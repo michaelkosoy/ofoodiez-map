@@ -286,3 +286,168 @@ html {
 
 /* Google Maps handles markers natively now */
 ```
+/* Mobile Responsiveness */
+
+/* Tablet (768px and below) */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: 40vh;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    #map {
+        height: 60vh;
+        width: 100%;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+    }
+
+    .sidebar-header h1 {
+        font-size: 2rem;
+    }
+
+    .sidebar-content {
+        max-height: calc(40vh - 150px);
+        padding: 0 20px 20px 20px;
+    }
+
+    #category-filter {
+        font-size: 0.9rem;
+        padding: 10px 12px;
+    }
+
+    .place-list-item h3 {
+        font-size: 0.95rem;
+    }
+
+    .place-list-item p {
+        font-size: 0.85rem;
+    }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+    .sidebar {
+        height: 45vh;
+    }
+
+    #map {
+        height: 55vh;
+    }
+
+    .sidebar-header {
+        padding: 15px;
+    }
+
+    .sidebar-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .sidebar-header p {
+        font-size: 0.9rem;
+    }
+
+    .sidebar-content {
+        max-height: calc(45vh - 130px);
+        padding: 0 15px 15px 15px;
+    }
+
+    #category-filter {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+
+    .place-list-item {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .place-list-item h3 {
+        font-size: 0.9rem;
+    }
+
+    .place-list-item p {
+        font-size: 0.8rem;
+    }
+
+    .gm-style .gm-style-iw-c {
+        max-width: 250px !important;
+        padding: 10px !important;
+    }
+
+    .info-window-content h3 {
+        font-size: 1rem !important;
+    }
+
+    .info-window-content p {
+        font-size: 0.85rem !important;
+    }
+
+    .place-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .place-description {
+        font-size: 0.9rem;
+    }
+
+    .back-button {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+}
+
+/* Landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar {
+        width: 40%;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: auto;
+        right: auto;
+        border-radius: 0 20px 20px 0;
+    }
+
+    #map {
+        width: 60%;
+        height: 100vh;
+        margin-left: 40%;
+    }
+
+    .sidebar-content {
+        max-height: calc(100vh - 180px);
+    }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+    .place-list-item {
+        min-height: 60px;
+        padding: 15px;
+    }
+
+    #category-filter {
+        min-height: 44px;
+    }
+
+    .back-button {
+        min-height: 44px;
+    }
+
+    .place-list-item a {
+        padding: 10px;
+        margin: -10px;
+    }
+}

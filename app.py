@@ -9,8 +9,11 @@ app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
 
-# API Key from environment variable (for production) or hardcoded (for development)
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'AIzaSyBdh_bKAGD6ZFbNpq3G_2tmV1BlaedFcPU')
+# API Key from environment variable
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+
+if not GOOGLE_MAPS_API_KEY:
+    raise ValueError("GOOGLE_MAPS_API_KEY environment variable is not set")
 
 DATA_FILE = 'places.xlsx'
 geolocator = GoogleV3(api_key=GOOGLE_MAPS_API_KEY, user_agent="ofoodiez_map")
