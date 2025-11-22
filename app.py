@@ -4,10 +4,13 @@ import os
 from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderTimedOut
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_url_path='/static',
+            static_folder='static',
+            template_folder='templates')
 
-# API Key provided by user
-GOOGLE_MAPS_API_KEY = "AIzaSyBdh_bKAGD6ZFbNpq3G_2tmV1BlaedFcPU"
+# API Key from environment variable (for production) or hardcoded (for development)
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'AIzaSyBdh_bKAGD6ZFbNpq3G_2tmV1BlaedFcPU')
 
 DATA_FILE = 'places.xlsx'
 geolocator = GoogleV3(api_key=GOOGLE_MAPS_API_KEY, user_agent="ofoodiez_map")
