@@ -261,158 +261,194 @@ html {
 .gm-style .gm-style-iw-c {
     border-radius: 16px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
-    padding: 12px !important;
+    padding: 0 !important;
     max-width: 300px !important;
-    /* Allow it to be wider */
 }
 
 .gm-style .gm-style-iw-d {
     overflow: auto !important;
-    /* Allow scrolling if absolutely necessary */
     max-height: none !important;
-    /* Remove height limit */
+    padding: 12px 12px 12px 12px !important;
 }
 
 .gm-style .gm-style-iw-tc::after {
     background: white !important;
 }
 
-/* Close button adjustment */
+/* Close button - align with content */
 .gm-ui-hover-effect {
-    top: 5px !important;
-    right: 5px !important;
-    opacity: 0.6 !important;
+    top: 8px !important;
+    right: 8px !important;
+    opacity: 0.7 !important;
+    width: 28px !important;
+    height: 28px !important;
 }
 
-/* Mobile Responsiveness - Completely Redesigned */
+.gm-ui-hover-effect img {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Mobile Responsiveness - Fullscreen Map with Minimal List */
 
 /* Tablet (768px and below) */
 @media (max-width: 768px) {
 
     body,
     html {
-        overflow: auto;
+        overflow: hidden;
+    }
+
+    #map {
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
     }
 
     .sidebar {
         width: 100%;
         max-width: 100%;
-        height: 30vh;
+        height: auto;
+        max-height: 85vh;
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
         top: auto;
         border-radius: 16px 16px 0 0;
-        box-shadow: 0 -3px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 -3px 20px rgba(0, 0, 0, 0.2);
         padding: 0;
+        transform: translateY(calc(100% - 260px));
+        transition: transform 0.3s ease;
     }
 
-    #map {
-        height: 70vh;
-        width: 100%;
+    .sidebar.expanded {
+        transform: translateY(0);
+    }
+
+    /* Drag handle */
+    .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 2px;
+        z-index: 10;
     }
 
     .sidebar-header {
-        padding: 12px 16px 8px 16px;
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+        padding: 8px 14px 4px 14px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+        cursor: pointer;
+        position: relative;
     }
 
     .sidebar-header h1 {
-        font-size: 1.4rem;
-        margin: 0 0 4px 0;
+        font-size: 1.1rem;
+        margin: 0 0 2px 0;
         letter-spacing: -0.5px;
     }
 
     .sidebar-header p {
-        font-size: 0.75rem;
-        margin: 0 0 8px 0;
+        font-size: 0.6rem;
+        margin: 0 0 4px 0;
     }
 
     .filter-container {
-        margin-top: 8px;
+        margin-top: 4px;
     }
 
     .sidebar-content {
-        max-height: calc(30vh - 95px);
-        padding: 0 16px 16px 16px;
+        max-height: calc(85vh - 100px);
+        padding: 4px 12px 10px 12px;
         overflow-y: auto;
+        background: rgba(255, 255, 255, 0.95);
     }
 
     #category-filter {
-        font-size: 0.8rem;
-        padding: 8px 12px;
-        border-radius: 10px;
-        background-size: 10px auto;
-        background-position: right 12px top 50%;
+        font-size: 0.65rem;
+        padding: 5px 8px;
+        border-radius: 8px;
+        background-size: 8px auto;
+        background-position: right 8px top 50%;
+        min-height: 28px;
+    }
+
+    .place-list {
+        margin-top: 4px;
     }
 
     .place-list-item {
-        padding: 10px 12px;
-        margin-bottom: 6px;
-        border-radius: 12px;
+        padding: 5px 8px;
+        margin-bottom: 3px;
+        border-radius: 8px;
+        min-height: 35px;
     }
 
     .place-list-item h3 {
-        font-size: 0.85rem;
-        line-height: 1.3;
+        font-size: 0.7rem;
+        line-height: 1.2;
+        margin: 0;
     }
 
     .place-list-item span {
-        font-size: 0.75rem;
+        font-size: 0.6rem;
     }
 
-    /* Instagram icon in list */
     .place-list-item a {
-        font-size: 16px;
+        font-size: 13px;
     }
 }
 
-/* Mobile (480px and below) - Even more compact */
+/* Mobile (480px and below) */
 @media (max-width: 480px) {
     .sidebar {
-        height: 28vh;
-    }
-
-    #map {
-        height: 72vh;
+        transform: translateY(calc(100% - 250px));
     }
 
     .sidebar-header {
-        padding: 10px 14px 6px 14px;
+        padding: 6px 12px 3px 12px;
     }
 
     .sidebar-header h1 {
-        font-size: 1.3rem;
+        font-size: 1rem;
+        margin: 0 0 1px 0;
     }
 
     .sidebar-header p {
-        font-size: 0.7rem;
+        font-size: 0.55rem;
+        margin: 0 0 3px 0;
     }
 
     .sidebar-content {
-        max-height: calc(28vh - 85px);
-        padding: 0 14px 14px 14px;
+        max-height: calc(85vh - 95px);
+        padding: 3px 10px 10px 10px;
     }
 
     #category-filter {
-        font-size: 0.75rem;
-        padding: 7px 10px;
-        min-height: 38px;
+        font-size: 0.6rem;
+        padding: 4px 7px;
+        min-height: 26px;
     }
 
     .place-list-item {
-        padding: 8px 10px;
-        margin-bottom: 5px;
-        min-height: 50px;
+        padding: 4px 7px;
+        margin-bottom: 2px;
+        min-height: 33px;
     }
 
     .place-list-item h3 {
-        font-size: 0.8rem;
+        font-size: 0.65rem;
     }
 
     .place-list-item span {
-        font-size: 0.7rem;
+        font-size: 0.55rem;
     }
 
     /* Adjust InfoWindow for mobile */
@@ -457,12 +493,14 @@ html {
     .sidebar {
         width: 35%;
         height: 100vh;
+        max-height: 100vh;
         position: fixed;
         left: 0;
         top: 0;
         bottom: auto;
         right: auto;
         border-radius: 0 16px 16px 0;
+        transform: translateX(0);
     }
 
     #map {
@@ -471,8 +509,13 @@ html {
         margin-left: 35%;
     }
 
+    .sidebar::before {
+        display: none;
+    }
+
     .sidebar-header {
         padding: 12px 14px;
+        cursor: default;
     }
 
     .sidebar-header h1 {
@@ -487,11 +530,11 @@ html {
 /* Touch-friendly adjustments */
 @media (hover: none) and (pointer: coarse) {
     .place-list-item {
-        min-height: 50px;
+        min-height: 48px;
     }
 
     #category-filter {
-        min-height: 38px;
+        min-height: 34px;
     }
 
     .back-button {

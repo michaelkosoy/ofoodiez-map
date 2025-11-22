@@ -216,7 +216,6 @@ async function addMarkers(places) {
                     <div class="info-window-content">
                         <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
                         ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
-                        ${place.OpeningHours ? `<p style="margin: 5px 0; font-size: 12px; color: #555;"><strong><i class="far fa-clock"></i> Opening Hours:</strong><br>${place.OpeningHours}</p>` : ''}
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
                         ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="display: inline-block; margin-top: 8px; color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
                     </div>
@@ -329,6 +328,21 @@ function showPlaceDetails(place) {
             </div>
         </div>
     `;
+}
+
+// Mobile: Make sidebar expandable
+if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarHeader = document.querySelector('.sidebar-header');
+
+    sidebarHeader.addEventListener('click', () => {
+        sidebar.classList.toggle('expanded');
+    });
+
+    // Close sidebar when clicking on map
+    document.getElementById('map').addEventListener('click', () => {
+        sidebar.classList.remove('expanded');
+    });
 }
 
 initMap();

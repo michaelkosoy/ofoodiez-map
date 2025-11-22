@@ -3,6 +3,10 @@ import pandas as pd
 import os
 from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderTimedOut
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (for local development)
+load_dotenv()
 
 app = Flask(__name__, 
             static_url_path='/static',
