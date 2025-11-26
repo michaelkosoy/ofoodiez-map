@@ -34,6 +34,10 @@ geolocator = GoogleV3(api_key=GOOGLE_MAPS_API_KEY, user_agent="ofoodiez_map")
 def index():
     return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY)
 
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
 @app.route('/api/places')
 def get_places():
     try:

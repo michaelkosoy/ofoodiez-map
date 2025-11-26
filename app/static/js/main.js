@@ -86,12 +86,36 @@ async function initMap() {
         zoomControl: false, // We can add custom controls if needed
     });
 
-
-
     fetchPlaces();
 
-    // Auto-focus on user location
-    showUserLocation();
+    // Check if user previously granted location permission
+    checkAndShowUserLocation();
+}
+
+// Check permission status and auto-locate if previously granted
+async function checkAndShowUserLocation() {
+    if (!navigator.geolocation) return;
+
+    try {
+        // Check if Permissions API is available
+        if (navigator.permissions) {
+            const permission = await navigator.permissions.query({ name: 'geolocation' });
+
+            if (permission.state === 'granted') {
+                // User previously granted permission, get location silently
+                showUserLocation();
+            }
+            // If 'prompt' or 'denied', don't auto-request - wait for user to click button
+        } else {
+            // Fallback: check localStorage for previous successful location
+            const hasUsedLocation = localStorage.getItem('hasUsedLocation');
+            if (hasUsedLocation === 'true') {
+                showUserLocation();
+            }
+        }
+    } catch (error) {
+        console.log('Permission check not supported, waiting for user action');
+    }
 }
 
 function fetchPlaces() {
@@ -157,6 +181,19 @@ function populateFilter(places) {
         option.textContent = hebrewLabels[category] || category; // Show Hebrew label
         filterSelect.appendChild(option);
     });
+
+    // Initialize Choices.js
+    if (!filterSelect.choicesInstance) {
+        const choices = new Choices(filterSelect, {
+            searchEnabled: false,
+            itemSelectText: '',
+            shouldSort: false,
+            classNames: {
+                containerOuter: 'choices-custom',
+            }
+        });
+        filterSelect.choicesInstance = choices;
+    }
 }
 
 window.filterPlaces = () => {
@@ -446,6 +483,9 @@ async function showUserLocation() {
         async (position) => {
             const { latitude, longitude } = position.coords;
             const pos = { lat: latitude, lng: longitude };
+
+            // Save to localStorage that user has successfully used location
+            localStorage.setItem('hasUsedLocation', 'true');
 
             const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
