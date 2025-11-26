@@ -86,7 +86,12 @@ async function initMap() {
         zoomControl: false, // We can add custom controls if needed
     });
 
+
+
     fetchPlaces();
+
+    // Auto-focus on user location
+    showUserLocation();
 }
 
 function fetchPlaces() {
@@ -330,19 +335,143 @@ function showPlaceDetails(place) {
     `;
 }
 
-// Mobile: Make sidebar expandable
+// Mobile: Make sidebar draggable
 if (window.innerWidth <= 768) {
     const sidebar = document.getElementById('sidebar');
     const sidebarHeader = document.querySelector('.sidebar-header');
 
-    sidebarHeader.addEventListener('click', () => {
-        sidebar.classList.toggle('expanded');
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    let startTranslateY = 0;
+
+    // Calculate the collapsed and expanded positions
+    // Collapsed: translateY(calc(100% - 260px)) -> we need the pixel value
+    // Expanded: translateY(0)
+
+    // Helper to get current transform Y value
+    const getTranslateY = (element) => {
+        const style = window.getComputedStyle(element);
+        const matrix = new WebKitCSSMatrix(style.transform);
+        return matrix.m42;
+    };
+
+    sidebarHeader.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        startTranslateY = getTranslateY(sidebar);
+
+        // Disable transition during drag
+        sidebar.classList.add('is-dragging');
+    }, { passive: true });
+
+    sidebarHeader.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+
+        const currentTouchY = e.touches[0].clientY;
+        const diff = currentTouchY - startY;
+        let newTranslateY = startTranslateY + diff;
+
+        // Limit the drag range
+        // Max up: 0 (expanded)
+        // Max down: window.innerHeight - 100 (collapsed state approx)
+        // Note: The CSS defines collapsed as calc(100% - 260px)
+
+        if (newTranslateY < 0) newTranslateY = 0; // Don't drag past top
+
+        sidebar.style.transform = `translateY(${newTranslateY}px)`;
+    }, { passive: true });
+
+    sidebarHeader.addEventListener('touchend', (e) => {
+        isDragging = false;
+        sidebar.classList.remove('is-dragging');
+        sidebar.style.transform = ''; // Clear inline style to let CSS take over
+
+        const currentTouchY = e.changedTouches[0].clientY;
+        const diff = currentTouchY - startY;
+
+        // Threshold for snapping
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+                // Dragged down -> Collapse
+                sidebar.classList.remove('expanded');
+            } else {
+                // Dragged up -> Expand
+                sidebar.classList.add('expanded');
+            }
+        } else {
+            // If moved less than threshold, toggle based on click/tap
+            if (diff === 0) {
+                sidebar.classList.toggle('expanded');
+            } else {
+                // Revert to nearest state
+                if (sidebar.classList.contains('expanded')) {
+                    sidebar.classList.add('expanded');
+                } else {
+                    sidebar.classList.remove('expanded');
+                }
+            }
+        }
     });
 
     // Close sidebar when clicking on map
     document.getElementById('map').addEventListener('click', () => {
         sidebar.classList.remove('expanded');
     });
+}
+
+// User Location Logic
+let userMarker = null;
+
+async function showUserLocation() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+    }
+
+    const btn = document.getElementById('locate-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // Loading state
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            const pos = { lat: latitude, lng: longitude };
+
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+            // Create custom marker element
+            const markerContent = document.createElement('div');
+            markerContent.className = 'user-location-marker';
+
+            const pulse = document.createElement('div');
+            pulse.className = 'user-location-pulse';
+            markerContent.appendChild(pulse);
+
+            // Remove existing user marker if any
+            if (userMarker) {
+                userMarker.map = null;
+            }
+
+            // Create new marker
+            userMarker = new AdvancedMarkerElement({
+                map: map,
+                position: pos,
+                content: markerContent,
+                title: "Your Location"
+            });
+
+            // Center map
+            map.setCenter(pos);
+            map.setZoom(17);
+
+            // Reset button icon
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
+        },
+        () => {
+            alert("Error: The Geolocation service failed.");
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
+        }
+    );
 }
 
 initMap();

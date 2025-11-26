@@ -12,8 +12,8 @@ load_dotenv()
 
 app = Flask(__name__, 
             static_url_path='/static',
-            static_folder='static',
-            template_folder='templates')
+            static_folder='app/static',
+            template_folder='app/templates')
 
 # API Key from environment variable
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
@@ -26,7 +26,7 @@ SHEET_ID = '1yvXOS3l_0Wr0SxLf9YZE8RaFzwgQop4MshD5pbtmwzA'
 SHEET_URL = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv'
 
 # Fallback to local file if Google Sheets is unavailable
-DATA_FILE = 'places.xlsx'
+DATA_FILE = 'data/places.xlsx'
 
 geolocator = GoogleV3(api_key=GOOGLE_MAPS_API_KEY, user_agent="ofoodiez_map")
 
