@@ -356,6 +356,16 @@ if (window.innerWidth <= 768) {
         return matrix.m42;
     };
 
+    // Prevent drag when interacting with the filter
+    const filterSelect = document.getElementById('category-filter');
+    filterSelect.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+
+    filterSelect.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+
     sidebarHeader.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
         isDragging = true;
