@@ -88,35 +88,14 @@ async function initMap() {
 
     fetchPlaces();
 
-    // Check if user previously granted location permission
-    checkAndShowUserLocation();
+    fetchPlaces();
+
+    // Auto-locate user on load
+    showUserLocation();
 }
 
-// Check permission status and auto-locate if previously granted
-async function checkAndShowUserLocation() {
-    if (!navigator.geolocation) return;
+// Removed checkAndShowUserLocation to restore aggressive auto-locate behavior
 
-    try {
-        // Check if Permissions API is available
-        if (navigator.permissions) {
-            const permission = await navigator.permissions.query({ name: 'geolocation' });
-
-            if (permission.state === 'granted') {
-                // User previously granted permission, get location silently
-                showUserLocation();
-            }
-            // If 'prompt' or 'denied', don't auto-request - wait for user to click button
-        } else {
-            // Fallback: check localStorage for previous successful location
-            const hasUsedLocation = localStorage.getItem('hasUsedLocation');
-            if (hasUsedLocation === 'true') {
-                showUserLocation();
-            }
-        }
-    } catch (error) {
-        console.log('Permission check not supported, waiting for user action');
-    }
-}
 
 function fetchPlaces() {
     fetch('/api/places')
