@@ -413,11 +413,6 @@ html {
         transition: none;
     }
 
-    /* Force sidebar to stay at bottom when showing details */
-    .sidebar:has(.place-details) {
-        transform: translateY(calc(100% - 260px)) !important;
-    }
-
     /* Drag handle */
     .sidebar::before {
         content: '';
@@ -704,8 +699,10 @@ html {
 @media (max-width: 768px) {
     .locate-btn {
         top: auto;
-        bottom: 110px;
-        /* Above the collapsed bottom sheet */
+        bottom: 280px;
+        /* Above the collapsed sidebar (260px) */
         right: 16px;
+        z-index: 1100;
+        /* Ensure it's above the sidebar */
     }
 }
