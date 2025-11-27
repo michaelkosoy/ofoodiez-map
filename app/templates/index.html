@@ -10,11 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
 </head>
 
 <body>
     <div id="map"></div>
+
+    <!-- Locate Me Button -->
     <button id="locate-btn" class="locate-btn" onclick="showUserLocation()">
         <i class="fas fa-location-arrow"></i>
     </button>
@@ -29,23 +31,26 @@
                 <div class="filter-container">
                     <select id="category-filter" onchange="filterPlaces()">
                         <option value="all">כל השעות</option>
+                        <!-- Options will be populated by JS -->
                     </select>
                 </div>
             </div>
         </div>
         <div id="sidebar-content" class="sidebar-content">
-            <!-- Content will be injected here -->
+            <!-- List will be populated by JS -->
         </div>
     </div>
 
     <script>
+        // Pass API key to JS if needed, or just use it in the map script
+        const GOOGLE_MAPS_API_KEY = "{{ api_key }}";
         (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({
-            key: "{{ api_key }}",
+            key: GOOGLE_MAPS_API_KEY,
             v: "weekly",
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=3"></script>
 </body>
 
 </html>
