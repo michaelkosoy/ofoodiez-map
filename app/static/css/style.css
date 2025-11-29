@@ -213,6 +213,12 @@ html {
     border-color: #FF8E53;
 }
 
+.place-list-item.selected {
+    border-color: #FF6B6B;
+    background-color: #FFF0F0;
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+}
+
 .place-list-item h3 {
     margin: 0;
     font-size: 1.1rem;

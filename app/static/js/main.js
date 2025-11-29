@@ -285,7 +285,7 @@ function renderPlaceList(places) {
     const listHtml = `
         <ul class="place-list">
             ${places.map(place => `
-                <li class="place-list-item" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
+                <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>
                             <h3>${place.Name}</h3>
@@ -304,23 +304,32 @@ window.handlePlaceClick = (placeName) => {
     if (place) {
         highlightMarker(placeName);
 
-        // Find marker and trigger its click event first
+        // Highlight list item
+        document.querySelectorAll('.place-list-item').forEach(item => {
+            if (item.getAttribute('data-name') === placeName) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+
+        // Find marker and center map
         const markerObj = markers.find(m => m.name === placeName);
         if (markerObj) {
             map.setCenter(markerObj.marker.position);
             map.setZoom(16);
 
-            // Trigger marker click to show InfoWindow
-            // Use setTimeout to ensure map has time to pan/zoom before opening InfoWindow
-            setTimeout(() => {
-                google.maps.event.trigger(markerObj.marker, 'click');
-            }, 300);
+            // Removed marker click trigger (Info Window) as requested
         }
 
-        // Show details in sidebar after a brief delay
-        setTimeout(() => {
-            showPlaceDetails(place);
-        }, 100);
+        // Collapse sidebar on mobile to show map
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('expanded');
+            // Don't scroll to top, keep list position
+        }
+
+        // Removed showPlaceDetails call to keep the list visible
     }
 };
 
