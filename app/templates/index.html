@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=7">
 </head>
 
 <body>
@@ -42,6 +42,77 @@
         </div>
     </div>
 
+    <!-- Add Happy Hour Button -->
+    <button id="add-btn" class="add-btn" onclick="openAddModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Add Happy Hour Modal -->
+    <div id="add-modal" class="modal" onclick="closeModalOnOutside(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🍻 הוסף Happy Hour</h2>
+                <button class="modal-close" onclick="closeAddModal()">&times;</button>
+            </div>
+            <form id="add-form" onsubmit="submitHappyHour(event)">
+                <div class="form-group">
+                    <label for="place-name-he">שם המקום (עברית) *</label>
+                    <input type="text" id="place-name-he" name="placeNameHe" required>
+                </div>
+                <div class="form-group">
+                    <label for="place-name-en">Place Name (English) *</label>
+                    <input type="text" id="place-name-en" name="placeNameEn" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">תיאור ההאפי אוור *</label>
+                    <input type="text" id="description" name="description" placeholder="לדוגמא: 30% על הכל" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">כתובת *</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">עיר *</label>
+                    <input type="text" id="city" name="city" value="תל אביב" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">קטגוריה *</label>
+                    <select id="category" name="category" required>
+                        <option value="Until 19:00">עד 19:00</option>
+                        <option value="Until 19:30">עד 19:30</option>
+                        <option value="Until 20:00">עד 20:00</option>
+                        <option value="After 20:00">אחרי 20:00</option>
+                        <option value="Weekends">סופ״ש</option>
+                        <option value="Not TLV">מחוץ לת״א</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ימי Happy Hour</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="days" value="Sunday"> ראשון</label>
+                        <label><input type="checkbox" name="days" value="Monday"> שני</label>
+                        <label><input type="checkbox" name="days" value="Tuesday"> שלישי</label>
+                        <label><input type="checkbox" name="days" value="Wednesday"> רביעי</label>
+                        <label><input type="checkbox" name="days" value="Thursday"> חמישי</label>
+                        <label><input type="checkbox" name="days" value="Friday"> שישי</label>
+                        <label><input type="checkbox" name="days" value="Saturday"> שבת</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="instagram">Instagram Link</label>
+                    <input type="text" id="instagram" name="instagram" placeholder="https://instagram.com/...">
+                </div>
+                <div class="form-group">
+                    <label for="reservation">Reservation Link</label>
+                    <input type="text" id="reservation" name="reservation" placeholder="https://ontopo.co.il/...">
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> שלח לאישור
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Pass API key to JS if needed, or just use it in the map script
         const GOOGLE_MAPS_API_KEY = "{{ api_key }}";
@@ -51,7 +122,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 
 </html>

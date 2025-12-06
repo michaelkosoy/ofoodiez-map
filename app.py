@@ -1,7 +1,10 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import pandas as pd
 import os
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderTimedOut
@@ -221,6 +224,90 @@ def refresh_cache():
     """Force refresh the data cache."""
     clear_data_cache()
     return jsonify({"status": "Cache cleared. Next request will fetch fresh data."})
+
+# Formspree configuration (free email API service)
+# Get your form ID from https://formspree.io - create a free account and form
+FORMSPREE_ENDPOINT = os.environ.get('FORMSPREE_ENDPOINT', '')
+
+@app.route('/api/submit-happy-hour', methods=['POST'])
+def submit_happy_hour():
+    """Receive happy hour submission and send via Formspree."""
+    try:
+        data = request.get_json()
+        
+        # Build formatted message
+        days_str = ', '.join(data.get('days', [])) or 'Not specified'
+        
+        message = f"""
+🍻 New Happy Hour Submission!
+
+📍 Place Details:
+- Name (Hebrew): {data.get('placeNameHe', '')}
+- Name (English): {data.get('placeNameEn', '')}
+- Description: {data.get('description', '')}
+- Address: {data.get('address', '')}
+- City: {data.get('city', '')}
+- Category: {data.get('category', '')}
+- Days: {days_str}
+
+🔗 Links:
+- Instagram: {data.get('instagram', '') or 'Not provided'}
+- Reservation: {data.get('reservation', '') or 'Not provided'}
+
+📅 Submitted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        """
+        
+        # Always save to file as backup
+        submissions_file = os.path.join(CACHE_DIR, 'submissions.json')
+        submissions = []
+        if os.path.exists(submissions_file):
+            try:
+                with open(submissions_file, 'r', encoding='utf-8') as f:
+                    submissions = json.load(f)
+            except:
+                pass
+        
+        data['submitted_at'] = datetime.now().isoformat()
+        submissions.append(data)
+        
+        with open(submissions_file, 'w', encoding='utf-8') as f:
+            json.dump(submissions, f, ensure_ascii=False, indent=2)
+        
+        # Send via Formspree if configured
+        if FORMSPREE_ENDPOINT:
+            formspree_data = {
+                'email': 'ofir.lazarov@gmail.com',
+                '_subject': f"🍻 New Happy Hour: {data.get('placeNameEn', 'Unknown')}",
+                'message': message,
+                'place_name_he': data.get('placeNameHe', ''),
+                'place_name_en': data.get('placeNameEn', ''),
+                'description': data.get('description', ''),
+                'address': data.get('address', ''),
+                'city': data.get('city', ''),
+                'category': data.get('category', ''),
+                'days': days_str,
+                'instagram': data.get('instagram', ''),
+                'reservation': data.get('reservation', '')
+            }
+            
+            response = requests.post(
+                FORMSPREE_ENDPOINT,
+                json=formspree_data,
+                headers={'Accept': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                print(f"✅ Email sent via Formspree for: {data.get('placeNameEn')}")
+            else:
+                print(f"⚠️ Formspree error: {response.status_code} - {response.text}")
+        else:
+            print("📧 Formspree not configured, submission saved to file only")
+        
+        return jsonify({"success": True, "message": "Submission received"})
+        
+    except Exception as e:
+        print(f"❌ Error submitting happy hour: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

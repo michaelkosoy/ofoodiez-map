@@ -608,3 +608,79 @@ async function showUserLocation() {
 }
 
 initMap();
+
+// Modal Functions
+window.openAddModal = () => {
+    document.getElementById('add-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeAddModal = () => {
+    document.getElementById('add-modal').classList.remove('show');
+    document.body.style.overflow = '';
+};
+
+window.closeModalOnOutside = (event) => {
+    if (event.target.id === 'add-modal') {
+        closeAddModal();
+    }
+};
+
+// Form Submission
+window.submitHappyHour = async (event) => {
+    event.preventDefault();
+
+    const form = event.target;
+    const submitBtn = form.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> שולח...';
+
+    // Gather form data
+    const formData = {
+        placeNameHe: form.placeNameHe.value,
+        placeNameEn: form.placeNameEn.value,
+        description: form.description.value,
+        address: form.address.value,
+        city: form.city.value,
+        category: form.category.value,
+        days: Array.from(form.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value),
+        instagram: form.instagram.value,
+        reservation: form.reservation.value
+    };
+
+    try {
+        const response = await fetch('/api/submit-happy-hour', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('✅ תודה רבה! הבקשה נשלחה בהצלחה ותיבדק בקרוב.');
+            form.reset();
+            closeAddModal();
+        } else {
+            alert('❌ שגיאה בשליחה: ' + (result.error || 'נסה שוב מאוחר יותר'));
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert('❌ שגיאה בשליחה. נסה שוב מאוחר יותר.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+};
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeAddModal();
+    }
+});

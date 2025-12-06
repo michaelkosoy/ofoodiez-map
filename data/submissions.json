@@ -1,0 +1,37 @@
+[
+  {
+    "placeNameHe": "בדיקה",
+    "placeNameEn": "Test Place",
+    "description": "30% off",
+    "address": "123 Test St",
+    "city": "Tel Aviv",
+    "category": "Until 19:00",
+    "days": [
+      "Sunday",
+      "Monday"
+    ],
+    "instagram": "",
+    "reservation": "",
+    "submitted_at": "2025-12-06T12:17:26.452770"
+  },
+  {
+    "placeNameHe": "מייקל",
+    "placeNameEn": "king",
+    "description": "100% חינם",
+    "address": "סגולה 6",
+    "city": "תל אביב",
+    "category": "Until 19:00",
+    "days": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "instagram": "http://www.instagram.com/michaelkosoy/",
+    "reservation": "https://www.instagram.com/michaelkosoy/",
+    "submitted_at": "2025-12-06T12:22:06.102783"
+  }
+]
