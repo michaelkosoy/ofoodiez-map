@@ -189,7 +189,6 @@ function populateFilter(places) {
         // Add event listener for Choices.js
         filterSelect.addEventListener('change', function (e) {
             const selectedValue = e.detail.value;
-            console.log('Filter changed to:', selectedValue);
             filterPlacesBy(selectedValue);
         });
     } else {
@@ -200,15 +199,10 @@ function populateFilter(places) {
 }
 
 function filterPlacesBy(selectedCategory) {
-    console.log('Filtering by category:', selectedCategory);
-    console.log('All places count:', allPlaces.length);
-
     // Filter places
     const filteredPlaces = selectedCategory === 'all'
         ? allPlaces
         : allPlaces.filter(p => p.Category === selectedCategory);
-
-    console.log('Filtered places count:', filteredPlaces.length);
 
     // Update List
     renderPlaceList(filteredPlaces);
@@ -601,7 +595,7 @@ async function showUserLocation() {
             btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
         },
         () => {
-            alert("Error: The Geolocation service failed.");
+            // Silently fail - just reset button, no error shown
             btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
         }
     );
@@ -613,17 +607,77 @@ initMap();
 window.openAddModal = () => {
     document.getElementById('add-modal').classList.add('show');
     document.body.style.overflow = 'hidden';
+
+    // Populate place dropdown
+    const placeSelect = document.getElementById('place-select');
+    placeSelect.innerHTML = '<option value="">-- בחר מקום --</option>';
+    allPlaces.forEach(place => {
+        const option = document.createElement('option');
+        option.value = place.Name;
+        option.textContent = place.Name;
+        placeSelect.appendChild(option);
+    });
+
+    // Reset to 'new' mode
+    setFormMode('new');
 };
 
 window.closeAddModal = () => {
     document.getElementById('add-modal').classList.remove('show');
     document.body.style.overflow = '';
+    document.getElementById('add-form').reset();
 };
 
 window.closeModalOnOutside = (event) => {
     if (event.target.id === 'add-modal') {
         closeAddModal();
     }
+};
+
+// Form mode toggle (new vs update)
+window.setFormMode = (mode) => {
+    const isUpdate = mode === 'update';
+
+    // Update toggle buttons
+    document.getElementById('toggle-new').classList.toggle('active', !isUpdate);
+    document.getElementById('toggle-update').classList.toggle('active', isUpdate);
+
+    // Update hidden input
+    document.getElementById('form-mode').value = mode;
+
+    // Update modal title
+    document.getElementById('modal-title').textContent = isUpdate ? '🔄 עדכון Happy Hour' : '🍻 הוסף Happy Hour';
+
+    // Show/hide place select
+    document.getElementById('place-select-container').classList.toggle('show', isUpdate);
+
+    // Show/hide required stars and toggle required attribute
+    const requiredFields = ['place-name-he', 'place-name-en', 'description', 'address', 'city', 'category'];
+    const requiredStars = document.querySelectorAll('.required-star');
+
+    requiredStars.forEach(star => {
+        star.style.display = isUpdate ? 'none' : 'inline';
+    });
+
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            if (isUpdate) {
+                field.removeAttribute('required');
+            } else {
+                field.setAttribute('required', 'required');
+            }
+        }
+    });
+
+    // Hide fields that are not needed in update mode
+    const hideInUpdate = ['group-place-name-he', 'group-place-name-en', 'group-address', 'group-city', 'group-instagram', 'group-reservation'];
+    hideInUpdate.forEach(groupId => {
+        const el = document.getElementById(groupId);
+        if (el) {
+            el.style.display = isUpdate ? 'none' : 'block';
+        }
+    });
 };
 
 // Form Submission
@@ -640,6 +694,8 @@ window.submitHappyHour = async (event) => {
 
     // Gather form data
     const formData = {
+        formMode: form.formMode.value,
+        existingPlace: form.existingPlace ? form.existingPlace.value : '',
         placeNameHe: form.placeNameHe.value,
         placeNameEn: form.placeNameEn.value,
         description: form.description.value,
@@ -648,7 +704,8 @@ window.submitHappyHour = async (event) => {
         category: form.category.value,
         days: Array.from(form.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value),
         instagram: form.instagram.value,
-        reservation: form.reservation.value
+        reservation: form.reservation.value,
+        notes: form.notes ? form.notes.value : ''
     };
 
     try {
@@ -663,20 +720,41 @@ window.submitHappyHour = async (event) => {
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ תודה רבה! הבקשה נשלחה בהצלחה ותיבדק בקרוב.');
             form.reset();
             closeAddModal();
+            showToast('✅ תודה רבה! הבקשה נשלחה בהצלחה ומחכה לאישור.');
         } else {
-            alert('❌ שגיאה בשליחה: ' + (result.error || 'נסה שוב מאוחר יותר'));
+            showToast('❌ שגיאה בשליחה. נסה שוב מאוחר יותר.', true);
         }
     } catch (error) {
         console.error('Submission error:', error);
-        alert('❌ שגיאה בשליחה. נסה שוב מאוחר יותר.');
+        showToast('❌ שגיאה בשליחה. נסה שוב מאוחר יותר.', true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     }
 };
+
+// Toast notification function
+function showToast(message, isError = false) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification' + (isError ? ' error' : '');
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
 
 // Close modal with Escape key
 document.addEventListener('keydown', (e) => {
@@ -684,3 +762,11 @@ document.addEventListener('keydown', (e) => {
         closeAddModal();
     }
 });
+
+// Close banner function
+window.closeBanner = () => {
+    const banner = document.getElementById('update-banner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
+};

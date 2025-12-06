@@ -931,3 +931,136 @@ html {
         font-size: 20px;
     }
 }
+
+/* Toast Notification */
+.toast-notification {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    z-index: 3000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-notification.error {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+/* Top Banner - Fixed at very top */
+.update-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    color: #795548;
+    padding: 10px 40px 10px 16px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+    direction: rtl;
+    z-index: 2500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.update-banner.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.update-banner .banner-text {
+    flex: 1;
+}
+
+.update-banner .update-date {
+    font-weight: 400;
+    opacity: 0.8;
+    margin-right: 8px;
+}
+
+.banner-close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #795548;
+    cursor: pointer;
+    padding: 4px 8px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.banner-close:hover {
+    opacity: 1;
+}
+
+/* Form Toggle */
+.form-toggle {
+    display: flex;
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+
+.form-toggle button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
+}
+
+.form-toggle button.active {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: #FF6B6B;
+}
+
+/* Place select dropdown for update mode */
+.place-select-container {
+    display: none;
+}
+
+.place-select-container.show {
+    display: block;
+}
+
+.place-select-container select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: 'Outfit', sans-serif;
+    margin-bottom: 16px;
+}

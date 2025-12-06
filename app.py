@@ -136,12 +136,31 @@ def clear_data_cache():
     _data_cache['timestamp'] = None
     print("🗑️ Data cache cleared")
 
+def get_last_update():
+    """Get the last update date from config file."""
+    config_file = os.path.join(CACHE_DIR, 'config.json')
+    try:
+        if os.path.exists(config_file):
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                date_str = config.get('last_update', '')
+                if date_str:
+                    # Convert YYYY-MM-DD to DD-MM-YYYY
+                    parts = date_str.split('-')
+                    if len(parts) == 3:
+                        return f"{parts[2]}-{parts[1]}-{parts[0]}"
+        return ''
+    except:
+        return ''
+
 
 # ============ ROUTES ============
 
 @app.route('/')
 def index():
-    return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY)
+    last_update = get_last_update()
+    return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY, last_update=last_update)
+
 
 @app.route('/health')
 def health_check():
@@ -238,7 +257,28 @@ def submit_happy_hour():
         # Build formatted message
         days_str = ', '.join(data.get('days', [])) or 'Not specified'
         
-        message = f"""
+        form_mode = data.get('formMode', 'new')
+        is_update = form_mode == 'update'
+        
+        if is_update:
+            message = f"""
+🔄 Happy Hour UPDATE Request!
+
+📍 Place to Update: {data.get('existingPlace', 'Not specified')}
+
+📝 Requested Changes:
+- Description: {data.get('description', '') or 'No change'}
+- Category: {data.get('category', '') or 'No change'}
+- Days: {days_str}
+- Instagram: {data.get('instagram', '') or 'No change'}
+- Reservation: {data.get('reservation', '') or 'No change'}
+
+📌 Notes: {data.get('notes', '') or 'None'}
+
+📅 Submitted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            """
+        else:
+            message = f"""
 🍻 New Happy Hour Submission!
 
 📍 Place Details:
@@ -254,8 +294,10 @@ def submit_happy_hour():
 - Instagram: {data.get('instagram', '') or 'Not provided'}
 - Reservation: {data.get('reservation', '') or 'Not provided'}
 
+📌 Notes: {data.get('notes', '') or 'None'}
+
 📅 Submitted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-        """
+            """
         
         # Always save to file as backup
         submissions_file = os.path.join(CACHE_DIR, 'submissions.json')
