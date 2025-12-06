@@ -12,7 +12,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=16">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=18">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ofoodiez.com/">
+    <meta property="og:title" content="Ofoodiez">
+    <meta property="og:description" content="Happy Hours. Great Deals. Best Spots.">
+    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ofoodiez.com/">
+    <meta property="twitter:title" content="Ofoodiez">
+    <meta property="twitter:description" content="Happy Hours. Great Deals. Best Spots.">
+    <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
 </head>
 
 <body>
@@ -39,11 +53,19 @@
                     <h1>Ofoodiez</h1>
                     <p>Happy Hour's Map</p>
                 </div>
-                <!-- Filter Dropdown -->
-                <div class="filter-container">
-                    <select id="category-filter" class="form-control">
-                        <option value="all">All Hours</option>
-                    </select>
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 45px;">
+                    <!-- Filter Dropdown -->
+                    <div class="filter-container">
+                        <select id="category-filter" class="form-control">
+                            <option value="all">All Hours</option>
+                        </select>
+                    </div>
+                    <!-- Verified Toggle -->
+                    <label class="verified-toggle">
+                        <input type="checkbox" id="verified-filter">
+                        <span class="slider round"></span>
+                        <span class="toggle-label">Verified</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -93,7 +115,7 @@
                     <input type="text" id="place-name-en" name="placeNameEn" required>
                 </div>
                 <div class="form-group">
-                    <label for="description">תיאור <span class="required-star" id="desc-required">*</span></label>
+                    <label for="description">תיאור <span class="required-star">*</span></label>
                     <input type="text" id="description" name="description" placeholder="לדוגמא: 30% על הכל" required>
                 </div>
                 <div class="form-group" id="group-address">
@@ -154,7 +176,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=15"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=17"></script>
 </body>
 
 </html>

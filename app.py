@@ -186,6 +186,9 @@ def get_places():
         print("✓ Loaded fresh data from Google Sheets")
         print(f"  Columns: {list(df.columns)}")
         
+        # Strip whitespace from column names
+        df.columns = df.columns.str.strip()
+        
         # Map Google Sheets column names to expected frontend column names
         column_mapping = {
             'Place Name (English)': 'Name',
@@ -213,8 +216,11 @@ def get_places():
         # Rename columns that exist in the mapping
         df = df.rename(columns={k: v for k, v in column_mapping.items() if k in df.columns})
         
-        # Fill NaN values with empty string to avoid JSON errors
+        # Fill NaN values with empty string to avoid JSON errors (Fixes SyntaxError: Unexpected token 'N')
         df = df.fillna("")
+        
+        # Strip whitespace from all string columns (fixes "After 20:00 " issue)
+        df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
         
         # Filter out rows where Name is empty (if Name column exists)
         if 'Name' in df.columns:

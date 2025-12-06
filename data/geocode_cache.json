@@ -674,5 +674,61 @@
   "Yehudit Blvd 20, Tel Aviv-Yafo, Tel aviv, Israel": [
     32.0698938,
     34.7903888
+  ],
+  "Bialik St 26, Ramat Gan, Ramat Gan, Israel": [
+    32.0813802,
+    34.8151122
+  ],
+  "Katzenelson 33, Givatayim, Givatayim, Israel": [
+    32.0753684,
+    34.8049516
+  ],
+  "Rambam St 30, Giv'atayim, Givatayim, Israel": [
+    32.0704734,
+    34.8073574
+  ],
+  "Katzenelson St 57, Giv'atayim, Givatayim, Israel": [
+    32.07541,
+    34.807385
+  ],
+  "Katzenelson St 112, Giv'atayim, Givatayim, Israel": [
+    32.077035,
+    34.81423400000001
+  ],
+  "Katzenelson St 40, Givatayim, Givatayim, Israel": [
+    32.0750271,
+    34.8062964
+  ],
+  "Sderot Hatzvi 1, Ramat Gan, Kfar Saba, Israel": [
+    32.178195,
+    34.90761
+  ],
+  "Ramatayim Road 70, Hod Hasharon, 4532517, Hod HaSharon, Israel": [
+    32.156846,
+    34.8943407
+  ],
+  "Sasha Argov St 23, Ra'anana, 4334323, Ra'anana, Israel": [
+    32.1932671,
+    34.865714
+  ],
+  "Shlomo Lahat Promenade 17, Tel Aviv-Yafo, Tel Aviv, Israel": [
+    32.0817267,
+    34.7676036
+  ],
+  "Ben Yehuda St 17, Tel Aviv-Yafo, 6329302, Tel aviv, Israel": [
+    32.075388,
+    34.7678498
+  ],
+  "Sderot Ben Gurion 34, Tel Aviv-Yafo, Tel aviv, Israel": [
+    32.0844278,
+    34.7736676
+  ],
+  "nan, nan, Israel": [
+    31.883208,
+    34.859237
+  ],
+  "Rambam St 3, Tel Aviv-Yafo, Tel aviv, Israel": [
+    32.0684072,
+    34.7688572
   ]
 }

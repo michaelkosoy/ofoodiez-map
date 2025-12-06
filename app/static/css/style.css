@@ -168,7 +168,7 @@ html {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    gap: 67px;
+    gap: 12px;
     width: 100%;
     margin-top: 0;
     box-sizing: border-box;
@@ -1130,4 +1130,68 @@ html {
 /* Hide action buttons in list view */
 .place-list-item .action-buttons {
     display: none !important;
+}
+
+/* Verified Toggle Switch */
+.verified-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    user-select: none;
+}
+
+.verified-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #1DA1F2;
+    /* Twitter Blue */
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #1DA1F2;
+}
+
+input:checked+.slider:before {
+    transform: translateX(16px);
+}
+
+.toggle-label {
+    font-size: 0.8rem;
+    color: #555;
+    font-weight: 600;
+}
+
+input:checked~.toggle-label {
+    color: #1DA1F2;
 }

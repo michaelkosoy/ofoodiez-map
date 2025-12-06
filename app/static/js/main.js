@@ -199,10 +199,18 @@ function populateFilter(places) {
 }
 
 function filterPlacesBy(selectedCategory) {
+    const verifiedOnly = document.getElementById('verified-filter').checked;
+
+    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}`);
+
     // Filter places
-    const filteredPlaces = selectedCategory === 'all'
-        ? allPlaces
-        : allPlaces.filter(p => p.Category === selectedCategory);
+    const filteredPlaces = allPlaces.filter(p => {
+        const categoryMatch = selectedCategory === 'all' || p.Category === selectedCategory;
+        const verifiedMatch = !verifiedOnly || (p.Recommended && p.Recommended.trim() !== "");
+        return categoryMatch && verifiedMatch;
+    });
+
+    console.log(`Matches found: ${filteredPlaces.length}`);
 
     // Update List
     renderPlaceList(filteredPlaces);
@@ -210,15 +218,31 @@ function filterPlacesBy(selectedCategory) {
     // Update Markers - hide non-matching markers
     markers.forEach(markerObj => {
         const place = allPlaces.find(p => p.Name === markerObj.name);
-        if (place && (selectedCategory === 'all' || place.Category === selectedCategory)) {
-            // Show marker
-            markerObj.marker.map = map;
-        } else {
-            // Hide marker
-            markerObj.marker.map = null;
+        if (place) {
+            const categoryMatch = selectedCategory === 'all' || place.Category === selectedCategory;
+            const verifiedMatch = !verifiedOnly || (place.Recommended && place.Recommended.trim() !== "");
+
+            if (categoryMatch && verifiedMatch) {
+                markerObj.marker.map = map;
+            } else {
+                markerObj.marker.map = null;
+            }
         }
     });
 }
+
+// Add event listener for Verified Toggle
+document.addEventListener('DOMContentLoaded', () => {
+    const verifiedToggle = document.getElementById('verified-filter');
+    if (verifiedToggle) {
+        verifiedToggle.addEventListener('change', () => {
+            // Get current category from Choices.js or fallback to select value
+            const categorySelect = document.getElementById('category-filter');
+            const currentCategory = categorySelect.value;
+            filterPlacesBy(currentCategory);
+        });
+    }
+});
 
 // Keep old function name for backwards compatibility
 window.filterPlaces = () => {
@@ -481,6 +505,20 @@ if (window.innerWidth <= 768) {
     filterSelect.addEventListener('touchmove', (e) => {
         e.stopPropagation();
     }, { passive: true });
+
+    // Stop propagation for Verified Toggle
+    const verifiedToggle = document.getElementById('verified-filter');
+    if (verifiedToggle) {
+        // We need to stop propagation on the label container as well
+        const toggleLabel = verifiedToggle.closest('.verified-toggle');
+        if (toggleLabel) {
+            ['touchstart', 'touchmove', 'click'].forEach(evt => {
+                toggleLabel.addEventListener(evt, (e) => {
+                    e.stopPropagation();
+                }, { passive: evt !== 'click' }); // click cannot be passive if we want to stop propagation? actually stopPropagation works fine
+            });
+        }
+    }
 
     sidebarHeader.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
