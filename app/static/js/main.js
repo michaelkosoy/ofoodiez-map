@@ -645,9 +645,6 @@ window.setFormMode = (mode) => {
     // Update hidden input
     document.getElementById('form-mode').value = mode;
 
-    // Update modal title
-    document.getElementById('modal-title').textContent = isUpdate ? '🔄 עדכון Happy Hour' : '🍻 הוסף Happy Hour';
-
     // Show/hide place select
     document.getElementById('place-select-container').classList.toggle('show', isUpdate);
 

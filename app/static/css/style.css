@@ -814,6 +814,13 @@ html {
     color: #333;
 }
 
+.modal-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 400;
+}
+
 .modal-close {
     background: none;
     border: none;

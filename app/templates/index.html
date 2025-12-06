@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=9">
 </head>
 
 <body>
@@ -39,9 +39,10 @@
                     <h1>Ofoodiez</h1>
                     <p>Happy Hour's Map</p>
                 </div>
+                <!-- Filter Dropdown -->
                 <div class="filter-container">
-                    <select id="category-filter">
-                        <!-- Options will be populated by Choices.js -->
+                    <select id="category-filter" class="form-control">
+                        <option value="all">All Hours</option>
                     </select>
                 </div>
             </div>
@@ -60,7 +61,10 @@
     <div id="add-modal" class="modal" onclick="closeModalOnOutside(event)">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">🍻 הוסף Happy Hour</h2>
+                <div>
+                    <h2 id="modal-title">🍻 Happy Hour</h2>
+                    <p class="modal-subtitle">הטופס ישלח לאימות*</p>
+                </div>
                 <button class="modal-close" onclick="closeAddModal()">&times;</button>
             </div>
             <form id="add-form" onsubmit="submitHappyHour(event)">
@@ -85,12 +89,11 @@
                     <input type="text" id="place-name-he" name="placeNameHe" required>
                 </div>
                 <div class="form-group" id="group-place-name-en">
-                    <label for="place-name-en">Place Name (English) <span class="required-star">*</span></label>
+                    <label for="place-name-en">שם המקום (English) <span class="required-star">*</span></label>
                     <input type="text" id="place-name-en" name="placeNameEn" required>
                 </div>
                 <div class="form-group">
-                    <label for="description">תיאור ההאפי אוור <span class="required-star"
-                            id="desc-required">*</span></label>
+                    <label for="description">תיאור <span class="required-star" id="desc-required">*</span></label>
                     <input type="text" id="description" name="description" placeholder="לדוגמא: 30% על הכל" required>
                 </div>
                 <div class="form-group" id="group-address">
@@ -112,7 +115,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>ימי Happy Hour</label>
+                    <label>ימים</label>
                     <div class="checkbox-group">
                         <label><input type="checkbox" name="days" value="Sunday"> ראשון</label>
                         <label><input type="checkbox" name="days" value="Monday"> שני</label>
@@ -151,7 +154,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=7"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=8"></script>
 </body>
 
 </html>

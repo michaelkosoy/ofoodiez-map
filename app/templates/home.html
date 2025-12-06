@@ -66,16 +66,19 @@
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .emoji {
-            font-size: 5rem;
+        .logo {
+            width: 150px;
+            height: auto;
             margin-bottom: 20px;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+            border-radius: 20px;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="emoji">🍻</div>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" class="logo">
         <h1>Ofoodiez</h1>
         <p class="tagline">Happy Hours. Great Deals. Best Spots.</p>
         <a href="/map" class="map-link">🗺️ Explore the Map</a>
