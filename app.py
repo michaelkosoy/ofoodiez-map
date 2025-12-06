@@ -199,7 +199,8 @@ def get_places():
             'Reservation Link': 'ReservationLink',
             'OpeningHours': 'OpeningHours',
             'Latitude': 'Latitude',
-            'Longitude': 'Longitude'
+            'Longitude': 'Longitude',
+            'Recommended': 'Recommended'
         }
         
         # Drop duplicate columns (keep the first one)

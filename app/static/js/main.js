@@ -360,8 +360,10 @@ function renderPlaceList(places) {
                             ${place.Description ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">${place.Description}</p>` : ''}
                         </div>
                         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-                            ${getReservationIcon(place.ReservationLink)}
-                            ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px;"><i class="fab fa-instagram"></i></a>` : ''}
+                            ${place.Recommended ? `<a href="${place.Recommended}" target="_blank" class="verified-container" onclick="event.stopPropagation()" title="Watch Video">
+                                <div class="verified-badge"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>
+                                <span class="verified-text">Watch Video</span>
+                            </a>` : ''}
                         </div>
                     </div>
                 </li>
