@@ -111,6 +111,8 @@ function fetchPlaces() {
 
 let infoWindow;
 
+let choicesInstance = null;
+
 function populateFilter(places) {
     const filterSelect = document.getElementById('category-filter');
     const categories = new Set(places.map(p => p.Category).filter(c => c));
@@ -151,37 +153,57 @@ function populateFilter(places) {
         return a.localeCompare(b);
     });
 
-    // Clear existing options (except "All Times" if we want to keep it or replace it)
-    filterSelect.innerHTML = '<option value="all">כל השעות</option>';
+    // Build choices array for Choices.js
+    const choicesArray = [
+        { value: 'all', label: 'כל השעות', selected: true }
+    ];
 
     sortedCategories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category; // Keep the original value for filtering logic
-        option.textContent = hebrewLabels[category] || category; // Show Hebrew label
-        filterSelect.appendChild(option);
+        choicesArray.push({
+            value: category,
+            label: hebrewLabels[category] || category,
+            selected: false
+        });
     });
 
-    // Initialize Choices.js
-    if (!filterSelect.choicesInstance) {
-        const choices = new Choices(filterSelect, {
+    // Initialize or update Choices.js
+    if (!choicesInstance) {
+        // Clear any existing options first
+        filterSelect.innerHTML = '';
+
+        choicesInstance = new Choices(filterSelect, {
             searchEnabled: false,
             itemSelectText: '',
             shouldSort: false,
+            choices: choicesArray,
             classNames: {
                 containerOuter: 'choices-custom',
             }
         });
-        filterSelect.choicesInstance = choices;
+
+        // Add event listener for Choices.js
+        filterSelect.addEventListener('change', function (e) {
+            const selectedValue = e.detail.value;
+            console.log('Filter changed to:', selectedValue);
+            filterPlacesBy(selectedValue);
+        });
+    } else {
+        // Update existing choices
+        choicesInstance.clearChoices();
+        choicesInstance.setChoices(choicesArray, 'value', 'label', true);
     }
 }
 
-window.filterPlaces = () => {
-    const selectedCategory = document.getElementById('category-filter').value;
+function filterPlacesBy(selectedCategory) {
+    console.log('Filtering by category:', selectedCategory);
+    console.log('All places count:', allPlaces.length);
 
     // Filter places
     const filteredPlaces = selectedCategory === 'all'
         ? allPlaces
         : allPlaces.filter(p => p.Category === selectedCategory);
+
+    console.log('Filtered places count:', filteredPlaces.length);
 
     // Update List
     renderPlaceList(filteredPlaces);
@@ -197,6 +219,12 @@ window.filterPlaces = () => {
             markerObj.marker.map = null;
         }
     });
+}
+
+// Keep old function name for backwards compatibility
+window.filterPlaces = () => {
+    const selectedCategory = document.getElementById('category-filter').value;
+    filterPlacesBy(selectedCategory);
 };
 
 async function updateMarkers(places) {
@@ -237,12 +265,17 @@ async function addMarkers(places) {
                 // Highlight in list without changing view
                 highlightMarker(place.Name);
 
-                // Highlight list item
+                // Highlight list item and scroll to it
+                const sidebarContentEl = document.getElementById('sidebar-content');
                 document.querySelectorAll('.place-list-item').forEach(item => {
                     if (item.getAttribute('data-name') === place.Name) {
                         item.classList.add('selected');
-                        // Scroll the selected item into view smoothly
-                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        // Scroll the selected item into view within the sidebar
+                        const itemTop = item.offsetTop - sidebarContentEl.offsetTop;
+                        sidebarContentEl.scrollTo({
+                            top: itemTop - 10,
+                            behavior: 'smooth'
+                        });
                     } else {
                         item.classList.remove('selected');
                     }

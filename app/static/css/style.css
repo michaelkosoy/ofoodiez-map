@@ -162,8 +162,7 @@ html {
 /* Keep elements closer together */
 .header-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 12px;
     width: 100%;
     margin-top: 0;
@@ -171,11 +170,8 @@ html {
 
 /* Filter container properly aligned */
 .filter-container {
-    flex-shrink: 0;
-    min-width: 140px;
-    max-width: 180px;
-    display: flex;
-    align-items: center;
+    width: 100%;
+    max-width: 200px;
 }
 
 

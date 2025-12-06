@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
 </head>
 
 <body>
@@ -29,9 +29,8 @@
                     <p>Happy Hour's Map</p>
                 </div>
                 <div class="filter-container">
-                    <select id="category-filter" onchange="filterPlaces()">
-                        <option value="all">כל השעות</option>
-                        <!-- Options will be populated by JS -->
+                    <select id="category-filter">
+                        <!-- Options will be populated by Choices.js -->
                     </select>
                 </div>
             </div>
@@ -50,7 +49,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=3"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=4"></script>
 </body>
 
 </html>
