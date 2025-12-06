@@ -153,11 +153,16 @@ def get_last_update():
     except:
         return ''
 
-
 # ============ ROUTES ============
 
 @app.route('/')
-def index():
+def home():
+    """Home page - coming soon placeholder."""
+    return render_template('home.html')
+
+@app.route('/map')
+def map_page():
+    """Happy Hour Map page."""
     last_update = get_last_update()
     return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY, last_update=last_update)
 
