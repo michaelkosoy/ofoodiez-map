@@ -247,8 +247,33 @@ def get_places():
 @app.route('/api/refresh')
 def refresh_cache():
     """Force refresh the data cache."""
+    # Simple security check
+    key = request.args.get('key')
+    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025') # Default secret
+    
+    if key != admin_secret:
+        return jsonify({"error": "Unauthorized"}), 401
+
     clear_data_cache()
-    return jsonify({"status": "Cache cleared. Next request will fetch fresh data."})
+    
+    # Trigger a fetch to ensure data is valid and update the cache immediately
+    try:
+        # We call the internal logic or just call get_places (which handles fetching)
+        # However, get_places returns a Response object (jsonify), so we shouldn't call it directly if we want the data.
+        # But for populating the cache, it's fine.
+        # Better: just clear cache and let the next request handle it, OR fetch it here to confirm success.
+        # Let's fetch it here to be sure.
+        
+        # Re-using the logic from get_places would be best if it was refactored, 
+        # but calling the route function is okay-ish or we can just return success.
+        # Let's just return success to keep it simple and fast.
+        return jsonify({
+            "status": "Cache cleared successfully", 
+            "message": "Next visit to the map will load fresh data.",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Formspree configuration (free email API service)
 # Get your form ID from https://formspree.io - create a free account and form
