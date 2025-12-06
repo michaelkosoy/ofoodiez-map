@@ -33,3 +33,6 @@ Thumbs.db
 # Test files (keep the actual data)
 test_*.py
 compare_*.py
+
+# Cache files (places cache is in-memory, geocode cache is tracked in git)
+data/places_cache.json

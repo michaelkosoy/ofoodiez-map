@@ -118,20 +118,20 @@ function populateFilter(places) {
     // Define the priority order
     const priorityOrder = [
         "Until 19:00",
-        "until 19:30",
+        "Until 19:30",
         "Until 20:00",
         "After 20:00",
-        "WEEKENDS",
+        "Weekends",
         "Not TLV"
     ];
 
     // Hebrew mappings
     const hebrewLabels = {
         "Until 19:00": "עד 19:00",
-        "until 19:30": "עד 19:30",
+        "Until 19:30": "עד 19:30",
         "Until 20:00": "עד 20:00",
         "After 20:00": "אחרי 20:00",
-        "WEEKENDS": "סופ״ש",
+        "Weekends": "סופ״ש",
         "Not TLV": "מחוץ לת״א"
     };
 
@@ -186,8 +186,17 @@ window.filterPlaces = () => {
     // Update List
     renderPlaceList(filteredPlaces);
 
-    // Update Markers
-    updateMarkers(filteredPlaces);
+    // Update Markers - hide non-matching markers
+    markers.forEach(markerObj => {
+        const place = allPlaces.find(p => p.Name === markerObj.name);
+        if (place && (selectedCategory === 'all' || place.Category === selectedCategory)) {
+            // Show marker
+            markerObj.marker.map = map;
+        } else {
+            // Hide marker
+            markerObj.marker.map = null;
+        }
+    });
 };
 
 async function updateMarkers(places) {
@@ -225,8 +234,19 @@ async function addMarkers(places) {
             });
 
             marker.addListener("click", () => {
-                showPlaceDetails(place);
+                // Highlight in list without changing view
                 highlightMarker(place.Name);
+
+                // Highlight list item
+                document.querySelectorAll('.place-list-item').forEach(item => {
+                    if (item.getAttribute('data-name') === place.Name) {
+                        item.classList.add('selected');
+                        // Scroll the selected item into view smoothly
+                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
 
                 // Ensure smooth transition
                 map.setCenter(marker.position);
@@ -286,11 +306,12 @@ function renderPlaceList(places) {
         <ul class="place-list">
             ${places.map(place => `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                        <div style="flex: 1;">
                             <h3>${place.Name}</h3>
+                            ${place.Description ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">${place.Description}</p>` : ''}
                         </div>
-                        ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px; margin-left: 10px;"><i class="fab fa-instagram"></i></a>` : ''}
+                        ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px; margin-left: 10px; flex-shrink: 0;"><i class="fab fa-instagram"></i></a>` : ''}
                     </div>
                 </li>
             `).join('')}
