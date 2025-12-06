@@ -95,8 +95,6 @@ async function initMap() {
 
     fetchPlaces();
 
-    fetchPlaces();
-
     // Auto-locate user on load
     showUserLocation();
 }
@@ -299,7 +297,10 @@ async function addMarkers(places) {
                         ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
                         <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                            ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px;"></a>` : ''}
+                            ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
+                        ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 24px; height: 24px; border: none;"></a>`
+                        : `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px; border: none;"></a>`)
+                        : ''}
                             ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
                         </div>
                     </div>
@@ -344,6 +345,16 @@ function highlightMarker(placeName) {
 
 const sidebarContent = document.getElementById('sidebar-content');
 
+// Helper function to get reservation icon based on URL
+function getReservationIcon(url) {
+    if (!url) return '';
+    if (url.toLowerCase().includes('tabit')) {
+        return `<a href="${url}" target="_blank" onclick="event.stopPropagation()" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 20px; height: 20px; border: none;"></a>`;
+    } else {
+        return `<a href="${url}" target="_blank" onclick="event.stopPropagation()" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 20px; height: 20px; border: none;"></a>`;
+    }
+}
+
 function renderPlaceList(places) {
     const listHtml = `
         <ul class="place-list">
@@ -355,7 +366,7 @@ function renderPlaceList(places) {
                             ${place.Description ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">${place.Description}</p>` : ''}
                         </div>
                         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-                            ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" onclick="event.stopPropagation()" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 20px; height: 20px;"></a>` : ''}
+                            ${getReservationIcon(place.ReservationLink)}
                             ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px;"><i class="fab fa-instagram"></i></a>` : ''}
                         </div>
                     </div>
@@ -393,7 +404,10 @@ window.handlePlaceClick = (placeName) => {
                     ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
                     <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
                     <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                        ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px;"></a>` : ''}
+                        ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
+                    ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 24px; height: 24px; border: none;"></a>`
+                    : `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px; border: none;"></a>`)
+                    : ''}
                         ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
                     </div>
                 </div>
