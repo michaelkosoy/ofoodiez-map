@@ -86,6 +86,13 @@ async function initMap() {
         zoomControl: false, // We can add custom controls if needed
     });
 
+    // Close InfoWindow when clicking on the map (outside popup)
+    map.addListener("click", () => {
+        if (infoWindow) {
+            infoWindow.close();
+        }
+    });
+
     fetchPlaces();
 
     fetchPlaces();
@@ -291,7 +298,10 @@ async function addMarkers(places) {
                         <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
                         ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
                         <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
-                        ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="display: inline-block; margin-top: 8px; color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
+                        <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
+                            ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px;"></a>` : ''}
+                            ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
+                        </div>
                     </div>
                 `;
                 infoWindow.setContent(contentString);
@@ -344,7 +354,10 @@ function renderPlaceList(places) {
                             <h3>${place.Name}</h3>
                             ${place.Description ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">${place.Description}</p>` : ''}
                         </div>
-                        ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px; margin-left: 10px; flex-shrink: 0;"><i class="fab fa-instagram"></i></a>` : ''}
+                        <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                            ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" onclick="event.stopPropagation()" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 20px; height: 20px;"></a>` : ''}
+                            ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" onclick="event.stopPropagation()" style="color: #E1306C; font-size: 20px;"><i class="fab fa-instagram"></i></a>` : ''}
+                        </div>
                     </div>
                 </li>
             `).join('')}
@@ -373,7 +386,23 @@ window.handlePlaceClick = (placeName) => {
             map.setCenter(markerObj.marker.position);
             map.setZoom(16);
 
-            // Removed marker click trigger (Info Window) as requested
+            // Open InfoWindow popup on the marker
+            const contentString = `
+                <div class="info-window-content">
+                    <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
+                    ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
+                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
+                    <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
+                        ${place.ReservationLink ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px;"></a>` : ''}
+                        ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
+                    </div>
+                </div>
+            `;
+            infoWindow.setContent(contentString);
+            infoWindow.open({
+                anchor: markerObj.marker,
+                map,
+            });
         }
 
         // Collapse sidebar on mobile to show map
@@ -382,8 +411,6 @@ window.handlePlaceClick = (placeName) => {
             sidebar.classList.remove('expanded');
             // Don't scroll to top, keep list position
         }
-
-        // Removed showPlaceDetails call to keep the list visible
     }
 };
 

@@ -178,18 +178,9 @@ def get_places():
         # Drop duplicate columns (keep the first one)
         df = df.loc[:, ~df.columns.duplicated()]
         
-        # Handle Instagram URL - merge both columns if they exist
-        if 'Instagram Link' in df.columns and 'InstagramURL' in df.columns:
-            # Combine both columns - prefer Instagram Link if InstagramURL is empty
-            df['InstagramURL'] = df.apply(
-                lambda row: row['Instagram Link'] if pd.isna(row['InstagramURL']) or row['InstagramURL'] == '' 
-                else row['InstagramURL'], axis=1
-            )
-            df = df.drop(columns=['Instagram Link'])
-            column_mapping.pop('Instagram Link', None)
-        elif 'InstagramURL' in df.columns:
-            # Already has InstagramURL, don't rename
-            column_mapping.pop('Instagram Link', None)
+        # Drop the InstagramURL column if it exists (we only use Instagram Link)
+        if 'InstagramURL' in df.columns:
+            df = df.drop(columns=['InstagramURL'])
         
         # Rename columns that exist in the mapping
         df = df.rename(columns={k: v for k, v in column_mapping.items() if k in df.columns})
