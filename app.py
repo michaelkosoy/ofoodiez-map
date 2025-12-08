@@ -210,7 +210,8 @@ def get_places():
             'Wednesday': 'Wednesday',
             'Thursday': 'Thursday',
             'Friday': 'Friday',
-            'Saturday': 'Saturday'
+            'Saturday': 'Saturday',
+            'Verified': 'Verified'
         }
         
         # Drop duplicate columns (keep the first one)

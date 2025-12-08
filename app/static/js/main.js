@@ -206,7 +206,7 @@ function filterPlacesBy(selectedCategory) {
     // Filter places
     const filteredPlaces = allPlaces.filter(p => {
         const categoryMatch = selectedCategory === 'all' || p.Category === selectedCategory;
-        const verifiedMatch = !verifiedOnly || (p.Recommended && p.Recommended.trim() !== "");
+        const verifiedMatch = !verifiedOnly || (p.Verified === true || (typeof p.Verified === 'string' && ['yes', 'true'].includes(p.Verified.toLowerCase().trim())));
         return categoryMatch && verifiedMatch;
     });
 
@@ -220,7 +220,7 @@ function filterPlacesBy(selectedCategory) {
         const place = allPlaces.find(p => p.Name === markerObj.name);
         if (place) {
             const categoryMatch = selectedCategory === 'all' || place.Category === selectedCategory;
-            const verifiedMatch = !verifiedOnly || (place.Recommended && place.Recommended.trim() !== "");
+            const verifiedMatch = !verifiedOnly || (place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim())));
 
             if (categoryMatch && verifiedMatch) {
                 markerObj.marker.map = map;
@@ -421,10 +421,12 @@ function renderPlaceList(places) {
                             <h3>${place.Name}</h3>
                             ${place.Description ? `<p class="place-description" style="margin: 4px 0 0 0; font-size: 13px;">${place.Description}</p>` : ''}
                         </div>
-                        <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                        <div style="display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; align-items: center; min-width: 40px; justify-content: center;">
+                            ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
+                `<div class="verified-badge" title="Verified Place"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>`
+                : ''}
                             ${place.Recommended ? `<a href="${place.Recommended}" target="_blank" class="verified-container" onclick="event.stopPropagation()" title="Watch Video">
-                                <div class="verified-badge"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>
-                                <span class="verified-text">Watch Video</span>
+                                <span class="verified-text">Watch<br>Video</span>
                             </a>` : ''}
                         </div>
                     </div>

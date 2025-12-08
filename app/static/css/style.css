@@ -230,7 +230,8 @@ html {
 }
 
 .place-list-item span {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
+    margin-top: 2px;
     color: var(--text-secondary);
 }
 
@@ -1083,7 +1084,6 @@ html {
     gap: 2px;
     cursor: pointer;
     text-decoration: none;
-    margin-right: 8px;
     align-self: center;
 }
 
@@ -1091,24 +1091,16 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     color: #1DA1F2;
     /* Twitter Blue */
-    font-size: 24px;
+    font-size: 18px;
     border-radius: 50%;
     animation: ripple 1.5s infinite;
 }
 
-.verified-text {
-    font-size: 0.6rem;
-    font-weight: 600;
-    color: #1DA1F2;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    line-height: 1;
-    text-align: center;
-}
+
 
 @keyframes ripple {
     0% {
