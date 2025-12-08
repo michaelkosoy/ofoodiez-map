@@ -285,6 +285,35 @@ def refresh_cache():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/update-date')
+def update_date():
+    """Update the last_update date in config.json to today."""
+    # Simple security check
+    key = request.args.get('key')
+    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025') # Default secret
+    
+    if key != admin_secret:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        config_file = os.path.join(CACHE_DIR, 'config.json')
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump({'last_update': current_date}, f, indent=2)
+            
+        print(f"📅 Updated last_update to {current_date}")
+        
+        return jsonify({
+            "status": "Date updated successfully",
+            "last_update": current_date,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+    except Exception as e:
+        print(f"⚠️ Could not update config.json: {e}")
+        return jsonify({"error": str(e)}), 500
+
 # Formspree configuration (free email API service)
 # Get your form ID from https://formspree.io - create a free account and form
 FORMSPREE_ENDPOINT = os.environ.get('FORMSPREE_ENDPOINT', '')
