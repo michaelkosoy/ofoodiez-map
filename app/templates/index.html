@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=30">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=43">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -52,16 +52,22 @@
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="header-row">
-                <div>
-                    <h1>Ofoodiez</h1>
-                    <p>Happy Hour's Map</p>
-                </div>
-                <div style="display: flex; flex-direction: row; align-items: center; gap: 45px;">
+            <div class="header-logo-row">
+                <h1>Ofoodiez</h1>
+                <p>Happy Hour's Map</p>
+            </div>
+            <div class="header-filters-row">
+                <div class="filters-wrapper">
                     <!-- Filter Dropdown -->
                     <div class="filter-container">
                         <select id="category-filter" class="form-control">
                             <option value="all">All Hours</option>
+                        </select>
+                    </div>
+                    <!-- Days Filter -->
+                    <div class="days-filter-container">
+                        <select id="days-filter" class="form-control">
+                            <!-- Populated by JS -->
                         </select>
                     </div>
                     <!-- Verified Toggle -->
@@ -181,7 +187,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=31"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=34"></script>
 </body>
 
 </html>

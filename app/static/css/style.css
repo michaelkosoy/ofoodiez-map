@@ -30,7 +30,7 @@ html {
     position: absolute;
     top: 24px;
     left: 24px;
-    width: 380px;
+    width: 420px;
     max-height: calc(100% - 48px);
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
@@ -48,20 +48,26 @@ html {
 }
 
 /* Choices.js Custom Styling */
-.choices-custom {
+.choices-custom,
+.choices-days-filter {
     width: 100% !important;
     min-width: 100% !important;
     max-width: 100% !important;
     position: relative;
 }
 
-.choices-custom .choices__inner {
+.choices-custom .choices__inner,
+.choices-days-filter .choices__inner {
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
-    padding: 8px 30px 8px 12px;
+    padding: 0 30px 0 12px;
+    width: -webkit-fill-available;
     /* Added right padding for arrow */
-    min-height: auto;
+    min-height: 27px;
+    max-height: 27px;
+    line-height: 25px;
+    /* 27px - 2px border */
     font-family: 'Outfit', sans-serif;
     font-size: 0.85rem;
     font-weight: 500;
@@ -74,29 +80,60 @@ html {
     background-size: 10px auto;
 }
 
-.choices-custom.is-open .choices__inner {
+.choices-custom.is-open .choices__inner,
+.choices-days-filter.is-open .choices__inner {
     border-radius: 12px 12px 0 0;
     border-color: #FF6B6B;
 }
 
-.choices-custom .choices__inner:hover {
+.choices-custom .choices__inner:hover,
+.choices-days-filter .choices__inner:hover {
     background-color: rgba(255, 255, 255, 0.95);
     border-color: rgba(255, 107, 107, 0.3);
 }
 
-.choices-custom.is-focused .choices__inner {
+.choices-custom.is-focused .choices__inner,
+.choices-days-filter.is-focused .choices__inner {
     border-color: #FF6B6B;
     box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
 }
 
-.choices-custom .choices__list--single {
+.choices-custom .choices__list--single,
+.choices-days-filter .choices__list--single {
     padding: 0;
 }
 
-.choices-custom .choices__item--selectable {
+.choices-custom .choices__item--selectable,
+.choices-days-filter .choices__item--selectable {
     color: #333;
     font-size: 0.85rem;
 }
+
+.filters-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.days-filter-container {
+    flex-shrink: 0;
+    width: 130px;
+    min-width: 130px;
+    max-width: 130px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.choices-days-filter .choices__inner {
+    padding-right: 30px;
+    /* Match hours filter padding */
+    font-size: 0.85rem;
+    /* Match hours filter font size */
+}
+
+
 
 .choices__list--dropdown {
     background: white;
@@ -104,8 +141,8 @@ html {
     border-top: none;
     border-radius: 0 0 12px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: auto !important;
-    min-width: 120px;
+    width: 100% !important;
+    min-width: 100%;
     right: 0 !important;
     left: auto !important;
 }
@@ -127,7 +164,8 @@ html {
 }
 
 /* Hide default select when Choices is active */
-#category-filter {
+#category-filter,
+#days-filter {
     display: none;
 }
 
@@ -155,30 +193,43 @@ html {
 }
 
 .sidebar-header p {
-    margin: 0;
+    margin: 6px 0 0 0;
     color: var(--text-secondary);
     font-weight: 400;
-    font-size: 0.85rem;
+    font-size: 15px;
     line-height: 1.4;
 }
 
 /* Keep elements in a row */
-.header-row {
+/* Header Layout */
+.header-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.header-filters-row {
+    width: 100%;
+}
+
+.filters-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    gap: 12px;
+    gap: 3px;
+    flex-wrap: wrap;
     width: 100%;
-    margin-top: 0;
-    box-sizing: border-box;
 }
 
 /* Filter container properly aligned - must fit in remaining space */
 .filter-container {
-    flex-shrink: 1;
-    min-width: 90px;
-    max-width: 120px;
+    flex-shrink: 0;
+    width: 130px;
+    min-width: 130px;
+    max-width: 130px;
     box-sizing: border-box;
 }
 
@@ -467,7 +518,8 @@ html {
         margin: 0 0 4px 0;
     }
 
-    .filter-container {
+    .filter-container,
+    .days-filter-container {
         margin-top: 4px;
     }
 
@@ -528,8 +580,12 @@ html {
     }
 
     .sidebar-header p {
-        font-size: 0.55rem;
-        margin: 0 0 3px 0;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .header-logo-row {
+        margin-bottom: 6px;
     }
 
     .sidebar-content {
@@ -543,10 +599,14 @@ html {
         overflow-y: auto;
     }
 
-    #category-filter {
+    #category-filter,
+    .choices-days-filter .choices__inner {
         font-size: 0.6rem;
-        padding: 4px 7px;
-        min-height: 26px;
+        padding: 0 25px 0 8px;
+        /* Slightly tighter padding for mobile */
+        min-height: 27px;
+        max-height: 27px;
+        line-height: 25px;
     }
 
     .place-list-item {
@@ -1147,9 +1207,7 @@ html {
 }
 
 .verified-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    display: none;
 }
 
 .slider {

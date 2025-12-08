@@ -108,6 +108,7 @@ function fetchPlaces() {
         .then(data => {
             allPlaces = data;
             populateFilter(allPlaces);
+            populateDaysFilter();
             renderPlaceList(allPlaces);
             addMarkers(allPlaces);
         })
@@ -117,6 +118,38 @@ function fetchPlaces() {
 let infoWindow;
 
 let choicesInstance = null;
+let daysChoicesInstance = null;
+
+function populateDaysFilter() {
+    const daysSelect = document.getElementById('days-filter');
+    const days = [
+        { value: 'all', label: 'ימים', selected: true },
+        { value: 'Sunday', label: 'ראשון' },
+        { value: 'Monday', label: 'שני' },
+        { value: 'Tuesday', label: 'שלישי' },
+        { value: 'Wednesday', label: 'רביעי' },
+        { value: 'Thursday', label: 'חמישי' },
+        { value: 'Friday', label: 'שישי' },
+        { value: 'Saturday', label: 'שבת' }
+    ];
+
+    if (!daysChoicesInstance) {
+        daysChoicesInstance = new Choices(daysSelect, {
+            searchEnabled: false,
+            itemSelectText: '',
+            shouldSort: false,
+            choices: days,
+            classNames: {
+                containerOuter: 'choices-days-filter', // Custom class for styling
+            }
+        });
+
+        daysSelect.addEventListener('change', () => {
+            const categorySelect = document.getElementById('category-filter');
+            filterPlacesBy(categorySelect.value);
+        });
+    }
+}
 
 function populateFilter(places) {
     const filterSelect = document.getElementById('category-filter');
@@ -160,7 +193,7 @@ function populateFilter(places) {
 
     // Build choices array for Choices.js
     const choicesArray = [
-        { value: 'all', label: 'כל השעות', selected: true }
+        { value: 'all', label: 'שעות', selected: true }
     ];
 
     sortedCategories.forEach(category => {
@@ -201,13 +234,25 @@ function populateFilter(places) {
 function filterPlacesBy(selectedCategory) {
     const verifiedOnly = document.getElementById('verified-filter').checked;
 
-    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}`);
+    // Get selected day
+    const daysSelect = document.getElementById('days-filter');
+    const selectedDay = daysSelect.value;
+
+    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}, Day: ${selectedDay}`);
 
     // Filter places
     const filteredPlaces = allPlaces.filter(p => {
         const categoryMatch = selectedCategory === 'all' || p.Category === selectedCategory;
         const verifiedMatch = !verifiedOnly || (p.Verified === true || (typeof p.Verified === 'string' && ['yes', 'true'].includes(p.Verified.toLowerCase().trim())));
-        return categoryMatch && verifiedMatch;
+
+        // Day match
+        let dayMatch = true;
+        if (selectedDay && selectedDay !== 'all') {
+            const val = p[selectedDay];
+            dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
+        }
+
+        return categoryMatch && verifiedMatch && dayMatch;
     });
 
     console.log(`Matches found: ${filteredPlaces.length}`);
@@ -222,7 +267,13 @@ function filterPlacesBy(selectedCategory) {
             const categoryMatch = selectedCategory === 'all' || place.Category === selectedCategory;
             const verifiedMatch = !verifiedOnly || (place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim())));
 
-            if (categoryMatch && verifiedMatch) {
+            let dayMatch = true;
+            if (selectedDay && selectedDay !== 'all') {
+                const val = place[selectedDay];
+                dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
+            }
+
+            if (categoryMatch && verifiedMatch && dayMatch) {
                 markerObj.marker.map = map;
             } else {
                 markerObj.marker.map = null;
