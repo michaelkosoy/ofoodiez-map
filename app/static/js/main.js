@@ -313,7 +313,7 @@ async function addMarkers(places) {
                     <div class="info-window-content">
                         <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
                         ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
-                        <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">${place.Description || place.Category}</p>
+                        <p class="place-description" style="margin: 5px 0 0 0; font-size: 14px;">${place.Description || place.Category}</p>
                         <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
                             ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
                         ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 24px; height: 24px; border: none;"></a>`
@@ -381,7 +381,7 @@ function renderPlaceList(places) {
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
                         <div style="flex: 1;">
                             <h3>${place.Name}</h3>
-                            ${place.Description ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">${place.Description}</p>` : ''}
+                            ${place.Description ? `<p class="place-description" style="margin: 4px 0 0 0; font-size: 13px;">${place.Description}</p>` : ''}
                         </div>
                         <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
                             ${place.Recommended ? `<a href="${place.Recommended}" target="_blank" class="verified-container" onclick="event.stopPropagation()" title="Watch Video">
