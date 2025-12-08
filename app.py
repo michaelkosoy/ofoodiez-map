@@ -225,6 +225,10 @@ def get_places():
         # Filter out rows where Name is empty (if Name column exists)
         if 'Name' in df.columns:
             df = df[df['Name'].str.strip().astype(bool)]
+
+        # Filter out rows where Category is empty (if Category column exists)
+        if 'Category' in df.columns:
+            df = df[df['Category'].str.strip().astype(bool)]
         
         # Geocode addresses if Latitude/Longitude are missing
         places = df.to_dict(orient='records')
