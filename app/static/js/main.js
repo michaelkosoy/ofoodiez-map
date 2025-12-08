@@ -309,11 +309,13 @@ async function addMarkers(places) {
                 map.setZoom(16);
 
                 // Show InfoWindow
+                const daysText = formatDays(place);
                 const contentString = `
                     <div class="info-window-content">
                         <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
                         ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
                         <p class="place-description" style="margin: 5px 0 0 0; font-size: 14px;">${place.Description || place.Category}</p>
+                        ${daysText ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #888; direction: rtl; text-align: right;">תקף בימים: ${daysText}</p>` : ''}
                         <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
                             ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
                         ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 24px; height: 24px; border: none;"></a>`
@@ -373,10 +375,42 @@ function getReservationIcon(url) {
     }
 }
 
+// Helper function to format days
+function formatDays(place) {
+    const daysMap = {
+        'Sunday': "א'",
+        'Monday': "ב'",
+        'Tuesday': "ג'",
+        'Wednesday': "ד'",
+        'Thursday': "ה'",
+        'Friday': "ו'",
+        'Saturday': "ש'"
+    };
+
+    const activeDays = [];
+    // Order: Sunday to Saturday
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    days.forEach(day => {
+        // Check if value exists and is true/yes
+        const val = place[day];
+        const isTrue = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
+
+        if (isTrue) {
+            activeDays.push(daysMap[day]);
+        }
+    });
+
+    if (activeDays.length === 0) return '';
+    return activeDays.join(', ');
+}
+
 function renderPlaceList(places) {
     const listHtml = `
         <ul class="place-list">
-            ${places.map(place => `
+            ${places.map(place => {
+        const daysText = formatDays(place);
+        return `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
                         <div style="flex: 1;">
@@ -391,7 +425,7 @@ function renderPlaceList(places) {
                         </div>
                     </div>
                 </li>
-            `).join('')}
+            `}).join('')}
         </ul>
     `;
     sidebarContent.innerHTML = listHtml;

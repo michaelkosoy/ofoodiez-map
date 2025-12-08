@@ -203,7 +203,14 @@ def get_places():
             'OpeningHours': 'OpeningHours',
             'Latitude': 'Latitude',
             'Longitude': 'Longitude',
-            'Recommended': 'Recommended'
+            'Recommended': 'Recommended',
+            'Sunday': 'Sunday',
+            'Monday': 'Monday',
+            'Tuesday': 'Tuesday',
+            'Wednesday': 'Wednesday',
+            'Thursday': 'Thursday',
+            'Friday': 'Friday',
+            'Saturday': 'Saturday'
         }
         
         # Drop duplicate columns (keep the first one)
