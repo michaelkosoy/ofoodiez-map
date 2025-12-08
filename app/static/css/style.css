@@ -412,6 +412,8 @@ html {
         width: 100%;
         max-width: 100%;
         height: auto;
+        min-height: 260px;
+        /* Ensure it doesn't float up if content is short */
         max-height: 85vh;
         position: fixed;
         bottom: 0;
@@ -470,8 +472,7 @@ html {
     }
 
     .sidebar-content {
-        max-height: calc(85vh - 100px);
-        padding: 4px 12px 10px 12px;
+        padding: 4px 12px 20px 12px;
         overflow-y: auto;
         background: rgba(255, 255, 255, 0.95);
     }
@@ -532,8 +533,14 @@ html {
     }
 
     .sidebar-content {
-        max-height: calc(85vh - 95px);
-        padding: 3px 10px 10px 10px;
+        padding: 3px 10px 20px 10px;
+    }
+
+    /* When collapsed, restrict content height to fit visible area */
+    .sidebar:not(.expanded) .sidebar-content {
+        max-height: calc(260px - 110px);
+        /* 260px visible - approx header height */
+        overflow-y: auto;
     }
 
     #category-filter {
