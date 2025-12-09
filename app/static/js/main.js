@@ -521,6 +521,7 @@ window.handlePlaceClick = (placeName) => {
         if (window.innerWidth <= 768) {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.remove('expanded');
+            document.body.classList.remove('sidebar-expanded');
             // Don't scroll to top, keep list position
         }
     }
@@ -637,20 +638,25 @@ if (window.innerWidth <= 768) {
             if (diff > 0) {
                 // Dragged down -> Collapse
                 sidebar.classList.remove('expanded');
+                document.body.classList.remove('sidebar-expanded');
             } else {
                 // Dragged up -> Expand
                 sidebar.classList.add('expanded');
+                document.body.classList.add('sidebar-expanded');
             }
         } else {
             // If moved less than threshold, toggle based on click/tap
             if (diff === 0) {
                 sidebar.classList.toggle('expanded');
+                document.body.classList.toggle('sidebar-expanded');
             } else {
                 // Revert to nearest state
                 if (sidebar.classList.contains('expanded')) {
                     sidebar.classList.add('expanded');
+                    document.body.classList.add('sidebar-expanded');
                 } else {
                     sidebar.classList.remove('expanded');
+                    document.body.classList.remove('sidebar-expanded');
                 }
             }
         }
@@ -659,6 +665,7 @@ if (window.innerWidth <= 768) {
     // Close sidebar when clicking on map
     document.getElementById('map').addEventListener('click', () => {
         sidebar.classList.remove('expanded');
+        document.body.classList.remove('sidebar-expanded');
     });
 }
 
