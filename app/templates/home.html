@@ -3,103 +3,119 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ofoodiez</title>
-    <meta name="description" content="Happy Hours. Great Deals. Best Spots.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ofoodiez - Best Happy Hours & Food Guides</title>
+    <meta name="description" content="{{ data.slogan }}">
+
+    <!-- PWA & Icons -->
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
     <meta name="theme-color" content="#FF6B6B">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ofoodiez.com/">
-    <meta property="og:title" content="Ofoodiez">
-    <meta property="og:description" content="Happy Hours. Great Deals. Best Spots.">
-    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://ofoodiez.com/">
-    <meta property="twitter:title" content="Ofoodiez">
-    <meta property="twitter:description" content="Happy Hours. Great Deals. Best Spots.">
-    <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-        }
-
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .tagline {
-            font-size: 1.5rem;
-            font-weight: 300;
-            opacity: 0.9;
-            margin-bottom: 40px;
-        }
-
-        .map-link {
-            display: inline-block;
-            background: white;
-            color: #FF6B6B;
-            padding: 16px 40px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .map-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            width: 150px;
-            height: auto;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
-            border-radius: 20px;
-        }
-    </style>
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=1">
 </head>
 
 <body>
     <div class="container">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" class="logo">
-        <h1>Ofoodiez</h1>
-        <p class="tagline">Happy Hours. Great Deals. Best Spots.</p>
-        <a href="/map" class="map-link">🗺️ Explore the Map</a>
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" class="logo-img">
+                <h1 class="brand-name">Ofoodiez</h1>
+            </div>
+            <p class="slogan">{{ data.slogan }}</p>
+        </header>
+
+        <!-- Happy Hour Map Section -->
+        <section class="section">
+            <a href="/map" class="main-card">
+                <h2>Happy Hour Map</h2>
+                <p>Discover the best deals and happy hours around you right now.</p>
+                <span class="btn">Explore Map <i class="fas fa-arrow-right"></i></span>
+            </a>
+        </section>
+
+        <!-- Community Insider Section -->
+        <section class="section">
+            <div class="community-card">
+                <h3>{{ data.community.title }}</h3>
+                <p>{{ data.community.description }}</p>
+                <a href="{{ data.community.link }}" target="_blank" class="btn-white">
+                    <i class="fab fa-whatsapp"></i> {{ data.community.link_text }}
+                </a>
+            </div>
+        </section>
+
+        <!-- World Food Maps Section -->
+        <section class="section">
+            <h3 class="section-title">World Food Maps</h3>
+            <div class="world-grid">
+                {% for item in data.world_maps %}
+                <a href="{{ item.map_link }}" class="country-card" {% if 'http' in item.map_link %}target="_blank" {%
+                    endif %}>
+                    <span class="flag">{{ item.flag }}</span>
+                    <span class="country-name">{{ item.country }}</span>
+                    <span class="cities">{{ item.cities }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- About & Contact Section -->
+        <section class="section">
+            <div class="about-section">
+                <h3 class="section-title" style="border:none; padding:0; margin-bottom:10px;">{{ data.about.title }}
+                </h3>
+                <p class="about-text">{{ data.about.text }}</p>
+                <a href="{{ data.about.contact_link }}" class="contact-link">{{ data.about.contact_text }}</a>
+            </div>
+        </section>
+
+        <!-- Extra Page Link -->
+        <!-- HiTech Benefits & Office Happy Hours Section -->
+        <section class="section">
+            <a href="{{ data.extra_page.link }}" class="hitech-card">
+                <h3>HiTech Benefits & Office Happy Hours</h3>
+                <p>{{ data.extra_page.text }}</p>
+            </a>
+        </section>
+
+        <!-- Social Media Links -->
+        <div class="social-media">
+            {% for social in data.social_media %}
+            <a href="{{ social.link }}" target="_blank" class="social-icon">
+                <i class="{{ social.icon }}"></i>
+            </a>
+            {% endfor %}
+        </div>
+
+
     </div>
+
+
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>

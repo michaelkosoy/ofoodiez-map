@@ -1,0 +1,294 @@
+/* Global Styles */
+:root {
+    --primary-color: #FF6B6B;
+    --primary-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+    --text-color: #333;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --radius: 16px;
+}
+
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding-bottom: 40px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 40px 0 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.logo-img {
+    width: 60px;
+    height: 60px;
+}
+
+.brand-name {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -1px;
+}
+
+.slogan {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 400;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Section Styles */
+.section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 4px solid var(--primary-color);
+    line-height: 1.2;
+}
+
+/* Happy Hour Map Card */
+.main-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: block;
+    border: 2px solid transparent;
+}
+
+.main-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.main-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+.main-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* Community Section */
+.community-card {
+    background: var(--primary-gradient);
+    /* Changed from WhatsApp Green */
+    color: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.community-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.community-card p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.btn-white {
+    background: white;
+    color: var(--primary-color);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* World Grid */
+.world-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.country-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 10px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.country-card:hover {
+    transform: translateY(-2px);
+}
+
+.flag {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.country-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.cities {
+    font-size: 0.75rem;
+    color: #888;
+    display: block;
+}
+
+/* About & Contact */
+.about-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.about-text {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.contact-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+/* Extra Page Link / HiTech Section */
+.hitech-card {
+    background: #f0f2f5;
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    display: block;
+    border: 1px dashed #ccc;
+    color: #888;
+}
+
+.hitech-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: 700;
+}
+
+.hitech-card p {
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* Social Media Section */
+.social-media {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.social-icon {
+    font-size: 1.5rem;
+    color: #888;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.social-icon:hover {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (min-width: 768px) {
+    .world-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .header {
+        padding: 60px 0 40px;
+    }
+
+    .brand-name {
+        font-size: 3rem;
+    }
+
+    .slogan {
+        font-size: 1.2rem;
+        max-width: 500px;
+    }
+}

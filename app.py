@@ -11,6 +11,7 @@ from geopy.exc import GeocoderTimedOut
 from dotenv import load_dotenv
 import requests
 from io import StringIO
+from data import data as home_data
 
 # Load environment variables from .env file (for local development)
 load_dotenv()
@@ -157,8 +158,8 @@ def get_last_update():
 
 @app.route('/')
 def home():
-    """Home page - coming soon placeholder."""
-    return render_template('home.html')
+    """Render the new homepage with data."""
+    return render_template('home.html', data=home_data)
 
 @app.route('/map')
 def map_page():
