@@ -54,7 +54,7 @@ data = {
     "social_media": [
         {"icon": "fab fa-instagram", "link": "https://instagram.com/ofoodiez"},
         {"icon": "fab fa-tiktok", "link": "https://tiktok.com/@ofoodiez"},
-        {"icon": "fab fa-facebook", "link": "https://facebook.com/ofoodiez"},
-        {"icon": "fab fa-x", "link": "https://x.com/ofoodiez"},
+        {"icon": "fab fa-facebook", "link": "https://www.facebook.com/share/1AQDUqhNoK/?mibextid=wwXIfr"},
+        {"icon": "fab fa-threads", "link": "https://www.threads.com/@ofoodiez?igshid=NTc4MTIwNjQ2YQ=="},
     ]
 }
