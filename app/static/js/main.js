@@ -447,14 +447,18 @@ function getInfoWindowContent(place) {
         <div class="info-window-content">
             <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
             ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
-            <p class="place-description" style="margin: 5px 0 0 0; font-size: 14px; text-align: right;">${place.Description || place.Category}</p>
+
+            <p class="place-description" style="margin: 5px 0 0 0; font-size: 14px; text-align: right;">${place.Description || ''}</p>
             ${daysText ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #888; direction: rtl; text-align: right;">תקף בימים: ${daysText}</p>` : ''}
-            <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center;">
-                ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
+            <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    ${place.ReservationLink ? (place.ReservationLink.toLowerCase().includes('tabit')
             ? `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Tabit"><img src="/static/images/tabit-icon.ico" alt="Tabit" style="width: 24px; height: 24px; border: none;"></a>`
             : `<a href="${place.ReservationLink}" target="_blank" title="Reserve on Ontopo"><img src="/static/images/ontopo-icon.ico" alt="Ontopo" style="width: 24px; height: 24px; border: none;"></a>`)
             : ''}
-                ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
+                    ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
+                </div>
+                ${place.Category ? `<div style="background-color: #f0f0f0; border-radius: 12px; padding: 4px 8px; font-size: 12px; direction: rtl; color: #333; white-space: nowrap;">${place.Category}</div>` : ''}
             </div>
         </div>
     `;
