@@ -134,9 +134,112 @@ nav.bottom-nav.map-bottom-nav {
 /* Adjust map to account for sidebar width on desktop */
 #map {
     margin-left: 400px;
-    /* Same as sidebar width */
     height: calc(100vh - 60px);
-    /* Full height minus nav */
+}
+
+/* =========================================
+   SEARCH COMPONENT
+   ========================================= */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    position: relative;
+}
+
+.search-toggle {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-toggle:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.search-input-wrapper {
+    display: none;
+    align-items: center;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 4px 8px 4px 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.2s ease;
+}
+
+.search-input-wrapper.active {
+    display: flex;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.search-input-wrapper input {
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    width: 150px;
+    background: transparent;
+    font-family: inherit;
+}
+
+.search-input-wrapper input::placeholder {
+    color: #999;
+}
+
+.search-clear {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.search-clear:hover {
+    color: var(--primary-color);
+}
+
+/* Hide toggle when search is active */
+.search-container.active .search-toggle {
+    display: none;
+}
+
+/* No results message */
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.no-results i {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: #ddd;
 }
 
 /* Choices.js Custom Styling */
@@ -632,6 +735,16 @@ nav.bottom-nav.map-bottom-nav {
     .sidebar-header p {
         font-size: 0.6rem;
         margin: 0 0 4px 0;
+    }
+
+    /* Mobile search adjustments */
+    .search-input-wrapper input {
+        width: 120px;
+    }
+
+    .search-toggle {
+        width: 32px;
+        height: 32px;
     }
 
     .filter-container,

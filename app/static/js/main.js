@@ -1,7 +1,87 @@
 let map;
 let allPlaces = [];
 let markers = [];
+let searchQuery = ''; // Current search query
 
+// =========================================
+// SEARCH FUNCTIONALITY
+// =========================================
+
+// Toggle search input visibility
+function toggleSearch() {
+    const container = document.getElementById('search-container');
+    const wrapper = document.getElementById('search-wrapper');
+    const input = document.getElementById('search-input');
+
+    container.classList.add('active');
+    wrapper.classList.add('active');
+    input.focus();
+}
+
+// Handle Enter key in search input
+function handleSearchKeypress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        performSearch();
+    }
+}
+
+// Perform the search
+function performSearch() {
+    const input = document.getElementById('search-input');
+    searchQuery = input.value.trim().toLowerCase();
+
+    if (searchQuery === '') {
+        // If empty, show all places
+        applyAllFilters();
+        return;
+    }
+
+    // Filter places by name (partial match, case-insensitive)
+    const filteredPlaces = allPlaces.filter(place => {
+        const name = (place.Name || place.name || '').toLowerCase();
+        return name.includes(searchQuery);
+    });
+
+    // Render filtered list
+    renderPlaceList(filteredPlaces);
+    updateMarkersForSearch(filteredPlaces);
+}
+
+// Clear search and restore full list
+function clearSearch() {
+    const container = document.getElementById('search-container');
+    const wrapper = document.getElementById('search-wrapper');
+    const input = document.getElementById('search-input');
+
+    input.value = '';
+    searchQuery = '';
+    container.classList.remove('active');
+    wrapper.classList.remove('active');
+
+    // Restore full list with current filters
+    applyAllFilters();
+}
+
+// Update markers to show only searched places
+function updateMarkersForSearch(filteredPlaces) {
+    const filteredIds = new Set(filteredPlaces.map(p => p.Name || p.name));
+
+    markers.forEach(markerData => {
+        const placeName = markerData.place.Name || markerData.place.name;
+        if (filteredIds.has(placeName)) {
+            markerData.marker.map = map;
+        } else {
+            markerData.marker.map = null;
+        }
+    });
+}
+
+// Apply all filters including search
+function applyAllFilters() {
+    const categorySelect = document.getElementById('category-filter');
+    filterPlacesBy(categorySelect ? categorySelect.value : 'all');
+}
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
@@ -465,6 +545,18 @@ function getInfoWindowContent(place) {
 }
 
 function renderPlaceList(places) {
+    // Handle no results
+    if (places.length === 0) {
+        sidebarContent.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>No places found</p>
+                <p style="font-size: 0.85rem;">Try a different search term</p>
+            </div>
+        `;
+        return;
+    }
+
     const listHtml = `
         <ul class="place-list">
             ${places.map(place => {

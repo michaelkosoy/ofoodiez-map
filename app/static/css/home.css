@@ -57,13 +57,14 @@ a {
     right: 0;
     bottom: 0;
     background: transparent;
-    /* Removed pink blur overlay */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
+    /* Centered text */
     padding: 40px;
     color: white;
+    text-align: center;
 }
 
 .hero-title {
