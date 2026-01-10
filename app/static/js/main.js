@@ -2,6 +2,7 @@ let map;
 let allPlaces = [];
 let markers = [];
 let searchQuery = ''; // Current search query
+let searchDebounceTimer = null; // Debounce timer
 
 // =========================================
 // SEARCH FUNCTIONALITY
@@ -18,15 +19,27 @@ function toggleSearch() {
     input.focus();
 }
 
-// Handle Enter key in search input
+// Handle keypress - trigger debounced search
 function handleSearchKeypress(event) {
+    // Clear existing timer
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
+
+    // Immediate search on Enter
     if (event.key === 'Enter') {
         event.preventDefault();
         performSearch();
+        return;
     }
+
+    // Debounced search (1 second after typing stops)
+    searchDebounceTimer = setTimeout(() => {
+        performSearch();
+    }, 1000);
 }
 
-// Perform the search
+// Perform the search (supports English AND Hebrew)
 function performSearch() {
     const input = document.getElementById('search-input');
     searchQuery = input.value.trim().toLowerCase();
@@ -37,10 +50,14 @@ function performSearch() {
         return;
     }
 
-    // Filter places by name (partial match, case-insensitive)
+    // Filter places by name - check both English and Hebrew names
+    // Case-insensitive partial matching for both languages
     const filteredPlaces = allPlaces.filter(place => {
-        const name = (place.Name || place.name || '').toLowerCase();
-        return name.includes(searchQuery);
+        const englishName = (place.Name || place.name || '').toLowerCase();
+        const hebrewName = (place.NameHebrew || '').toLowerCase();
+
+        // Match if query is found in either English OR Hebrew name
+        return englishName.includes(searchQuery) || hebrewName.includes(searchQuery);
     });
 
     // Render filtered list
@@ -53,6 +70,11 @@ function clearSearch() {
     const container = document.getElementById('search-container');
     const wrapper = document.getElementById('search-wrapper');
     const input = document.getElementById('search-input');
+
+    // Clear debounce timer
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
 
     input.value = '';
     searchQuery = '';

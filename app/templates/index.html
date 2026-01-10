@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=63">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=64">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=3">
 
     <!-- Open Graph / Facebook -->
@@ -62,8 +62,8 @@
                         <i class="fas fa-search"></i>
                     </button>
                     <div class="search-input-wrapper" id="search-wrapper">
-                        <input type="text" id="search-input" placeholder="Search places..."
-                            onkeypress="handleSearchKeypress(event)">
+                        <input type="text" id="search-input" placeholder="Search / חיפוש..."
+                            oninput="handleSearchKeypress(event)" onkeypress="handleSearchKeypress(event)">
                         <button class="search-clear" onclick="clearSearch()">
                             <i class="fas fa-times"></i>
                         </button>
