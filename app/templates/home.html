@@ -20,29 +20,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=3">
 </head>
 
 <body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay">
+            <h1 class="hero-title">Ofoodiez</h1>
+            <p class="hero-subtitle">{{ data.slogan }}</p>
+        </div>
+    </section>
+
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo-container">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" class="logo-img">
-                <h1 class="brand-name">Ofoodiez</h1>
-            </div>
-            <p class="slogan">{{ data.slogan }}</p>
-        </header>
-
-        <!-- Happy Hour Map Section -->
-        <section class="section">
-            <a href="/map" class="main-card">
-                <h2>Happy Hour Map</h2>
-                <p>Discover the best deals and happy hours around you right now.</p>
-                <span class="btn">Explore Map <i class="fas fa-arrow-right"></i></span>
-            </a>
-        </section>
-
         <!-- Community Insider Section -->
         <section class="section">
             <div class="community-card">
@@ -55,37 +45,20 @@
         </section>
 
         <!-- World Food Maps Section -->
-        <section class="section">
+        <section class="section" id="destinations">
             <h3 class="section-title">World Food Maps</h3>
             <div class="world-grid">
                 {% for item in data.world_maps %}
-                <a href="{{ item.map_link }}" class="country-card" {% if 'http' in item.map_link %}target="_blank" {%
-                    endif %}>
-                    <span class="flag">{{ item.flag }}</span>
-                    <span class="country-name">{{ item.country }}</span>
-                    <span class="cities">{{ item.cities }}</span>
+                <a href="{{ item.map_link }}" class="country-card"
+                    style="background-image: url('{{ url_for('static', filename='img/' + item.country.lower() + '.png') }}');"
+                    {% if 'http' in item.map_link %}target="_blank" {% endif %}>
+                    <div class="country-overlay">
+                        <span class="country-name">{{ item.country }}</span>
+                        <span class="cities">{{ item.cities }}</span>
+                    </div>
                 </a>
                 {% endfor %}
             </div>
-        </section>
-
-        <!-- About & Contact Section -->
-        <section class="section">
-            <div class="about-section">
-                <h3 class="section-title" style="border:none; padding:0; margin-bottom:10px;">{{ data.about.title }}
-                </h3>
-                <p class="about-text">{{ data.about.text }}</p>
-                <a href="{{ data.about.contact_link }}" class="contact-link">{{ data.about.contact_text }}</a>
-            </div>
-        </section>
-
-        <!-- Extra Page Link -->
-        <!-- HiTech Benefits & Office Happy Hours Section -->
-        <section class="section">
-            <a href="{{ data.extra_page.link }}" class="hitech-card">
-                <h3>HiTech Benefits & Office Happy Hours</h3>
-                <p>{{ data.extra_page.text }}</p>
-            </a>
         </section>
 
         <!-- Social Media Links -->
@@ -97,13 +70,37 @@
             {% endfor %}
         </div>
 
-
+        <!-- Spacer for bottom nav -->
+        <div class="bottom-nav-spacer"></div>
     </div>
 
-
+    <!-- Sticky Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/map" class="bottom-nav-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Happy Hour Map</span>
+        </a>
+        <a href="/about" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>About Me</span>
+        </a>
+        <a href="#" class="bottom-nav-item disabled" onclick="showComingSoon(event)">
+            <i class="fas fa-building"></i>
+            <span>HiTech</span>
+        </a>
+    </nav>
 
     <!-- PWA Service Worker Registration -->
     <script>
+        function showComingSoon(event) {
+            event.preventDefault();
+            alert('HiTech section coming soon! 🚀');
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/sw.js')
@@ -115,6 +112,71 @@
                     });
             });
         }
+
+        // Smooth scroll to top
+        function scrollToTop(event) {
+            event.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Active state for bottom nav
+        document.addEventListener('DOMContentLoaded', function () {
+            const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+            const sections = document.querySelectorAll('section[id]');
+
+            // Handle hash navigation for bottom nav
+            bottomNavItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href');
+
+                        // Remove active from all
+                        bottomNavItems.forEach(nav => nav.classList.remove('active'));
+
+                        // Add active to clicked
+                        this.classList.add('active');
+
+                        // Scroll to section
+                        if (targetId !== '#') {
+                            const targetSection = document.querySelector(targetId);
+                            if (targetSection) {
+                                targetSection.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Update active state on scroll
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (window.pageYOffset >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                // If near top, set home as active
+                if (window.pageYOffset < 300) {
+                    bottomNavItems.forEach(item => {
+                        item.classList.remove('active');
+                        if (item.getAttribute('href') === '#') {
+                            item.classList.add('active');
+                        }
+                    });
+                } else if (current) {
+                    bottomNavItems.forEach(item => {
+                        item.classList.remove('active');
+                        if (item.getAttribute('href') === '#' + current) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
     </script>
 </body>
 

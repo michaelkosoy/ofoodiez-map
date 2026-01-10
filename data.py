@@ -34,6 +34,12 @@ data = {
             "map_link": "https://maps.app.goo.gl/KWjvp1LHRG4dS5Ko6" # External link mock
         },
         {
+            "country": "Spain",
+            "flag": "🇪🇸",
+            "cities": "Coming Soon",
+            "map_link": "#" # Coming soon
+        },
+        {
             "country": "Japan",
             "flag": "🇯🇵",
             "cities": "Coming Soon",

@@ -16,7 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=52">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=62">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=3">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -178,7 +179,32 @@
         </div>
     </div>
 
+    <!-- Bottom Navigation for Map Page -->
+    <nav class="bottom-nav map-bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/map" class="bottom-nav-item active">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Happy Hour Map</span>
+        </a>
+        <a href="/about" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>About Me</span>
+        </a>
+        <a href="#" class="bottom-nav-item disabled" onclick="showComingSoon(event)">
+            <i class="fas fa-building"></i>
+            <span>HiTech</span>
+        </a>
+    </nav>
+
     <script>
+        function showComingSoon(event) {
+            event.preventDefault();
+            alert('HiTech section coming soon! 🚀');
+        }
+
         // Pass API key to JS if needed, or just use it in the map script
         const GOOGLE_MAPS_API_KEY = "{{ api_key }}";
         (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })({

@@ -671,6 +671,12 @@ if (window.innerWidth <= 768) {
         sidebar.classList.remove('expanded');
         document.body.classList.remove('sidebar-expanded');
     });
+
+    // Also handle click for tap gesture (fallback)
+    sidebarHeader.addEventListener('click', () => {
+        sidebar.classList.toggle('expanded');
+        document.body.classList.toggle('sidebar-expanded');
+    });
 }
 
 // User Location Logic
@@ -896,3 +902,8 @@ window.closeBanner = () => {
         banner.classList.add('hidden');
     }
 };
+
+// Auto-close banner after 5 seconds if not manually closed
+setTimeout(() => {
+    closeBanner();
+}, 5000);

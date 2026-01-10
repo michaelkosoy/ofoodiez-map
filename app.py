@@ -167,6 +167,11 @@ def map_page():
     last_update = get_last_update()
     return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY, last_update=last_update)
 
+@app.route('/about')
+def about_page():
+    """About Me page."""
+    return render_template('about.html', data=home_data)
+
 
 @app.route('/health')
 def health_check():
