@@ -196,6 +196,91 @@ a {
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
 }
 
+/* Happy Hour Map Promo Card */
+.promo-card {
+    display: block;
+    text-decoration: none;
+    border-radius: var(--radius);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    color: white;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.happy-hour-card {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.4),
+            rgba(0, 0, 0, 0.5)),
+        url('../img/map-bg.png');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Floating pin icon */
+.happy-hour-card::after {
+    content: "📍";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+    opacity: 0.9;
+}
+
+.promo-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+}
+
+.promo-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.promo-content p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    opacity: 0.95;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.promo-button {
+    display: inline-block;
+    background: white;
+    color: var(--primary-color);
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    align-self: center;
+}
+
+/* Hover effects (desktop only) */
+@media (hover: hover) {
+    .promo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .promo-card:hover .promo-button {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+    }
+}
+
 /* World Grid */
 .world-grid {
     display: grid;
