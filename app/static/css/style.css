@@ -319,6 +319,7 @@ nav.bottom-nav.map-bottom-nav {
     max-width: 130px;
     box-sizing: border-box;
     position: relative;
+    z-index: 50;
 }
 
 .choices-days-filter .choices__inner {
@@ -340,6 +341,7 @@ nav.bottom-nav.map-bottom-nav {
     min-width: 100%;
     right: 0 !important;
     left: auto !important;
+    z-index: 100;
 }
 
 .choices__list--dropdown .choices__item {
@@ -368,7 +370,7 @@ nav.bottom-nav.map-bottom-nav {
 .sidebar-header {
     padding: 24px 20px 16px 20px;
     position: relative;
-    z-index: 20;
+    z-index: 200;
     background: linear-gradient(to bottom,
             rgba(255, 255, 255, 0.85),
             rgba(255, 255, 255, 0));
@@ -426,6 +428,8 @@ nav.bottom-nav.map-bottom-nav {
     min-width: 130px;
     max-width: 130px;
     box-sizing: border-box;
+    position: relative;
+    z-index: 50;
 }
 
 
@@ -444,8 +448,8 @@ nav.bottom-nav.map-bottom-nav {
 }
 
 .place-list-item {
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
     background: white;
     border-radius: 16px;
     cursor: pointer;
@@ -454,7 +458,7 @@ nav.bottom-nav.map-bottom-nav {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .place-list-item:hover {
@@ -471,7 +475,7 @@ nav.bottom-nav.map-bottom-nav {
 
 .place-list-item h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 24px;
     font-weight: 600;
 }
 
@@ -674,8 +678,8 @@ nav.bottom-nav.map-bottom-nav {
         height: auto;
         min-height: 316px;
         /* 260px visible + 56px behind nav */
-        max-height: 66vh;
-        /* Cap at 2/3 of viewport */
+        max-height: 75vh;
+        /* Cap at 3/4 of viewport */
         position: fixed;
         bottom: 0;
         left: 0;
@@ -692,8 +696,8 @@ nav.bottom-nav.map-bottom-nav {
         transition: transform 0.3s ease;
         background: white;
         box-sizing: border-box;
-        overflow: hidden;
-        /* Contain content within max-height */
+        overflow: visible;
+        /* Allow dropdowns to overflow */
     }
 
     .sidebar.expanded {
@@ -773,14 +777,14 @@ nav.bottom-nav.map-bottom-nav {
     }
 
     .place-list-item {
-        padding: 5px 8px;
-        margin-bottom: 3px;
+        padding: 4px 6px;
+        margin-bottom: 2px;
         border-radius: 8px;
-        min-height: 35px;
+        min-height: 28px;
     }
 
     .place-list-item h3 {
-        font-size: 0.7rem;
+        font-size: 18px;
         line-height: 1.2;
         margin: 0;
     }
@@ -840,13 +844,13 @@ nav.bottom-nav.map-bottom-nav {
     }
 
     .place-list-item {
-        padding: 4px 7px;
-        margin-bottom: 2px;
-        min-height: 33px;
+        padding: 3px 5px;
+        margin-bottom: 1px;
+        min-height: 26px;
     }
 
     .place-list-item h3 {
-        font-size: 0.65rem;
+        font-size: 16px;
     }
 
     .place-list-item span {
@@ -1026,7 +1030,7 @@ nav.bottom-nav.map-bottom-nav {
     }
 
     body.sidebar-expanded .locate-btn {
-        bottom: calc(66vh + 70px);
+        bottom: calc(75vh + 70px);
         /* Above FAB, above expanded sheet */
     }
 
@@ -1065,9 +1069,9 @@ nav.bottom-nav.map-bottom-nav {
         /* Below locate button (340px - 48px button - 12px gap) */
     }
 
-    /* When expanded, position just above the sheet (66vh) */
+    /* When expanded, position just above the sheet (75vh) */
     body.sidebar-expanded .add-btn {
-        bottom: calc(66vh + 20px);
+        bottom: calc(75vh + 20px);
     }
 }
 

@@ -225,7 +225,7 @@ let daysChoicesInstance = null;
 function populateDaysFilter() {
     const daysSelect = document.getElementById('days-filter');
     const days = [
-        { value: 'all', label: 'ימים', selected: true },
+        { value: 'all', label: 'כל הימים', selected: true },
         { value: 'Sunday', label: 'ראשון' },
         { value: 'Monday', label: 'שני' },
         { value: 'Tuesday', label: 'שלישי' },
@@ -295,7 +295,7 @@ function populateFilter(places) {
 
     // Build choices array for Choices.js
     const choicesArray = [
-        { value: 'all', label: 'שעות', selected: true }
+        { value: 'all', label: 'כל השעות', selected: true }
     ];
 
     sortedCategories.forEach(category => {
@@ -579,23 +579,38 @@ function renderPlaceList(places) {
         return;
     }
 
+    // Helper to extract discount number from description
+    const getDiscountNumber = (description) => {
+        if (!description) return 0;
+        // Match patterns like "30%", "30 %", "30% off", etc.
+        const match = description.match(/(\d+)\s*%/);
+        return match ? parseInt(match[1], 10) : 0;
+    };
+
+    // Sort places by discount percentage (highest first)
+    const sortedPlaces = [...places].sort((a, b) => {
+        const discountA = getDiscountNumber(a.Description);
+        const discountB = getDiscountNumber(b.Description);
+        return discountB - discountA;
+    });
+
     const listHtml = `
         <ul class="place-list">
-            ${places.map(place => {
+            ${sortedPlaces.map(place => {
         const daysText = formatDays(place);
         return `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                        <div style="flex: 1;">
-                            <h3>${place.Name}</h3>
-                            ${place.Description ? `<p class="place-description" style="margin: 4px 0 0 0; font-size: 13px;">${place.Description}</p>` : ''}
+                    <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
+                        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0;">
+                            ${place.Description ? `<p class="place-description" style="margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: right;">${place.Description}</p>` : ''}
+                            <h3 style="white-space: nowrap; flex-shrink: 0;">${place.Name}</h3>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; align-items: center; min-width: 40px; justify-content: center;">
                             ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
                 `<div class="verified-badge" title="Verified Place"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>`
                 : ''}
                             ${place.Recommended ? `<a href="${place.Recommended}" target="_blank" class="verified-container" onclick="event.stopPropagation()" title="Watch Video">
-                                <span class="verified-text">Watch<br>Video</span>
+                                <span class="verified-text">Video</span>
                             </a>` : ''}
                         </div>
                     </div>
@@ -787,7 +802,11 @@ if (window.innerWidth <= 768) {
     });
 
     // Also handle click for tap gesture (fallback)
-    sidebarHeader.addEventListener('click', () => {
+    sidebarHeader.addEventListener('click', (e) => {
+        // Don't toggle sidebar if clicking on filter elements
+        if (e.target.closest('.filter-container, .days-filter-container, .choices, .choices__inner, .choices__list')) {
+            return;
+        }
         sidebar.classList.toggle('expanded');
         document.body.classList.toggle('sidebar-expanded');
     });
