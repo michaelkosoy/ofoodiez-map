@@ -186,6 +186,7 @@ async function initMap() {
         styles: mapStyle,
         disableDefaultUI: true,
         zoomControl: false, // We can add custom controls if needed
+        gestureHandling: 'greedy', // Allow single-finger panning
     });
 
     // Close InfoWindow when clicking on the map (outside popup)
