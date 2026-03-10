@@ -21,14 +21,21 @@ app = Flask(__name__,
             static_folder='app/static',
             template_folder='app/templates')
 
+# Helper to get env var or use default if missing/placeholder
+def get_env_var(name, default=None):
+    val = os.environ.get(name)
+    if not val or val.startswith('your_'):
+        return default
+    return val
+
 # API Key from environment variable
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+GOOGLE_MAPS_API_KEY = get_env_var('GOOGLE_MAPS_API_KEY')
 
 if not GOOGLE_MAPS_API_KEY:
-    raise ValueError("GOOGLE_MAPS_API_KEY environment variable is not set")
+    raise ValueError("GOOGLE_MAPS_API_KEY environment variable is not set correctly in .env")
 
 # Google Sheets URL (converted to CSV export)
-SHEET_ID = os.environ.get('SHEET_ID', '1yvXOS3l_0Wr0SxLf9YZE8RaFzwgQop4MshD5pbtmwzA')
+SHEET_ID = get_env_var('SHEET_ID', '1yvXOS3l_0Wr0SxLf9YZE8RaFzwgQop4MshD5pbtmwzA')
 SHEET_URL = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv'
 
 # Cache configuration
@@ -273,7 +280,7 @@ def refresh_cache():
     """Force refresh the data cache."""
     # Simple security check
     key = request.args.get('key')
-    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025') # Default secret
+    admin_secret = get_env_var('ADMIN_SECRET', 'ofoodiez2025') # Default secret
     
     if key != admin_secret:
         return jsonify({"error": "Unauthorized"}), 401
@@ -304,7 +311,7 @@ def update_date():
     """Update the last_update date in config.json to today."""
     # Simple security check
     key = request.args.get('key')
-    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025') # Default secret
+    admin_secret = get_env_var('ADMIN_SECRET', 'ofoodiez2025') # Default secret
     
     if key != admin_secret:
         return jsonify({"error": "Unauthorized"}), 401
@@ -330,7 +337,7 @@ def update_date():
 
 # Formspree configuration (free email API service)
 # Get your form ID from https://formspree.io - create a free account and form
-FORMSPREE_ENDPOINT = os.environ.get('FORMSPREE_ENDPOINT', '')
+FORMSPREE_ENDPOINT = get_env_var('FORMSPREE_ENDPOINT', '')
 
 @app.route('/api/submit-happy-hour', methods=['POST'])
 def submit_happy_hour():
