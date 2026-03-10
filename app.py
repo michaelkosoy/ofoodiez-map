@@ -193,10 +193,23 @@ def get_places():
             return jsonify(cached_places)
         
         # Fetch fresh data from Google Sheets
-        response = requests.get(SHEET_URL, timeout=10)
-        response.raise_for_status()
-        df = pd.read_csv(StringIO(response.content.decode('utf-8')))
-        print("✓ Loaded fresh data from Google Sheets")
+        try:
+            # Try to bypass system proxies if they are causing issues
+            response = requests.get(SHEET_URL, timeout=10, proxies={'http': None, 'https': None})
+            response.raise_for_status()
+            df = pd.read_csv(StringIO(response.content.decode('utf-8')))
+            print("✓ Loaded fresh data from Google Sheets")
+        except Exception as e:
+            print(f"⚠️ Could not fetch from Google Sheets: {e}")
+            # Fallback to local cache file if network fetch fails
+            cache_file = os.path.join(CACHE_DIR, 'places_cache.json')
+            if os.path.exists(cache_file):
+                print(f"🔄 Falling back to local cache: {cache_file}")
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    return jsonify(json.load(f))
+            else:
+                # If no sheets and no cache, then we re-raise to show the error
+                raise e
         print(f"  Columns: {list(df.columns)}")
         
         # Strip whitespace from column names
