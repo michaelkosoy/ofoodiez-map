@@ -1,10 +1,18 @@
+import os
 import pandas as pd
 from geopy.geocoders import GoogleV3
 from geopy.exc import GeocoderTimedOut
 import time
+from dotenv import load_dotenv
 
-# API Key provided by user
-GOOGLE_MAPS_API_KEY = "AIzaSyBdh_bKAGD6ZFbNpq3G_2tmV1BlaedFcPU"
+# Load .env file
+load_dotenv()
+
+# API Key from environment variable
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+if not GOOGLE_MAPS_API_KEY:
+    raise ValueError("GOOGLE_MAPS_API_KEY not found in .env")
+
 DATA_FILE = 'places.xlsx'
 geolocator = GoogleV3(api_key=GOOGLE_MAPS_API_KEY, user_agent="ofoodiez_map")
 

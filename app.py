@@ -28,7 +28,7 @@ if not GOOGLE_MAPS_API_KEY:
     raise ValueError("GOOGLE_MAPS_API_KEY environment variable is not set")
 
 # Google Sheets URL (converted to CSV export)
-SHEET_ID = '1yvXOS3l_0Wr0SxLf9YZE8RaFzwgQop4MshD5pbtmwzA'
+SHEET_ID = os.environ.get('SHEET_ID', '1yvXOS3l_0Wr0SxLf9YZE8RaFzwgQop4MshD5pbtmwzA')
 SHEET_URL = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv'
 
 # Cache configuration
