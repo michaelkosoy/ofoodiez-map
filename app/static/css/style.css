@@ -756,6 +756,24 @@ nav.bottom-nav.map-bottom-nav {
         margin-top: 4px;
     }
 
+    .filters-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .filter-container,
+    .days-filter-container {
+        flex: 1 1 auto;
+    }
+
+    .toggles-row {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        margin-top: 2px;
+    }
+
     .sidebar-content {
         padding: 4px 12px 60px 12px;
         /* Extra bottom padding so content doesn't hide behind nav */

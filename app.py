@@ -237,7 +237,8 @@ def get_places():
             'Thursday': 'Thursday',
             'Friday': 'Friday',
             'Saturday': 'Saturday',
-            'Verified': 'Verified'
+            'Verified': 'Verified',
+            'Kosher': 'Kosher'
         }
         
         # Drop duplicate columns (keep the first one)
@@ -263,7 +264,13 @@ def get_places():
         # Filter out rows where Category is empty (if Category column exists)
         if 'Category' in df.columns:
             df = df[df['Category'].str.strip().astype(bool)]
-        
+
+        # Normalize Kosher to boolean
+        if 'Kosher' in df.columns:
+            df['Kosher'] = df['Kosher'].apply(
+                lambda v: True if str(v).strip().lower() in ('true', 'yes', '1') else False
+            )
+
         # Geocode addresses if Latitude/Longitude are missing
         places = df.to_dict(orient='records')
         for place in places:

@@ -336,17 +336,19 @@ function populateFilter(places) {
 
 function filterPlacesBy(selectedCategory) {
     const verifiedOnly = document.getElementById('verified-filter').checked;
+    const kosherOnly = document.getElementById('kosher-filter').checked;
 
     // Get selected day
     const daysSelect = document.getElementById('days-filter');
     const selectedDay = daysSelect.value;
 
-    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}, Day: ${selectedDay}`);
+    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}, Kosher Only: ${kosherOnly}, Day: ${selectedDay}`);
 
     // Filter places
     const filteredPlaces = allPlaces.filter(p => {
         const categoryMatch = selectedCategory === 'all' || p.Category === selectedCategory;
         const verifiedMatch = !verifiedOnly || (p.Verified === true || (typeof p.Verified === 'string' && ['yes', 'true'].includes(p.Verified.toLowerCase().trim())));
+        const kosherMatch = !kosherOnly || p.Kosher === true;
 
         // Day match
         let dayMatch = true;
@@ -355,7 +357,7 @@ function filterPlacesBy(selectedCategory) {
             dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
         }
 
-        return categoryMatch && verifiedMatch && dayMatch;
+        return categoryMatch && verifiedMatch && kosherMatch && dayMatch;
     });
 
     console.log(`Matches found: ${filteredPlaces.length}`);
@@ -369,6 +371,7 @@ function filterPlacesBy(selectedCategory) {
         if (place) {
             const categoryMatch = selectedCategory === 'all' || place.Category === selectedCategory;
             const verifiedMatch = !verifiedOnly || (place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim())));
+            const kosherMatch = !kosherOnly || place.Kosher === true;
 
             let dayMatch = true;
             if (selectedDay && selectedDay !== 'all') {
@@ -376,7 +379,7 @@ function filterPlacesBy(selectedCategory) {
                 dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
             }
 
-            if (categoryMatch && verifiedMatch && dayMatch) {
+            if (categoryMatch && verifiedMatch && kosherMatch && dayMatch) {
                 markerObj.marker.map = map;
             } else {
                 markerObj.marker.map = null;
@@ -390,7 +393,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const verifiedToggle = document.getElementById('verified-filter');
     if (verifiedToggle) {
         verifiedToggle.addEventListener('change', () => {
-            // Get current category from Choices.js or fallback to select value
+            const categorySelect = document.getElementById('category-filter');
+            const currentCategory = categorySelect.value;
+            filterPlacesBy(currentCategory);
+        });
+    }
+
+    const kosherToggle = document.getElementById('kosher-filter');
+    if (kosherToggle) {
+        kosherToggle.addEventListener('change', () => {
             const categorySelect = document.getElementById('category-filter');
             const currentCategory = categorySelect.value;
             filterPlacesBy(currentCategory);
@@ -561,7 +572,10 @@ function getInfoWindowContent(place) {
             : ''}
                     ${place.InstagramURL ? `<a href="${place.InstagramURL}" target="_blank" style="color: #E1306C; text-decoration: none; font-size: 24px;"><i class="fab fa-instagram"></i></a>` : ''}
                 </div>
-                ${place.Category ? `<div style="background-color: #f0f0f0; border-radius: 12px; padding: 4px 8px; font-size: 12px; direction: rtl; color: #333; white-space: nowrap;">${place.Category}</div>` : ''}
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                    ${place.Category ? `<div style="background-color: #f0f0f0; border-radius: 12px; padding: 4px 8px; font-size: 12px; direction: rtl; color: #333; white-space: nowrap;">${place.Category}</div>` : ''}
+                    ${place.Kosher === true ? `<div style="background-color: #e6f4ea; border-radius: 12px; padding: 4px 8px; font-size: 12px; direction: rtl; color: #2e7d32; white-space: nowrap;">כשר</div>` : ''}
+                </div>
             </div>
         </div>
     `;
@@ -719,19 +733,20 @@ if (window.innerWidth <= 768) {
         e.stopPropagation();
     }, { passive: true });
 
-    // Stop propagation for Verified Toggle
-    const verifiedToggle = document.getElementById('verified-filter');
-    if (verifiedToggle) {
-        // We need to stop propagation on the label container as well
-        const toggleLabel = verifiedToggle.closest('.verified-toggle');
-        if (toggleLabel) {
-            ['touchstart', 'touchmove', 'click'].forEach(evt => {
-                toggleLabel.addEventListener(evt, (e) => {
-                    e.stopPropagation();
-                }, { passive: evt !== 'click' }); // click cannot be passive if we want to stop propagation? actually stopPropagation works fine
-            });
+    // Stop propagation for Verified and Kosher toggles
+    ['verified-filter', 'kosher-filter'].forEach(id => {
+        const toggle = document.getElementById(id);
+        if (toggle) {
+            const toggleLabel = toggle.closest('.verified-toggle');
+            if (toggleLabel) {
+                ['touchstart', 'touchmove', 'click'].forEach(evt => {
+                    toggleLabel.addEventListener(evt, (e) => {
+                        e.stopPropagation();
+                    }, { passive: evt !== 'click' });
+                });
+            }
         }
-    }
+    });
 
     sidebarHeader.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
@@ -805,7 +820,7 @@ if (window.innerWidth <= 768) {
     // Also handle click for tap gesture (fallback)
     sidebarHeader.addEventListener('click', (e) => {
         // Don't toggle sidebar if clicking on filter elements
-        if (e.target.closest('.filter-container, .days-filter-container, .choices, .choices__inner, .choices__list')) {
+        if (e.target.closest('.filter-container, .days-filter-container, .choices, .choices__inner, .choices__list, .toggles-row')) {
             return;
         }
         sidebar.classList.toggle('expanded');
