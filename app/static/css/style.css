@@ -421,6 +421,15 @@ nav.bottom-nav.map-bottom-nav {
     width: 100%;
 }
 
+.toggles-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-top: 2px;
+}
+
 /* Filter container properly aligned - must fit in remaining space */
 .filter-container {
     flex-shrink: 0;
@@ -1522,4 +1531,55 @@ input:checked+.slider:before {
 
 input:checked~.toggle-label {
     color: #1DA1F2;
+}
+
+/* Sort toggle buttons */
+.sort-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1.5px solid #e0e0e0;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.sort-btn {
+    background: #fff;
+    border: none;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.sort-btn:first-child {
+    border-right: 1px solid #e0e0e0;
+}
+
+.sort-btn.active {
+    background: #FF6B6B;
+    color: #fff;
+}
+
+.sort-btn:hover:not(.active) {
+    background: #fff0f0;
+    color: #FF6B6B;
+}
+
+/* Distance badge in list items */
+.distance-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #FF6B6B;
+    background: #fff0f0;
+    border-radius: 10px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    line-height: 1.4;
 }

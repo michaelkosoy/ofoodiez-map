@@ -3,6 +3,19 @@ let allPlaces = [];
 let markers = [];
 let searchQuery = ''; // Current search query
 let searchDebounceTimer = null; // Debounce timer
+let userLat = null;
+let userLng = null;
+let currentSortMode = 'discount'; // 'discount' | 'distance'
+
+function calcDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 // =========================================
 // SEARCH FUNCTIONALITY
@@ -409,6 +422,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+window.toggleSortMode = (mode) => {
+    currentSortMode = mode;
+
+    const discountBtn = document.getElementById('sort-discount-btn');
+    const distanceBtn = document.getElementById('sort-distance-btn');
+    if (discountBtn) discountBtn.classList.toggle('active', mode === 'discount');
+    if (distanceBtn) distanceBtn.classList.toggle('active', mode === 'distance');
+
+    if (mode === 'distance' && userLat === null) {
+        // Request location - list will re-render once coords are received
+        showUserLocation(true);
+    } else {
+        applyAllFilters();
+    }
+};
+
 // Keep old function name for backwards compatibility
 window.filterPlaces = () => {
     const selectedCategory = document.getElementById('category-filter').value;
@@ -602,17 +631,28 @@ function renderPlaceList(places) {
         return match ? parseInt(match[1], 10) : 0;
     };
 
-    // Sort places by discount percentage (highest first)
+    const useDistance = currentSortMode === 'distance' && userLat !== null && userLng !== null;
+
+    // Sort by distance (closest first) or by discount percentage (highest first)
     const sortedPlaces = [...places].sort((a, b) => {
-        const discountA = getDiscountNumber(a.Description);
-        const discountB = getDiscountNumber(b.Description);
-        return discountB - discountA;
+        if (useDistance) {
+            const dA = (a.Latitude && a.Longitude) ? calcDistance(userLat, userLng, a.Latitude, a.Longitude) : Infinity;
+            const dB = (b.Latitude && b.Longitude) ? calcDistance(userLat, userLng, b.Latitude, b.Longitude) : Infinity;
+            return dA - dB;
+        }
+        return getDiscountNumber(b.Description) - getDiscountNumber(a.Description);
     });
 
     const listHtml = `
         <ul class="place-list">
             ${sortedPlaces.map(place => {
         const daysText = formatDays(place);
+        const distanceKm = (useDistance && place.Latitude && place.Longitude)
+            ? calcDistance(userLat, userLng, place.Latitude, place.Longitude)
+            : null;
+        const distanceBadge = distanceKm !== null
+            ? `<span class="distance-badge">${distanceKm < 1 ? Math.round(distanceKm * 1000) + ' m' : distanceKm.toFixed(1) + ' km'}</span>`
+            : '';
         return `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
                     <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
@@ -621,6 +661,7 @@ function renderPlaceList(places) {
                             <h3 style="white-space: nowrap; flex-shrink: 0;">${place.Name}</h3>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; align-items: center; min-width: 40px; justify-content: center;">
+                            ${distanceBadge}
                             ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
                 `<div class="verified-badge" title="Verified Place"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>`
                 : ''}
@@ -831,7 +872,7 @@ if (window.innerWidth <= 768) {
 // User Location Logic
 let userMarker = null;
 
-async function showUserLocation() {
+async function showUserLocation(fromSortToggle = false) {
     if (!navigator.geolocation) {
         alert("Geolocation is not supported by your browser");
         return;
@@ -845,8 +886,17 @@ async function showUserLocation() {
             const { latitude, longitude } = position.coords;
             const pos = { lat: latitude, lng: longitude };
 
+            // Save coordinates globally for distance sorting
+            userLat = latitude;
+            userLng = longitude;
+
             // Save to localStorage that user has successfully used location
             localStorage.setItem('hasUsedLocation', 'true');
+
+            // Re-render list if in distance sort mode
+            if (currentSortMode === 'distance') {
+                applyAllFilters();
+            }
 
             const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
@@ -878,10 +928,24 @@ async function showUserLocation() {
             // Reset button icon
             btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
         },
-        () => {
-            // Silently fail - just reset button, no error shown
+        (error) => {
             btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
-        }
+
+            // Only revert sort mode if this call was triggered by the distance sort toggle
+            if (fromSortToggle && currentSortMode === 'distance') {
+                currentSortMode = 'discount';
+                const discountBtn = document.getElementById('sort-discount-btn');
+                const distanceBtn = document.getElementById('sort-distance-btn');
+                if (discountBtn) discountBtn.classList.add('active');
+                if (distanceBtn) distanceBtn.classList.remove('active');
+                applyAllFilters();
+
+                // POSITION_UNAVAILABLE (code 2) = kCLErrorLocationUnknown - transient failure
+                if (error.code === 2) {
+                    showToast('לא ניתן לקבל מיקום כרגע. נסה שוב מאוחר יותר.', true);
+                }
+            }
+        },
     );
 }
 
