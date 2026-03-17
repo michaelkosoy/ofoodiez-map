@@ -61,7 +61,7 @@
             <div class="world-grid">
                 {% for item in data.world_maps %}
                 <a href="{{ item.map_link }}" class="country-card"
-                    style="background-image: url('{{ url_for('static', filename='img/' + item.country.lower() + '.png') }}');"
+                    data-bg="{{ url_for('static', filename='img/' + item.country.lower() + '.png') }}"
                     {% if 'http' in item.map_link %}target="_blank" {% endif %}>
                     <div class="country-overlay">
                         <span class="country-name">{{ item.country }}</span>
@@ -187,6 +187,11 @@
                     });
                 }
             });
+        });
+    </script>
+    <script>
+        document.querySelectorAll('.country-card[data-bg]').forEach(function(el) {
+            el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
         });
     </script>
 </body>
