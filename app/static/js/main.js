@@ -225,6 +225,7 @@ function fetchPlaces() {
             allPlaces = data;
             populateFilter(allPlaces);
             populateDaysFilter();
+            populateCityFilter(allPlaces);
             renderPlaceList(allPlaces);
             addMarkers(allPlaces);
         })
@@ -235,6 +236,7 @@ let infoWindow;
 
 let choicesInstance = null;
 let daysChoicesInstance = null;
+let cityChoicesInstance = null;
 
 function populateDaysFilter() {
     const daysSelect = document.getElementById('days-filter');
@@ -264,6 +266,39 @@ function populateDaysFilter() {
             const categorySelect = document.getElementById('category-filter');
             filterPlacesBy(categorySelect.value);
         });
+    }
+}
+
+function populateCityFilter(places) {
+    const citySelect = document.getElementById('city-filter');
+    const cities = new Set(places.map(p => p.City).filter(c => c && String(c).trim()));
+    const sortedCities = Array.from(cities).sort((a, b) => a.localeCompare(b));
+
+    const choicesArray = [
+        { value: 'all', label: 'כל הערים', selected: true }
+    ];
+    sortedCities.forEach(city => {
+        choicesArray.push({ value: city, label: city, selected: false });
+    });
+
+    if (!cityChoicesInstance) {
+        cityChoicesInstance = new Choices(citySelect, {
+            searchEnabled: false,
+            itemSelectText: '',
+            shouldSort: false,
+            choices: choicesArray,
+            classNames: {
+                containerOuter: 'choices-city-filter',
+            }
+        });
+
+        citySelect.addEventListener('change', () => {
+            const categorySelect = document.getElementById('category-filter');
+            filterPlacesBy(categorySelect.value);
+        });
+    } else {
+        cityChoicesInstance.clearChoices();
+        cityChoicesInstance.setChoices(choicesArray, 'value', 'label', true);
     }
 }
 
@@ -355,7 +390,11 @@ function filterPlacesBy(selectedCategory) {
     const daysSelect = document.getElementById('days-filter');
     const selectedDay = daysSelect.value;
 
-    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}, Kosher Only: ${kosherOnly}, Day: ${selectedDay}`);
+    // Get selected city
+    const citySelect = document.getElementById('city-filter');
+    const selectedCity = citySelect ? citySelect.value : 'all';
+
+    console.log(`Filtering by Category: ${selectedCategory}, Verified Only: ${verifiedOnly}, Kosher Only: ${kosherOnly}, Day: ${selectedDay}, City: ${selectedCity}`);
 
     // Filter places
     const filteredPlaces = allPlaces.filter(p => {
@@ -370,7 +409,10 @@ function filterPlacesBy(selectedCategory) {
             dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
         }
 
-        return categoryMatch && verifiedMatch && kosherMatch && dayMatch;
+        // City match
+        const cityMatch = selectedCity === 'all' || (p.City && String(p.City).trim() === selectedCity);
+
+        return categoryMatch && verifiedMatch && kosherMatch && dayMatch && cityMatch;
     });
 
     console.log(`Matches found: ${filteredPlaces.length}`);
@@ -392,7 +434,9 @@ function filterPlacesBy(selectedCategory) {
                 dayMatch = val === true || (typeof val === 'string' && ['yes', 'true'].includes(val.toLowerCase().trim()));
             }
 
-            if (categoryMatch && verifiedMatch && kosherMatch && dayMatch) {
+            const cityMatch = selectedCity === 'all' || (place.City && String(place.City).trim() === selectedCity);
+
+            if (categoryMatch && verifiedMatch && kosherMatch && dayMatch && cityMatch) {
                 markerObj.marker.map = map;
             } else {
                 markerObj.marker.map = null;
