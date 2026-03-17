@@ -647,7 +647,8 @@ function renderPlaceList(places) {
         <ul class="place-list">
             ${sortedPlaces.map(place => {
         const daysText = formatDays(place);
-        const distanceKm = (useDistance && place.Latitude && place.Longitude)
+        // Show distance whenever user location is known (not only in distance sort mode)
+        const distanceKm = (userLat !== null && userLng !== null && place.Latitude && place.Longitude)
             ? calcDistance(userLat, userLng, place.Latitude, place.Longitude)
             : null;
         const distanceBadge = distanceKm !== null
@@ -660,11 +661,13 @@ function renderPlaceList(places) {
                             ${place.Description ? `<p class="place-description" style="margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: right;">${place.Description}</p>` : ''}
                             <h3 style="white-space: nowrap; flex-shrink: 0;">${place.Name}</h3>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; align-items: center; min-width: 40px; justify-content: center;">
-                            ${distanceBadge}
-                            ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
+                        <div style="display: flex; flex-direction: row; gap: 4px; flex-shrink: 0; align-items: center;">
+                            <div style="width: 44px; display: flex; justify-content: center; align-items: center;">${distanceBadge}</div>
+                            <div style="width: 20px; display: flex; justify-content: center; align-items: center;">
+                                ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
                 `<div class="verified-badge" title="Verified Place"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>`
                 : ''}
+                            </div>
                             ${place.Recommended ? `<a href="${place.Recommended}" target="_blank" class="verified-container" onclick="event.stopPropagation()" title="Watch Video">
                                 <span class="verified-text">Video</span>
                             </a>` : ''}
