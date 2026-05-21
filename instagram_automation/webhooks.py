@@ -38,16 +38,25 @@ def webhook_receive():
     Receive incoming webhook events from Meta.
     All Instagram events (comments, messages, postbacks, etc.) come through here.
     """
+    print("📥 Webhook POST request received")
+    
     # Verify signature if app secret is configured
     if Config.META_APP_SECRET:
         signature = request.headers.get('X-Hub-Signature-256', '')
+        print(f"🔑 Verifying signature header: {signature}")
         if not _verify_signature(request.data, signature):
             print("❌ Webhook signature verification failed")
             return 'Unauthorized', 401
+        print("✅ Webhook signature verification passed")
+    else:
+        print("⚠️ META_APP_SECRET not configured. Signature verification skipped.")
 
     data = request.get_json()
     if not data:
+        print("❌ Webhook payload is empty or not JSON")
         return 'Bad Request', 400
+
+    print(f"📦 Webhook Payload: {json.dumps(data)}")
 
     # Only process Instagram events
     if data.get('object') != 'instagram':
@@ -61,10 +70,13 @@ def webhook_receive():
         # Find the user in our database
         user = User.query.filter_by(ig_user_id=ig_account_id, is_active=True).first()
         if not user:
-            print(f"  ⚠️ Received webhook for unknown IG account: {ig_account_id}")
+            # Print available users in DB for diagnostic purposes
+            all_users = User.query.all()
+            db_ids = [u.ig_user_id for u in all_users]
+            print(f"  ⚠️ Received webhook for unknown/inactive IG account: {ig_account_id}. Registered IDs in DB: {db_ids}")
             continue
 
-        print(f"📨 Webhook event for @{user.ig_username}")
+        print(f"📨 Webhook event matches registered user @{user.ig_username} (ID: {user.ig_user_id})")
 
         # Handle comment events (changes array)
         for change in entry.get('changes', []):
