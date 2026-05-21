@@ -374,3 +374,11 @@ def update_contact(user, contact_id):
             "custom_fields": contact.custom_fields
         }
     })
+
+@ig_bp.route('/api/media', methods=['GET'])
+@_require_login
+def get_media_api(user):
+    """Fetch recent media for the logged-in user."""
+    from .messaging import messenger
+    media_list = messenger.get_user_media(user.ig_user_id, user.access_token)
+    return jsonify(media_list)

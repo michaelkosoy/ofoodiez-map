@@ -94,6 +94,13 @@
                                         {% for kw in (auto.trigger_config or {}).get('keywords', []) %}
                                             <span class="keyword-chip">{{ kw }}</span>
                                         {% endfor %}
+                                        <div class="automation-media-indicator" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem;">
+                                            {% if (auto.trigger_config or {}).get('media_id') %}
+                                                <span>🎯 Target: 📱 Specific Post (ID: {{ (auto.trigger_config or {}).get('media_id') }})</span>
+                                            {% else %}
+                                                <span>🎯 Target: 🌐 All Posts & Reels</span>
+                                            {% endif %}
+                                        </div>
                                     {% elif auto.trigger_type == 'dm_keyword' %}
                                         DM contains:
                                         {% for kw in (auto.trigger_config or {}).get('keywords', []) %}
@@ -193,6 +200,32 @@
                                 <span class="trigger-option-desc">When someone sends you a DM with a specific word</span>
                             </div>
                         </label>
+                    </div>
+                </div>
+
+                <!-- Step 2.5: Target Media Selection (Only for comment_keyword) -->
+                <div class="form-group" id="media-target-group" style="display: block;">
+                    <label class="form-label">Target Posts / Reels</label>
+                    <div class="media-target-options" style="display: flex; gap: 1.5rem; margin-bottom: 0.5rem;">
+                        <label class="media-target-option selected" id="media-opt-all" style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                            <input type="radio" name="media_target_type" value="all" checked onchange="toggleMediaTargetUI()">
+                            <span>All Posts / Reels</span>
+                        </label>
+                        <label class="media-target-option" id="media-opt-specific" style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                            <input type="radio" name="media_target_type" value="specific" onchange="toggleMediaTargetUI()">
+                            <span>Specific Post / Reel</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Media Discovery Visual Grid -->
+                    <div id="media-select-container" class="media-select-container glass-card" style="display: none; margin-top: 0.75rem; max-height: 250px; overflow-y: auto; padding: 0.75rem;">
+                        <div id="media-grid-loading" class="pane-loading" style="padding: 1.5rem 0; text-align: center; color: var(--text-muted);">
+                            <span>⏳ Loading your posts and Reels...</span>
+                        </div>
+                        <div id="media-grid" class="media-grid" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            <!-- Dynamically loaded posts go here -->
+                        </div>
+                        <input type="hidden" id="selected-media-id" value="">
                     </div>
                 </div>
 

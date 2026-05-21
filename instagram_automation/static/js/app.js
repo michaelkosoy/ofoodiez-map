@@ -60,6 +60,17 @@ function resetForm() {
         r.checked = r.value === 'comment_keyword';
     });
     updateTriggerUI();
+
+    // Reset media target selection
+    const optAll = document.getElementById('media-opt-all');
+    if (optAll) {
+        optAll.querySelector('input').checked = true;
+    }
+    const mediaIdInput = document.getElementById('selected-media-id');
+    if (mediaIdInput) {
+        mediaIdInput.value = '';
+    }
+    toggleMediaTargetUI();
 }
 
 // Close modal on overlay click
@@ -80,12 +91,113 @@ document.querySelectorAll('input[name="trigger_type"]').forEach(radio => {
 });
 
 function updateTriggerUI() {
+    let selectedTrigger = 'comment_keyword';
     document.querySelectorAll('.trigger-option').forEach(opt => {
         const input = opt.querySelector('input');
         if (input.checked) {
             opt.classList.add('selected');
+            selectedTrigger = input.value;
         } else {
             opt.classList.remove('selected');
+        }
+    });
+
+    const mediaTargetGroup = document.getElementById('media-target-group');
+    if (mediaTargetGroup) {
+        if (selectedTrigger === 'comment_keyword') {
+            mediaTargetGroup.style.display = 'block';
+        } else {
+            mediaTargetGroup.style.display = 'none';
+            // Reset selection when changing away
+            const optAll = document.getElementById('media-opt-all');
+            if (optAll) optAll.querySelector('input').checked = true;
+            toggleMediaTargetUI();
+        }
+    }
+}
+
+// ============ Media Target Selection Grid Helpers ============
+let mediaLoaded = false;
+let userMedia = [];
+
+function toggleMediaTargetUI() {
+    const isSpecific = document.querySelector('input[name="media_target_type"]:checked').value === 'specific';
+    const container = document.getElementById('media-select-container');
+    
+    // Toggle active state classes for UI styling
+    document.querySelectorAll('.media-target-option').forEach(opt => {
+        const r = opt.querySelector('input');
+        if (r.checked) {
+            opt.classList.add('selected');
+        } else {
+            opt.classList.remove('selected');
+        }
+    });
+
+    if (isSpecific) {
+        container.style.display = 'block';
+        if (!mediaLoaded) {
+            fetchUserMedia();
+        }
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+async function fetchUserMedia() {
+    const loadingEl = document.getElementById('media-grid-loading');
+    const gridEl = document.getElementById('media-grid');
+    
+    loadingEl.style.display = 'block';
+    gridEl.style.display = 'none';
+    
+    try {
+        const resp = await fetch('/ig/api/media');
+        const data = await resp.json();
+        
+        loadingEl.style.display = 'none';
+        
+        if (Array.isArray(data) && data.length > 0) {
+            userMedia = data;
+            gridEl.innerHTML = data.map(item => {
+                const imgUrl = item.thumbnail_url || item.media_url || '/ig/static/images/post_placeholder.png';
+                const caption = escapeHtml(item.caption || 'No caption');
+                const typeLabel = item.media_type === 'VIDEO' ? 'REEL' : item.media_type;
+                const isSelected = document.getElementById('selected-media-id').value === item.id;
+                
+                return `
+                    <div class="media-grid-item ${isSelected ? 'active' : ''}" data-id="${item.id}" onclick="selectMediaItem('${item.id}')" title="${caption}">
+                        <img src="${imgUrl}" alt="Instagram Post">
+                        <div class="media-grid-item-badge">${typeLabel}</div>
+                        <div class="media-grid-item-overlay">
+                            <div class="media-grid-item-caption">${caption}</div>
+                        </div>
+                        <div class="media-grid-item-check">✓</div>
+                    </div>
+                `;
+            }).join('');
+            gridEl.style.display = 'grid';
+            mediaLoaded = true;
+        } else {
+            gridEl.innerHTML = `<div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 2rem 0;">No posts or Reels found on this account.</div>`;
+            gridEl.style.display = 'block';
+        }
+    } catch (err) {
+        loadingEl.style.display = 'none';
+        gridEl.innerHTML = `<div style="grid-column: span 3; text-align: center; color: var(--danger); padding: 2rem 0;">Failed to load media: ${escapeHtml(err.message)}</div>`;
+        gridEl.style.display = 'block';
+    }
+}
+
+function selectMediaItem(mediaId) {
+    document.getElementById('selected-media-id').value = mediaId;
+    
+    // Highlight selection in UI
+    document.querySelectorAll('.media-grid-item').forEach(item => {
+        if (item.getAttribute('data-id') === mediaId) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
         }
     });
 }
@@ -396,10 +508,23 @@ async function saveAutomation() {
         return;
     }
 
+    let triggerConfig = { keywords: keywords };
+    if (triggerType === 'comment_keyword') {
+        const targetType = document.querySelector('input[name="media_target_type"]:checked').value;
+        if (targetType === 'specific') {
+            const mediaId = document.getElementById('selected-media-id').value;
+            if (!mediaId) {
+                showToast('Please select a specific post or Reel', 'error');
+                return;
+            }
+            triggerConfig.media_id = mediaId;
+        }
+    }
+
     const payload = {
         name: name,
         trigger_type: triggerType,
-        trigger_config: { keywords: keywords },
+        trigger_config: triggerConfig,
         actions: actions,
         is_active: true
     };
@@ -497,6 +622,26 @@ async function editAutomation(id) {
         // Set keywords
         keywords = (data.trigger_config || {}).keywords || [];
         renderKeywords();
+
+        // Set media target selection
+        if (data.trigger_type === 'comment_keyword') {
+            const mediaId = (data.trigger_config || {}).media_id;
+            const targetGroup = document.getElementById('media-target-group');
+            if (targetGroup) {
+                targetGroup.style.display = 'block';
+                if (mediaId) {
+                    const specificRadio = document.getElementById('media-opt-specific');
+                    if (specificRadio) specificRadio.querySelector('input').checked = true;
+                    document.getElementById('selected-media-id').value = mediaId;
+                } else {
+                    const allRadio = document.getElementById('media-opt-all');
+                    if (allRadio) allRadio.querySelector('input').checked = true;
+                    document.getElementById('selected-media-id').value = '';
+                }
+                mediaLoaded = false; // Reset to force re-fetch and render with selected highlight
+                toggleMediaTargetUI();
+            }
+        }
 
         // Set actions
         actionSteps = (data.actions || []).map(a => ({ ...a }));
