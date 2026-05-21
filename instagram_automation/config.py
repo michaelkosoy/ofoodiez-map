@@ -14,7 +14,29 @@ class Config:
     
     # OAuth callback URL
     BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
-    OAUTH_REDIRECT_URI = f"{BASE_URL}/ig/auth/callback"
+    
+    @classmethod
+    def get_oauth_redirect_uri(cls):
+        """Get the OAuth redirect URI, dynamically matching host if BASE_URL is not set."""
+        # If BASE_URL is explicitly set to something other than default localhost, use it
+        env_base_url = os.environ.get('BASE_URL')
+        if env_base_url:
+            return f"{env_base_url}/ig/auth/callback"
+        
+        # Otherwise, check if we're in a Flask request context to dynamically construct it
+        try:
+            from flask import request
+            if request:
+                scheme = request.headers.get('X-Forwarded-Proto', request.scheme)
+                # Ensure we always use https for production
+                if 'ofoodiez.com' in request.host:
+                    scheme = 'https'
+                return f"{scheme}://{request.host}/ig/auth/callback"
+        except Exception:
+            pass
+            
+        # Default fallback
+        return f"{cls.BASE_URL}/ig/auth/callback"
     
     # Instagram OAuth URLs
     IG_AUTH_URL = "https://www.instagram.com/oauth/authorize"
@@ -40,7 +62,7 @@ class Config:
         return (
             f"{cls.IG_AUTH_URL}"
             f"?client_id={cls.META_APP_ID}"
-            f"&redirect_uri={cls.OAUTH_REDIRECT_URI}"
+            f"&redirect_uri={cls.get_oauth_redirect_uri()}"
             f"&response_type=code"
             f"&scope={cls.IG_SCOPES}"
         )

@@ -217,7 +217,7 @@ def _exchange_code_for_token(code):
             'client_id': Config.META_APP_ID,
             'client_secret': Config.META_APP_SECRET,
             'grant_type': 'authorization_code',
-            'redirect_uri': Config.OAUTH_REDIRECT_URI,
+            'redirect_uri': Config.get_oauth_redirect_uri(),
             'code': code
         }, timeout=10)
         return resp.json()
