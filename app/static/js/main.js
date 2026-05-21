@@ -837,6 +837,7 @@ if (window.innerWidth <= 768) {
     });
 
     sidebarHeader.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.filters-wrapper, .search-container')) return;
         startY = e.touches[0].clientY;
         isDragging = true;
         startTranslateY = getTranslateY(sidebar);
@@ -863,6 +864,8 @@ if (window.innerWidth <= 768) {
     }, { passive: true });
 
     sidebarHeader.addEventListener('touchend', (e) => {
+        if (e.target.closest('.filters-wrapper, .search-container')) return;
+        
         isDragging = false;
         sidebar.classList.remove('is-dragging');
         sidebar.style.transform = ''; // Clear inline style to let CSS take over

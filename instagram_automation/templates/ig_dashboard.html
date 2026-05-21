@@ -1,0 +1,203 @@
+{% extends "ig_base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+        <div class="sidebar-header">
+            <svg class="ig-icon-sm" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="sidebar-title">IG Automation</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('instagram_automation.dashboard_home') }}" class="nav-item active" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.inbox_page') }}" class="nav-item" id="nav-inbox">
+                <span class="nav-icon">📥</span>
+                <span>Inbox</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.contacts_page') }}" class="nav-item" id="nav-contacts">
+                <span class="nav-icon">👥</span>
+                <span>Contacts</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.automations_page') }}" class="nav-item" id="nav-automations">
+                <span class="nav-icon">⚡</span>
+                <span>Automations</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                {% if user.profile_picture_url %}
+                <img src="{{ user.profile_picture_url }}" alt="@{{ user.ig_username }}" class="user-avatar">
+                {% else %}
+                <div class="user-avatar user-avatar-placeholder">{{ (user.ig_username or '?')[0].upper() }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span class="user-name">@{{ user.ig_username }}</span>
+                    <span class="user-token-status {% if user.token_days_remaining() > 7 %}token-ok{% elif user.token_days_remaining() > 0 %}token-warn{% else %}token-expired{% endif %}">
+                        {% if user.token_days_remaining() > 0 %}
+                            Token: {{ user.token_days_remaining() }}d left
+                        {% else %}
+                            Token expired
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <a href="{{ url_for('instagram_automation.auth_disconnect') }}" class="btn-disconnect" id="disconnect-btn" title="Disconnect account">
+                ✕
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="page-subtitle">Welcome back, @{{ user.ig_username }} 👋</p>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card glass-card" id="stat-automations">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.automations_active }}</span>
+                    <span class="stat-label">Active Automations</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card" id="stat-contacts">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.contacts_total }}</span>
+                    <span class="stat-label">Total Contacts</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card" id="stat-messages">
+                <div class="stat-icon">📩</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.messages_sent }}</span>
+                    <span class="stat-label">Messages Sent</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card" id="stat-today">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.messages_today }}</span>
+                    <span class="stat-label">Sent Today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="quick-actions">
+                <a href="{{ url_for('instagram_automation.automations_page') }}" class="action-card glass-card" id="action-new-automation">
+                    <span class="action-icon">⚡</span>
+                    <span class="action-title">New Automation</span>
+                    <span class="action-desc">Create a comment → DM rule</span>
+                </a>
+                <a href="{{ url_for('instagram_automation.auth_refresh_token') }}" class="action-card glass-card" id="action-refresh-token">
+                    <span class="action-icon">🔄</span>
+                    <span class="action-title">Refresh Token</span>
+                    <span class="action-desc">Renew API access ({{ user.token_days_remaining() }}d left)</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Recent Automations -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Recent Automations</h2>
+                <a href="{{ url_for('instagram_automation.automations_page') }}" class="section-link">View all →</a>
+            </div>
+            {% if recent_automations %}
+            <div class="table-card glass-card">
+                <table class="data-table" id="recent-automations-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Trigger</th>
+                            <th>Fired</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for auto in recent_automations %}
+                        <tr>
+                            <td class="cell-name">{{ auto.name }}</td>
+                            <td>
+                                <span class="badge badge-trigger">{{ auto.trigger_type.replace('_', ' ').title() }}</span>
+                            </td>
+                            <td>{{ auto.trigger_count or 0 }}×</td>
+                            <td>
+                                <span class="badge {% if auto.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                                    {{ 'Active' if auto.is_active else 'Paused' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state glass-card" id="empty-automations">
+                <span class="empty-icon">⚡</span>
+                <p>No automations yet</p>
+                <a href="{{ url_for('instagram_automation.automations_page') }}" class="btn btn-primary btn-sm">Create your first automation</a>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Recent Contacts -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Recent Contacts</h2>
+            </div>
+            {% if recent_contacts %}
+            <div class="table-card glass-card">
+                <table class="data-table" id="recent-contacts-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Tags</th>
+                            <th>Last Interaction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in recent_contacts %}
+                        <tr>
+                            <td class="cell-name">@{{ contact.username or contact.igsid[:12] }}</td>
+                            <td>
+                                {% for tag in (contact.tags or [])[:3] %}
+                                <span class="badge badge-tag">{{ tag }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="cell-date">{{ contact.last_interaction.strftime('%b %d, %H:%M') if contact.last_interaction else '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state glass-card" id="empty-contacts">
+                <span class="empty-icon">👥</span>
+                <p>No contacts yet — they'll appear here when people interact with your automations</p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

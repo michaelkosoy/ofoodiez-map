@@ -1,0 +1,92 @@
+{% extends "ig_base.html" %}
+{% block title %}Connect Instagram{% endblock %}
+
+{% block body %}
+<div class="login-page">
+    <div class="login-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card glass-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <svg class="ig-icon" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                        <circle cx="12" cy="12" r="5"/>
+                        <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+                    </svg>
+                </div>
+                <h1>Instagram Automation</h1>
+                <p class="login-subtitle">Automate your DMs, replies & engagement — powered by Meta's official API</p>
+            </div>
+
+            <div class="login-features">
+                <div class="feature-item">
+                    <span class="feature-icon">💬</span>
+                    <div>
+                        <strong>Comment → DM</strong>
+                        <span>Auto-reply when someone comments a keyword</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📩</span>
+                    <div>
+                        <strong>Story Replies</strong>
+                        <span>Auto-respond to story mentions & replies</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔗</span>
+                    <div>
+                        <strong>Link Delivery</strong>
+                        <span>Send links, buttons & templates instantly</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <div>
+                        <strong>Lead Capture</strong>
+                        <span>Collect emails & grow your audience</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('instagram_automation.auth_login') }}" class="btn btn-instagram" id="connect-btn">
+                <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <circle cx="12" cy="12" r="5"/>
+                    <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+                </svg>
+                Connect your Instagram
+            </a>
+
+            <a href="{{ url_for('instagram_automation.auth_mock_login') }}" class="btn btn-ghost" style="width: 100%; margin-top: 1rem; justify-content: center;" id="mock-login-btn">
+                🧪 Quick Mock Login (@tester_account)
+            </a>
+
+            <div class="mock-login-form" style="margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px dashed rgba(255,255,255,0.15);">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; text-align: center;">
+                    🧪 Dev Mode: Connect a custom mock user
+                </p>
+                <form action="{{ url_for('instagram_automation.auth_mock_login') }}" method="POST" style="display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
+                    <div style="position: relative; flex-grow: 1;">
+                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.9rem;">@</span>
+                        <input type="text" name="username" class="form-input" placeholder="your_instagram_handle" style="padding-left: 24px; font-size: 0.85rem; width: 100%; box-sizing: border-box; height: 38px; background: rgba(255,255,255,0.05); border: 1px solid var(--bg-card-border); color: #fff; border-radius: var(--radius-md);" required>
+                    </div>
+                    <button type="submit" class="btn btn-ghost btn-sm" style="height: 38px; padding: 0 1rem; font-size: 0.85rem; border-radius: var(--radius-md);">Connect</button>
+                </form>
+            </div>
+
+            <p class="login-note" style="margin-top: 1.5rem;">
+                Requires an Instagram Business or Creator account.<br>
+                We use Meta's official API — your data stays secure.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

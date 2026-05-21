@@ -1,0 +1,278 @@
+{% extends "ig_base.html" %}
+{% block title %}Contacts{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+        <div class="sidebar-header">
+            <svg class="ig-icon-sm" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="sidebar-title">IG Automation</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('instagram_automation.dashboard_home') }}" class="nav-item" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.inbox_page') }}" class="nav-item" id="nav-inbox">
+                <span class="nav-icon">📥</span>
+                <span>Inbox</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.contacts_page') }}" class="nav-item active" id="nav-contacts">
+                <span class="nav-icon">👥</span>
+                <span>Contacts</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.automations_page') }}" class="nav-item" id="nav-automations">
+                <span class="nav-icon">⚡</span>
+                <span>Automations</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                {% if user.profile_picture_url %}
+                <img src="{{ user.profile_picture_url }}" alt="@{{ user.ig_username }}" class="user-avatar">
+                {% else %}
+                <div class="user-avatar user-avatar-placeholder">{{ (user.ig_username or '?')[0].upper() }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span class="user-name">@{{ user.ig_username }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Contacts</h1>
+                <p class="page-subtitle">Manage leads, segment users, and view profile details</p>
+            </div>
+        </header>
+
+        <!-- Search and Filters -->
+        <div class="contacts-toolbar glass-card">
+            <div class="search-box-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="contact-search" class="form-input search-input" placeholder="Search by username..." oninput="filterContacts()">
+            </div>
+            <div class="tag-filter-container">
+                <span class="filter-label">Filter by Tag:</span>
+                <select id="tag-filter" class="form-select" onchange="filterContacts()">
+                    <option value="">All Tags</option>
+                    {% set all_tags = [] %}
+                    {% for c in contacts %}
+                        {% for tag in (c.tags or []) %}
+                            {% if tag not in all_tags %}
+                                {% set _ = all_tags.append(tag) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {% for tag in all_tags %}
+                    <option value="{{ tag }}">{{ tag }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Contacts Table -->
+        <div class="table-card glass-card">
+            {% if contacts %}
+            <table class="data-table" id="contacts-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Tags</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Last Interaction</th>
+                        <th class="cell-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in contacts %}
+                    <tr class="contact-row" data-username="{{ contact.username or '' }}" data-tags="{{ (contact.tags or [])|join(',') }}">
+                        <td class="cell-name">
+                            <div class="contact-profile-cell">
+                                <div class="user-avatar user-avatar-sm">{{ (contact.username or 'C')[0].upper() }}</div>
+                                <span>@{{ contact.username or contact.igsid[:12] }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="tags-list">
+                                {% for tag in (contact.tags or []) %}
+                                <span class="badge badge-tag">{{ tag }}</span>
+                                {% else %}
+                                <span class="no-tags-placeholder">—</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td><span class="contact-field-val">{{ contact.email or '—' }}</span></td>
+                        <td><span class="contact-field-val">{{ contact.phone or '—' }}</span></td>
+                        <td class="cell-date">{{ contact.last_interaction.strftime('%b %d, %Y %H:%M') if contact.last_interaction else '—' }}</td>
+                        <td class="cell-actions">
+                            <div class="action-buttons">
+                                <button class="btn btn-ghost btn-sm" onclick="editContact({{ contact.id }}, '@{{ contact.username or contact.igsid[:12] }}', '{{ contact.email or '' }}', '{{ contact.phone or '' }}', {{ contact.tags|tojson }})">Edit</button>
+                                <a href="{{ url_for('instagram_automation.inbox_page') }}?convo_id={{ contact.conversations[0].id if contact.conversations else '' }}" class="btn btn-primary btn-sm btn-icon-only" title="Live Chat">💬 Chat</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state" id="empty-contacts">
+                <span class="empty-icon">👥</span>
+                <h3>No contacts found</h3>
+                <p>Contacts will be added here automatically as they interact with your Instagram account.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<!-- Edit Contact Modal -->
+<div class="modal-overlay" id="contact-modal" style="display: none;">
+    <div class="modal glass-card">
+        <div class="modal-header">
+            <h2>Edit Contact Details</h2>
+            <button class="modal-close" onclick="closeContactModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="contact-form" onsubmit="return false;">
+                <input type="hidden" id="edit-contact-id" value="">
+                
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="contact-username-display" class="form-input" disabled value="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-email" class="form-label">Email Address</label>
+                    <input type="email" id="contact-email" class="form-input" placeholder="e.g. user@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact-phone" class="form-label">Phone Number</label>
+                    <input type="text" id="contact-phone" class="form-input" placeholder="e.g. +123456789">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tags</label>
+                    <div class="keywords-input-container">
+                        <div class="keywords-tags" id="contact-tags-container"></div>
+                        <input type="text" id="contact-tags-input" class="form-input" placeholder="Add tag and press Enter" onkeydown="handleContactTagInput(event)">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeContactModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveContactChanges()">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentContactTags = [];
+
+    function filterContacts() {
+        const query = document.getElementById('contact-search').value.toLowerCase().trim();
+        const selectedTag = document.getElementById('tag-filter').value;
+        const rows = document.querySelectorAll('.contact-row');
+
+        rows.forEach(row => {
+            const username = row.dataset.username.toLowerCase();
+            const tags = row.dataset.tags.split(',');
+
+            const matchesQuery = username.includes(query);
+            const matchesTag = !selectedTag || tags.includes(selectedTag);
+
+            if (matchesQuery && matchesTag) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function editContact(id, username, email, phone, tags) {
+        document.getElementById('edit-contact-id').value = id;
+        document.getElementById('contact-username-display').value = username;
+        document.getElementById('contact-email').value = email;
+        document.getElementById('contact-phone').value = phone;
+        currentContactTags = [...tags];
+        renderContactTags();
+
+        document.getElementById('contact-modal').style.display = 'flex';
+    }
+
+    function closeContactModal() {
+        document.getElementById('contact-modal').style.display = 'none';
+    }
+
+    function handleContactTagInput(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const val = e.target.value.trim().toUpperCase();
+            if (val && !currentContactTags.includes(val)) {
+                currentContactTags.push(val);
+                renderContactTags();
+            }
+            e.target.value = '';
+        }
+    }
+
+    function renderContactTags() {
+        const container = document.getElementById('contact-tags-container');
+        container.innerHTML = currentContactTags.map((tag, idx) => 
+            `<span class="keyword-tag">
+                ${tag}
+                <span class="keyword-tag-remove" onclick="removeContactTag(${idx})">×</span>
+            </span>`
+        ).join('');
+    }
+
+    function removeContactTag(idx) {
+        currentContactTags.splice(idx, 1);
+        renderContactTags();
+    }
+
+    async function saveContactChanges() {
+        const id = document.getElementById('edit-contact-id').value;
+        const email = document.getElementById('contact-email').value;
+        const phone = document.getElementById('contact-phone').value;
+
+        const payload = {
+            email: email,
+            phone: phone,
+            tags: currentContactTags
+        };
+
+        try {
+            const resp = await fetch(`/ig/api/contacts/${id}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to save changes');
+            }
+        } catch (err) {
+            alert('Error updating contact: ' + err.message);
+        }
+    }
+</script>
+{% endblock %}

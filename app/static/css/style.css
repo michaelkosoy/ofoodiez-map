@@ -319,7 +319,16 @@ nav.bottom-nav.map-bottom-nav {
     flex-wrap: wrap;
 }
 
-.days-filter-container,
+.days-filter-container {
+    flex-shrink: 0;
+    width: 130px;
+    min-width: 130px;
+    max-width: 130px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 52;
+}
+
 .city-filter-container {
     flex-shrink: 0;
     width: 130px;
@@ -327,7 +336,7 @@ nav.bottom-nav.map-bottom-nav {
     max-width: 130px;
     box-sizing: border-box;
     position: relative;
-    z-index: 50;
+    z-index: 51;
 }
 
 .choices-days-filter .choices__inner,
@@ -448,7 +457,7 @@ nav.bottom-nav.map-bottom-nav {
     max-width: 130px;
     box-sizing: border-box;
     position: relative;
-    z-index: 50;
+    z-index: 53;
 }
 
 

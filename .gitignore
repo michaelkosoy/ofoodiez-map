@@ -36,3 +36,8 @@ compare_*.py
 
 # Cache files (places cache is in-memory, geocode cache is tracked in git)
 data/places_cache.json
+
+# SQLite database & Flask instance directory
+instance/
+*.db
+

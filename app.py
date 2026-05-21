@@ -21,6 +21,16 @@ app = Flask(__name__,
             static_folder='app/static',
             template_folder='app/templates')
 
+# Secret key for session management (used by Instagram automation OAuth)
+app.secret_key = os.environ.get('SECRET_KEY', 'ofoodiez-dev-secret-change-in-prod')
+
+# Database config for Instagram automation
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('IG_DATABASE_URL', 'sqlite:///instagram_automation.db')
+
+# Register Instagram Automation blueprint
+from instagram_automation import init_app as init_ig_automation
+init_ig_automation(app)
+
 # Helper to get env var or use default if missing/placeholder
 def get_env_var(name, default=None):
     val = os.environ.get(name)

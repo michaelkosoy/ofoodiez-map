@@ -1,0 +1,253 @@
+{% extends "ig_base.html" %}
+{% block title %}Automations{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+        <div class="sidebar-header">
+            <svg class="ig-icon-sm" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="sidebar-title">IG Automation</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('instagram_automation.dashboard_home') }}" class="nav-item" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.inbox_page') }}" class="nav-item" id="nav-inbox">
+                <span class="nav-icon">📥</span>
+                <span>Inbox</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.contacts_page') }}" class="nav-item" id="nav-contacts">
+                <span class="nav-icon">👥</span>
+                <span>Contacts</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.automations_page') }}" class="nav-item active" id="nav-automations">
+                <span class="nav-icon">⚡</span>
+                <span>Automations</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                {% if user.profile_picture_url %}
+                <img src="{{ user.profile_picture_url }}" alt="@{{ user.ig_username }}" class="user-avatar">
+                {% else %}
+                <div class="user-avatar user-avatar-placeholder">{{ (user.ig_username or '?')[0].upper() }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span class="user-name">@{{ user.ig_username }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Automations</h1>
+                <p class="page-subtitle">Create rules that auto-reply when people comment or message you</p>
+            </div>
+            <button class="btn btn-primary" id="btn-new-automation" onclick="openModal()">
+                <span>+</span> New Automation
+            </button>
+        </header>
+
+        <!-- Automations List -->
+        <div class="automations-list" id="automations-list">
+            {% if automations %}
+                {% for auto in automations %}
+                <div class="automation-card glass-card" data-id="{{ auto.id }}">
+                    <div class="automation-card-header">
+                        <div class="automation-info">
+                            <h3 class="automation-name">{{ auto.name }}</h3>
+                            <div class="automation-meta">
+                                <span class="badge badge-trigger">{{ auto.trigger_type.replace('_', ' ').title() }}</span>
+                                <span class="meta-sep">·</span>
+                                <span class="meta-text">Fired {{ auto.trigger_count or 0 }} times</span>
+                            </div>
+                        </div>
+                        <div class="automation-controls">
+                            <label class="toggle" title="Toggle active/inactive">
+                                <input type="checkbox" 
+                                       {% if auto.is_active %}checked{% endif %}
+                                       onchange="toggleAutomation({{ auto.id }}, this.checked)"
+                                       id="toggle-{{ auto.id }}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="automation-card-body">
+                        <!-- Trigger -->
+                        <div class="flow-step">
+                            <div class="flow-step-icon trigger-icon">🎯</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-label">TRIGGER</span>
+                                <span class="flow-step-text">
+                                    {% if auto.trigger_type == 'comment_keyword' %}
+                                        Comment contains:
+                                        {% for kw in (auto.trigger_config or {}).get('keywords', []) %}
+                                            <span class="keyword-chip">{{ kw }}</span>
+                                        {% endfor %}
+                                    {% elif auto.trigger_type == 'dm_keyword' %}
+                                        DM contains:
+                                        {% for kw in (auto.trigger_config or {}).get('keywords', []) %}
+                                            <span class="keyword-chip">{{ kw }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ auto.trigger_type.replace('_', ' ').title() }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flow-connector"></div>
+
+                        <!-- Actions -->
+                        {% for action in (auto.actions or []) %}
+                        <div class="flow-step">
+                            <div class="flow-step-icon action-icon">
+                                {% if action.type == 'send_private_reply' %}📨
+                                {% elif action.type == 'send_text' %}💬
+                                {% elif action.type == 'send_button_template' %}🔘
+                                {% elif action.type == 'send_image' %}🖼️
+                                {% elif action.type == 'add_tag' %}🏷️
+                                {% else %}▶️{% endif %}
+                            </div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-label">{{ action.type.replace('_', ' ').upper() }}</span>
+                                <span class="flow-step-text">
+                                    {% if action.text %}
+                                        "{{ action.text[:80] }}{% if action.text|length > 80 %}...{% endif %}"
+                                    {% elif action.tag %}
+                                        Tag: {{ action.tag }}
+                                    {% else %}
+                                        {{ action.type }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% if not loop.last %}
+                        <div class="flow-connector"></div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="automation-card-footer">
+                        <button class="btn btn-ghost btn-sm" onclick="editAutomation({{ auto.id }})" id="edit-{{ auto.id }}">Edit</button>
+                        <button class="btn btn-ghost btn-sm btn-danger" onclick="deleteAutomation({{ auto.id }})" id="delete-{{ auto.id }}">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state glass-card" id="empty-automations">
+                    <span class="empty-icon">⚡</span>
+                    <h3>No automations yet</h3>
+                    <p>Create your first automation to start auto-replying to comments and messages</p>
+                    <button class="btn btn-primary" onclick="openModal()">Create Automation</button>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<!-- Create/Edit Automation Modal -->
+<div class="modal-overlay" id="automation-modal" style="display: none;">
+    <div class="modal glass-card" id="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">New Automation</h2>
+            <button class="modal-close" onclick="closeModal()" id="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="automation-form" onsubmit="return false;">
+                <input type="hidden" id="edit-automation-id" value="">
+
+                <!-- Step 1: Name -->
+                <div class="form-group">
+                    <label for="auto-name" class="form-label">Automation Name</label>
+                    <input type="text" id="auto-name" class="form-input" placeholder="e.g. Link delivery for Reels" required>
+                </div>
+
+                <!-- Step 2: Trigger Type -->
+                <div class="form-group">
+                    <label class="form-label">Trigger Type</label>
+                    <div class="trigger-options">
+                        <label class="trigger-option selected" id="trigger-opt-comment">
+                            <input type="radio" name="trigger_type" value="comment_keyword" checked>
+                            <div class="trigger-option-content">
+                                <span class="trigger-option-icon">💬</span>
+                                <span class="trigger-option-title">Comment Keyword</span>
+                                <span class="trigger-option-desc">When someone comments a specific word on your post</span>
+                            </div>
+                        </label>
+                        <label class="trigger-option" id="trigger-opt-dm">
+                            <input type="radio" name="trigger_type" value="dm_keyword">
+                            <div class="trigger-option-content">
+                                <span class="trigger-option-icon">📩</span>
+                                <span class="trigger-option-title">DM Keyword</span>
+                                <span class="trigger-option-desc">When someone sends you a DM with a specific word</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 3: Keywords -->
+                <div class="form-group">
+                    <label for="auto-keywords" class="form-label">Trigger Keywords</label>
+                    <div class="keywords-input-container">
+                        <div class="keywords-tags" id="keywords-tags"></div>
+                        <input type="text" id="auto-keywords" class="form-input" placeholder="Type a keyword and press Enter" onkeydown="handleKeywordInput(event)">
+                    </div>
+                    <span class="form-hint">Press Enter after each keyword. The automation fires if ANY keyword matches.</span>
+                </div>
+
+                <!-- Step 4: Actions -->
+                <div class="form-group">
+                    <label class="form-label">Response Actions</label>
+                    <div class="actions-builder" id="actions-builder">
+                        <!-- Default: Private Reply action -->
+                        <div class="action-step" data-index="0" id="action-step-0">
+                            <div class="action-step-header">
+                                <span class="action-step-number">1</span>
+                                <select class="form-select action-type-select" onchange="actionTypeChanged(0, this.value)" id="action-type-0">
+                                    <option value="send_private_reply" selected>📨 Private Reply (DM from comment)</option>
+                                    <option value="send_text">💬 Send Text Message</option>
+                                    <option value="send_button_template">🔘 Send Button Template</option>
+                                    <option value="send_quick_replies">⚡ Send Quick Replies</option>
+                                    <option value="add_tag">🏷️ Add Tag</option>
+                                </select>
+                                <button type="button" class="btn-remove-action" onclick="removeAction(0)" title="Remove step">✕</button>
+                            </div>
+                            <div class="action-step-body" id="action-body-0">
+                                <textarea class="form-textarea" id="action-text-0" placeholder="Hey {{username}}! Here's the link you asked for 🔗&#10;&#10;https://your-link.com" rows="3"></textarea>
+                                <span class="form-hint">Use {{username}} to insert the commenter's name</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="addAction()" id="btn-add-action">
+                        + Add another action
+                    </button>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAutomation()" id="btn-save-automation">
+                        Create Automation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('instagram_automation.static', filename='js/app.js') }}"></script>
+{% endblock %}

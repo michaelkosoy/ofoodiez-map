@@ -1,0 +1,31 @@
+{% extends "ig_base.html" %}
+{% block title %}Error{% endblock %}
+
+{% block body %}
+<div class="login-page">
+    <div class="login-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card glass-card">
+            <div class="login-header">
+                <div class="login-logo error-logo">❌</div>
+                <h1>Something went wrong</h1>
+                <p class="login-subtitle">{{ description or 'An error occurred during authentication.' }}</p>
+            </div>
+            <div class="error-details glass-card" style="margin: 1.5rem 0; padding: 1rem; border-radius: 12px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2);">
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
+                    <strong>Error:</strong> {{ error }}<br>
+                    <strong>Reason:</strong> {{ reason }}
+                </p>
+            </div>
+            <a href="{{ url_for('instagram_automation.login_page') }}" class="btn btn-primary">
+                ← Try again
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

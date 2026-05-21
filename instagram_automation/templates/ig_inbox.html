@@ -1,0 +1,170 @@
+{% extends "ig_base.html" %}
+{% block title %}Inbox{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+        <div class="sidebar-header">
+            <svg class="ig-icon-sm" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="sidebar-title">IG Automation</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('instagram_automation.dashboard_home') }}" class="nav-item" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.inbox_page') }}" class="nav-item active" id="nav-inbox">
+                <span class="nav-icon">📥</span>
+                <span>Inbox</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.contacts_page') }}" class="nav-item" id="nav-contacts">
+                <span class="nav-icon">👥</span>
+                <span>Contacts</span>
+            </a>
+            <a href="{{ url_for('instagram_automation.automations_page') }}" class="nav-item" id="nav-automations">
+                <span class="nav-icon">⚡</span>
+                <span>Automations</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                {% if user.profile_picture_url %}
+                <img src="{{ user.profile_picture_url }}" alt="@{{ user.ig_username }}" class="user-avatar">
+                {% else %}
+                <div class="user-avatar user-avatar-placeholder">{{ (user.ig_username or '?')[0].upper() }}</div>
+                {% endif %}
+                <div class="user-info">
+                    <span class="user-name">@{{ user.ig_username }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content inbox-page-main">
+        <div class="inbox-layout">
+            <!-- Left Pane: Conversation List -->
+            <div class="inbox-pane inbox-left-pane glass-card">
+                <div class="pane-header">
+                    <h2>Conversations</h2>
+                    <div class="search-box-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="inbox-search" class="form-input search-input" placeholder="Search conversations..." oninput="filterConversations()">
+                    </div>
+                </div>
+                <div class="pane-body scrollable-pane" id="thread-list">
+                    <!-- Conversations loaded via JS -->
+                    <div class="pane-loading">Loading conversations...</div>
+                </div>
+            </div>
+
+            <!-- Middle Pane: Active Chat Area -->
+            <div class="inbox-pane inbox-middle-pane glass-card">
+                <div id="no-chat-selected" class="empty-state">
+                    <span class="empty-icon">💬</span>
+                    <h3>No Conversation Selected</h3>
+                    <p>Select a conversation from the left pane to start chatting.</p>
+                </div>
+                
+                <div id="active-chat-container" style="display: none;">
+                    <div class="pane-header chat-header">
+                        <div class="chat-header-user">
+                            <div class="user-avatar user-avatar-sm" id="chat-header-avatar">?</div>
+                            <div>
+                                <h3 id="chat-header-username">@username</h3>
+                                <span class="badge" id="chat-window-badge">24h Window</span>
+                            </div>
+                        </div>
+                        <div class="chat-header-timer" id="chat-header-countdown">
+                            Window closed
+                        </div>
+                    </div>
+
+                    <div class="pane-body chat-timeline scrollable-pane" id="chat-messages-container">
+                        <!-- Message timeline loaded via JS -->
+                    </div>
+
+                    <div class="chat-composer">
+                        <div class="window-expired-alert" id="window-expired-warning" style="display: none;">
+                            ⚠️ <strong>24-hour messaging window has closed.</strong> You can only respond if the customer messages you first, or by using a standard trigger automation template. Direct manual replies are restricted by Meta.
+                        </div>
+                        <form id="chat-form" onsubmit="handleSendMessage(event)" class="composer-form">
+                            <textarea id="composer-textarea" class="form-input composer-textarea" placeholder="Type a message..." required onkeydown="handleComposerKeydown(event)"></textarea>
+                            <button type="submit" class="btn btn-primary btn-send" id="btn-send-message">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Contact Details -->
+            <div class="inbox-pane inbox-right-pane glass-card" id="contact-details-pane" style="visibility: hidden;">
+                <div class="pane-header">
+                    <h2>Contact Profile</h2>
+                </div>
+                <div class="pane-body scrollable-pane">
+                    <div class="profile-summary">
+                        <div class="user-avatar user-avatar-lg" id="details-avatar">?</div>
+                        <h3 id="details-username">@username</h3>
+                        <span class="profile-igsid" id="details-igsid">IGSID: 12345</span>
+                    </div>
+
+                    <hr class="pane-divider">
+
+                    <!-- Contact Fields Form -->
+                    <form id="details-fields-form" onsubmit="handleSaveContactDetails(event)">
+                        <div class="form-group">
+                            <label for="details-email" class="form-label">Email</label>
+                            <input type="email" id="details-email" class="form-input" placeholder="e.g. user@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="details-phone" class="form-label">Phone</label>
+                            <input type="text" id="details-phone" class="form-input" placeholder="e.g. +123456789">
+                        </div>
+                        <button type="submit" class="btn btn-ghost btn-sm" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Save Fields</button>
+                    </form>
+
+                    <hr class="pane-divider">
+
+                    <!-- Tags section -->
+                    <div class="details-section">
+                        <label class="form-label">Tags</label>
+                        <div class="keywords-input-container">
+                            <div class="keywords-tags" id="details-tags-container"></div>
+                            <input type="text" id="details-tags-input" class="form-input" placeholder="Add tag..." onkeydown="handleDetailsTagInput(event)">
+                        </div>
+                        <span class="form-hint">Type tag and press Enter</span>
+                    </div>
+
+                    <hr class="pane-divider">
+
+                    <!-- Custom fields JSON representation -->
+                    <div class="details-section">
+                        <label class="form-label">Custom Fields Data</label>
+                        <pre id="details-custom-fields-json" class="custom-fields-pre">{}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('instagram_automation.static', filename='js/app.js') }}"></script>
+<script>
+    // Initial bootstrap for inbox page
+    document.addEventListener('DOMContentLoaded', () => {
+        // Read URL parameters to see if we should auto-select a thread
+        const urlParams = new URLSearchParams(window.location.search);
+        const convoId = urlParams.get('convo_id');
+        initInbox(convoId ? parseInt(convoId) : null);
+    });
+</script>
+{% endblock %}
