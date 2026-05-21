@@ -47,7 +47,7 @@ class Config:
     GRAPH_API_VERSION = "v25.0"
     
     # Scopes we request
-    IG_SCOPES = "instagram_business_basic,instagram_business_manage_messages,instagram_manage_comments"
+    IG_SCOPES = "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments"
     
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('IG_DATABASE_URL', 'sqlite:///instagram_automation.db')
