@@ -115,11 +115,19 @@ def _handle_messaging_event(event, user):
     """Dispatch a messaging event to the appropriate handler."""
     sender_id = event.get('sender', {}).get('id')
 
+    if not sender_id:
+        if 'read' in event:
+            print("  👁️ Messages read receipt received")
+        else:
+            print(f"  ⚠️ Messaging event missing sender_id: {event}")
+        return
+
     # Skip messages sent by ourselves
     if sender_id == user.ig_user_id:
         return
 
     if 'message' in event:
+
         # Incoming message (DM, story reply, etc.)
         message = event['message']
         text = message.get('text', '')
