@@ -20,6 +20,9 @@ def webhook_verify():
     Meta sends a GET request when you first configure the webhook URL
     in the App Dashboard. We must return the hub.challenge to verify.
     """
+    # Log detailed diagnostics for the incoming GET request
+    print(f"🔍 Incoming webhook GET request: URL={request.url}, Args={dict(request.args)}, User-Agent={request.headers.get('User-Agent')}")
+    
     mode = request.args.get('hub.mode')
     token = request.args.get('hub.verify_token')
     challenge = request.args.get('hub.challenge')
