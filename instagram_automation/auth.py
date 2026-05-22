@@ -253,7 +253,21 @@ def get_current_user():
     user_id = session.get('ig_user_id')
     if not user_id:
         return None
-    return User.query.get(user_id)
+    user = User.query.get(user_id)
+
+    # Auto-align/upgrade legacy user ID (e.g. starting with 275) to proper 17-digit Instagram Professional ID (starting with 1784)
+    if user and user.access_token and not user.ig_user_id.startswith('1784') and not user.ig_user_id.startswith('mock_'):
+        try:
+            profile = _fetch_user_profile(user.access_token)
+            profile_user_id = str(profile.get('user_id') or '')
+            if profile_user_id and profile_user_id.startswith('1784') and profile_user_id != user.ig_user_id:
+                print(f"🔄 Auto-aligning legacy user ID {user.ig_user_id} to Instagram Professional ID {profile_user_id}")
+                user.ig_user_id = profile_user_id
+                db.session.commit()
+        except Exception as e:
+            print(f"⚠️ Failed to auto-align legacy user ID: {e}")
+
+    return user
 
 
 # ============ Internal helpers ============

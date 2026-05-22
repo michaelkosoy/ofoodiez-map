@@ -49,8 +49,15 @@ class Config:
     # Scopes we request
     IG_SCOPES = "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments"
     
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('IG_DATABASE_URL', 'sqlite:///instagram_automation.db')
+    # Database (supports Render postgres:// to postgresql:// conversion)
+    _db_url = os.environ.get('IG_DATABASE_URL') or os.environ.get('DATABASE_URL')
+    if _db_url:
+        if _db_url.startswith('postgres://'):
+            _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+        SQLALCHEMY_DATABASE_URI = _db_url
+    else:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///instagram_automation.db'
+
     
     # Security
     SECRET_KEY = os.environ.get('IG_SECRET_KEY', 'change-me-in-production-ig-auto')

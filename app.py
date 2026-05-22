@@ -24,8 +24,15 @@ app = Flask(__name__,
 # Secret key for session management (used by Instagram automation OAuth)
 app.secret_key = os.environ.get('SECRET_KEY', 'ofoodiez-dev-secret-change-in-prod')
 
-# Database config for Instagram automation
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('IG_DATABASE_URL', 'sqlite:///instagram_automation.db')
+# Database config for Instagram automation (supports Render postgres:// to postgresql:// conversion)
+_db_url = os.environ.get('IG_DATABASE_URL') or os.environ.get('DATABASE_URL')
+if _db_url:
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instagram_automation.db'
+
 
 # Register Instagram Automation blueprint
 from instagram_automation import init_app as init_ig_automation
