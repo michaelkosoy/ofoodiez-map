@@ -66,6 +66,20 @@
             </div>
         </header>
 
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, msg in messages %}
+                        <div class="alert alert-{{ category or 'info' }} glass-card">
+                            {{ msg }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+
         <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card glass-card" id="stat-automations">
@@ -109,6 +123,11 @@
                     <span class="action-title">New Automation</span>
                     <span class="action-desc">Create a comment → DM rule</span>
                 </a>
+                <a href="{{ url_for('instagram_automation.auth_subscribe_webhooks_route') }}" class="action-card glass-card" id="action-subscribe-webhooks">
+                    <span class="action-icon">🔔</span>
+                    <span class="action-title">Subscribe Webhooks</span>
+                    <span class="action-desc">Link Instagram account events to this server</span>
+                </a>
                 <a href="{{ url_for('instagram_automation.auth_refresh_token') }}" class="action-card glass-card" id="action-refresh-token">
                     <span class="action-icon">🔄</span>
                     <span class="action-title">Refresh Token</span>
@@ -116,6 +135,7 @@
                 </a>
             </div>
         </section>
+
 
         <!-- Recent Automations -->
         <section class="section">

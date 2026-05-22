@@ -127,6 +127,9 @@ def auth_callback():
 
     db.session.commit()
 
+    # Automatically subscribe user to webhooks
+    subscribe_to_webhooks(user)
+
     # Store user ID in session for dashboard access
     session['ig_user_id'] = user.id
 
@@ -289,3 +292,46 @@ def _fetch_user_profile(access_token):
         return resp.json()
     except Exception as e:
         return {"error": str(e)}
+
+
+@ig_bp.route('/auth/subscribe')
+def auth_subscribe_webhooks_route():
+    """Manually trigger webhook subscription for the current user."""
+    user = get_current_user()
+    if not user:
+        flash("You must be logged in to subscribe to webhooks.", "error")
+        return redirect(url_for('instagram_automation.login_page'))
+        
+    success = subscribe_to_webhooks(user)
+    if success:
+        flash("Successfully subscribed to Instagram Webhooks! Real-time comments and DMs will now be received.", "success")
+    else:
+        flash("Failed to subscribe to Instagram Webhooks. Please verify your Meta App credentials and user permissions.", "error")
+        
+    return redirect(url_for('instagram_automation.dashboard_home'))
+
+
+def subscribe_to_webhooks(user):
+    """
+    Subscribe the user's Instagram account to the webhook fields (comments, messages)
+    using the Meta Graph API.
+    """
+    url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/subscribed_apps"
+    params = {
+        "subscribed_fields": "comments,messages",
+        "access_token": user.access_token
+    }
+    try:
+        resp = requests.post(url, params=params, timeout=10)
+        data = resp.json()
+        if data.get('success'):
+            print(f"✅ Successfully subscribed @{user.ig_username} ({user.ig_user_id}) to webhooks.")
+            return True
+        else:
+            error_msg = data.get('error', {}).get('message', str(data))
+            print(f"❌ Webhook subscription failed for @{user.ig_username}: {error_msg}")
+            return False
+    except Exception as e:
+        print(f"❌ Exception subscribing @{user.ig_username} to webhooks: {e}")
+        return False
+
