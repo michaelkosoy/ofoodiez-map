@@ -337,6 +337,56 @@ def auth_subscribe_webhooks_route():
     return redirect(url_for('instagram_automation.dashboard_home'))
 
 
+@ig_bp.route('/debug-status')
+def debug_status_route():
+    """Diagnostic route to inspect token validity, active permissions, and webhook subscriptions."""
+    user = get_current_user()
+    if not user:
+        user = User.query.filter_by(is_active=True).first()
+        if not user:
+            return jsonify({
+                "status": "error",
+                "message": "No active user found in database. Connect your Instagram account first."
+            }), 404
+
+    # 1. Test profile retrieval
+    me_url = f"{Config.IG_GRAPH_URL}/me"
+    me_params = {
+        "fields": "user_id,username,account_type",
+        "access_token": user.access_token
+    }
+    profile_data = {}
+    try:
+        resp = requests.get(me_url, params=me_params, timeout=10)
+        profile_data = resp.json()
+    except Exception as e:
+        profile_data = {"error": str(e)}
+
+    # 2. Check webhook subscriptions
+    sub_url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/subscribed_apps"
+    sub_params = {
+        "access_token": user.access_token
+    }
+    subscription_data = {}
+    try:
+        resp = requests.get(sub_url, params=sub_params, timeout=10)
+        subscription_data = resp.json()
+    except Exception as e:
+        subscription_data = {"error": str(e)}
+
+    return jsonify({
+        "database_user": {
+            "id": user.id,
+            "ig_user_id": user.ig_user_id,
+            "ig_username": user.ig_username,
+            "is_active": user.is_active,
+            "token_days_remaining": user.token_days_remaining(),
+        },
+        "meta_profile_check": profile_data,
+        "meta_webhook_subscriptions": subscription_data
+    })
+
+
 def subscribe_to_webhooks(user):
     """
     Subscribe the user's Instagram account to the webhook fields (comments, messages)
