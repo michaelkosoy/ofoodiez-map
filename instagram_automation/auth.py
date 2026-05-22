@@ -104,9 +104,21 @@ def auth_callback():
     account_type = profile.get('account_type', '')
     profile_picture_url = profile.get('profile_picture_url', '')
 
+    # Use the 17-digit Instagram Professional Account ID (from profile) if available
+    profile_user_id = str(profile.get('user_id') or '')
+    legacy_user_id = str(token_data.get('user_id') or '')
+    ig_user_id = profile_user_id or legacy_user_id
+
     # Step 4: Store or update user in database
-    user = User.query.filter_by(ig_user_id=ig_user_id).first()
+    # Try finding by the proper ID first, then by the legacy ID
+    user = None
+    if profile_user_id:
+        user = User.query.filter_by(ig_user_id=profile_user_id).first()
+    if not user and legacy_user_id:
+        user = User.query.filter_by(ig_user_id=legacy_user_id).first()
+
     if user:
+        user.ig_user_id = ig_user_id  # Update to correct ID if it was legacy
         user.access_token = access_token
         user.token_expires_at = expires_at
         user.ig_username = username or user.ig_username
