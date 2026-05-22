@@ -375,6 +375,123 @@ def update_contact(user, contact_id):
         }
     })
 
+# ============ Legal / Compliance Pages ============
+
+@ig_bp.route('/privacy')
+def privacy_page():
+    """Privacy Policy page — required by Meta for App Review."""
+    return render_template('ig_privacy.html')
+
+
+@ig_bp.route('/data-deletion', methods=['GET'])
+def data_deletion_page():
+    """Data Deletion instructions page — required by Meta."""
+    user = get_current_user()
+    return render_template('ig_data_deletion.html', user=user)
+
+
+@ig_bp.route('/data-deletion', methods=['POST'])
+def data_deletion_request():
+    """
+    Process a data deletion request.
+    Can be triggered by:
+    1. A logged-in user clicking "Delete All My Data"
+    2. Meta's Data Deletion callback (sends signed_request)
+    """
+    import hashlib
+    import json as json_module
+
+    # Check if this is a Meta callback (contains signed_request)
+    signed_request = request.form.get('signed_request')
+    if signed_request:
+        # Meta Data Deletion callback
+        # Parse the signed_request to get the user_id
+        try:
+            parts = signed_request.split('.', 1)
+            if len(parts) == 2:
+                import base64
+                payload = parts[1]
+                # Add padding if needed
+                payload += '=' * (4 - len(payload) % 4)
+                decoded = json_module.loads(base64.urlsafe_b64decode(payload))
+                ig_user_id = str(decoded.get('user_id', ''))
+                if ig_user_id:
+                    _perform_deletion(ig_user_id)
+                    confirmation_code = hashlib.sha256(
+                        f"del_{ig_user_id}_{datetime.utcnow().isoformat()}".encode()
+                    ).hexdigest()[:12].upper()
+                    # Meta expects a JSON response with url and confirmation_code
+                    return jsonify({
+                        "url": f"{request.host_url}ig/data-deletion?status_code={confirmation_code}",
+                        "confirmation_code": confirmation_code
+                    })
+        except Exception as e:
+            print(f"❌ Data deletion callback error: {e}")
+            return jsonify({"error": "Invalid signed_request"}), 400
+
+    # Manual deletion by logged-in user
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('instagram_automation.data_deletion_page'))
+
+    ig_user_id = user.ig_user_id
+    username = user.ig_username
+    confirmation_code = hashlib.sha256(
+        f"del_{ig_user_id}_{datetime.utcnow().isoformat()}".encode()
+    ).hexdigest()[:12].upper()
+
+    _perform_deletion(ig_user_id)
+
+    # Clear session
+    session.pop('ig_user_id', None)
+
+    print(f"🗑️ Data deleted for @{username} (confirmation: {confirmation_code})")
+    return render_template('ig_data_deletion.html', confirmation_code=confirmation_code, user=None)
+
+
+@ig_bp.route('/data-deletion/status', methods=['GET'])
+def data_deletion_status():
+    """Check deletion status by confirmation code."""
+    code = request.args.get('code', '').strip()
+    status_code = request.args.get('status_code', '').strip()
+    lookup_code = code or status_code
+
+    if not lookup_code:
+        return redirect(url_for('instagram_automation.data_deletion_page'))
+
+    # Since deletions are immediate, any valid-looking code means completed
+    status_result = {
+        "code": lookup_code,
+        "status": "Completed — all data has been deleted"
+    }
+    return render_template('ig_data_deletion.html', status_result=status_result, user=None)
+
+
+def _perform_deletion(ig_user_id):
+    """Delete all data for a given Instagram user ID."""
+    from .database import User, Contact, Conversation, MessageLog, Automation
+
+    user = User.query.filter_by(ig_user_id=ig_user_id).first()
+    if not user:
+        return
+
+    # Delete all message logs via conversations
+    conversations = Conversation.query.filter_by(user_id=user.id).all()
+    for convo in conversations:
+        MessageLog.query.filter_by(conversation_id=convo.id).delete()
+    Conversation.query.filter_by(user_id=user.id).delete()
+
+    # Delete contacts, automations, and user
+    Contact.query.filter_by(user_id=user.id).delete()
+    Automation.query.filter_by(user_id=user.id).delete()
+
+    db.session.delete(user)
+    db.session.commit()
+    print(f"🗑️ All data deleted for IG user ID: {ig_user_id}")
+
+
+# ============ Media API ============
+
 @ig_bp.route('/api/media', methods=['GET'])
 @_require_login
 def get_media_api(user):

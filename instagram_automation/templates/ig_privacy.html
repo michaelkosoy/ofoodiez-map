@@ -1,0 +1,132 @@
+{% extends "ig_base.html" %}
+{% block title %}Privacy Policy{% endblock %}
+
+{% block body %}
+<div class="login-page" style="align-items: flex-start; padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="login-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="login-container" style="max-width: 720px;">
+        <div class="login-card glass-card" style="text-align: left; padding: 2.5rem;">
+            <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
+                <div class="login-logo" style="font-size: 2.5rem;">🔒</div>
+                <h1>Privacy Policy</h1>
+                <p class="login-subtitle">How oFoodiez Instagram Automation handles your data</p>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    Last updated: May 22, 2026
+                </p>
+            </div>
+
+            <div class="policy-content" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">1. Introduction</h2>
+                    <p>
+                        oFoodiez Instagram Automation ("the Service") is operated by oFoodiez.
+                        This Privacy Policy describes how we collect, use, and protect your personal
+                        information when you use our Instagram DM and comment automation service.
+                    </p>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">2. Data We Collect</h2>
+                    <p style="margin-bottom: 0.75rem;">When you connect your Instagram account, we collect and store:</p>
+                    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <li><strong style="color: var(--text-primary);">Account Information:</strong> Your Instagram User ID, username, account type, and profile picture URL.</li>
+                        <li><strong style="color: var(--text-primary);">Access Tokens:</strong> OAuth access tokens provided by Meta to interact with the Instagram Graph API on your behalf.</li>
+                        <li><strong style="color: var(--text-primary);">Message Data:</strong> Incoming and outgoing messages processed through automations, including text content, timestamps, and message IDs.</li>
+                        <li><strong style="color: var(--text-primary);">Comment Data:</strong> Comments on your posts that trigger automations, including the commenter's username and comment text.</li>
+                        <li><strong style="color: var(--text-primary);">Contact Information:</strong> Instagram-Scoped IDs (IGSIDs) and usernames of people who interact with your account through the Service.</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">3. How We Use Your Data</h2>
+                    <p style="margin-bottom: 0.75rem;">We use the collected data exclusively to:</p>
+                    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <li>Process and execute your configured automations (comment-to-DM, keyword triggers, etc.)</li>
+                        <li>Display your inbox, contacts, and automation statistics in the dashboard</li>
+                        <li>Maintain message logs for your review</li>
+                        <li>Refresh your access tokens to maintain service continuity</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">4. Data Sharing</h2>
+                    <p>
+                        We do <strong style="color: var(--text-primary);">not</strong> sell, rent, or share your personal data with third parties.
+                        Data is only transmitted to Meta's Instagram Graph API to fulfill the actions you have configured
+                        (e.g., sending automated DMs in response to comments).
+                    </p>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">5. Data Storage &amp; Security</h2>
+                    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <li>Your data is stored in a secure database hosted on Render's infrastructure.</li>
+                        <li>Access tokens are stored securely and are only used for authorized API calls.</li>
+                        <li>All communication with Meta's APIs is done over HTTPS.</li>
+                        <li>We employ industry-standard security practices to protect your data.</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">6. Data Retention</h2>
+                    <p>
+                        We retain your data for as long as your Instagram account is connected to the Service.
+                        When you disconnect your account, we deactivate your user record. You may request
+                        full deletion of your data at any time (see section 8).
+                    </p>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">7. Your Rights</h2>
+                    <p style="margin-bottom: 0.75rem;">You have the right to:</p>
+                    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <li><strong style="color: var(--text-primary);">Access</strong> your data through the dashboard</li>
+                        <li><strong style="color: var(--text-primary);">Disconnect</strong> your Instagram account at any time</li>
+                        <li><strong style="color: var(--text-primary);">Delete</strong> all your data by submitting a <a href="{{ url_for('instagram_automation.data_deletion_page') }}">data deletion request</a></li>
+                        <li><strong style="color: var(--text-primary);">Revoke</strong> API access via your Instagram account settings</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">8. Data Deletion</h2>
+                    <p>
+                        To request deletion of all your data, visit our
+                        <a href="{{ url_for('instagram_automation.data_deletion_page') }}">Data Deletion page</a>
+                        or email us at <a href="mailto:privacy@ofoodiez.com">privacy@ofoodiez.com</a>.
+                        We will process your request within 30 days.
+                    </p>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">9. Meta Platform Terms</h2>
+                    <p>
+                        This Service uses Meta's Instagram Graph API. By using the Service, you also agree to
+                        <a href="https://www.facebook.com/terms.php" target="_blank" rel="noopener">Meta's Terms of Service</a>
+                        and
+                        <a href="https://developers.facebook.com/terms/" target="_blank" rel="noopener">Meta Platform Terms</a>.
+                    </p>
+                </section>
+
+                <section style="margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">10. Contact Us</h2>
+                    <p>
+                        If you have any questions about this Privacy Policy, please contact us at:<br>
+                        <a href="mailto:privacy@ofoodiez.com">privacy@ofoodiez.com</a>
+                    </p>
+                </section>
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--bg-card-border); text-align: center;">
+                <a href="{{ url_for('instagram_automation.login_page') }}" class="btn btn-ghost">
+                    ← Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

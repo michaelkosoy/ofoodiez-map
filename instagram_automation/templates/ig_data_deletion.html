@@ -1,0 +1,129 @@
+{% extends "ig_base.html" %}
+{% block title %}Data Deletion{% endblock %}
+
+{% block body %}
+<div class="login-page" style="align-items: flex-start; padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="login-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="login-container" style="max-width: 620px;">
+        <div class="login-card glass-card" style="text-align: left; padding: 2.5rem;">
+            <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
+                <div class="login-logo" style="font-size: 2.5rem;">🗑️</div>
+                <h1>Data Deletion</h1>
+                <p class="login-subtitle">Request deletion of all your data from oFoodiez Instagram Automation</p>
+            </div>
+
+            {% if confirmation_code %}
+            <!-- Deletion confirmation -->
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Deletion Request Received</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Your data deletion request has been processed. All data associated with your
+                    Instagram account has been removed from our systems.
+                </p>
+                <div class="glass-card" style="padding: 1.2rem; text-align: center; margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em;">Confirmation Code</p>
+                    <p style="font-size: 1.1rem; font-weight: 700; font-family: monospace; color: var(--accent-purple);">{{ confirmation_code }}</p>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.8rem;">
+                    Please save this confirmation code for your records.<br>
+                    You may verify the status of your request at any time using this code.
+                </p>
+            </div>
+
+            {% elif status_result %}
+            <!-- Status check result -->
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Deletion Status</h2>
+                <div class="glass-card" style="padding: 1.5rem; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Confirmation Code</span>
+                        <span style="font-weight: 600; font-family: monospace;">{{ status_result.code }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Status</span>
+                        <span class="badge badge-active">{{ status_result.status }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Deletion request form + info -->
+            <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7;">
+                <section style="margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">What gets deleted</h2>
+                    <p style="margin-bottom: 0.75rem;">When you submit a deletion request, we remove the following:</p>
+                    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                        <li>Your Instagram account information (username, profile, tokens)</li>
+                        <li>All contacts and their associated data</li>
+                        <li>All message logs (incoming and outgoing)</li>
+                        <li>All conversations and their history</li>
+                        <li>All automation rules and their configurations</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">How to request deletion</h2>
+                    <p>
+                        You can request deletion by clicking the button below (if you are logged in),
+                        or by emailing <a href="mailto:privacy@ofoodiez.com">privacy@ofoodiez.com</a>
+                        with your Instagram username.
+                    </p>
+                </section>
+            </div>
+
+            {% if user %}
+            <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05);">
+                <p style="font-size: 0.85rem; color: var(--danger); font-weight: 600; margin-bottom: 0.3rem;">⚠️ Warning</p>
+                <p style="font-size: 0.82rem; color: var(--text-secondary);">
+                    This action is permanent and cannot be undone. All data for
+                    <strong style="color: var(--text-primary);">@{{ user.ig_username }}</strong>
+                    will be permanently deleted.
+                </p>
+            </div>
+
+            <form method="POST" action="{{ url_for('instagram_automation.data_deletion_request') }}"
+                  onsubmit="return confirm('Are you sure you want to delete ALL your data? This cannot be undone.');"
+                  style="text-align: center;">
+                <button type="submit" class="btn" style="background: var(--danger); color: #fff; width: 100%; justify-content: center; padding: 0.85rem 2rem; font-size: 1rem; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);">
+                    🗑️ Delete All My Data
+                </button>
+            </form>
+            {% else %}
+            <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem; text-align: center;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Log in to request data deletion, or email us directly.
+                </p>
+                <a href="{{ url_for('instagram_automation.login_page') }}" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Log in to delete your data
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Status check form -->
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--bg-card-border);">
+                <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem; text-align: center;">Check Deletion Status</h2>
+                <form method="GET" action="{{ url_for('instagram_automation.data_deletion_status') }}" style="display: flex; gap: 0.5rem;">
+                    <input type="text" name="code" class="form-input" placeholder="Enter confirmation code"
+                           style="flex: 1; padding: 0.65rem 1rem; font-size: 0.85rem; background: rgba(255,255,255,0.05); border: 1px solid var(--bg-card-border); color: #fff; border-radius: var(--radius-md); font-family: monospace;"
+                           required>
+                    <button type="submit" class="btn btn-ghost" style="padding: 0.65rem 1.2rem;">Check</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--bg-card-border); text-align: center;">
+                <a href="{{ url_for('instagram_automation.login_page') }}" class="btn btn-ghost">
+                    ← Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

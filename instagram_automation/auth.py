@@ -147,6 +147,39 @@ def auth_disconnect():
     return redirect(url_for('instagram_automation.login_page'))
 
 
+@ig_bp.route('/auth/deauthorize', methods=['POST'])
+def auth_deauthorize():
+    """
+    Deauthorize callback — Meta calls this when a user removes the app
+    from their Instagram account settings.
+    """
+    import json as json_module
+    import base64
+
+    signed_request = request.form.get('signed_request', '')
+    if not signed_request:
+        return 'Bad Request', 400
+
+    try:
+        parts = signed_request.split('.', 1)
+        if len(parts) == 2:
+            payload = parts[1]
+            payload += '=' * (4 - len(payload) % 4)
+            decoded = json_module.loads(base64.urlsafe_b64decode(payload))
+            ig_user_id = str(decoded.get('user_id', ''))
+
+            if ig_user_id:
+                user = User.query.filter_by(ig_user_id=ig_user_id).first()
+                if user:
+                    user.is_active = False
+                    db.session.commit()
+                    print(f"🔌 User @{user.ig_username} deauthorized the app")
+    except Exception as e:
+        print(f"❌ Deauthorize callback error: {e}")
+
+    return 'OK', 200
+
+
 @ig_bp.route('/auth/refresh-token')
 def auth_refresh_token():
     """Manually refresh the long-lived token."""
