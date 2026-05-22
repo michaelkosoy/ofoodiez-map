@@ -42,8 +42,14 @@ data = {
         {
             "country": "Japan",
             "flag": "🇯🇵",
-            "cities": "Coming Soon",
-            "map_link": "https://goo.gl/maps/example2" # External link mock
+            "cities": "Tokyo, Kyoto, Osaka",
+            "map_link": "https://www.google.com/maps/@/data=!3m1!4b1!4m2!11m1!2sNcLlKeOBS1WnlvweSIahcQ?g_ep=CAISEjI2LjIwLjQuOTEzODcwMjQ0MBgAILffASpJLDk0Mjk3Njk5LDk0MjMxMTg8LDk0MjgwNTY4LDQ3MDcxNzA0LDk0MjE4NjQxLDk0MjgyMTM0LDEwMDc5OTg3Nyw5NDI4Njg2OUICSUw%3D"
+        },
+        {
+            "country": "France",
+            "flag": "🇫🇷",
+            "cities": "Paris, Nice, Lyon, Bordeaux",
+            "map_link": "https://www.google.com/maps/@/data=!3m1!4b1!4m2!11m1!2sIRCaLjsaTrOcDzgeWjImsw?g_ep=CAISEjI2LjIwLjQuOTEzODcwMjQ0MBgAILffASpJLDk0Mjk3Njk5LDk0MjMxMTg8LDk0MjgwNTY4LDQ3MDcxNzA0LDk0MjE4NjQxLDk0MjgyMTM0LDEwMDc5OTg3Nyw5NDI4Njg2OUICSUw%3D"
         },
     ],
     "about": {
