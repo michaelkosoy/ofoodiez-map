@@ -196,6 +196,21 @@ def about_page():
     """About Me page."""
     return render_template('about.html', data=home_data)
 
+@app.route('/privacy')
+def privacy_policy():
+    """Privacy Policy for Meta App Review."""
+    return render_template('legal/privacy.html')
+
+@app.route('/terms')
+def terms_of_service():
+    """Terms of Service for Meta App Review."""
+    return render_template('legal/terms.html')
+
+@app.route('/data-deletion')
+def data_deletion():
+    """Data Deletion Instructions for Meta App Review."""
+    return render_template('legal/data_deletion.html')
+
 
 @app.route('/health')
 def health_check():
