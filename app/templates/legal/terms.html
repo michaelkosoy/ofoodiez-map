@@ -1,36 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service - Ofoodiez</title>
+    <title>תנאי שימוש - Ofoodiez</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=4">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
-        h1, h2 { color: #FF6B6B; }
+        body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 30px 20px; color: #333; text-align: right; }
+        h1, h2 { color: #FF6B6B; margin-top: 1.5em; }
         a { color: #FF6B6B; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .last-updated { color: #666; font-style: italic; margin-bottom: 2em; }
+        ul { margin-top: 0; padding-right: 20px; padding-left: 0; }
+        li { margin-bottom: 0.5em; }
+        .disclaimer-box { background: #fff5f5; border-right: 4px solid #FF6B6B; border-left: none; padding: 15px; margin: 20px 0; border-radius: 8px 0 0 8px; }
+        .disclaimer-box h2 { margin-top: 0; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 40px 0; }
+        
+        /* Fixed bottom nav RTL overrides */
+        .bottom-nav { direction: ltr; } /* Keep bottom nav English icons LTR */
     </style>
 </head>
 <body>
-    <h1>Terms of Service</h1>
-    <p>Last updated: May 2026</p>
+    <h1>תנאי שימוש (Terms of Use)</h1>
+    <p class="last-updated">עודכן לאחרונה: מאי 2026</p>
 
-    <h2>1. Acceptance of Terms</h2>
-    <p>By using the Ofoodiez Instagram Automation service, you agree to these Terms of Service. If you do not agree to these terms, please do not use the service.</p>
+    <p>ברוכים הבאים ל-<strong>Ofoodiez</strong>.</p>
+    <p>בעצם השימוש באתר זה, הנכם מסכימים לתנאים הבאים.</p>
 
-    <h2>2. Description of Service</h2>
-    <p>Ofoodiez provides an automated messaging service that interacts with the Instagram Graph API on your behalf. It allows you to set up automatic direct message replies based on keyword triggers in comments and messages.</p>
+    <h2>1. על האתר</h2>
+    <p>Ofoodiez הוא בלוג אישי המשתף המלצות אוכל, מפות וחוויות מערים שונות ברחבי העולם.</p>
+    <p>כל התוכן מבוסס על דעות וחוויות אישיות בלבד.</p>
 
-    <h2>3. User Responsibilities</h2>
-    <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree not to use the service for any unlawful or abusive purposes, including sending spam or violating Instagram's Terms of Use.</p>
+    <h2>2. למטרות מידע בלבד</h2>
+    <p>התוכן באתר זה מסופק למטרות מידע והשראה כלליות בלבד.</p>
+    <p>אנו עושים את מירב המאמצים לשמור על דיוק המידע, אך פרטים כגון:</p>
+    <ul>
+        <li>שעות פתיחה</li>
+        <li>תפריטים</li>
+        <li>מחירים</li>
+        <li>זמינות</li>
+    </ul>
+    <p>עשויים להשתנות בכל עת. יש לוודא את הפרטים תמיד ישירות מול בית העסק.</p>
 
-    <h2>4. Limitations of Liability</h2>
-    <p>Ofoodiez is provided "as is" without warranties of any kind. We are not liable for any account bans, suspensions, or restrictions imposed by Meta or Instagram due to your use of our automation tools.</p>
+    <h2>3. היעדר אחריות</h2>
+    <p>אנו איננו מתחייבים ל:</p>
+    <ul>
+        <li>דיוק המידע</li>
+        <li>זמינות המקומות</li>
+        <li>איכות האוכל או השירות</li>
+        <li>מחירים או מבצעים (כולל Happy Hours)</li>
+    </ul>
+    <p>השימוש במידע הוא על אחריותכם בלבד.</p>
 
-    <h2>5. Changes to Terms</h2>
-    <p>We reserve the right to modify these terms at any time. We will notify you of any changes by updating the date at the top of this page.</p>
+    <h2>4. קישורים חיצוניים</h2>
+    <p>אתר זה מכיל קישורים לפלטפורמות צד-שלישי כגון:</p>
+    <ul>
+        <li>Google Maps</li>
+        <li>אינסטגרם (Instagram)</li>
+        <li>פלטפורמות להזמנת מקומות במסעדות</li>
+    </ul>
+    <p>אין לנו שליטה על אתרים אלו ואיננו אחראים ל:</p>
+    <ul>
+        <li>התוכן שלהם</li>
+        <li>הזמינות שלהם</li>
+        <li>המדיניות שלהם</li>
+    </ul>
 
-    <h2>6. Contact Us</h2>
-    <p>If you have any questions, please contact us at hello@ofoodiez.com.</p>
+    <h2>5. אחריות מסעדות</h2>
+    <p>כל המסעדות והברים המופיעים באתר זה הם עסקים עצמאיים.</p>
+    <p>Ofoodiez אינו אחראי ל:</p>
+    <ul>
+        <li>איכות השירות</li>
+        <li>בטיחות המזון</li>
+        <li>מחירים</li>
+        <li>חווית הלקוח</li>
+    </ul>
+    <p>כל אינטראקציה היא אך ורק בינכם לבין המסעדה.</p>
+
+    <h2>6. קניין רוחני</h2>
+    <p>כל התוכן באתר זה, לרבות טקסט, מפות מותאמות, המלצות ומיתוג שייך ל-Ofoodiez אלא אם צוין אחרת.</p>
+    <p>אין להעתיק, לשכפל או להפיץ תוכן ללא קבלת אישור מראש. שיתוף התוכן יחד עם מתן קרדיט ראוי וקישור לאתר מותר ואף מבורך.</p>
+
+    <h2>7. הגבלת אחריות</h2>
+    <p>Ofoodiez לא יהיה אחראי לכל נזק ישיר או עקיף שייגרם כתוצאה מ:</p>
+    <ul>
+        <li>שימוש באתר</li>
+        <li>הסתמכות על המידע</li>
+        <li>ביקור במקומות המומלצים</li>
+    </ul>
+
+    <h2>8. שינויים באתר</h2>
+    <p>אנו עשויים לעדכן, לשנות או להסיר תוכן בכל עת וללא הודעה מוקדמת.</p>
+
+    <div class="disclaimer-box">
+        <h2>הצהרת אחריות (Disclaimer)</h2>
+        <p>Ofoodiez הוא בלוג אוכל וטיולים אישי. כל ההמלצות, המפות והתכנים מבוססים על דעות וחוויות אישיות.</p>
+        <p><strong>דעות אישיות:</strong> התוכן משקף חוויות סובייקטיביות ואין לראות בו ייעוץ מקצועי.</p>
+        <p><strong>מידע משתנה:</strong> מסעדות, תפריטים, מחירים, שעות פתיחה ומבצעים (כולל Happy Hours) עשויים להשתנות עם הזמן. איננו יכולים להבטיח שכל המידע תמיד מעודכן.</p>
+        <p><strong>אין אחריות על חוויות:</strong> אנו איננו אחראים לכל חוויה שעשויה להיות לכם במקום מומלץ, לרבות איכות האוכל, השירות, המחירים והזמינות.</p>
+        <p><strong>שימוש על אחריותכם בלבד:</strong> כל פעולה שתנקטו על סמך המידע מאתר זה היא על פי שיקול דעתכם ועל אחריותכם בלבד.</p>
+    </div>
+
+    <hr>
+
+    <h2>9. יצירת קשר</h2>
+    <p>לשאלות, תיקונים או בקשות הסרה, ניתן ליצור קשר בכתובת: <a href="mailto:contact@ofoodiez.com">contact@ofoodiez.com</a></p>
+    
+    <div class="bottom-nav-spacer" style="height: 80px;"></div>
+
+    <!-- Sticky Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/map" class="bottom-nav-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Happy Hour Map</span>
+        </a>
+        <a href="/about" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>About Me</span>
+        </a>
+        <a href="#" class="bottom-nav-item disabled" onclick="showComingSoon(event)">
+            <i class="fas fa-building"></i>
+            <span>HiTech</span>
+        </a>
+    </nav>
+
+    <script>
+        function showComingSoon(event) {
+            event.preventDefault();
+            alert('HiTech section coming soon! 🚀');
+        }
+    </script>
 </body>
 </html>

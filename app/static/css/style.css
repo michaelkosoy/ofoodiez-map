@@ -1605,3 +1605,21 @@ input:checked~.toggle-label {
     white-space: nowrap;
     line-height: 1.4;
 }
+
+/* Legal Footer */
+.legal-footer {
+    font-family: 'Sour Gummy', 'Outfit', sans-serif;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 0.85em;
+    opacity: 0.8;
+    background: white;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.legal-footer a {
+    color: inherit;
+    text-decoration: none;
+    margin: 0 10px;
+}

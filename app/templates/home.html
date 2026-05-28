@@ -16,7 +16,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playpen+Sans:wght@400;600;800&family=Sour+Gummy:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
@@ -72,6 +72,14 @@
             </div>
         </section>
 
+        <!-- Contact Section -->
+        <div class="contact-section" style="text-align: center; margin-top: 40px;">
+            <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-color);">Let's Connect!</h3>
+            <a href="{{ data.about.contact_link }}" class="btn">
+                <i class="fas fa-envelope"></i> {{ data.about.contact_text }}
+            </a>
+        </div>
+
         <!-- Social Media Links -->
         <div class="social-media">
             {% for social in data.social_media %}
@@ -79,6 +87,12 @@
                 <i class="{{ social.icon }}"></i>
             </a>
             {% endfor %}
+        </div>
+
+        <!-- Legal Footer -->
+        <div class="legal-footer">
+            <a href="/terms">Terms</a> | 
+            <a href="/privacy">Privacy</a>
         </div>
 
         <!-- Spacer for bottom nav -->

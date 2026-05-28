@@ -1,39 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Ofoodiez</title>
+    <title>מדיניות פרטיות - Ofoodiez</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=4">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
-        h1, h2 { color: #FF6B6B; }
+        body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 30px 20px; color: #333; text-align: right; }
+        h1, h2 { color: #FF6B6B; margin-top: 1.5em; }
         a { color: #FF6B6B; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .last-updated { color: #666; font-style: italic; margin-bottom: 2em; }
+        ul { margin-top: 0; padding-right: 20px; padding-left: 0; }
+        li { margin-bottom: 0.5em; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 40px 0; }
+        
+        /* Fixed bottom nav RTL overrides */
+        .bottom-nav { direction: ltr; } /* Keep bottom nav English icons LTR */
     </style>
 </head>
 <body>
-    <h1>Privacy Policy</h1>
-    <p>Last updated: May 2026</p>
+    <h1>מדיניות פרטיות (Privacy Policy)</h1>
+    <p class="last-updated">עודכן לאחרונה: מאי 2026</p>
 
-    <h2>1. Information We Collect</h2>
-    <p>When you use the Ofoodiez Instagram Automation service, we collect the following information from your Meta/Instagram account:</p>
+    <p>Ofoodiez מכבד את פרטיותכם.</p>
+
+    <h2>1. מידע שאנו אוספים</h2>
+    <p>אנו איננו אוספים מידע אישי מזהה ממבקרים באתר באופן יזום.</p>
+    <p>עם זאת, ייתכן וייאסף מידע בסיסי באופן אוטומטי באמצעות:</p>
     <ul>
-        <li>Basic profile information (username, ID)</li>
-        <li>Comments on your posts (to provide automated replies)</li>
-        <li>Direct messages (to provide automated replies)</li>
+        <li>עוגיות (Cookies)</li>
+        <li>כלי אנליטיקה</li>
+        <li>שירותי אחסון</li>
+    </ul>
+    <p>מידע זה עשוי לכלול:</p>
+    <ul>
+        <li>סוג דפדפן</li>
+        <li>דפים שביקרתם בהם</li>
+        <li>מיקום כללי (לא מדויק)</li>
     </ul>
 
-    <h2>2. How We Use Your Information</h2>
-    <p>We use your information exclusively to provide the automation features you requested (e.g., sending an automated direct message when a user comments a specific keyword on your post).</p>
-    <p>We do not sell, rent, or share your data with any third parties.</p>
+    <h2>2. עוגיות (Cookies)</h2>
+    <p>אתר זה עשוי להשתמש בעוגיות כדי לשפר את חווית המשתמש.</p>
+    <p>ניתן להשבית עוגיות דרך הגדרות הדפדפן שלכם.</p>
 
-    <h2>3. Data Storage and Security</h2>
-    <p>Your authentication tokens are stored securely and used only for the purpose of interacting with the Instagram Graph API on your behalf. We employ industry-standard security measures to protect your data.</p>
+    <h2>3. שירותי צד-שלישי</h2>
+    <p>אתר זה עשוי להכיל קישורים או להשתמש בשירותים של צד-שלישי כגון:</p>
+    <ul>
+        <li>Google Maps</li>
+        <li>אינסטגרם (Instagram)</li>
+    </ul>
+    <p>לפלטפורמות אלו יש מדיניות פרטיות משלהן, ואיננו אחראים לנוהלי הפרטיות שלהן.</p>
 
-    <h2>4. Data Deletion</h2>
-    <p>You can request the deletion of your data at any time. Please visit our <a href="/data-deletion">Data Deletion Instructions</a> page for details on how to remove your data from our systems.</p>
+    <h2>4. שיתוף נתונים</h2>
+    <p>אנו איננו מוכרים או משתפים את הנתונים האישיים שלכם.</p>
 
-    <h2>5. Contact Us</h2>
-    <p>If you have any questions about this Privacy Policy, please contact us at hello@ofoodiez.com.</p>
+    <hr>
+
+    <h2>5. יצירת קשר</h2>
+    <p>לכל שאלה בנושא פרטיות: <a href="mailto:contact@ofoodiez.com">contact@ofoodiez.com</a></p>
+    
+    <div class="bottom-nav-spacer" style="height: 80px;"></div>
+
+    <!-- Sticky Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/map" class="bottom-nav-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Happy Hour Map</span>
+        </a>
+        <a href="/about" class="bottom-nav-item">
+            <i class="fas fa-user"></i>
+            <span>About Me</span>
+        </a>
+        <a href="#" class="bottom-nav-item disabled" onclick="showComingSoon(event)">
+            <i class="fas fa-building"></i>
+            <span>HiTech</span>
+        </a>
+    </nav>
+
+    <script>
+        function showComingSoon(event) {
+            event.preventDefault();
+            alert('HiTech section coming soon! 🚀');
+        }
+    </script>
 </body>
 </html>
