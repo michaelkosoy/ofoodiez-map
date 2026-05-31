@@ -5,7 +5,7 @@ data = {
     "community": {
         "title": "Community Insider",
         "description": "Join our WhatsApp group to get the latest updates, secret deals, and new resturants and Pop Ups in TLV!",
-        "link": "https://chat.whatsapp.com/HkvN2rOU4D4AHp2253HMk3", 
+        "link": "https://chat.whatsapp.com/KC3Dxo3Y9xZFHBUuI0WeAp?s=cl&p=i&ilr=1", 
         "link_text": "Join WhatsApp Group"
     },
     "world_maps": [
