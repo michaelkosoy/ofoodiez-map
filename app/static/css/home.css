@@ -1,9 +1,9 @@
 /* Global Styles */
 :root {
-    --primary-color: #E07B7B;
-    --primary-gradient: linear-gradient(135deg, #E07B7B 0%, #EE9B78 100%);
-    --text-color: #333;
-    --bg-color: #FFF5F0;
+    --primary-color: #5A3A31;
+    --primary-gradient: linear-gradient(135deg, #5A3A31 0%, #8c5b4d 100%);
+    --text-color: #362118;
+    --bg-color: #FBF8ED;
     --card-bg: #ffffff;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
@@ -73,7 +73,7 @@ a {
     letter-spacing: -1px;
     margin-bottom: 10px;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-    color: #E07B7B;
+    color: var(--primary-color);
     animation: fadeInUp 0.8s ease-out forwards;
 }
 
@@ -171,13 +171,13 @@ a {
     border-radius: 50px;
     font-weight: 600;
     font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(224, 123, 123, 0.3);
+    box-shadow: 0 4px 15px rgba(90, 58, 49, 0.3);
     transition: all 0.3s ease;
 }
 
 .btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(224, 123, 123, 0.4);
+    box-shadow: 0 6px 20px rgba(90, 58, 49, 0.4);
 }
 
 /* Community Section */
@@ -511,12 +511,12 @@ a {
 
 .bottom-nav-item:hover {
     color: var(--primary-color);
-    background: rgba(224, 123, 123, 0.1);
+    background: rgba(90, 58, 49, 0.1);
 }
 
 .bottom-nav-item.active {
     color: var(--primary-color);
-    background: rgba(224, 123, 123, 0.15);
+    background: rgba(90, 58, 49, 0.15);
 }
 
 .bottom-nav-item.disabled {
@@ -639,4 +639,142 @@ a {
     color: inherit;
     text-decoration: none;
     margin: 0 10px;
+}
+
+/* Splash Screen Styles */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeOutSplash 0.4s ease-out 1.8s forwards;
+    pointer-events: none;
+}
+
+.splash-animation-container {
+    position: relative;
+    width: 300px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.splash-drinks {
+    position: relative;
+    width: 200px;
+    height: 250px;
+}
+
+.splash-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+}
+
+.splash-drink-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Drink Flashing Animations */
+.frame-1 { animation: showFrame 0.15s linear 0.1s forwards; }
+.frame-2 { animation: showFrame 0.15s linear 0.25s forwards; }
+.frame-3 { animation: showFrame 0.15s linear 0.4s forwards; }
+.frame-4 { animation: showFrame 1.0s linear 0.55s forwards; }
+
+.frame-4 .splash-drink-img {
+    animation: fadeOutImage 0.2s ease-out 0.8s forwards;
+}
+
+.splash-final-brand {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.splash-site-icon {
+    width: 200px; /* Exact same size as splash-drinks */
+    height: 250px;
+    object-fit: contain;
+    opacity: 0;
+    animation: fadeInIcon 0.3s ease-out 0.8s forwards;
+}
+
+.splash-logo {
+    font-family: 'Playpen Sans', 'Outfit', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    opacity: 0;
+    animation: fadeInLogo 0.3s ease-out 0.8s forwards;
+}
+
+@keyframes showFrame {
+    0%, 99.9% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes fadeOutImage {
+    to { opacity: 0; }
+}
+
+@keyframes fadeInIcon {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeInLogo {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOutSplash {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@keyframes slideUpSplash {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 767px) {
+    #splash-screen {
+        animation: slideUpSplash 0.6s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards;
+    }
 }

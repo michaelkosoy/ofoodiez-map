@@ -1,0 +1,28 @@
+<!-- Instagram Feed Component -->
+<section class="section instagram-feed-section">
+    <div class="container">
+        <h2 class="section-title">Latest Instagram Finds</h2>
+        <p class="section-subtitle">Search through all my recommendations straight from Instagram.</p>
+        
+        <div class="ig-search-container">
+            <i class="fas fa-search ig-search-icon"></i>
+            <input type="text" id="ig-search-input" class="ig-search-input" placeholder="Search places, cities, vibes...">
+            <button id="ig-search-clear" class="ig-search-clear" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="ig-posts-loading" class="ig-loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading posts...
+        </div>
+
+        <div id="ig-posts-empty" class="ig-empty" style="display: none;">
+            <i class="fas fa-search"></i>
+            <p>No posts found for "<span id="ig-search-term"></span>"</p>
+        </div>
+
+        <div id="ig-posts-grid" class="ig-posts-grid">
+            <!-- Posts injected by JS -->
+        </div>
+    </div>
+</section>

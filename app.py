@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 import requests
 from io import StringIO
 from data import data as home_data
+from instagram_automation.database import User
+from instagram_automation.config import Config
 
 # Load environment variables from .env file (for local development)
 load_dotenv()
@@ -215,6 +217,120 @@ def data_deletion():
 @app.route('/health')
 def health_check():
     return "OK", 200
+
+# ============ INSTAGRAM FEED API ============
+IG_POSTS_CACHE_FILE = os.path.join(CACHE_DIR, 'ig_posts_cache.json')
+IG_CACHE_EXPIRY_HOURS = 1
+
+def fetch_all_ig_posts():
+    """Fetch all IG posts for the active user, using pagination. Cache results."""
+    # Check cache first
+    if os.path.exists(IG_POSTS_CACHE_FILE):
+        file_mod_time = datetime.fromtimestamp(os.path.getmtime(IG_POSTS_CACHE_FILE))
+        if datetime.now() - file_mod_time < timedelta(hours=IG_CACHE_EXPIRY_HOURS):
+            try:
+                with open(IG_POSTS_CACHE_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Error loading IG posts cache: {e}")
+                
+    # Needs fetching. Get active user
+    try:
+        # Force the backend to ONLY fetch posts for the official ofoodiez account
+        # This prevents random users from showing their posts if they somehow connected their account
+        user = User.query.filter_by(ig_username='ofoodiez', is_active=True).first()
+        
+        # Fallback to the tester account if we are developing locally
+        if not user:
+            user = User.query.filter_by(ig_username='tester_account', is_active=True).first()
+            
+        if not user or not user.access_token:
+            return []
+
+        # If user is a mock account, return mock posts for testing
+        if user.access_token == 'test_token_123' or user.ig_username == 'tester_account':
+            print("🧪 Using mock Instagram posts for testing account")
+            mock_posts = []
+            for i in range(1, 26):
+                mock_posts.append({
+                    "id": f"mock_post_{i}",
+                    "caption": f"This is a mock Instagram post #{i}! Finding the best places in Tel Aviv like a delicious Pizza or amazing Sushi. #ofoodiez",
+                    "media_url": "https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=600&auto=format&fit=crop",
+                    "permalink": "https://instagram.com/ofoodiez",
+                    "media_type": "IMAGE",
+                    "timestamp": (datetime.now() - timedelta(days=i)).isoformat()
+                })
+            # Add some specific keywords for search testing
+            mock_posts[0]["caption"] = "Just found the best Burger in town! #foodie"
+            mock_posts[1]["caption"] = "Amazing sushi rolls for dinner 🍣 #sushi"
+            mock_posts[2]["caption"] = "Nothing beats a good Pasta on a rainy day."
+            mock_posts[2]["media_type"] = "VIDEO"
+            mock_posts[2]["thumbnail_url"] = "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=600&auto=format&fit=crop"
+            return mock_posts
+
+        posts = []
+        url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/media"
+        params = {
+            'fields': 'id,caption,media_url,permalink,media_type,thumbnail_url,timestamp',
+            'access_token': user.access_token,
+            'limit': 100
+        }
+        
+        while url:
+            resp = requests.get(url, params=params, timeout=15)
+            data = resp.json()
+            if 'data' in data:
+                posts.extend(data['data'])
+            
+            # Pagination
+            paging = data.get('paging', {})
+            url = paging.get('next')
+            params = {} # The next URL already contains all parameters including access_token
+            
+            # Guard against fetching too many posts to prevent timeouts
+            if len(posts) >= 500:
+                break
+                
+        # Save to cache
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        with open(IG_POSTS_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(posts, f, ensure_ascii=False)
+            
+        print(f"📸 Fetched and cached {len(posts)} Instagram posts")
+        return posts
+    except Exception as e:
+        print(f"❌ Error fetching IG posts from API: {e}")
+        # Fallback to expired cache if available
+        if os.path.exists(IG_POSTS_CACHE_FILE):
+            try:
+                with open(IG_POSTS_CACHE_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return []
+
+@app.route('/api/instagram/posts')
+def api_ig_posts():
+    """Returns the last 12 posts"""
+    posts = fetch_all_ig_posts()
+    return jsonify(posts[:12])
+
+@app.route('/api/instagram/search')
+def api_ig_search():
+    """Searches across all posts by caption text"""
+    query = request.args.get('q', '').lower().strip()
+    posts = fetch_all_ig_posts()
+    
+    if not query:
+        return jsonify(posts[:12])
+        
+    filtered = []
+    for p in posts:
+        caption = p.get('caption', '').lower()
+        if query in caption:
+            filtered.append(p)
+            
+    return jsonify(filtered)
 
 @app.route('/api/places')
 def get_places():

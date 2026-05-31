@@ -2,6 +2,7 @@
 Instagram OAuth authentication routes.
 Handles the Instagram Login flow: authorize → callback → token exchange → store user.
 """
+import os
 import requests
 from datetime import datetime, timedelta
 from flask import redirect, request, session, url_for, flash, render_template, jsonify
@@ -14,6 +15,11 @@ from .database import db, User
 @ig_bp.route('/auth/login')
 def auth_login():
     """Redirect user to Instagram's authorization page."""
+    # Secure the login route so only the admin can connect an account
+    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025')
+    if request.args.get('key') != admin_secret:
+        return "Unauthorized. Admin key required (?key=...).", 401
+        
     missing = Config.validate()
     if missing:
         return jsonify({
@@ -29,6 +35,10 @@ def auth_login():
 @ig_bp.route('/auth/mock-login', methods=['GET', 'POST'])
 def auth_mock_login():
     """Bypass Meta OAuth and log in directly with a test account or custom username."""
+    admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025')
+    if request.args.get('key') != admin_secret:
+        return "Unauthorized. Admin key required (?key=...).", 401
+        
     username = 'tester_account'
     if request.method == 'POST':
         username = request.form.get('username', 'tester_account').strip().replace('@', '')
