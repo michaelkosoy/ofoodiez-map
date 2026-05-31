@@ -271,7 +271,7 @@ def fetch_all_ig_posts():
         posts = []
         url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/media"
         params = {
-            'fields': 'id,caption,media_url,permalink,media_type,thumbnail_url,timestamp',
+            'fields': 'id,caption,media_url,permalink,media_type,media_product_type,thumbnail_url,timestamp,like_count,comments_count,is_shared_to_feed',
             'access_token': user.access_token,
             'limit': 100
         }
@@ -280,7 +280,11 @@ def fetch_all_ig_posts():
             resp = requests.get(url, params=params, timeout=15)
             data = resp.json()
             if 'data' in data:
-                posts.extend(data['data'])
+                for post in data['data']:
+                    # Filter out Reels that were NOT shared to the main feed grid
+                    if post.get('media_product_type') == 'REELS' and post.get('is_shared_to_feed') is False:
+                        continue
+                    posts.append(post)
             
             # Pagination
             paging = data.get('paging', {})
@@ -311,18 +315,31 @@ def fetch_all_ig_posts():
 
 @app.route('/api/instagram/posts')
 def api_ig_posts():
-    """Returns the last 12 posts"""
+    """Returns paginated posts"""
+    limit = int(request.args.get('limit', 12))
+    offset = int(request.args.get('offset', 0))
     posts = fetch_all_ig_posts()
-    return jsonify(posts[:12])
+    
+    paginated = posts[offset:offset+limit]
+    has_more = len(posts) > offset + limit
+    
+    return jsonify({
+        "posts": paginated,
+        "has_more": has_more
+    })
 
 @app.route('/api/instagram/search')
 def api_ig_search():
     """Searches across all posts by caption text"""
     query = request.args.get('q', '').lower().strip()
+    limit = int(request.args.get('limit', 12))
+    offset = int(request.args.get('offset', 0))
     posts = fetch_all_ig_posts()
     
     if not query:
-        return jsonify(posts[:12])
+        paginated = posts[offset:offset+limit]
+        has_more = len(posts) > offset + limit
+        return jsonify({"posts": paginated, "has_more": has_more})
         
     filtered = []
     for p in posts:
@@ -330,7 +347,9 @@ def api_ig_search():
         if query in caption:
             filtered.append(p)
             
-    return jsonify(filtered)
+    paginated = filtered[offset:offset+limit]
+    has_more = len(filtered) > offset + limit
+    return jsonify({"posts": paginated, "has_more": has_more})
 
 @app.route('/api/places')
 def get_places():

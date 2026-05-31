@@ -78,7 +78,7 @@
 /* Posts Grid */
 .ig-posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* Mobile default: 2 columns */
     gap: 10px;
 }
 
@@ -151,16 +151,55 @@
     margin-bottom: 6px;
 }
 
-.ig-post-date {
-    font-size: 0.65rem;
+.ig-post-stats {
+    font-size: 0.75rem;
     color: #999;
     margin-top: auto;
+    display: flex;
+    gap: 12px;
+}
+
+.ig-post-stats span i {
+    margin-right: 4px;
+}
+
+/* Load More Button */
+.ig-load-more-btn {
+    display: block;
+    margin: 30px auto 0 auto;
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #666;
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.ig-load-more-btn:hover {
+    color: var(--primary-color, #E07B7B);
 }
 
 /* Responsive */
+@media (min-width: 480px) {
+    .ig-posts-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (min-width: 768px) {
     .ig-posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 15px;
+    }
+}
+
+@media (min-width: 900px) {
+    .ig-posts-grid {
+        grid-template-columns: repeat(6, 1fr);
     }
 }

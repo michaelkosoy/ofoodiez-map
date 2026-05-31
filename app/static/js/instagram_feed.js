@@ -8,24 +8,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!grid) return; // Not on home page
 
+    // Create Load More button
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.id = 'ig-load-more';
+    loadMoreBtn.className = 'ig-load-more-btn';
+    loadMoreBtn.textContent = 'Load More';
+    loadMoreBtn.style.display = 'none';
+    
+    // Insert after the grid
+    grid.parentNode.insertBefore(loadMoreBtn, grid.nextSibling);
+
     let debounceTimer;
+    let currentOffset = 0;
+    const POSTS_PER_PAGE = 12;
+    let currentQuery = '';
 
     // Initial load
-    fetchPosts('/api/instagram/posts');
+    fetchPosts('/api/instagram/posts', '', 0);
 
     // Search input listener
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
+        currentQuery = query;
         
         // Show/hide clear button
         clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+        
+        // Hide empty state immediately while typing/debouncing
+        emptyState.style.display = 'none';
+        loadMoreBtn.style.display = 'none';
 
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
+            currentOffset = 0;
             if (query.length > 0) {
-                fetchPosts(`/api/instagram/search?q=${encodeURIComponent(query)}`, query);
+                fetchPosts(`/api/instagram/search?q=${encodeURIComponent(query)}`, query, 0);
             } else {
-                fetchPosts('/api/instagram/posts');
+                fetchPosts('/api/instagram/posts', '', 0);
             }
         }, 500); // 500ms debounce
     });
@@ -33,22 +52,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear search
     clearBtn.addEventListener('click', () => {
         searchInput.value = '';
+        currentQuery = '';
         clearBtn.style.display = 'none';
-        fetchPosts('/api/instagram/posts');
+        currentOffset = 0;
+        fetchPosts('/api/instagram/posts', '', 0);
     });
 
-    function fetchPosts(url, query = '') {
-        grid.innerHTML = '';
-        grid.style.display = 'none';
+    // Load More click
+    loadMoreBtn.addEventListener('click', () => {
+        currentOffset += POSTS_PER_PAGE;
+        const base_url = currentQuery ? `/api/instagram/search?q=${encodeURIComponent(currentQuery)}` : '/api/instagram/posts';
+        fetchPosts(base_url, currentQuery, currentOffset, true);
+    });
+
+    function fetchPosts(url, query = '', offset = 0, append = false) {
+        if (!append) {
+            grid.innerHTML = '';
+            grid.style.display = 'none';
+        }
+        
         emptyState.style.display = 'none';
+        loadMoreBtn.style.display = 'none';
         loading.style.display = 'block';
 
-        fetch(`${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`)
+        const fetchUrl = `${url}${url.includes('?') ? '&' : '?'}offset=${offset}&limit=${POSTS_PER_PAGE}&t=${Date.now()}`;
+
+        fetch(fetchUrl)
             .then(res => res.json())
-            .then(posts => {
+            .then(data => {
                 loading.style.display = 'none';
                 
-                if (posts.length === 0) {
+                const posts = data.posts || [];
+                
+                if (posts.length === 0 && !append) {
                     if (query) {
                         searchTermSpan.textContent = query;
                         emptyState.style.display = 'block';
@@ -64,12 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 posts.forEach(post => {
                     grid.appendChild(createPostCard(post));
                 });
+                
+                if (data.has_more) {
+                    loadMoreBtn.style.display = 'block';
+                }
             })
             .catch(err => {
                 console.error('Error fetching Instagram posts:', err);
                 loading.style.display = 'none';
-                grid.innerHTML = '<p class="ig-empty">Error loading Instagram feed.</p>';
-                grid.style.display = 'block';
+                if (!append) {
+                    grid.innerHTML = '<p class="ig-empty">Error loading Instagram feed.</p>';
+                    grid.style.display = 'block';
+                }
             });
     }
 
@@ -93,10 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             iconHtml = '<div class="ig-post-type-icon"><i class="fas fa-clone"></i></div>';
         }
 
-        // Format Date
-        const dateStr = post.timestamp ? new Date(post.timestamp).toLocaleDateString(undefined, {
-            year: 'numeric', month: 'short', day: 'numeric'
-        }) : '';
+        // Likes and Comments
+        const likes = post.like_count !== undefined ? post.like_count : 0;
+        const comments = post.comments_count !== undefined ? post.comments_count : 0;
 
         // Safely handle missing caption
         const caption = post.caption || '';
@@ -108,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="ig-post-content">
                 <p class="ig-post-caption">${escapeHtml(caption)}</p>
-                <span class="ig-post-date">${dateStr}</span>
+                <div class="ig-post-stats">
+                    <span><i class="fas fa-heart"></i> ${likes}</span>
+                    <span><i class="fas fa-comment"></i> ${comments}</span>
+                </div>
             </div>
         `;
         return card;
