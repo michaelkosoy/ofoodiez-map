@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ofoodiez - Best Happy Hours & Food Guides | בלוג אוכל, המלצות ומפות האפי האוור</title>
@@ -25,8 +26,6 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=6">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/instagram_feed.css') }}?v=4">
-
-    {% include 'components/analytics.html' %}
 </head>
 
 <body>
