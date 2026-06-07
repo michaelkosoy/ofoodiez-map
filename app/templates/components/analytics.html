@@ -1,31 +1,20 @@
-<!-- ===== Google Analytics 4 ===== -->
-<!-- Replace G-XXXXXXXXXX with your real Measurement ID from analytics.google.com -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-L7T5RWNGFQ"></script>
 <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-L7T5RWNGFQ');
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-L7T5RWNGFQ');
 
-    // ── Universal Click Tracker ──────────────────────────────────────────────
-    // Fires a GA4 "click" event for EVERY click on the page with full context.
-    document.addEventListener('click', function (e) {
-        const el = e.target.closest('a, button, [role="button"], input[type="submit"], .filter-btn, .sort-btn, .bottom-nav-item, .social-icon, .promo-card, .country-card, .place-card');
-        if (!el) return;
-
-        const tag     = el.tagName.toLowerCase();
-        const text    = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 100);
-        const href    = el.getAttribute('href') || '';
-        const cls     = el.className || '';
-        const page    = window.location.pathname;
-
-        gtag('event', 'click', {
-            element_tag:   tag,
-            element_text:  text,
-            element_href:  href,
-            element_class: cls.slice(0, 100),
-            page_path:     page,
-        });
-    }, true);  // useCapture=true catches all clicks even on disabled elements
+  // Universal Click Tracker — fires a GA4 event for every meaningful click
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('a, button, [role="button"], .filter-btn, .sort-btn, .bottom-nav-item, .social-icon, .promo-card, .country-card, .place-card');
+    if (!el) return;
+    gtag('event', 'click', {
+      element_tag:   el.tagName.toLowerCase(),
+      element_text:  (el.innerText || el.value || '').trim().slice(0, 100),
+      element_href:  el.getAttribute('href') || '',
+      page_path:     window.location.pathname
+    });
+  }, true);
 </script>
-<!-- ===== End Google Analytics ===== -->
