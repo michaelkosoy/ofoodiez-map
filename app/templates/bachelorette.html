@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ofoodiez - מסיבות רווקות</title>
+    <meta name="description" content="המדריך המלא למסיבות רווקות - חללים פרטיים, שפים וחוויות בלתי נשכחות.">
+
+    <!-- PWA & Icons -->
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <meta name="theme-color" content="#FF6B6B">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bachelorette.css') }}?v=1">
+</head>
+
+<body>
+    <!-- Header removed as requested -->
+
+    {% set active_page = 'bachelorette' %}
+    {% include 'components/blog_menu.html' %}
+
+    <div class="container bach-container">
+        <!-- Note -->
+        <div class="info-note">
+            <i class="fas fa-info-circle"></i> {{ bachelorette_data.note }}
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="filter-section">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="חיפוש מקום, אזור או תיאור...">
+                <i class="fas fa-times clear-icon" id="clearSearch" style="display: none;"></i>
+            </div>
+            
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="all">הכל</button>
+                <button class="filter-btn" data-filter="חלל ושף">חלל ושף</button>
+                <button class="filter-btn" data-filter="יקבים">יקבים</button>
+                <button class="filter-btn" data-filter="חלל פרטי להשכרה">חלל פרטי להשכרה</button>
+                <button class="filter-btn" data-filter="חדר פרטי במסעדה">חדר פרטי במסעדה</button>
+            </div>
+
+            <!-- Price Filter -->
+            <div class="price-filter">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label for="priceRange" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">תקציב עד: <span id="priceValue" style="color: var(--primary-color); font-weight: 800;">ללא הגבלה</span></label>
+                </div>
+                <input type="range" id="priceRange" min="100" max="1000" step="50" value="1000" style="width: 100%; accent-color: var(--primary-color);">
+            </div>
+        </div>
+
+        <!-- Places Grid -->
+        <div class="places-grid" id="placesGrid">
+            {% for place in bachelorette_data.places %}
+            <div class="place-card" data-category="{{ place.category }}">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                            <h2 style="margin: 0;">{{ place.name }}</h2>
+                            {% if place.instagram and place.instagram != "https://instagram.com/" %}
+                            <a href="{{ place.instagram }}" target="_blank" class="ig-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-instagram"></i></a>
+                            {% endif %}
+                            {% if place.link and place.link != "#" %}
+                            <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
+                            {% endif %}
+                        </div>
+                        <span class="category-badge">{{ place.category }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ place.location }}</span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-tag"></i>
+                        <span class="price-text">{{ place.price }}</span>
+                    </div>
+                    
+                    <p class="description">{{ place.description }}</p>
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-search-minus"></i>
+            <h3>לא נמצאו תוצאות</h3>
+            <p>נסו לחפש מילים אחרות</p>
+        </div>
+        
+        <div class="bottom-nav-spacer"></div>
+    </div>
+
+    <!-- Sticky Bottom Navigation -->
+    {% include 'components/bottom_nav.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.place-card');
+            const emptyState = document.getElementById('emptyState');
+            const priceRange = document.getElementById('priceRange');
+            const priceValue = document.getElementById('priceValue');
+            const clearSearch = document.getElementById('clearSearch');
+
+            let currentFilter = 'all';
+            let currentSearch = '';
+            let currentMaxPrice = 1000;
+
+            // Price Range Slide
+            priceRange.addEventListener('input', (e) => {
+                currentMaxPrice = parseInt(e.target.value);
+                if (currentMaxPrice >= 1000) {
+                    priceValue.textContent = 'ללא הגבלה';
+                } else {
+                    priceValue.textContent = currentMaxPrice + '₪';
+                }
+                applyFilters();
+            });
+
+            // Filter Buttons Click
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.getAttribute('data-filter');
+                    applyFilters();
+                });
+            });
+
+            // Search Input
+            searchInput.addEventListener('input', (e) => {
+                currentSearch = e.target.value.toLowerCase();
+                clearSearch.style.display = currentSearch.length > 0 ? 'block' : 'none';
+                applyFilters();
+            });
+
+            // Clear Search
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                currentSearch = '';
+                clearSearch.style.display = 'none';
+                applyFilters();
+            });
+
+            // Expand Descriptions
+            const descriptions = document.querySelectorAll('.description');
+            descriptions.forEach(desc => {
+                desc.addEventListener('click', () => {
+                    desc.classList.toggle('expanded');
+                });
+            });
+
+            function applyFilters() {
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    const textContent = card.innerText.toLowerCase();
+                    const priceText = card.querySelector('.price-text').innerText;
+                    
+                    // extract min price
+                    const nums = priceText.match(/\d+/g);
+                    let minPrice = 0;
+                    if (nums && nums.length > 0) {
+                        minPrice = parseInt(nums[0]);
+                    }
+                    
+                    const matchesFilter = currentFilter === 'all' || category === currentFilter;
+                    const matchesSearch = textContent.includes(currentSearch);
+                    // Price is matched if max price is set to "unlimited", if there is no price, or if min price is <= current limit
+                    const matchesPrice = currentMaxPrice >= 1000 || minPrice === 0 || minPrice <= currentMaxPrice;
+
+                    if (matchesFilter && matchesSearch && matchesPrice) {
+                        card.style.display = 'flex';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    emptyState.style.display = 'flex';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

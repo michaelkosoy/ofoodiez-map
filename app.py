@@ -11,7 +11,7 @@ from geopy.exc import GeocoderTimedOut
 from dotenv import load_dotenv
 import requests
 from io import StringIO
-from data import data as home_data
+from data import data as home_data, bachelorette_data
 from instagram_automation.database import User
 from instagram_automation.config import Config
 
@@ -187,11 +187,26 @@ def home():
     """Render the new homepage with data."""
     return render_template('home.html', data=home_data)
 
+@app.route('/blog/<category>')
+def blog_category(category):
+    """Render specific blog category pages."""
+    # Convert category slug to a title-case name (e.g. 'recipes' -> 'Recipes')
+    category_title = category.replace('-', ' ').title()
+    return render_template('blog_category.html', 
+                           category_slug=category,
+                           category_title=category_title,
+                           data=home_data)
+
 @app.route('/map')
 def map_page():
     """Happy Hour Map page."""
     last_update = get_last_update()
     return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY, last_update=last_update)
+
+@app.route('/bachelorette')
+def bachelorette_page():
+    """Bachelorette Party Directory page."""
+    return render_template('bachelorette.html', bachelorette_data=bachelorette_data, data=home_data)
 
 @app.route('/about')
 def about_page():

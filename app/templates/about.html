@@ -130,6 +130,10 @@
 </head>
 
 <body>
+    <br>
+    {% set active_page = 'about' %}
+    {% include 'components/blog_menu.html' %}
+    
     <div class="about-page">
         <div class="container">
             <!-- Photo Grid -->
@@ -180,24 +184,7 @@
     </div>
 
     <!-- Sticky Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a href="/" class="bottom-nav-item">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="/map" class="bottom-nav-item">
-            <i class="fas fa-map-marked-alt"></i>
-            <span>Happy Hour Map</span>
-        </a>
-        <a href="/about" class="bottom-nav-item active">
-            <i class="fas fa-user"></i>
-            <span>About Me</span>
-        </a>
-        <a href="#" class="bottom-nav-item disabled" onclick="showComingSoon(event)">
-            <i class="fas fa-building"></i>
-            <span>HiTech</span>
-        </a>
-    </nav>
+    {% include 'components/bottom_nav.html' %}
 
     <script>
         function showComingSoon(event) {

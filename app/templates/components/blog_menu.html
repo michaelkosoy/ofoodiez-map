@@ -1,0 +1,23 @@
+<!-- Blog Category Menu -->
+<div class="blog-category-menu" dir="ltr">
+    {% if active_page != 'home' %}
+    <div class="blog-menu-header" style="display: flex; justify-content: center; align-items: center; gap: 10px; padding: 0 20px; margin-bottom: 15px; margin-top: 30px;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--text-main, #2D3436);">Ofoodiez</span>
+    </div>
+    {% endif %}
+    <div class="category-scroll-container">
+        <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
+            <i class="fas fa-glass-cheers"></i> Bachelorette Party
+        </a>
+        <a href="/blog/japan-guide" class="category-pill {% if active_page == 'japan-guide' %}active{% endif %}">
+            <i class="fas fa-plane"></i> Japan Guide
+        </a>
+        <a href="/about" class="category-pill {% if active_page == 'about' %}active{% endif %}">
+            <i class="fas fa-user"></i> About Me
+        </a>
+    </div>
+</div>
