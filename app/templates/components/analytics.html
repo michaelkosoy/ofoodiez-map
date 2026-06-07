@@ -8,9 +8,68 @@
   gtag('config', 'G-L7T5RWNGFQ');
 </script>
 
-<!-- Universal Click Tracker -->
+<!-- Universal Click and Feature Tracker -->
 <script>
-  document.addEventListener('click', function (e) {
+  // Friendly mapping helper functions
+  function getPageLabel(path) {
+    if (path === '/' || path === '') return 'דף הבית (Home Page)';
+    if (path === '/map') return 'מפת האפי האוור (Happy Hour Map)';
+    if (path === '/bachelorette') return 'מסיבות רווקות (Bachelorette)';
+    if (path === '/about') return 'אודות (About Me)';
+    if (path === '/privacy') return 'מדיניות פרטיות (Privacy Policy)';
+    if (path === '/terms') return 'תנאי שימוש (Terms of Service)';
+    if (path === '/data-deletion') return 'הנחיות מחיקת מידע (Data Deletion)';
+    if (path.indexOf('/blog/') === 0) {
+      var category = path.split('/')[2] || '';
+      var cleanCat = category.replace(/-/g, ' ');
+      return 'בלוג - ' + cleanCat.charAt(0).toUpperCase() + cleanCat.slice(1);
+    }
+    return 'דף אחר - ' + path;
+  }
+
+  function getFilterLabel(id) {
+    var labels = {
+      'category-filter': 'סינון שעות (Category Filter)',
+      'days-filter': 'סינון ימים (Days Filter)',
+      'city-filter': 'סינון ערים (City Filter)',
+      'category': 'טופס - קטגוריה (Form Category)',
+      'verified-filter': 'סינון מאומתים (Verified Toggle)',
+      'kosher-filter': 'סינון כשר (Kosher Toggle)'
+    };
+    return labels[id] || id;
+  }
+
+  function getFriendlyValueLabel(value) {
+    var translations = {
+      'all': 'הכל (All)',
+      'Sunday': 'יום ראשון (Sunday)',
+      'Monday': 'יום שני (Monday)',
+      'Tuesday': 'יום שלישי (Tuesday)',
+      'Wednesday': 'יום רביעי (Wednesday)',
+      'Thursday': 'יום חמישי (Thursday)',
+      'Friday': 'יום שישי (Friday)',
+      'Saturday': 'יום שבת (Saturday)',
+      'Until 19:00': 'עד 19:00 (Until 19:00)',
+      'Until 19:30': 'עד 19:30 (Until 19:30)',
+      'Until 20:00': 'עד 20:00 (Until 20:00)',
+      'After 20:00': 'אחרי 20:00 (After 20:00)',
+      'Weekends': 'סופ״ש (Weekends)',
+      'Not TLV': 'מחוץ לת״א (Not TLV)'
+    };
+    return translations[value] || value;
+  }
+
+  function getFeatureLabel(feature) {
+    var labels = {
+      'locate_me': '📍 מצא אותי GPS (Locate Me)',
+      'sort_by_discount': '% מיון לפי הנחה (Sort by Discount)',
+      'sort_by_distance': '📍 מיון לפי מרחק (Sort by Distance)'
+    };
+    return labels[feature] || feature;
+  }
+
+  // Helper to get element properties for general clicks
+  function trackClick(e) {
     var el = e.target.closest('a, button, [role="button"], .filter-btn, .sort-btn, .bottom-nav-item, .social-icon, .promo-card, .country-card, .place-card');
     if (!el) return;
 
@@ -20,12 +79,134 @@
     var cls = el.className || '';
     var page = window.location.pathname;
 
+    // Send generic click event
     gtag('event', 'click', {
       element_tag: tag,
       element_text: text,
       element_href: href,
       element_class: cls.slice(0, 100),
-      page_path: page
+      page_path: page,
+      page_label: getPageLabel(page)
     });
+
+    // Clean tracking for specific features clicked:
+    // 1. Locate Me Button
+    if (cls.includes('locate-btn') || el.id === 'locate-btn') {
+      var feat = 'locate_me';
+      gtag('event', 'use_feature', {
+        feature_name: feat,
+        feature_label: getFeatureLabel(feat),
+        page_path: page,
+        page_label: getPageLabel(page)
+      });
+    }
+
+    // 2. Sort Buttons
+    var sortFeat = '';
+    if (el.id === 'sort-discount-btn') {
+      sortFeat = 'sort_by_discount';
+    } else if (el.id === 'sort-distance-btn') {
+      sortFeat = 'sort_by_distance';
+    }
+    if (sortFeat) {
+      gtag('event', 'use_feature', {
+        feature_name: sortFeat,
+        feature_label: getFeatureLabel(sortFeat),
+        page_path: page,
+        page_label: getPageLabel(page)
+      });
+    }
+  }
+
+  // Bind general clicks
+  document.addEventListener('click', trackClick, true);
+
+  // Track specific list item clicks (Places)
+  document.addEventListener('click', function(e) {
+    var placeItem = e.target.closest('.place-list-item');
+    if (placeItem) {
+      var name = placeItem.getAttribute('data-name') || '';
+      var page = window.location.pathname;
+      gtag('event', 'view_place_details', {
+        place_name: name,
+        click_source: 'sidebar_list',
+        page_path: page,
+        page_label: getPageLabel(page)
+      });
+    }
+  }, true);
+
+  // Track Dropdown and Checkbox Filters
+  document.addEventListener('change', function(e) {
+    var target = e.target;
+    if (!target) return;
+    var page = window.location.pathname;
+
+    // 1. Dropdown select filters (Category, Days, City)
+    if (target.tagName.toLowerCase() === 'select') {
+      var filterId = target.id || target.name;
+      if (['category-filter', 'days-filter', 'city-filter', 'category'].indexOf(filterId) !== -1) {
+        gtag('event', 'use_filter', {
+          filter_name: filterId,
+          filter_label: getFilterLabel(filterId),
+          filter_value: target.value,
+          filter_value_label: getFriendlyValueLabel(target.value),
+          page_path: page,
+          page_label: getPageLabel(page)
+        });
+      }
+    }
+
+    // 2. Checkbox filters (Verified, Kosher)
+    if (target.tagName.toLowerCase() === 'input' && target.type === 'checkbox') {
+      var checkId = target.id || target.name;
+      if (['verified-filter', 'kosher-filter'].indexOf(checkId) !== -1) {
+        var stateLabel = target.checked ? 'פעיל (Enabled)' : 'כבוי (Disabled)';
+        gtag('event', 'toggle_filter', {
+          filter_name: checkId,
+          filter_label: getFilterLabel(checkId),
+          filter_state: target.checked ? 'enabled' : 'disabled',
+          filter_state_label: stateLabel,
+          page_path: page,
+          page_label: getPageLabel(page)
+        });
+      }
+    }
+  }, true);
+
+  // Track Search Interactions with Debounce
+  var searchTimeout;
+  document.addEventListener('input', function(e) {
+    var target = e.target;
+    if (target && target.id === 'search-input') {
+      clearTimeout(searchTimeout);
+      var query = target.value.trim();
+      if (query.length >= 2) {
+        searchTimeout = setTimeout(function() {
+          var page = window.location.pathname;
+          gtag('event', 'search_places', {
+            search_term: query,
+            page_path: page,
+            page_label: getPageLabel(page)
+          });
+        }, 1500); // 1.5 second debounce
+      }
+    }
+  }, true);
+
+  // Track Happy Hour Form Submissions
+  document.addEventListener('submit', function(e) {
+    if (e.target && e.target.id === 'add-form') {
+      var formModeEl = document.getElementById('form-mode');
+      var formMode = formModeEl ? formModeEl.value : 'new';
+      var modeLabel = formMode === 'new' ? 'הוספת מקום חדש (New Place)' : 'עדכון מקום קיים (Update Place)';
+      var page = window.location.pathname;
+      gtag('event', 'submit_happy_hour', {
+        form_mode: formMode,
+        form_mode_label: modeLabel,
+        page_path: page,
+        page_label: getPageLabel(page)
+      });
+    }
   }, true);
 </script>
