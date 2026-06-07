@@ -4,17 +4,28 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-L7T5RWNGFQ');
 
-  // Universal Click Tracker — fires a GA4 event for every meaningful click
-  document.addEventListener('click', function(e) {
+  gtag('config', 'G-L7T5RWNGFQ');
+</script>
+
+<!-- Universal Click Tracker -->
+<script>
+  document.addEventListener('click', function (e) {
     var el = e.target.closest('a, button, [role="button"], .filter-btn, .sort-btn, .bottom-nav-item, .social-icon, .promo-card, .country-card, .place-card');
     if (!el) return;
+
+    var tag = el.tagName.toLowerCase();
+    var text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 100);
+    var href = el.getAttribute('href') || '';
+    var cls = el.className || '';
+    var page = window.location.pathname;
+
     gtag('event', 'click', {
-      element_tag:   el.tagName.toLowerCase(),
-      element_text:  (el.innerText || el.value || '').trim().slice(0, 100),
-      element_href:  el.getAttribute('href') || '',
-      page_path:     window.location.pathname
+      element_tag: tag,
+      element_text: text,
+      element_href: href,
+      element_class: cls.slice(0, 100),
+      page_path: page
     });
   }, true);
 </script>
