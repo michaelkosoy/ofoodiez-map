@@ -509,7 +509,7 @@ async function addMarkers(places) {
         if (place.Latitude && place.Longitude) {
             // Create a custom pin
             const pin = new PinElement({
-                background: "#FF6B6B",
+                background: "#5A3A31",
                 borderColor: "#FFFFFF",
                 glyphColor: "#FFFFFF",
                 scale: 1.1,
@@ -575,7 +575,7 @@ function highlightMarker(placeName) {
         } else {
             // Reset - Default Red
             const pin = new google.maps.marker.PinElement({
-                background: "#FF6B6B",
+                background: "#5A3A31",
                 borderColor: "#FFFFFF",
                 glyphColor: "#FFFFFF",
                 scale: 1.1,

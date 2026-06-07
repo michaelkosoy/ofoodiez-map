@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ofoodiez Map</title>
+    <title>Ofoodiez Map - מפת האפי האוור תל אביב</title>
     <meta name="description"
-        content="Discover the best Happy Hours, great deals, and top food spots in Tel Aviv. Real-time updates and verified recommendations.">
+        content="Discover the best Happy Hours, great deals, and top food spots in Tel Aviv. מפת ההאפי האוור של תל אביב - מצאו את המבצעים הכי שווים, שעות שמחות ומסעדות מומלצות.">
+    <meta name="keywords" content="happy hour tel aviv, מפת האפי האוור, תל אביב, מבצעים במסעדות, שעה שמחה, happy hour, ofoodiez, אוכל">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
-    <meta name="theme-color" content="#FF6B6B">
+    <meta name="theme-color" content="#5A3A31">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -37,6 +38,12 @@
 </head>
 
 <body>
+    <!-- Floating Back Button for Map Page -->
+    <a href="/" class="floating-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+
     <!-- Top Banner -->
     <div class="update-banner" id="update-banner">
         <span class="banner-text">

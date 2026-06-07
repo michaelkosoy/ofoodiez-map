@@ -41,3 +41,4 @@ data/places_cache.json
 instance/
 *.db
 
+scripts/

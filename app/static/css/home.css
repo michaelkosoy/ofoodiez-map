@@ -869,17 +869,17 @@ a {
 
 .category-pill i {
     font-size: 1.1rem;
-    color: var(--primary-color, #FF6B6B);
+    color: var(--primary-color, #5A3A31);
 }
 
 .category-pill:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    color: var(--primary-color, #FF6B6B);
+    color: var(--primary-color, #5A3A31);
 }
 
 .category-pill.active {
-    background: var(--primary-gradient, linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%));
+    background: var(--primary-gradient, linear-gradient(135deg, #5A3A31 0%, #8c5b4d 100%));
     color: white;
     border-color: transparent;
 }
