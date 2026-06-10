@@ -25,7 +25,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=6">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/instagram_feed.css') }}?v=4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=1">
 </head>
 
 <body>
@@ -111,7 +111,51 @@
             </div>
         </section>
 
-        {% include 'components/instagram_feed.html' %}
+        <!-- Pop-ups Calendar Section -->
+        <section class="section" id="popups-section">
+            <h3 class="section-title">📅 Pop Ups Events Calender TLV</h3>
+            <div class="calendar-layout">
+                <!-- Left Column: Calendar and Details below it -->
+                <div class="calendar-main-col">
+                    <!-- Calendar Card -->
+                    <div class="calendar-card glass-card">
+                        <div class="calendar-header">
+                            <button class="calendar-nav-btn calendar-prev-btn"><i class="fas fa-chevron-left"></i></button>
+                            <span class="calendar-title">June 2026</span>
+                            <button class="calendar-nav-btn calendar-next-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-weekdays">
+                            <div>Su</div>
+                            <div>Mo</div>
+                            <div>Tu</div>
+                            <div>We</div>
+                            <div>Th</div>
+                            <div>Fr</div>
+                            <div>Sa</div>
+                        </div>
+                        <div class="calendar-days">
+                            <!-- Days will be dynamically rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Details Panel (below calendar) -->
+                    <div class="details-card glass-card hidden">
+                        <!-- Will be dynamically populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Sidebar (laptop upcoming list) -->
+                <div class="events-sidebar">
+                    <!-- All Upcoming Events List -->
+                    <div class="list-card glass-card">
+                        <h4 class="list-card-title">✨ Upcoming Events</h4>
+                        <div class="upcoming-events-list">
+                            <!-- Will be dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Contact Section -->
         <div class="contact-section" style="text-align: center; margin-top: 40px;">
@@ -233,7 +277,10 @@
             el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
         });
     </script>
-    <script src="{{ url_for('static', filename='js/instagram_feed.js') }}?v=2"></script>
+    <script>
+        const POPUP_EVENTS = {{ data.popups | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/calendar.js') }}?v=1"></script>
 </body>
 
 </html>

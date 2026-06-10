@@ -23,6 +23,9 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=7">
+    {% if category_slug == 'instagram' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/instagram_feed.css') }}?v=4">
+    {% endif %}
     <style>
         .blog-page-content {
             min-height: 100vh;
@@ -87,12 +90,16 @@
             <!-- Page Title -->
             <h1 class="page-title">{{ category_title }}</h1>
 
-            <!-- Placeholder Content -->
+            <!-- Content -->
+            {% if category_slug == 'instagram' %}
+                {% include 'components/instagram_feed.html' %}
+            {% else %}
             <div class="placeholder-card">
                 <i class="fas fa-pencil-alt"></i>
                 <h2>Coming Soon</h2>
                 <p>We are currently writing the best content for our {{ category_title }} section. Check back soon for amazing updates!</p>
             </div>
+            {% endif %}
 
             <!-- Legal Footer -->
             <div class="legal-footer">
@@ -111,6 +118,9 @@
             alert('HiTech section coming soon! 🚀');
         }
     </script>
+    {% if category_slug == 'instagram' %}
+    <script src="{{ url_for('static', filename='js/instagram_feed.js') }}?v=2"></script>
+    {% endif %}
 </body>
 
 </html>
