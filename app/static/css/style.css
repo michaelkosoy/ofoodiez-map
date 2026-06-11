@@ -112,7 +112,7 @@ nav.bottom-nav.map-bottom-nav {
     position: fixed;
     top: 0;
     left: 0;
-    bottom: 60px;
+    bottom: 80px;
     /* Stops exactly at top of bottom nav */
     width: 480px;
 
@@ -126,7 +126,7 @@ nav.bottom-nav.map-bottom-nav {
     /* Layout */
     z-index: 1000;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
 }
@@ -1557,6 +1557,8 @@ input:checked~.toggle-label {
 
 /* Sort toggle buttons */
 .sort-toggle-group {
+    position: relative;
+    z-index: 100;
     display: inline-flex;
     align-items: center;
     border-radius: 20px;
@@ -1652,6 +1654,119 @@ input:checked~.toggle-label {
 
 @media (min-width: 768px) {
     .floating-back-btn {
-        left: 500px; /* 480px sidebar + 20px margin */
+        left: 500px;
+        /* 480px sidebar + 20px margin */
+    }
+}
+
+/* =========================================
+   MAP FILTERS CARD
+   ========================================= */
+@media (min-width: 769px) {
+    .map-filters-card {
+        position: fixed;
+        top: 75px;
+        /* Moved down to avoid collision with back button */
+        left: calc(480px + (100vw - 480px) / 2);
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 12px 24px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        width: max-content;
+        max-width: calc(100vw - 520px);
+    }
+
+    /* Search Field in Sidebar on Desktop */
+    .search-container {
+        margin-top: 16px;
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .search-toggle {
+        display: none !important;
+        /* Hide toggle button */
+    }
+
+    .search-input-wrapper {
+        display: flex !important;
+        /* Always show search field */
+        position: static;
+        animation: none;
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 0 10px 0 14px;
+        height: 36px;
+        margin: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .search-input-wrapper input {
+        width: 100%;
+        font-size: 0.95rem;
+        height: 100%;
+        margin-bottom: 0;
+    }
+
+    .search-clear {
+        padding: 0 4px;
+    }
+
+    .map-filters-card .header-filters-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .map-filters-card .filters-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .map-filters-card .toggles-row {
+        width: auto;
+        margin-top: 0;
+        gap: 12px;
+    }
+
+    .sidebar-header {
+        padding-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .map-filters-card {
+        position: static;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        display: block;
+    }
+
+    .sidebar-header {
+        position: relative;
+    }
+
+    .search-container {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        margin-left: 0;
     }
 }

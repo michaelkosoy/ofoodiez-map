@@ -66,57 +66,62 @@
             <div class="header-logo-row">
                 <h1>Ofoodiez</h1>
                 <p>Happy Hour's Map</p>
-                <!-- Search Container -->
-                <div class="search-container" id="search-container">
-                    <button class="search-toggle" id="search-toggle" onclick="toggleSearch()">
-                        <i class="fas fa-search"></i>
+            </div>
+            
+            <!-- Search Container -->
+            <div class="search-container" id="search-container">
+                <button class="search-toggle" id="search-toggle" onclick="toggleSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div class="search-input-wrapper" id="search-wrapper">
+                    <input type="text" id="search-input" placeholder="Search / חיפוש..."
+                        oninput="handleSearchKeypress(event)" onkeypress="handleSearchKeypress(event)">
+                    <button class="search-clear" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
                     </button>
-                    <div class="search-input-wrapper" id="search-wrapper">
-                        <input type="text" id="search-input" placeholder="Search / חיפוש..."
-                            oninput="handleSearchKeypress(event)" onkeypress="handleSearchKeypress(event)">
-                        <button class="search-clear" onclick="clearSearch()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
-            <div class="header-filters-row">
-                <div class="filters-wrapper">
-                    <!-- Filter Dropdown -->
-                    <div class="filter-container">
-                        <select id="category-filter" class="form-control">
-                            <option value="all">All Hours</option>
-                        </select>
-                    </div>
-                    <!-- Days Filter -->
-                    <div class="days-filter-container">
-                        <select id="days-filter" class="form-control">
-                            <!-- Populated by JS -->
-                        </select>
-                    </div>
-                    <!-- City Filter -->
-                    <div class="city-filter-container">
-                        <select id="city-filter" class="form-control">
-                            <!-- Populated by JS -->
-                        </select>
-                    </div>
-                    <!-- Toggles Row -->
-                    <div class="toggles-row">
-                        <label class="verified-toggle">
-                            <input type="checkbox" id="verified-filter">
-                            <span class="slider round"></span>
-                            <span class="toggle-label">Verified</span>
-                        </label>
-                        <label class="verified-toggle">
-                            <input type="checkbox" id="kosher-filter">
-                            <span class="slider round"></span>
-                            <span class="toggle-label">כשר</span>
-                        </label>
-                        <div class="sort-toggle-group">
-                            <button id="sort-discount-btn" class="sort-btn active"
-                                onclick="toggleSortMode('discount')">% הנחה</button>
-                            <button id="sort-distance-btn" class="sort-btn" onclick="toggleSortMode('distance')">📍
-                                מרחק</button>
+            
+            <div class="map-filters-card">
+
+                <div class="header-filters-row">
+                    <div class="filters-wrapper">
+                        <!-- Filter Dropdown -->
+                        <div class="filter-container">
+                            <select id="category-filter" class="form-control">
+                                <option value="all">All Hours</option>
+                            </select>
+                        </div>
+                        <!-- Days Filter -->
+                        <div class="days-filter-container">
+                            <select id="days-filter" class="form-control">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <!-- City Filter -->
+                        <div class="city-filter-container">
+                            <select id="city-filter" class="form-control">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <!-- Toggles Row -->
+                        <div class="toggles-row">
+                            <label class="verified-toggle">
+                                <input type="checkbox" id="verified-filter">
+                                <span class="slider round"></span>
+                                <span class="toggle-label">Verified</span>
+                            </label>
+                            <label class="verified-toggle">
+                                <input type="checkbox" id="kosher-filter">
+                                <span class="slider round"></span>
+                                <span class="toggle-label">כשר</span>
+                            </label>
+                            <div class="sort-toggle-group">
+                                <button id="sort-discount-btn" class="sort-btn active"
+                                    onclick="toggleSortMode('discount')">% הנחה</button>
+                                <button id="sort-distance-btn" class="sort-btn" onclick="toggleSortMode('distance')">📍
+                                    מרחק</button>
+                            </div>
                         </div>
                     </div>
                 </div>
