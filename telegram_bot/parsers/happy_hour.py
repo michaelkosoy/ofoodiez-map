@@ -29,6 +29,8 @@ class HappyHourParser(BaseEventParser):
         4. Build a short, attractive 1-2 sentence description in English summarizing the deals and the restaurant/bar's vibe.
         5. Provide the official Instagram handle link (e.g., 'https://instagram.com/handle').
 
+        CRITICAL: If any information is missing or cannot be found in the image/text, DO NOT fail. Instead, leave the corresponding field as an empty string ("") so the user can fill it in manually later.
+
         You must return a single JSON object matching this schema:
         {
           "name": "Restaurant/Bar Name",
