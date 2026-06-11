@@ -1,7 +1,7 @@
 /* Calendar Styling Variable & Base overrides */
 :root {
-    --accent-color: #E07A5F;
-    --accent-color-hover: #D95D39;
+    --accent-color: #720815;
+    --accent-color-hover: #8C0A19; /* Slightly lighter burgundy for hover */
     --calendar-shadow: 0 10px 30px rgba(90, 58, 49, 0.08);
 }
 

@@ -25,7 +25,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=6">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=2">
 </head>
 
 <body>
@@ -280,7 +280,7 @@
     <script>
         const POPUP_EVENTS = {{ data.popups | tojson | safe }};
     </script>
-    <script src="{{ url_for('static', filename='js/calendar.js') }}?v=1"></script>
+    <script src="{{ url_for('static', filename='js/calendar.js') }}?v=4"></script>
 </body>
 
 </html>

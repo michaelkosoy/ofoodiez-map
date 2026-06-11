@@ -153,3 +153,37 @@ class MessageLog(db.Model):
 
     def __repr__(self):
         return f'<Message {self.direction} ({self.message_type})>'
+
+
+class PopupEvent(db.Model):
+    """Calendar popup event added via Telegram bot."""
+    __tablename__ = 'popup_events'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(256), nullable=False)
+    date = db.Column(db.String(256), nullable=False)  # "YYYY-MM-DD" or "YYYY-MM-DD | YYYY-MM-DD"
+    time = db.Column(db.String(64))
+    location = db.Column(db.String(256))
+    location_link = db.Column(db.Text)
+    description = db.Column(db.Text)
+    instagram_username = db.Column(db.String(128))
+    instagram_link = db.Column(db.Text)
+    image = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "date": self.date,
+            "time": self.time or "",
+            "location": self.location or "",
+            "location_link": self.location_link or "",
+            "description": self.description or "",
+            "instagram_username": self.instagram_username or "",
+            "instagram_link": self.instagram_link or "",
+            "image": self.image or ""
+        }
+
+    def __repr__(self):
+        return f'<PopupEvent "{self.title}" on {self.date}>'

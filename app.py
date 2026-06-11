@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import requests
 from io import StringIO
 from data import data as home_data, bachelorette_data
-from instagram_automation.database import User
+from instagram_automation.database import User, PopupEvent
 from instagram_automation.config import Config
 
 # Load environment variables from .env file (for local development)
@@ -39,6 +39,17 @@ else:
 # Register Instagram Automation blueprint
 from instagram_automation import init_app as init_ig_automation
 init_ig_automation(app)
+
+# Start Telegram bot in a background thread
+import threading
+from telegram_bot.bot import run_bot
+
+# Only start the bot in the main thread if reloading or if not in debug mode
+is_reloader = os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+if not app.debug or is_reloader:
+    bot_thread = threading.Thread(target=run_bot, args=(app,), daemon=True)
+    bot_thread.start()
+    print("🚀 Started Telegram bot background thread.")
 
 # Helper to get env var or use default if missing/placeholder
 def get_env_var(name, default=None):
@@ -185,7 +196,19 @@ def get_last_update():
 @app.route('/')
 def home():
     """Render the new homepage with data."""
-    return render_template('home.html', data=home_data)
+    # Load popups from Supabase instead of mock data
+    try:
+        db_events = PopupEvent.query.order_by(PopupEvent.date.asc()).all()
+        popups_list = [event.to_dict() for event in db_events]
+
+        # Dynamically inject into a copy of home_data
+        data_to_render = dict(home_data)
+        data_to_render['popups'] = popups_list
+    except Exception as e:
+        print(f"⚠️ Error fetching popups from database: {e}")
+        data_to_render = home_data # Fallback to mock data in case of db errors
+        
+    return render_template('home.html', data=data_to_render)
 
 @app.route('/blog/<category>')
 def blog_category(category):
