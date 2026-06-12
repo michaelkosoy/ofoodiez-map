@@ -23,7 +23,7 @@ class PopupParser(BaseEventParser):
 
         Follow these steps:
         1. Identify the name of the pop-up or chef.
-        2. Identify the date of the event (convert to YYYY-MM-DD format).
+        2. Identify the date of the event (convert to YYYY-MM-DD format). If the date is displayed without a year (like "14.06" or "June 14"), use the current year from today's date ({current_date_str}).
         3. Identify the time of the event.
         4. Identify the location/venue name and full address.
         5. Build a short, attractive 1-2 sentence description in English summarizing the menu, chef, and vibe of the pop-up.

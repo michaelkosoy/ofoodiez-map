@@ -265,6 +265,24 @@ if bot:
             parsed_data = parser.parse_image(downloaded_file, mime_type)
             state['pending_data'] = parsed_data
             
+            if active_mode == 'popup' and not parsed_data.get('date'):
+                state['editing_field'] = 'date'
+                state['edit_message_id'] = processing_msg.message_id
+                
+                bot.edit_message_text(
+                    "✅ Flyer parsed, but I couldn't find the date.",
+                    chat_id,
+                    processing_msg.message_id
+                )
+                
+                prompt_msg = bot.send_message(
+                    chat_id,
+                    "⚠️ Please reply with the **date** for this event (e.g., YYYY-MM-DD or DD.MM):",
+                    parse_mode="Markdown"
+                )
+                state['prompt_message_id'] = prompt_msg.message_id
+                return
+            
             # Format and display confirmation message
             show_confirmation_message(chat_id, processing_msg.message_id, active_mode, parsed_data)
             
@@ -323,6 +341,24 @@ if bot:
             # Parse text
             parsed_data = parser.parse_text(message.text)
             state['pending_data'] = parsed_data
+            
+            if active_mode == 'popup' and not parsed_data.get('date'):
+                state['editing_field'] = 'date'
+                state['edit_message_id'] = processing_msg.message_id
+                
+                bot.edit_message_text(
+                    "✅ Text parsed, but I couldn't find the date.",
+                    chat_id,
+                    processing_msg.message_id
+                )
+                
+                prompt_msg = bot.send_message(
+                    chat_id,
+                    "⚠️ Please reply with the **date** for this event (e.g., YYYY-MM-DD or DD.MM):",
+                    parse_mode="Markdown"
+                )
+                state['prompt_message_id'] = prompt_msg.message_id
+                return
             
             # Format and display confirmation message
             show_confirmation_message(chat_id, processing_msg.message_id, active_mode, parsed_data)
