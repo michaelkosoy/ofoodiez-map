@@ -429,7 +429,13 @@ def run_bot(app):
         return
         
     print("🤖 Telegram Bot initialized successfully and starting listener thread...")
-    bot.infinity_polling(timeout=20, long_polling_timeout=20)
+    import time
+    while True:
+        try:
+            bot.infinity_polling(timeout=20, long_polling_timeout=20)
+        except Exception as e:
+            print(f"⚠️ Telegram Bot polling crashed: {e}. Restarting in 5 seconds...")
+            time.sleep(5)
 
 if __name__ == "__main__":
     # Standard standalone run for debugging
