@@ -41,51 +41,52 @@ class WaUser(db.Model):
     id = _pk()
     phone = db.Column(db.Text, nullable=False, unique=True)  # E.164, no 'whatsapp:' prefix
     profile_name = db.Column(db.Text)
+    first_name = db.Column(db.Text)
+    last_name = db.Column(db.Text)
+    email = db.Column(db.Text)
+    terms_accepted_at = db.Column(db.DateTime)
     last_language = db.Column(db.Text, nullable=False, default="en")
-    message_count = db.Column(db.Integer, nullable=False, default=0)
     is_blocked = db.Column(db.Boolean, nullable=False, default=False)
-    last_results = db.Column(db.JSON)  # array of link ids; reassign whole list, never mutate in place
-    last_results_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def is_registered(self):
+        return bool(self.first_name and self.email)
 
     def __repr__(self):
         return f"<WaUser {self.phone}>"
 
 
-class WaReferralLink(db.Model):
-    __tablename__ = "wa_referral_links"
+class WaConversation(db.Model):
+    """Live conversation state, one row per user."""
+    __tablename__ = "wa_conversations"
 
     id = _pk()
-    company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
-    submitter_user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"))
-    submitter_display = db.Column(db.Text)  # first word of submitter's ProfileName
-    role_title = db.Column(db.Text)
-    url = db.Column(db.Text, nullable=False)  # cleaned, as shown to users
-    url_canonical = db.Column(db.Text, nullable=False)  # for dedup
-    status = db.Column(db.Text, nullable=False, default="pending")  # pending|approved|rejected|expired
-    rejection_reason = db.Column(db.Text)
-    times_sent = db.Column(db.Integer, nullable=False, default=0)
-    reviewed_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False, unique=True)
+    flow = db.Column(db.Text)          # candidate | employee | contact | None
+    step = db.Column(db.Text)
+    data = db.Column(db.JSON, default=dict)   # reassign whole dict; never mutate in place
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Dedup among LIVE rows only: re-submitting a previously rejected/expired URL
-    # is allowed. Both dialect `_where` clauses are supplied so the partial index
-    # behaves identically on sqlite (tests) and postgres (prod) — see plan §4.
-    __table_args__ = (
-        db.Index(
-            "uq_wa_links_company_url_active",
-            "company_id",
-            "url_canonical",
-            unique=True,
-            postgresql_where=db.text("status in ('pending','approved')"),
-            sqlite_where=db.text("status in ('pending','approved')"),
-        ),
-    )
+    def __repr__(self):
+        return f"<WaConversation user={self.user_id} {self.flow}/{self.step}>"
+
+
+class WaOutboundMessage(db.Model):
+    """Log of every outbound REST send (replies are async REST, not TwiML)."""
+    __tablename__ = "wa_outbound_messages"
+
+    id = _pk()
+    to_phone = db.Column(db.Text, nullable=False)
+    body = db.Column(db.Text)
+    content_sid = db.Column(db.Text)
+    twilio_sid = db.Column(db.Text)
+    status = db.Column(db.Text)
+    error = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<WaReferralLink {self.id} company={self.company_id} {self.status}>"
+        return f"<WaOutboundMessage to={self.to_phone} {self.twilio_sid}>"
 
 
 class WaInboundMessage(db.Model):
