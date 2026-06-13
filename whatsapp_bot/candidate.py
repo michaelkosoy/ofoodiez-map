@@ -116,20 +116,25 @@ def _handle_resume(user, conv, data, inbound):
                                {"company_id": data.get("company_id"), "company_name": data.get("company_name")})
         messaging.send_buttons(user.phone, WaConfig.WA_CT_EXPLORE_MORE, {"1": str(recipients)})
     else:
-        conversation.set_state(conv, "candidate", "cand_company", {})
+        conversation.reset_state(conv)
         messaging.send_prompt(user.phone, copy.CAND_SUBMITTED.format(n=recipients))
+        _send_menu(user)
     return "cand_submitted"
 
 
 def _handle_explore(user, conv, payload):
     if payload == "EXPLORE_YES":
         return start(user, conv)
-    if payload == "EXPLORE_FINISH":
-        conversation.reset_state(conv)
-        messaging.send_prompt(user.phone, copy.CAND_FINISHED)
-        return "cand_finished"
+    conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.CAND_FINISHED)
-    return "cand_explore"
+    _send_menu(user)
+    return "cand_finished"
+
+
+def _send_menu(user):
+    """Drop the user back on the Welcome menu so they can pick any path next."""
+    if WaConfig.WA_CT_WELCOME:
+        messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
 
 
 def _create_application(user, data, resume_path):

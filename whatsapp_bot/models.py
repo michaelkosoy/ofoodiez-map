@@ -49,7 +49,10 @@ class WaAdvocate(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
-        db.Index("uq_wa_advocates_user_company", "user_id", "company_id", unique=True),
+        # One row per work email an advocate gives for a company (they can add a
+        # few), so this is unique on (user, company, email) — not (user, company).
+        db.Index("uq_wa_advocates_user_company_email",
+                 "user_id", "company_id", "email", unique=True),
     )
 
     def __repr__(self):

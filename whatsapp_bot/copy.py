@@ -59,13 +59,23 @@ EMP_FIRST_NAME = "Awesome — let's set you up as an advocate! 🙌\nWhat's your
 EMP_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
 EMP_COMPANY = "Which company do you work at (and can refer candidates into)? 🏢"
 EMP_EMAIL = (
-    "Great — *{company}*! 💼\n"
-    "What's the best *email at {company}* to receive candidate applications?"
+    "Awesome — *{company}*! 💼\n"
+    "Which *work email(s)* should we send candidate referrals to?\n"
+    "Add a few if you like — just separate them with commas. 📧"
 )
-EMP_EMAIL_INVALID = "Hmm, that doesn't look like an email 🤔\nMind trying again? (e.g. you@company.com)"
+EMP_EMAIL_INVALID = (
+    "Hmm, I couldn't spot a valid email there 🤔\n"
+    "Mind sending it again? (e.g. you@company.com — separate a few with commas)"
+)
+EMP_EMAIL_PERSONAL = (
+    "Looks like a personal email 🙃\n"
+    "Please use your *work email at {company}* (not Gmail/Yahoo/Outlook, etc.) so "
+    "we route referrals to the right inbox. 📧"
+)
 ADVOCATE_DONE = (
     "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
-    "We'll send candidate applications straight to *{email}*. ✨"
+    "We'll send candidate referrals to: *{emails}* ✨\n"
+    "Want to do more? Tap a button below or type *menu* anytime."
 )
 
 # ---- Phase C: candidate company search ----
@@ -103,6 +113,6 @@ CAND_RESUME_NOT_PDF = "I need your résumé as a *PDF file* 🙏 — attach the 
 CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending the PDF again."
 CAND_SUBMITTED = (
     "Sent to *{n}* advocate(s) — fingers crossed! 🤞🎉\n"
-    "Type another company to line up more, or *menu* to finish."
+    "Pick what's next below, or type *menu* anytime."
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"
