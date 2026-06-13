@@ -59,6 +59,31 @@ class _WaConfig:
     def WA_CT_EMPLOYEE_CONFIRM(self):
         return os.environ.get("WA_CT_EMPLOYEE_CONFIRM")
 
+    @property
+    def WA_CT_EXPLORE_MORE(self):
+        return os.environ.get("WA_CT_EXPLORE_MORE")
+
+    # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
+    @property
+    def SUPABASE_URL(self):
+        return os.environ.get("SUPABASE_URL")
+
+    @property
+    def SUPABASE_SERVICE_ROLE_KEY(self):
+        return os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+
+    @property
+    def SUPABASE_RESUME_BUCKET(self):
+        return os.environ.get("SUPABASE_RESUME_BUCKET", "wa-resumes")
+
+    @property
+    def SENDGRID_API_KEY(self):
+        return os.environ.get("SENDGRID_API_KEY")
+
+    @property
+    def WA_FROM_EMAIL(self):
+        return os.environ.get("WA_FROM_EMAIL")
+
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property
     def MAX_BODY_LENGTH(self):

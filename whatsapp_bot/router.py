@@ -1,9 +1,10 @@
 """Dispatch, Welcome menu, and path routing.
 
-A path button enters its flow, running the shared registration sub-flow first
-if the user isn't registered. After registration: Candidate runs company search
-(Phase C), Employee runs advocate registration (Phase E), Contact Us returns
-contact info. Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
+- Candidate: register (name + email + review) → company search → role → job link
+  → résumé → submit.
+- Employee: advocate registration (name → company → company email → confirm).
+- Contact Us: returns contact info.
+Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 """
 import logging
 
@@ -38,13 +39,17 @@ def handle(inbound):
         return _enter_path(user, conv, _PATHS[payload])
 
     # In-flow dispatch.
-    if conv.flow in ("candidate", "employee"):
+    if conv.flow == "candidate":
         if conv.step and conv.step.startswith("reg_"):
             return registration.handle(user, conv, payload, text)
-        if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
+        if conv.step and conv.step.startswith("cand_"):
+            return candidate.handle(user, conv, inbound)
+        messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
+        return "main_coming_soon"
+
+    if conv.flow == "employee":
+        if conv.step and conv.step.startswith("emp_"):
             return employee.handle(user, conv, payload, text)
-        if conv.flow == "candidate" and conv.step and conv.step.startswith("cand_"):
-            return candidate.handle(user, conv, payload, text)
         messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
         return "main_coming_soon"
 
@@ -57,9 +62,12 @@ def _enter_path(user, conv, flow):
         messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"
+    if flow == "employee":
+        return employee.start(user, conv)
+    # candidate
     if user.is_registered:
-        return registration.enter_main(user, conv)
-    return registration.start(user, conv, flow)
+        return candidate.start(user, conv)
+    return registration.start(user, conv, "candidate")
 
 
 def _welcome(user, conv):

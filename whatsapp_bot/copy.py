@@ -54,15 +54,18 @@ CONTACT_INFO = (
     "Type *menu* anytime to start over."
 )
 
-# ---- Phase E: employee advocate registration ----
-EMP_COMPANY = (
-    "Amazing — advocates are how the magic happens! 🙌\n"
-    "Which company do you work at (or can refer into)?"
+# ---- Employee / advocate registration ----
+EMP_FIRST_NAME = "Awesome — let's set you up as an advocate! 🙌\nWhat's your *first name*?"
+EMP_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
+EMP_COMPANY = "Which company do you work at (and can refer candidates into)? 🏢"
+EMP_EMAIL = (
+    "Great — *{company}*! 💼\n"
+    "What's the best *email at {company}* to receive candidate applications?"
 )
-EMP_ROLE = "Love it — *{company}*! 💼\nWhat's your role/title there?"
+EMP_EMAIL_INVALID = "Hmm, that doesn't look like an email 🤔\nMind trying again? (e.g. you@company.com)"
 ADVOCATE_DONE = (
     "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
-    "We'll ping you the moment a great candidate comes through. ✨"
+    "We'll send candidate applications straight to *{email}*. ✨"
 )
 
 # ---- Phase C: candidate company search ----
@@ -92,3 +95,14 @@ CAND_RESUME_SOON = (
     "Awesome — you're almost there! 🙌\n"
     "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
 )
+CAND_RESUME_PROMPT = (
+    "Last step! 📄 Send your résumé as a *PDF* and we'll get it to the advocates.\n"
+    "Make it shine — tailor it to the role if you can. ✨"
+)
+CAND_RESUME_NOT_PDF = "I need your résumé as a *PDF file* 🙏 — attach the PDF and send again."
+CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending the PDF again."
+CAND_SUBMITTED = (
+    "Sent to *{n}* advocate(s) — fingers crossed! 🤞🎉\n"
+    "Type another company to line up more, or *menu* to finish."
+)
+CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"

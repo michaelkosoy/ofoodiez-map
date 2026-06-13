@@ -1,31 +1,29 @@
-"""Registration sub-flow (shared by the candidate & employee paths).
+"""Registration sub-flow for the CANDIDATE path.
 
 Collects first/last name + email as free text (each prompt carries a
 Back-to-Menu button via messaging.send_prompt), shows a review with
 Confirm/Edit/Restart buttons (WA_CT_REGISTER_REVIEW), persists on Confirm, then
-hands off to the flow's main step (candidate → company search; employee →
-advocate registration).
+hands off to the candidate company search. (The employee path has its own
+advocate registration in employee.py.)
 """
 import re
 from datetime import datetime
 
 from database.models import db
 
-from . import candidate, conversation, copy, employee, messaging
+from . import candidate, conversation, copy, messaging
 from .config import WaConfig
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def start(user, conv, flow):
-    """Kick off registration for `flow` ('candidate' or 'employee')."""
+def start(user, conv, flow="candidate"):
     conversation.set_state(conv, flow, "reg_first_name", {})
     messaging.send_prompt(user.phone, copy.REG_FIRST_NAME)
     return "reg_start"
 
 
 def handle(user, conv, payload, text):
-    """Dispatch a message while the user is in a reg_* step."""
     step = conv.step
     data = dict(conv.data or {})
 
@@ -58,18 +56,14 @@ def handle(user, conv, payload, text):
             conversation.set_state(conv, conv.flow, "reg_first_name", {})
             messaging.send_prompt(user.phone, copy.REG_EDIT)
             return "reg_edit"
-        # Any stray tap/text at the review: just re-show it.
         _send_review(user, data)
         return "reg_review"
 
-    # Defensive: unknown step → restart registration cleanly.
     return start(user, conv, conv.flow)
 
 
 def enter_main(user, conv):
-    """Hand off to the flow's main step after registration."""
-    if conv.flow == "employee":
-        return employee.start(user, conv)
+    """After candidate registration, go to company search."""
     return candidate.start(user, conv)
 
 

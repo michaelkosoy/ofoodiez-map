@@ -42,6 +42,7 @@ class WaAdvocate(db.Model):
     id = _pk()
     user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
+    email = db.Column(db.Text)          # company/work email — where applications are sent
     role_title = db.Column(db.Text)
     status = db.Column(db.Text, nullable=False, default="active")  # active|pending|inactive
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -71,6 +72,42 @@ class WaCompanyRequest(db.Model):
 
     def __repr__(self):
         return f"<WaCompanyRequest {self.company_name_raw!r} {self.reason}>"
+
+
+class WaApplication(db.Model):
+    """A candidate's submitted application to a company."""
+    __tablename__ = "wa_applications"
+
+    id = _pk()
+    candidate_user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False)
+    company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
+    role_query = db.Column(db.Text)
+    job_posting_url = db.Column(db.Text)
+    resume_path = db.Column(db.Text)        # Supabase Storage object path (or a fallback ref)
+    resume_filename = db.Column(db.Text)
+    status = db.Column(db.Text, nullable=False, default="submitted")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<WaApplication {self.id} user={self.candidate_user_id} company={self.company_id}>"
+
+
+class WaApplicationRecipient(db.Model):
+    """Per-advocate delivery record for an application's notification email."""
+    __tablename__ = "wa_application_recipients"
+
+    id = _pk()
+    application_id = db.Column(db.BigInteger, db.ForeignKey("wa_applications.id"), nullable=False)
+    advocate_id = db.Column(db.BigInteger, db.ForeignKey("wa_advocates.id"), nullable=False)
+    email = db.Column(db.Text)
+    emailed_at = db.Column(db.DateTime)
+    email_status = db.Column(db.Text)       # sent | pending | failed
+    error = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<WaApplicationRecipient app={self.application_id} adv={self.advocate_id} {self.email_status}>"
 
 
 class WaUser(db.Model):
