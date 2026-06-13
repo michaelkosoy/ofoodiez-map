@@ -796,3 +796,28 @@ alter table public.wa_users drop column if exists last_results_at;
 - **Placeholder scan:** the only stubs are the three "coming soon" path messages in `router.py`, explicitly transitional and replaced in Phases B–F — not plan placeholders. No TBD/TODO steps.
 - **Type/name consistency:** `router.handle(inbound)` returns the `parsed_command` label used in Task 6's webhook + audit assertions; `messaging.send_text/send_buttons`, `conversation.get_or_create_user/get_state/set_state/reset_state`, `WaConfig.WA_CT_WELCOME` names match across tasks; `mock_twilio` patches `whatsapp_bot.messaging.Client` (the import site).
 - **Idempotency preserved:** Task 6 keeps PR1's claim-before-side-effect; a duplicate `MessageSid` returns the empty ack before `router.handle`, so no duplicate REST sends.
+
+---
+
+## Phase A → Phase B handoff notes
+
+Carried from the final holistic review of the Foundation implementation:
+
+- **Reset semantics are deferred.** The shipped `router.py` collapses every
+  non-`PATH_*` input to the Welcome menu (which resets). The typed reset
+  keywords (`menu`/`restart`/`back`/`hi`/…) and the spec's "unknown free-text at
+  a decision step → gentle re-prompt, do NOT reset/advance" rule are **not**
+  implemented yet. Phase B must reintroduce both when it adds flow-aware dispatch
+  at the marked seam in `router.handle` — do not treat the current
+  welcome-fallthrough as the final dispatch shape.
+- **`WA_CT_BACK_TO_MENU` is provisioned but unused.** Phase A handles "Back to
+  Menu" by re-sending the Welcome template; the dedicated Back-to-Menu template
+  SID is wired in config but not yet sent.
+- **Transaction boundaries.** `messaging._log` commits per send, separate from
+  the audit-row commit and any conversation-state commit. As flows send multiple
+  messages, confirm the intended atomicity (should state + send be one txn?).
+- **`response_summary` currently duplicates `parsed_command`.** Repurpose it
+  (e.g. store the outbound Twilio SID) or drop it in a later migration.
+- **Task 7 (operator setup) is still pending** before the bot is testable live:
+  create the Welcome + Back-to-Menu Content templates, set the new Render env
+  vars, and re-run `whatsapp_bot/schema.sql` in Supabase.
