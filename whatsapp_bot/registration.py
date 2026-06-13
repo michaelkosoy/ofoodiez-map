@@ -3,15 +3,15 @@
 Collects first/last name + email as free text (each prompt carries a
 Back-to-Menu button via messaging.send_prompt), shows a review with
 Confirm/Edit/Restart buttons (WA_CT_REGISTER_REVIEW), persists on Confirm, then
-hands off to the flow's main step (candidate → Phase C stub; employee → advocate
-registration).
+hands off to the flow's main step (candidate → company search; employee →
+advocate registration).
 """
 import re
 from datetime import datetime
 
 from database.models import db
 
-from . import conversation, copy, employee, messaging
+from . import candidate, conversation, copy, employee, messaging
 from .config import WaConfig
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -70,9 +70,7 @@ def enter_main(user, conv):
     """Hand off to the flow's main step after registration."""
     if conv.flow == "employee":
         return employee.start(user, conv)
-    conversation.set_state(conv, "candidate", "cand_main", {})
-    messaging.send_prompt(user.phone, copy.REGISTERED_CANDIDATE)
-    return "registered_candidate"
+    return candidate.start(user, conv)
 
 
 def _send_review(user, data):

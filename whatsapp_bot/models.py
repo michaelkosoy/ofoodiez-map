@@ -55,6 +55,24 @@ class WaAdvocate(db.Model):
         return f"<WaAdvocate user={self.user_id} company={self.company_id}>"
 
 
+class WaCompanyRequest(db.Model):
+    """A candidate search for an unknown / no-advocate company — the ops
+    backfill queue that powers the 'we'll add it, check back' promise."""
+    __tablename__ = "wa_company_requests"
+
+    id = _pk()
+    candidate_user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False)
+    company_name_raw = db.Column(db.Text, nullable=False)
+    normalized_name = db.Column(db.Text)
+    resolved_company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"))
+    reason = db.Column(db.Text, nullable=False)  # unknown_company | no_advocates
+    status = db.Column(db.Text, nullable=False, default="open")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<WaCompanyRequest {self.company_name_raw!r} {self.reason}>"
+
+
 class WaUser(db.Model):
     __tablename__ = "wa_users"
 

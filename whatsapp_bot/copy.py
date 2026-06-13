@@ -64,3 +64,31 @@ ADVOCATE_DONE = (
     "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
     "We'll ping you the moment a great candidate comes through. ✨"
 )
+
+# ---- Phase C: candidate company search ----
+CAND_COMPANY = (
+    "You're all set — welcome aboard! 🎉🚀\n"
+    "Which company are you aiming for?"
+)
+CAND_ROLE = (
+    "Great news — we've got advocates at *{company}*! 🎉\n"
+    "What role are you aiming for? (e.g. Product Manager, Software Engineer, Analyst)"
+)
+CAND_JOB_LINK = "Nice — *{company}* it is! 🎯\nPaste the link to the exact job posting you want in for."
+CAND_JOB_LINK_INVALID = (
+    "That doesn't look like a valid link 🤔\n"
+    "Please paste the full *https://* URL of the job posting."
+)
+CAND_NO_ADVOCATES = (
+    "We know *{company}*, but there are no advocates there *yet* 😕\n"
+    "We've put it on our radar — check back soon, or try another company. 🔜"
+)
+CAND_NOT_FOUND = (
+    "Hmm, couldn't find *{company}* yet 🤔\n"
+    "Double-check the spelling (English works best), or type another company — "
+    "we've flagged it for our team to add! 🔜"
+)
+CAND_RESUME_SOON = (
+    "Awesome — you're almost there! 🙌\n"
+    "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
+)

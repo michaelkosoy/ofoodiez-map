@@ -1,13 +1,13 @@
 """Dispatch, Welcome menu, and path routing.
 
 A path button enters its flow, running the shared registration sub-flow first
-if the user isn't registered. Candidate "main" (company search) is Phase C and
-stubbed for now; Employee runs the advocate-registration flow; Contact Us
-returns contact info. Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
+if the user isn't registered. After registration: Candidate runs company search
+(Phase C), Employee runs advocate registration (Phase E), Contact Us returns
+contact info. Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 """
 import logging
 
-from . import conversation, copy, employee, messaging, registration
+from . import candidate, conversation, copy, employee, messaging, registration
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
@@ -43,7 +43,8 @@ def handle(inbound):
             return registration.handle(user, conv, payload, text)
         if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
             return employee.handle(user, conv, payload, text)
-        # Candidate main (company search) is Phase C — gentle nudge for now.
+        if conv.flow == "candidate" and conv.step and conv.step.startswith("cand_"):
+            return candidate.handle(user, conv, payload, text)
         messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
         return "main_coming_soon"
 
