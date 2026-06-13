@@ -72,6 +72,9 @@ def send_buttons(to_phone, content_sid, variables=None):
 
 def send_prompt(to_phone, text):
     """Send a text prompt that also carries a Back-to-Menu button, via the
-    reusable WA_CT_PROMPT quick-reply template (body {{1}} + one button). Users
-    can still type a free-text answer."""
-    return send_buttons(to_phone, WaConfig.WA_CT_PROMPT, {"1": text})
+    reusable WA_CT_PROMPT quick-reply template (body {{1}} + one button). Falls
+    back to plain text if WA_CT_PROMPT isn't configured, so prompts never break.
+    Users can still type a free-text answer either way."""
+    if WaConfig.WA_CT_PROMPT:
+        return send_buttons(to_phone, WaConfig.WA_CT_PROMPT, {"1": text})
+    return send_text(to_phone, text)
