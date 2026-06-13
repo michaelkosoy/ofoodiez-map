@@ -72,6 +72,15 @@ EMP_EMAIL_PERSONAL = (
     "Please use your *work email at {company}* (not Gmail/Yahoo/Outlook, etc.) so "
     "we route referrals to the right inbox. 📧"
 )
+EMP_EMAILS_CONFIRM = (
+    "Got it! 🙌 I'll send candidate referrals for *{company}* to:\n"
+    "📧 {emails}\n\n"
+    "Reply *yes* to confirm — or just send the right email(s) again to change them."
+)
+EMP_SAVE_FAILED = (
+    "Hmm, I couldn't save that just now 😅 — let's try once more.\n"
+    "What's your *work email* at {company}? (you can list a few, comma-separated)"
+)
 ADVOCATE_DONE = (
     "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
     "We'll send candidate referrals to: *{emails}* ✨\n"

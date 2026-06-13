@@ -6,10 +6,11 @@ advocate row per email. No job link / résumé — that's the candidate side.
 On completion we return the user to the Welcome menu so a registered person can
 freely jump between paths.
 """
+import logging
 import re
 from datetime import datetime
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database.models import db
 
@@ -17,7 +18,14 @@ from . import conversation, copy, messaging
 from .config import WaConfig
 from .models import WaAdvocate, WaCompany
 
+logger = logging.getLogger("whatsapp_bot")
+
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+_CONFIRM_WORDS = {
+    "yes", "y", "yep", "yeah", "yup", "ya", "ok", "okay", "k", "confirm",
+    "confirmed", "correct", "sure", "👍", "✅",
+}
 
 # Consumer mailbox providers — an advocate must use a work email so referrals
 # land in the right inbox and we can loosely tie them to the company.
@@ -88,21 +96,57 @@ def handle(user, conv, payload, text):
         return "emp_company"
 
     if step == "emp_emails":
-        company_name = data.get("company_name", "your company")
-        valid, had_personal = _parse_emails(text)
-        if not valid:
-            msg = copy.EMP_EMAIL_PERSONAL if had_personal else copy.EMP_EMAIL_INVALID
-            messaging.send_prompt(user.phone, msg.format(company=company_name))
-            return "emp_emails_invalid"
-        saved = _create_advocates(user, data, valid)
-        conversation.reset_state(conv)
-        messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
-            company=company_name, emails=", ".join(saved or valid)))
-        _send_menu(user)
-        return "advocate_created"
+        return _collect_emails(user, conv, data, text)
+
+    if step == "emp_emails_confirm":
+        if _is_confirm(text, payload):
+            return _finalize(user, conv, data)
+        # Anything that isn't a yes → treat it as a correction (new emails).
+        return _collect_emails(user, conv, data, text)
 
     # Unexpected step inside the employee flow → restart it cleanly.
     return start(user, conv)
+
+
+def _collect_emails(user, conv, data, text):
+    """Parse the work email(s), then echo them back for a yes/no confirm."""
+    company_name = data.get("company_name", "your company")
+    valid, had_personal = _parse_emails(text)
+    if not valid:
+        msg = copy.EMP_EMAIL_PERSONAL if had_personal else copy.EMP_EMAIL_INVALID
+        messaging.send_prompt(user.phone, msg.format(company=company_name))
+        return "emp_emails_invalid"
+    data["emails"] = valid
+    conversation.set_state(conv, "employee", "emp_emails_confirm", data)
+    messaging.send_prompt(user.phone, copy.EMP_EMAILS_CONFIRM.format(
+        company=company_name, emails=", ".join(valid)))
+    return "emp_emails_collected"
+
+
+def _is_confirm(text, payload):
+    if payload in ("EMP_CONFIRM", "EMP_EMAILS_CONFIRM"):
+        return True
+    return (text or "").strip().lower() in _CONFIRM_WORDS
+
+
+def _finalize(user, conv, data):
+    """Persist the advocate rows. On any DB error, never show a hiccup — roll
+    back and re-ask for the email so the user can simply try again."""
+    company_name = data.get("company_name", "your company")
+    emails = data.get("emails") or []
+    try:
+        saved = _create_advocates(user, data, emails)
+    except SQLAlchemyError:
+        logger.exception("wa: failed to save advocate(s) for user %s", user.id)
+        db.session.rollback()
+        conversation.set_state(conv, "employee", "emp_emails", data)
+        messaging.send_prompt(user.phone, copy.EMP_SAVE_FAILED.format(company=company_name))
+        return "emp_save_failed"
+    conversation.reset_state(conv)
+    messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
+        company=company_name, emails=", ".join(saved or emails)))
+    _send_menu(user)
+    return "advocate_created"
 
 
 def _send_menu(user):
