@@ -9,7 +9,7 @@ from flask import redirect, request, session, url_for, flash, render_template, j
 
 from . import ig_bp
 from .config import Config
-from .database import db, User
+from .models import db, User
 
 
 @ig_bp.route('/auth/login')

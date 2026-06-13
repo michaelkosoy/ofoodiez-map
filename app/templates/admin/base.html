@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - Ofoodiez</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playpen+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #f9f9f9;
+            --sidebar-bg: #5A3A31;
+            --text-color: #333;
+            --sidebar-text: #fff;
+            --accent-color: #D3A78A;
+            --danger-color: #e74c3c;
+            --success-color: #2e7d32;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header img {
+            width: 60px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex-grow: 1;
+        }
+
+        .nav-link {
+            padding: 15px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .logout-btn {
+            margin: 20px;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 { font-size: 1.8rem; }
+
+        .btn {
+            background: var(--sidebar-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-success { background: var(--success-color); }
+        .btn-danger { background: var(--danger-color); }
+
+        /* Custom Tabulator Theme to match Ofoodiez */
+        .tabulator {
+            border-radius: 12px;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: #fff;
+            font-family: 'Outfit', sans-serif !important;
+        }
+        .tabulator .tabulator-header {
+            background-color: var(--sidebar-bg) !important;
+            color: white !important;
+            border-bottom: none !important;
+        }
+        .tabulator .tabulator-header .tabulator-col {
+            background-color: var(--sidebar-bg) !important;
+        }
+        .tabulator-row {
+            border-bottom: 1px solid #f0f0f0 !important;
+        }
+        .tabulator-row:nth-child(even) {
+            background-color: #fafafa !important;
+        }
+        .tabulator-row:hover {
+            background-color: #f1f1f1 !important;
+        }
+        .tabulator-cell {
+            padding: 12px 10px !important;
+        }
+        .tabulator-cell.tabulator-editable {
+            background: rgba(211, 167, 138, 0.1);
+        }
+
+        /* Custom SweetAlert Modals */
+        .swal-wide-popup {
+            width: 800px !important;
+            max-width: 95vw !important;
+            border-radius: 16px !important;
+            padding: 30px !important;
+        }
+        
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .modal-grid.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-grid.checkbox-grid {
+            grid-template-columns: repeat(4, 1fr);
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid, .modal-grid.checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+        }
+
+        .form-control {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(211, 167, 138, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--sidebar-bg);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+            <h3>Admin Panel</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.places') }}" class="nav-link {% if request.endpoint == 'admin.places' %}active{% endif %}">
+                <i class="fas fa-map-marked-alt"></i> Happy Hours Map
+            </a>
+            <a href="{{ url_for('admin.events') }}" class="nav-link {% if request.endpoint == 'admin.events' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Popups Calendar
+            </a>
+            <!-- Links back to website -->
+            <a href="/" target="_blank" class="nav-link" style="margin-top: 20px; opacity: 0.8;">
+                <i class="fas fa-external-link-alt"></i> View Website
+            </a>
+        </nav>
+        <a href="{{ url_for('admin.logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </aside>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Flatpickr (for multi-date selection) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

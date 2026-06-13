@@ -17,7 +17,7 @@ ig_bp = Blueprint(
 def init_app(app):
     """Register the Instagram automation blueprint with the Flask app."""
     from . import auth, webhooks, dashboard
-    from .database import db, init_db
+    from database.models import db, init_db
 
     # Initialize database
     init_db(app)

@@ -9,7 +9,7 @@ from flask import request, jsonify
 
 from . import ig_bp
 from .config import Config
-from .database import User
+from .models import User
 from .automations import engine
 
 

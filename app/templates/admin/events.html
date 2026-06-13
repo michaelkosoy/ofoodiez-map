@@ -1,0 +1,223 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Popup Events{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>Popup Events Calendar</h2>
+    <div>
+        <button class="btn btn-success" id="add-row"><i class="fas fa-plus"></i> Add New Event</button>
+    </div>
+</div>
+
+<div id="events-table"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var flatpickrEditor = function(cell, onRendered, success, cancel, editorParams){
+        var cellValue = cell.getValue();
+        var input = document.createElement("input");
+        input.setAttribute("type", "text");
+        input.style.padding = "4px";
+        input.style.width = "100%";
+        input.style.boxSizing = "border-box";
+        input.value = cellValue || "";
+
+        onRendered(function(){
+            input.focus();
+            input.style.height = "100%";
+            flatpickr(input, {
+                mode: "multiple",
+                dateFormat: "Y-m-d",
+                conjunction: " | ",
+                defaultDate: cellValue ? cellValue.split(" | ") : [],
+                onClose: function(selectedDates, dateStr, instance) {
+                    success(dateStr);
+                }
+            });
+        });
+
+        return input;
+    };
+
+    var table = new Tabulator("#events-table", {
+        layout: "fitColumns",
+        ajaxURL: "{{ url_for('admin.get_events') }}",
+        history: true,
+        pagination: "local",
+        paginationSize: 50,
+        columns: [
+            { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
+            { title: "Title", field: "title", editor: "input", headerFilter: "input", minWidth: 150 },
+            { title: "Date (YYYY-MM-DD)", field: "date", editor: flatpickrEditor, headerFilter: "input", minWidth: 200 },
+            { title: "Time", field: "time", editor: "input", width: 100 },
+            { title: "Location", field: "location", editor: "input", minWidth: 150 },
+            { title: "Location Link", field: "location_link", editor: "input", width: 150 },
+            { title: "IG Username", field: "instagram_username", editor: "input", width: 150 },
+            { title: "IG Link", field: "instagram_link", editor: "input", width: 150 },
+            { title: "Description", field: "description", editor: "input", width: 250 },
+            { title: "Image URL", field: "image", editor: "input", width: 150 },
+            {
+                formatter: function (cell) {
+                    return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>";
+                },
+                width: 60,
+                hozAlign: "center",
+                headerSort: false,
+                cellClick: function (e, cell) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#aaa',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            var row = cell.getRow();
+                            var id = row.getData().id;
+                            if (id) {
+                                fetch("{{ url_for('admin.get_events') }}/" + id, { method: 'DELETE' })
+                                    .then(res => {
+                                        if (res.ok) row.delete();
+                                        else Swal.fire('Error!', 'Failed to delete row.', 'error');
+                                    });
+                            } else {
+                                row.delete();
+                            }
+                        }
+                    });
+                }
+            }
+        ]
+    });
+
+    // Handle Cell Editing (Saving)
+    table.on("cellEdited", function (cell) {
+        var row = cell.getRow();
+        var data = row.getData();
+        var id = data.id;
+
+        if (id) {
+            // Update existing
+            fetch("{{ url_for('admin.get_events') }}/" + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => {
+                if(!res.ok) {
+                    Swal.fire('Error', 'Failed to save changes.', 'error');
+                    cell.restoreOldValue();
+                }
+            });
+        }
+    });
+
+    document.getElementById("add-row").addEventListener("click", function () {
+        var today = new Date().toISOString().split('T')[0];
+        Swal.fire({
+            title: 'Add New Popup Event',
+            customClass: { popup: 'swal-wide-popup' },
+            html: `
+                <div class="modal-grid">
+                    <div class="form-group">
+                        <label>Title <span class="required">*</span></label>
+                        <input id="ev-title" class="form-control" placeholder="e.g. Italian Wine Tasting">
+                    </div>
+                    <div class="form-group">
+                        <label>Date <span class="required">*</span></label>
+                        <input id="ev-date" type="text" class="form-control" placeholder="YYYY-MM-DD or YYYY-MM-DD | YYYY-MM-DD" value="${today}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Location <span class="required">*</span></label>
+                        <input id="ev-location" class="form-control" placeholder="e.g. Rothschild 12">
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input id="ev-time" class="form-control" placeholder="e.g. 18:00 - 23:00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location Link</label>
+                        <input id="ev-loc-link" type="url" class="form-control" placeholder="Google Maps link...">
+                    </div>
+                    <div class="form-group">
+                        <label>Instagram Username</label>
+                        <input id="ev-ig-user" class="form-control" placeholder="e.g. @popup_tlv">
+                    </div>
+
+                    <div class="form-group full-width" style="grid-column: 1 / -1;">
+                        <label>Description</label>
+                        <input id="ev-description" class="form-control" placeholder="Event details...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Instagram Link</label>
+                        <input id="ev-ig-link" type="url" class="form-control" placeholder="Link to reel or post...">
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input id="ev-image" type="url" class="form-control" placeholder="Image link...">
+                    </div>
+                </div>
+            `,
+            didOpen: () => {
+                flatpickr("#ev-date", {
+                    mode: "multiple",
+                    dateFormat: "Y-m-d",
+                    conjunction: " | "
+                });
+            },
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save"></i> Save Event',
+            confirmButtonColor: '#2e7d32',
+            preConfirm: () => {
+                const title = document.getElementById('ev-title').value.trim();
+                const date = document.getElementById('ev-date').value.trim();
+                const location = document.getElementById('ev-location').value.trim();
+                
+                if (!title || !date || !location) {
+                    Swal.showValidationMessage('Please fill all mandatory fields marked with *');
+                    return false;
+                }
+                
+                return { 
+                    title: title, 
+                    date: date, 
+                    location: location, 
+                    time: document.getElementById('ev-time').value.trim(),
+                    location_link: document.getElementById('ev-loc-link').value.trim(),
+                    description: document.getElementById('ev-description').value.trim(),
+                    instagram_username: document.getElementById('ev-ig-user').value.trim(),
+                    instagram_link: document.getElementById('ev-ig-link').value.trim(),
+                    image: document.getElementById('ev-image').value.trim()
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Post to backend immediately
+                fetch("{{ url_for('admin.get_events') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result.value)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                    } else {
+                        table.addRow(data, true);
+                        Swal.fire('Added!', 'Event has been added.', 'success');
+                    }
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock %}

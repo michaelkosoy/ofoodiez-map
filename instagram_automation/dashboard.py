@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, session, jsonify
 
 from . import ig_bp
-from .database import db, User, Automation, Contact, MessageLog, Conversation
+from .models import db, User, Automation, Contact, MessageLog, Conversation
 from .auth import get_current_user
 
 
@@ -482,7 +482,7 @@ def data_deletion_status():
 
 def _perform_deletion(ig_user_id):
     """Delete all data for a given Instagram user ID."""
-    from .database import User, Contact, Conversation, MessageLog, Automation
+    from .models import User, Contact, Conversation, MessageLog, Automation
 
     user = User.query.filter_by(ig_user_id=ig_user_id).first()
     if not user:

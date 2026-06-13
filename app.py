@@ -12,7 +12,8 @@ from dotenv import load_dotenv
 import requests
 from io import StringIO
 from data import data as home_data, bachelorette_data
-from instagram_automation.database import User, PopupEvent
+from database.models import PopupEvent, HappyHourPlace
+from instagram_automation.models import User
 from instagram_automation.config import Config
 
 # Load environment variables from .env file (for local development)
@@ -53,6 +54,10 @@ init_ig_automation(app)
 # the one-time Supabase SQL script; see docs/whatsapp-referral-bot-plan.md §4).
 from whatsapp_bot import init_app as init_wa_bot
 init_wa_bot(app)
+
+# Register Admin blueprint
+from admin import admin_bp
+app.register_blueprint(admin_bp)
 
 # Start Telegram bot in a background thread
 import threading
@@ -411,7 +416,35 @@ def get_places():
         if cached_places:
             return jsonify(cached_places)
         
-        # Fetch fresh data from Google Sheets
+        # Try fetching from DB first
+        try:
+            db_places = HappyHourPlace.query.all()
+            if db_places:
+                places_list = [p.to_dict() for p in db_places]
+                
+                # Geocode addresses if Latitude/Longitude are missing
+                for place in places_list:
+                    has_lat = place.get('Latitude') is not None and place.get('Latitude') != ""
+                    has_lng = place.get('Longitude') is not None and place.get('Longitude') != ""
+                    
+                    if not has_lat or not has_lng:
+                        address = place.get('Address', '')
+                        city = place.get('City', '')
+                        if address:
+                            lat, lng = geocode_address(address, city)
+                            if lat and lng:
+                                place['Latitude'] = lat
+                                place['Longitude'] = lng
+
+                set_cached_data(places_list)
+                print(f"✓ Loaded {len(places_list)} places from Database")
+                return jsonify(places_list)
+            else:
+                print("⚠️ Database is empty. Falling back to Google Sheets...")
+        except Exception as db_err:
+            print(f"⚠️ Database fetch failed: {db_err}. Falling back to Google Sheets...")
+        
+        # Fallback: Fetch fresh data from Google Sheets
         try:
             # Try to bypass system proxies if they are causing issues
             response = requests.get(SHEET_URL, timeout=10, proxies={'http': None, 'https': None})

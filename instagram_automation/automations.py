@@ -2,7 +2,7 @@
 Automation engine — matches incoming events against active rules and fires actions.
 """
 from datetime import datetime
-from .database import db, Automation, Contact, Conversation, MessageLog, User
+from .models import db, Automation, Contact, Conversation, MessageLog, User
 from .messaging import messenger
 
 

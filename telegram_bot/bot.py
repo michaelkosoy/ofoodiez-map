@@ -75,6 +75,59 @@ if bot:
         user_states[chat_id] = {'mode': None, 'pending_data': None, 'editing_field': None, 'edit_message_id': None, 'prompt_message_id': None}
         send_mode_selection(chat_id)
 
+    @bot.message_handler(commands=['searchplace'])
+    def handle_search_place(message):
+        if not is_authorized(message.from_user.id): return
+        
+        args = message.text.split(maxsplit=1)
+        if len(args) < 2:
+            bot.reply_to(message, "⚠️ Usage: `/searchplace <name>`\nExample: `/searchplace Leny`", parse_mode="Markdown")
+            return
+            
+        query = args[1].lower()
+        global _flask_app
+        if not _flask_app: return
+        
+        with _flask_app.app_context():
+            from database.models import HappyHourPlace
+            places = HappyHourPlace.query.filter(HappyHourPlace.name.ilike(f"%{query}%")).limit(10).all()
+            
+            if not places:
+                bot.reply_to(message, f"❌ No places found matching '{query}'.")
+                return
+                
+            response = "🔍 **Search Results:**\n\n"
+            for p in places:
+                response += f"🆔 **ID:** {p.id}\n🍷 **Name:** {p.name}\n📍 **Address:** {p.address}\n---\n"
+            
+            response += "\nTo delete a place, use: `/deleteplace <ID>`"
+            bot.reply_to(message, response, parse_mode="Markdown")
+
+    @bot.message_handler(commands=['deleteplace'])
+    def handle_delete_place(message):
+        if not is_authorized(message.from_user.id): return
+        
+        args = message.text.split(maxsplit=1)
+        if len(args) < 2 or not args[1].isdigit():
+            bot.reply_to(message, "⚠️ Usage: `/deleteplace <ID>`\nExample: `/deleteplace 15`", parse_mode="Markdown")
+            return
+            
+        place_id = int(args[1])
+        global _flask_app
+        if not _flask_app: return
+        
+        with _flask_app.app_context():
+            from database.models import db, HappyHourPlace
+            place = HappyHourPlace.query.get(place_id)
+            if not place:
+                bot.reply_to(message, f"❌ No place found with ID {place_id}.")
+                return
+                
+            name = place.name
+            db.session.delete(place)
+            db.session.commit()
+            bot.reply_to(message, f"✅ Successfully deleted '{name}' from the database.")
+
     # Callback Query Handler for selections
     @bot.callback_query_handler(func=lambda call: call.data.startswith('mode_'))
     def handle_mode_callbacks(call):

@@ -1,5 +1,5 @@
 from telegram_bot.handlers.base import BaseApprovalHandler
-from instagram_automation.database import db, PopupEvent
+from database.models import db, PopupEvent
 
 class PopupHandler(BaseApprovalHandler):
     """

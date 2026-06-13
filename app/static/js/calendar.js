@@ -243,10 +243,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         upcomingListContainer.innerHTML = '';
 
-        // Sort ORIGINAL events chronologically by their first date
-        const sortedEvents = [...POPUP_EVENTS].sort((a, b) => {
-            const dateA = a.date.split('|')[0].trim();
-            const dateB = b.date.split('|')[0].trim();
+        // Sort EXPANDED events chronologically
+        const sortedEvents = [...EXPANDED_EVENTS].sort((a, b) => {
+            const dateA = a.date.trim();
+            const dateB = b.date.trim();
             return new Date(dateA) - new Date(dateB);
         });
 
@@ -263,22 +263,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const item = document.createElement('div');
             item.className = 'upcoming-event-item';
             
-            const dateStrings = event.date.split('|').map(d => d.trim());
-            const firstDateStr = dateStrings[0];
-            item.dataset.date = firstDateStr; // Use first date for data matching
+            const dateStr = event.date.trim();
+            item.dataset.date = dateStr;
 
-            // Parse FIRST date to extract day number and short month name for the badge
-            const dateParts = firstDateStr.split('-');
-            const firstDateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-            const dayNum = firstDateObj.getDate();
-            const shortMonth = SHORT_MONTHS[firstDateObj.getMonth()];
-
-            // Format all dates for the meta description
-            const formattedAllDates = dateStrings.map(d => {
-                const parts = d.split('-');
-                const obj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                return `${obj.getDate()} ${SHORT_MONTHS[obj.getMonth()]}`;
-            }).join(', ');
+            const dateParts = dateStr.split('-');
+            const dateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+            const dayNum = dateObj.getDate();
+            const shortMonth = SHORT_MONTHS[dateObj.getMonth()];
 
             item.innerHTML = `
                 <div class="event-date-badge">
@@ -288,23 +279,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="event-item-info">
                     <h5 class="event-item-title">${event.title}</h5>
                     <div class="event-item-meta">
-                        ${dateStrings.length > 1 ? `<span style="display:block; margin-bottom: 4px; color: var(--accent-color); font-weight: 600;"><i class="far fa-calendar-alt"></i> ${formattedAllDates}</span>` : ''}
                         <span><i class="far fa-clock"></i> ${event.time}</span>
                         <span><i class="fas fa-map-marker-alt"></i> ${event.location.split(',')[0]}</span>
                     </div>
                 </div>
             `;
 
-            // Click event list item navigates to the FIRST date of the event
+            // Click event list item navigates to the date of the event
             item.addEventListener('click', () => {
-                currentYear = firstDateObj.getFullYear();
-                currentMonth = firstDateObj.getMonth();
+                currentYear = dateObj.getFullYear();
+                currentMonth = dateObj.getMonth();
 
                 // Re-render calendar to the correct month and select the day
                 renderCalendar(currentYear, currentMonth);
 
-                const dayEvents = EXPANDED_EVENTS.filter(e => e.date === firstDateStr);
-                selectDay(firstDateStr, dayEvents);
+                const dayEvents = EXPANDED_EVENTS.filter(e => e.date === dateStr);
+                selectDay(dateStr, dayEvents);
 
                 // Smooth scroll to the details card if in mobile/stacked view
                 if (window.innerWidth < 1024) {

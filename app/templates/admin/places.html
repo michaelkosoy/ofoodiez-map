@@ -1,0 +1,261 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Places{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>Happy Hour Places</h2>
+    <div>
+        <button class="btn btn-success" id="add-row"><i class="fas fa-plus"></i> Add New Place</button>
+    </div>
+</div>
+
+<div id="places-table"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var table = new Tabulator("#places-table", {
+        layout: "fitColumns",
+        ajaxURL: "{{ url_for('admin.get_places') }}",
+        history: true,
+        pagination: "local",
+        paginationSize: 50,
+        columns: [
+            { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
+            { title: "English Name", field: "Name", editor: "input", headerFilter: "input", minWidth: 150 },
+            { title: "Hebrew Name", field: "NameHebrew", editor: "input", headerFilter: "input", minWidth: 150 },
+            { title: "Address", field: "Address", editor: "input", headerFilter: "input", minWidth: 200 },
+            { title: "City", field: "City", editor: "input", width: 100 },
+            { title: "Category", field: "Category", editor: "list", editorParams: { values: ["Until 19:00", "Until 19:30", "Until 20:00", "After 20:00", "Not TLV"] }, width: 120 },
+            { title: "Sun", field: "Sunday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Mon", field: "Monday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Tue", field: "Tuesday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Wed", field: "Wednesday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Thu", field: "Thursday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Fri", field: "Friday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Sat", field: "Saturday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
+            { title: "Latitude", field: "Latitude", editor: "input", width: 100 },
+            { title: "Longitude", field: "Longitude", editor: "input", width: 100 },
+            { title: "Instagram URL", field: "InstagramURL", editor: "input", width: 150 },
+            { title: "Reservation Link", field: "ReservationLink", editor: "input", width: 150 },
+            { title: "Description", field: "Description", editor: "input", width: 200 },
+            { title: "Verified", field: "Verified", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 80 },
+            { title: "Kosher", field: "Kosher", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 80 },
+            {
+                formatter: function (cell) {
+                    return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>";
+                },
+                width: 60,
+                hozAlign: "center",
+                headerSort: false,
+                cellClick: function (e, cell) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#aaa',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            var row = cell.getRow();
+                            var id = row.getData().id;
+                            if (id) {
+                                fetch("{{ url_for('admin.get_places') }}/" + id, { method: 'DELETE' })
+                                    .then(res => {
+                                        if (res.ok) row.delete();
+                                        else Swal.fire('Error!', 'Failed to delete row.', 'error');
+                                    });
+                            } else {
+                                row.delete();
+                            }
+                        }
+                    });
+                }
+            }
+        ]
+    });
+
+    // Handle Cell Editing (Saving)
+    table.on("cellEdited", function (cell) {
+        var row = cell.getRow();
+        var data = row.getData();
+        var id = data.id;
+
+        // Ensure tickCross fields are converted to 'yes'/'no' for the backend if needed,
+        // Wait, our backend expects actual booleans or "yes"/"no" based on the logic!
+        // In backend: `str(data['Sunday']).lower() == 'yes'` or `data['Sunday'] == True`
+        // We will send the exact JS object back. Our backend handles boolean parsing for tickCross!
+
+        // Normalize tickCross boolean values back to "yes" / "no" for compatibility if needed.
+        // Actually tickCross uses true/false natively in tabulator.
+        
+        if (id) {
+            // Update existing
+            fetch("{{ url_for('admin.get_places') }}/" + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => {
+                if(!res.ok) {
+                    Swal.fire('Error', 'Failed to save changes.', 'error');
+                    cell.restoreOldValue();
+                }
+            });
+        }
+    });
+
+    document.getElementById("add-row").addEventListener("click", function () {
+        Swal.fire({
+            title: 'Add New Happy Hour Place',
+            customClass: { popup: 'swal-wide-popup' },
+            html: `
+                <div class="modal-grid">
+                    <div class="form-group">
+                        <label>English Name <span class="required">*</span></label>
+                        <input id="hh-name" class="form-control" placeholder="e.g. Leny">
+                    </div>
+                    <div class="form-group">
+                        <label>Hebrew Name</label>
+                        <input id="hh-name-hebrew" class="form-control" placeholder="e.g. לני">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Address <span class="required">*</span></label>
+                        <input id="hh-address" class="form-control" placeholder="e.g. Frishman Street 39">
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input id="hh-city" class="form-control" value="תל אביב">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category <span class="required">*</span></label>
+                        <select id="hh-category" class="form-control">
+                            <option value="" disabled selected>Select Category</option>
+                            <option value="Until 19:00">Until 19:00</option>
+                            <option value="Until 19:30">Until 19:30</option>
+                            <option value="Until 20:00">Until 20:00</option>
+                            <option value="After 20:00">After 20:00</option>
+                            <option value="Not TLV">Not TLV</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Opening Hours</label>
+                        <input id="hh-hours" class="form-control" placeholder="e.g. 18:00 - 20:00">
+                    </div>
+                    
+                    <div class="form-group full-width" style="grid-column: 1 / -1;">
+                        <label>Description</label>
+                        <input id="hh-description" class="form-control" placeholder="Happy hour details...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input id="hh-lat" type="number" step="any" class="form-control" placeholder="e.g. 32.079">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input id="hh-lng" type="number" step="any" class="form-control" placeholder="e.g. 34.773">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Instagram URL</label>
+                        <input id="hh-ig" type="url" class="form-control" placeholder="https://instagram.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Reservation Link</label>
+                        <input id="hh-reservation" type="url" class="form-control" placeholder="https://ontopo.co.il/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input id="hh-image" type="url" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Recommended Video URL</label>
+                        <input id="hh-recommended" type="url" class="form-control" placeholder="Reel link...">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Active Days & Statuses</label>
+                    <div class="modal-grid checkbox-grid">
+                        <div class="checkbox-group"><input type="checkbox" id="hh-sun"><label for="hh-sun">Sunday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-mon"><label for="hh-mon">Monday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-tue"><label for="hh-tue">Tuesday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-wed"><label for="hh-wed">Wednesday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-thu"><label for="hh-thu">Thursday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-fri"><label for="hh-fri">Friday</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-sat"><label for="hh-sat">Saturday</label></div>
+                        <div class="checkbox-group"></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-verified"><label for="hh-verified">Verified</label></div>
+                        <div class="checkbox-group"><input type="checkbox" id="hh-kosher"><label for="hh-kosher">Kosher</label></div>
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save"></i> Save Place',
+            confirmButtonColor: '#2e7d32',
+            preConfirm: () => {
+                const name = document.getElementById('hh-name').value.trim();
+                const address = document.getElementById('hh-address').value.trim();
+                const category = document.getElementById('hh-category').value;
+                
+                if (!name || !address || !category) {
+                    Swal.showValidationMessage('Please fill all mandatory fields marked with *');
+                    return false;
+                }
+                
+                return { 
+                    Name: name, 
+                    NameHebrew: document.getElementById('hh-name-hebrew').value.trim(), 
+                    Address: address, 
+                    City: document.getElementById('hh-city').value.trim(), 
+                    Category: category, 
+                    Description: document.getElementById('hh-description').value.trim(),
+                    OpeningHours: document.getElementById('hh-hours').value.trim(),
+                    Latitude: document.getElementById('hh-lat').value ? parseFloat(document.getElementById('hh-lat').value) : null,
+                    Longitude: document.getElementById('hh-lng').value ? parseFloat(document.getElementById('hh-lng').value) : null,
+                    InstagramURL: document.getElementById('hh-ig').value.trim(),
+                    ReservationLink: document.getElementById('hh-reservation').value.trim(),
+                    ImageURL: document.getElementById('hh-image').value.trim(),
+                    Recommended: document.getElementById('hh-recommended').value.trim(),
+                    Sunday: document.getElementById('hh-sun').checked, 
+                    Monday: document.getElementById('hh-mon').checked, 
+                    Tuesday: document.getElementById('hh-tue').checked, 
+                    Wednesday: document.getElementById('hh-wed').checked, 
+                    Thursday: document.getElementById('hh-thu').checked, 
+                    Friday: document.getElementById('hh-fri').checked, 
+                    Saturday: document.getElementById('hh-sat').checked, 
+                    Verified: document.getElementById('hh-verified').checked, 
+                    Kosher: document.getElementById('hh-kosher').checked 
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Post to backend immediately
+                fetch("{{ url_for('admin.get_places') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result.value)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.error) {
+                        Swal.fire('Error', data.error, 'error');
+                    } else {
+                        table.addRow(data, true);
+                        Swal.fire('Added!', 'Place has been added.', 'success');
+                    }
+                });
+            }
+        });
+    });
+
+</script>
+{% endblock %}

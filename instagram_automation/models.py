@@ -3,21 +3,7 @@ Database models for the Instagram DM Automation Service.
 Uses Flask-SQLAlchemy with SQLite (MVP) / PostgreSQL (production).
 """
 from datetime import datetime, timedelta
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-
-
-def init_db(app):
-    """Initialize the database with the Flask app."""
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get(
-        'SQLALCHEMY_DATABASE_URI', 
-        'sqlite:///instagram_automation.db'
-    )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
+from database.models import db
 
 
 class User(db.Model):
@@ -155,35 +141,4 @@ class MessageLog(db.Model):
         return f'<Message {self.direction} ({self.message_type})>'
 
 
-class PopupEvent(db.Model):
-    """Calendar popup event added via Telegram bot."""
-    __tablename__ = 'popup_events'
 
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(256), nullable=False)
-    date = db.Column(db.String(256), nullable=False)  # "YYYY-MM-DD" or "YYYY-MM-DD | YYYY-MM-DD"
-    time = db.Column(db.String(64))
-    location = db.Column(db.String(256))
-    location_link = db.Column(db.Text)
-    description = db.Column(db.Text)
-    instagram_username = db.Column(db.String(128))
-    instagram_link = db.Column(db.Text)
-    image = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "date": self.date,
-            "time": self.time or "",
-            "location": self.location or "",
-            "location_link": self.location_link or "",
-            "description": self.description or "",
-            "instagram_username": self.instagram_username or "",
-            "instagram_link": self.instagram_link or "",
-            "image": self.image or ""
-        }
-
-    def __repr__(self):
-        return f'<PopupEvent "{self.title}" on {self.date}>'

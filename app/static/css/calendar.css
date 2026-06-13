@@ -165,17 +165,7 @@
     box-shadow: 0 0 14px rgba(224, 122, 95, 0.4);
 }
 
-/* Bottom small dot for events indicators */
-.calendar-day-cell.has-popup::before {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    width: 5px;
-    height: 5px;
-    background-color: var(--accent-color);
-    border-radius: 50%;
-    transition: all 0.25s ease;
-}
+
 
 /* Current Today Highlight */
 .calendar-day-cell.today:not(.active) {
@@ -197,9 +187,7 @@
     box-shadow: none !important;
 }
 
-.calendar-day-cell.active::before {
-    background-color: white !important;
-}
+
 
 /* Main Columns layout */
 .calendar-main-col {
@@ -629,9 +617,5 @@ html, body {
         font-size: 0.8rem;
     }
     
-    .calendar-day-cell.has-popup::before {
-        bottom: 1px;
-        width: 4px;
-        height: 4px;
-    }
+
 }

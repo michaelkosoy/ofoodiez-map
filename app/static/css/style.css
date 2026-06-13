@@ -1729,6 +1729,8 @@ input:checked~.toggle-label {
     .map-filters-card .header-filters-row {
         display: flex;
         align-items: center;
+        width: max-content;
+        max-width: 100%;
     }
 
     .map-filters-card .filters-wrapper {
@@ -1736,13 +1738,20 @@ input:checked~.toggle-label {
         flex-direction: row;
         align-items: center;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 8px;
+        width: max-content;
+        max-width: 100%;
     }
 
     .map-filters-card .toggles-row {
-        width: auto;
+        width: max-content;
         margin-top: 0;
         gap: 12px;
+    }
+    
+    .map-filters-card .sort-toggle-group {
+        margin-left: 0;
     }
 
     .sidebar-header {
