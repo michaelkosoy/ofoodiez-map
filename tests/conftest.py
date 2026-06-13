@@ -71,8 +71,11 @@ def sign():
     return _sign
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_twilio(monkeypatch):
+    """Autouse: patch the Twilio REST Client for ALL tests so nothing hits the
+    network — including tests that reach routing without explicitly requesting
+    it. Tests that need the recorded calls accept `mock_twilio` and read the list."""
     sent = []
 
     class _FakeMessages:
