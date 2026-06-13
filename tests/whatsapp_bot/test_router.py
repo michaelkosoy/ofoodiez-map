@@ -1,5 +1,4 @@
 from whatsapp_bot import router, conversation
-from whatsapp_bot.models import WaConversation
 
 
 def _inbound(**kw):
