@@ -68,3 +68,10 @@ def send_buttons(to_phone, content_sid, variables=None):
         logger.exception("wa send_buttons failed to %s", to_phone)
         _log(to_phone, content_sid=content_sid, error=str(exc))
         raise
+
+
+def send_prompt(to_phone, text):
+    """Send a text prompt that also carries a Back-to-Menu button, via the
+    reusable WA_CT_PROMPT quick-reply template (body {{1}} + one button). Users
+    can still type a free-text answer."""
+    return send_buttons(to_phone, WaConfig.WA_CT_PROMPT, {"1": text})

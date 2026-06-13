@@ -35,6 +35,26 @@ class WaCompany(db.Model):
         return f"<WaCompany {self.name!r}>"
 
 
+class WaAdvocate(db.Model):
+    """An employee who will receive/refer candidate applications for a company."""
+    __tablename__ = "wa_advocates"
+
+    id = _pk()
+    user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False)
+    company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
+    role_title = db.Column(db.Text)
+    status = db.Column(db.Text, nullable=False, default="active")  # active|pending|inactive
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.Index("uq_wa_advocates_user_company", "user_id", "company_id", unique=True),
+    )
+
+    def __repr__(self):
+        return f"<WaAdvocate user={self.user_id} company={self.company_id}>"
+
+
 class WaUser(db.Model):
     __tablename__ = "wa_users"
 

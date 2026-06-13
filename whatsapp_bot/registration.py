@@ -1,17 +1,17 @@
 """Registration sub-flow (shared by the candidate & employee paths).
 
-Collects first/last name + email as free text, shows a review with
-Confirm/Edit/Restart buttons (the WA_CT_REGISTER_REVIEW Content template),
-persists on Confirm, then hands off to the flow's main step (Phase C/E —
-stubbed for now). Free-text prompts go out as plain messages; only the review
-needs a Content template.
+Collects first/last name + email as free text (each prompt carries a
+Back-to-Menu button via messaging.send_prompt), shows a review with
+Confirm/Edit/Restart buttons (WA_CT_REGISTER_REVIEW), persists on Confirm, then
+hands off to the flow's main step (candidate → Phase C stub; employee → advocate
+registration).
 """
 import re
 from datetime import datetime
 
 from database.models import db
 
-from . import conversation, copy, messaging
+from . import conversation, copy, employee, messaging
 from .config import WaConfig
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -20,7 +20,7 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 def start(user, conv, flow):
     """Kick off registration for `flow` ('candidate' or 'employee')."""
     conversation.set_state(conv, flow, "reg_first_name", {})
-    messaging.send_text(user.phone, copy.REG_FIRST_NAME)
+    messaging.send_prompt(user.phone, copy.REG_FIRST_NAME)
     return "reg_start"
 
 
@@ -32,18 +32,18 @@ def handle(user, conv, payload, text):
     if step == "reg_first_name":
         data["first_name"] = text
         conversation.set_state(conv, conv.flow, "reg_last_name", data)
-        messaging.send_text(user.phone, copy.REG_LAST_NAME.format(first=text))
+        messaging.send_prompt(user.phone, copy.REG_LAST_NAME.format(first=text))
         return "reg_first_name"
 
     if step == "reg_last_name":
         data["last_name"] = text
         conversation.set_state(conv, conv.flow, "reg_email", data)
-        messaging.send_text(user.phone, copy.REG_EMAIL.format(first=data.get("first_name", "")))
+        messaging.send_prompt(user.phone, copy.REG_EMAIL.format(first=data.get("first_name", "")))
         return "reg_last_name"
 
     if step == "reg_email":
         if not _EMAIL_RE.match(text):
-            messaging.send_text(user.phone, copy.REG_EMAIL_INVALID)
+            messaging.send_prompt(user.phone, copy.REG_EMAIL_INVALID)
             return "reg_email_invalid"
         data["email"] = text
         conversation.set_state(conv, conv.flow, "reg_review", data)
@@ -56,7 +56,7 @@ def handle(user, conv, payload, text):
             return enter_main(user, conv)
         if payload == "REG_EDIT":
             conversation.set_state(conv, conv.flow, "reg_first_name", {})
-            messaging.send_text(user.phone, copy.REG_EDIT)
+            messaging.send_prompt(user.phone, copy.REG_EDIT)
             return "reg_edit"
         # Any stray tap/text at the review: just re-show it.
         _send_review(user, data)
@@ -67,13 +67,11 @@ def handle(user, conv, payload, text):
 
 
 def enter_main(user, conv):
-    """Hand off to the flow's main step (Phase C/E — stubbed for now)."""
+    """Hand off to the flow's main step after registration."""
     if conv.flow == "employee":
-        conversation.set_state(conv, "employee", "emp_main", {})
-        messaging.send_text(user.phone, copy.REGISTERED_EMPLOYEE)
-        return "registered_employee"
+        return employee.start(user, conv)
     conversation.set_state(conv, "candidate", "cand_main", {})
-    messaging.send_text(user.phone, copy.REGISTERED_CANDIDATE)
+    messaging.send_prompt(user.phone, copy.REGISTERED_CANDIDATE)
     return "registered_candidate"
 
 

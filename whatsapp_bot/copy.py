@@ -53,3 +53,14 @@ CONTACT_INFO = (
     "Reach us at *contact@ofoodiez.com* or DM us on Instagram *@ofoodiez* 🧡\n"
     "Type *menu* anytime to start over."
 )
+
+# ---- Phase E: employee advocate registration ----
+EMP_COMPANY = (
+    "Amazing — advocates are how the magic happens! 🙌\n"
+    "Which company do you work at (or can refer into)?"
+)
+EMP_ROLE = "Love it — *{company}*! 💼\nWhat's your role/title there?"
+ADVOCATE_DONE = (
+    "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
+    "We'll ping you the moment a great candidate comes through. ✨"
+)

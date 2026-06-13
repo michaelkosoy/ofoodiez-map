@@ -48,6 +48,17 @@ class _WaConfig:
     def WA_CT_REGISTER_REVIEW(self):
         return os.environ.get("WA_CT_REGISTER_REVIEW")
 
+    @property
+    def WA_CT_PROMPT(self):
+        # Reusable quick-reply template: body is {{1}} + a single "Back to Menu"
+        # button (payload BACK_TO_MENU). Used by messaging.send_prompt so every
+        # text prompt carries a back button.
+        return os.environ.get("WA_CT_PROMPT")
+
+    @property
+    def WA_CT_EMPLOYEE_CONFIRM(self):
+        return os.environ.get("WA_CT_EMPLOYEE_CONFIRM")
+
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property
     def MAX_BODY_LENGTH(self):

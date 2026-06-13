@@ -1,13 +1,13 @@
 """Dispatch, Welcome menu, and path routing.
 
-Phase A welcomed everything; Phase B adds flow-aware dispatch: a path button
-enters its flow, running the shared registration sub-flow first if the user
-isn't registered yet. The post-registration "main" steps (candidate/employee)
-are Phase C/E and are stubbed for now; Contact Us returns contact info.
+A path button enters its flow, running the shared registration sub-flow first
+if the user isn't registered. Candidate "main" (company search) is Phase C and
+stubbed for now; Employee runs the advocate-registration flow; Contact Us
+returns contact info. Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 """
 import logging
 
-from . import conversation, copy, messaging, registration
+from . import conversation, copy, employee, messaging, registration
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
@@ -37,12 +37,14 @@ def handle(inbound):
     if payload in _PATHS:
         return _enter_path(user, conv, _PATHS[payload])
 
-    # In-flow dispatch for the candidate/employee paths.
+    # In-flow dispatch.
     if conv.flow in ("candidate", "employee"):
         if conv.step and conv.step.startswith("reg_"):
             return registration.handle(user, conv, payload, text)
-        # Post-registration main steps (Phase C/E) — gentle nudge for now.
-        messaging.send_text(user.phone, copy.MAIN_COMING_SOON)
+        if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
+            return employee.handle(user, conv, payload, text)
+        # Candidate main (company search) is Phase C — gentle nudge for now.
+        messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
         return "main_coming_soon"
 
     # No active flow / anything unrecognized → Welcome.
@@ -51,7 +53,7 @@ def handle(inbound):
 
 def _enter_path(user, conv, flow):
     if flow == "contact":
-        messaging.send_text(user.phone, copy.CONTACT_INFO)
+        messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"
     if user.is_registered:
