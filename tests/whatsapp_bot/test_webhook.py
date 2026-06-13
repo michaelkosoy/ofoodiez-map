@@ -71,7 +71,6 @@ def test_button_payload_is_routed(client, app, sign, mock_twilio):
     params["ButtonPayload"] = "PATH_CANDIDATE"
     resp = client.post("/wa/webhook", data=params, headers=sign(params))
     assert resp.status_code == 200
-    from whatsapp_bot.models import WaInboundMessage
     with app.app_context():
         row = WaInboundMessage.query.filter_by(message_sid=sid).one()
         assert row.parsed_command == "enter_candidate"

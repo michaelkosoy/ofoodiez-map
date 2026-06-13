@@ -6,11 +6,12 @@ POST /wa/webhook is the single inbound endpoint. The flow (plan §3) is:
   2. Claim the MessageSid: INSERT the audit row + COMMIT *before* any side
      effect. A duplicate SID raises IntegrityError -> we reply with empty TwiML
      (Twilio sends nothing) and do no reprocessing (idempotency).
-  3. Handle the message (PR1: a static bilingual help reply), wrapped so a
-     failure still leaves a debuggable audit row.
-  4. Finalise the audit row (parsed_command, response_summary, processing_ms,
-     error) and COMMIT.
-  5. Reply with TwiML.
+  3. Route to the conversation state machine (whatsapp_bot.router), wrapped so a
+     failure still leaves a debuggable audit row. Replies are sent via the Twilio
+     REST API inside the router/messaging layer, not via TwiML (WhatsApp buttons
+     require the Content API).
+  4. Finalise the audit row (parsed_command, processing_ms, error) and COMMIT.
+  5. Return an empty TwiML 200 ack (the reply already went out via REST).
 
 Inbound webhooks are at-most-once (Twilio does not redeliver), so the
 idempotency claim is cheap insurance rather than the main reliability
