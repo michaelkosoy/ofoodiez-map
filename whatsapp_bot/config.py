@@ -22,6 +22,22 @@ class _WaConfig:
     def TWILIO_WEBHOOK_URL(self):
         return os.environ.get("TWILIO_WEBHOOK_URL", DEFAULT_WEBHOOK_URL)
 
+    @property
+    def TWILIO_ACCOUNT_SID(self):
+        return os.environ.get("TWILIO_ACCOUNT_SID")
+
+    @property
+    def TWILIO_MESSAGING_SERVICE_SID(self):
+        return os.environ.get("TWILIO_MESSAGING_SERVICE_SID")
+
+    @property
+    def WA_CT_WELCOME(self):
+        return os.environ.get("WA_CT_WELCOME")
+
+    @property
+    def WA_CT_BACK_TO_MENU(self):
+        return os.environ.get("WA_CT_BACK_TO_MENU")
+
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property
     def MAX_BODY_LENGTH(self):
