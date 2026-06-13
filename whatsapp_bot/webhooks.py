@@ -27,9 +27,9 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from instagram_automation.database import db
 
-from . import wa_bp
+from . import messaging, router, wa_bp
 from .config import WaConfig
-from .copy import ERROR, HELP
+from .copy import ERROR
 from .models import WaInboundMessage
 
 logger = logging.getLogger("whatsapp_bot")
@@ -101,25 +101,32 @@ def webhook():
         logger.info("wa webhook: duplicate MessageSid %s — skipping", message_sid)
         return _twiml("")  # already handled on the first delivery; stay silent
 
-    # 3. Handle the message. PR1 replies with the static (English) help message;
-    #    per-message language detection arrives with PR2's parser. copy.py
-    #    already ships the Hebrew strings. We still wrap the handler so an
-    #    unexpected failure leaves a debuggable audit row.
-    reply = ""
+    # 3. Route to the conversation state machine. Replies are sent via REST
+    #    inside the router; the webhook just acknowledges with empty TwiML.
     parsed_command = None
     error_text = None
     try:
-        reply = HELP["en"]
-        parsed_command = "help"
-    except Exception as exc:  # defensive: keep the webhook a fast, safe 200
+        inbound = {
+            "phone": from_phone,
+            "profile_name": profile_name,
+            "body": body,
+            "button_payload": form.get("ButtonPayload"),
+            "num_media": num_media,
+            "media_url": form.get("MediaUrl0"),
+            "media_content_type": form.get("MediaContentType0"),
+        }
+        parsed_command = router.handle(inbound)
+    except Exception as exc:
         logger.exception("wa webhook: handler error for sid %s", message_sid)
-        reply = ERROR["en"]
         parsed_command = "error"
         error_text = str(exc)
+        try:
+            messaging.send_text(from_phone, ERROR["en"])
+        except Exception:
+            logger.exception("wa webhook: failed to send error reply")
     finally:
-        # 4. Finalise the audit row regardless of success/failure.
         audit.parsed_command = parsed_command
-        audit.response_summary = (reply or "")[:200]
+        audit.response_summary = (parsed_command or "")[:200]
         audit.processing_ms = int((time.monotonic() - started) * 1000)
         audit.error = error_text
         try:
@@ -128,5 +135,4 @@ def webhook():
             db.session.rollback()
             logger.exception("wa webhook: failed to update audit row for sid %s", message_sid)
 
-    # 5. Reply with TwiML.
-    return _twiml(reply)
+    return _twiml("")  # empty 200 ack; the reply already went out via REST
