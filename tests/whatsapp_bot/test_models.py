@@ -1,4 +1,8 @@
 from datetime import datetime
+
+import pytest
+from sqlalchemy.exc import IntegrityError
+
 from instagram_automation.database import db
 from whatsapp_bot.models import WaUser, WaConversation, WaOutboundMessage
 
@@ -36,3 +40,22 @@ def test_outbound_message_row(app):
 def test_referral_link_model_removed():
     import whatsapp_bot.models as m
     assert not hasattr(m, "WaReferralLink")
+
+
+def test_is_registered_is_a_property(app):
+    with app.app_context():
+        full = WaUser(phone="+972500000005", first_name="Ada", email="ada@example.com")
+        empty = WaUser(phone="+972500000006")
+        assert full.is_registered is True   # property access, no parens
+        assert empty.is_registered is False
+
+
+def test_conversation_unique_per_user(app):
+    with app.app_context():
+        u = WaUser(phone="+972500000007"); db.session.add(u); db.session.commit()
+        db.session.add(WaConversation(user_id=u.id, flow="candidate", step="a"))
+        db.session.commit()
+        db.session.add(WaConversation(user_id=u.id, flow="employee", step="b"))
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+        db.session.rollback()

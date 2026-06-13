@@ -50,6 +50,7 @@ class WaUser(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    @property
     def is_registered(self):
         return bool(self.first_name and self.email)
 
