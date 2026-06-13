@@ -18,6 +18,7 @@ from .models import (
     WaApplicationRecipient,
     WaCompany,
     WaCompanyRequest,
+    WaUser,
 )
 
 
@@ -32,9 +33,16 @@ def _valid_url(url):
     return bool(re.match(r"^https://[^\s/]+\.[^\s/]+", url, re.IGNORECASE))
 
 
-def start(user, conv):
+def start(user, conv, returning=True):
+    """Begin the candidate path. Returning (already-registered) users get a
+    by-name welcome-back; a freshly-registered user gets the welcome-aboard."""
     conversation.set_state(conv, "candidate", "cand_company", {})
-    messaging.send_prompt(user.phone, copy.CAND_COMPANY)
+    first = (user.first_name or "").strip()
+    if returning and first:
+        msg = copy.CAND_WELCOME_BACK.format(first=first)
+    else:
+        msg = copy.CAND_COMPANY
+    messaging.send_prompt(user.phone, msg)
     return "cand_start"
 
 
@@ -75,19 +83,40 @@ def _handle_company(user, conv, data, text):
     norm = _normalize(text)
     company = WaCompany.query.filter_by(normalized_name=norm).first()
     if company:
-        active = WaAdvocate.query.filter_by(company_id=company.id, status="active").count()
-        if active > 0:
+        advocate = WaAdvocate.query.filter_by(company_id=company.id, status="active").first()
+        if advocate:
             data["company_id"] = company.id
             data["company_name"] = company.name
+            data["advocate_name"] = _advocate_name(advocate)
             conversation.set_state(conv, "candidate", "cand_role", data)
-            messaging.send_prompt(user.phone, copy.CAND_ROLE.format(company=company.name))
+            messaging.send_prompt(user.phone, copy.CAND_ROLE.format(
+                company=company.name, advocate=data["advocate_name"]))
             return "cand_company_found"
         _log_request(user, text, norm, company.id, "no_advocates")
+        _notify_ops(user, text.strip(), "no_advocates")
         messaging.send_prompt(user.phone, copy.CAND_NO_ADVOCATES.format(company=company.name))
         return "cand_no_advocates"
     _log_request(user, text, norm, None, "unknown_company")
+    _notify_ops(user, text.strip(), "unknown_company")
     messaging.send_prompt(user.phone, copy.CAND_NOT_FOUND.format(company=text.strip()))
     return "cand_not_found"
+
+
+def _advocate_name(advocate):
+    """First name of the advocate behind a wa_advocates row (for the candidate-
+    facing 'I found {name}' message). Falls back gracefully."""
+    adv_user = WaUser.query.get(advocate.user_id) if advocate else None
+    first = (adv_user.first_name or "").strip() if adv_user else ""
+    return first or "one of our advocates"
+
+
+def _notify_ops(user, company_name, reason):
+    """Best-effort heads-up to ops about a company we can't serve yet."""
+    name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "A candidate"
+    try:
+        emailer.send_company_request_email(company_name, name, user.phone, user.email, reason)
+    except Exception:
+        pass  # never let the ops notification break the candidate flow
 
 
 def _handle_resume(user, conv, data, inbound):
@@ -117,7 +146,9 @@ def _handle_resume(user, conv, data, inbound):
         messaging.send_buttons(user.phone, WaConfig.WA_CT_EXPLORE_MORE, {"1": str(recipients)})
     else:
         conversation.reset_state(conv)
-        messaging.send_prompt(user.phone, copy.CAND_SUBMITTED.format(n=recipients))
+        messaging.send_prompt(user.phone, copy.CAND_SUBMITTED.format(
+            advocate=data.get("advocate_name", "the advocate"),
+            company=data.get("company_name", "the company")))
         _send_menu(user)
     return "cand_submitted"
 

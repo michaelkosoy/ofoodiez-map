@@ -46,6 +46,45 @@ def send_application_email(to_email, candidate_name, role, company, job_url,
             "disposition": "attachment",
         }]
 
+    return _post(payload)
+
+
+def send_company_request_email(company_name, candidate_name, candidate_phone,
+                               candidate_email, reason):
+    """Notify ops (WA_OPS_EMAIL, default contact@ofoodiez.com) that a candidate
+    searched a company we can't yet serve, so it can be backfilled. Best-effort:
+    returns False if SendGrid / the ops address aren't configured."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    to_email = WaConfig.WA_OPS_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+
+    reason_label = {
+        "unknown_company": "is NOT in our database yet",
+        "no_advocates": "is in our database but has NO advocates yet",
+    }.get(reason, reason)
+    body = (
+        f"A candidate requested a referral we can't fulfil yet.\n\n"
+        f"Company requested: {company_name}\n"
+        f"Status: that company {reason_label}.\n\n"
+        f"Candidate: {candidate_name}\n"
+        f"WhatsApp: {candidate_phone}\n"
+        f"Email: {candidate_email or '—'}\n\n"
+        f"Consider adding the company / recruiting an advocate there. "
+        f"Sent via Ofoodiez Referrals."
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez Referrals"},
+        "subject": f"Referral request: {company_name} ({reason})",
+        "content": [{"type": "text/plain", "value": body}],
+    }
+    return _post(payload)
+
+
+def _post(payload):
+    api_key = WaConfig.SENDGRID_API_KEY
     try:
         resp = requests.post(
             _SENDGRID_URL,

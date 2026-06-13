@@ -84,6 +84,11 @@ class _WaConfig:
     def WA_FROM_EMAIL(self):
         return os.environ.get("WA_FROM_EMAIL")
 
+    @property
+    def WA_OPS_EMAIL(self):
+        # Where "company not found / no advocates yet" requests are emailed.
+        return os.environ.get("WA_OPS_EMAIL", "contact@ofoodiez.com")
+
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property
     def MAX_BODY_LENGTH(self):

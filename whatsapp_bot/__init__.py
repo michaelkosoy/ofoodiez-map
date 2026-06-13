@@ -17,14 +17,21 @@ def init_app(app):
 
     Importing the submodules registers the models on the SHARED db metadata
     and attaches the webhook routes to ``wa_bp``. This intentionally does NOT
-    call ``db.init_app`` (already done by instagram_automation.init_app) nor
-    ``db.create_all`` — the wa_ tables are created by the one-time Supabase SQL
-    script (with RLS) described in docs/whatsapp-referral-bot-plan.md §4.
+    call ``db.init_app`` (already done by instagram_automation.init_app). It runs
+    idempotent, self-healing migrations (whatsapp_bot.migrate) so the live schema
+    tracks the models without a manual SQL step — schema.sql remains the human
+    reference (and still holds the optional Part 2 RLS for the site tables).
 
     Must be called AFTER ``instagram_automation.init_app`` so the shared db is
     initialized first.
     """
     from . import models, webhooks  # noqa: F401  (import for side effects)
+    from .migrate import run_migrations
 
     app.register_blueprint(wa_bp)
+    try:
+        run_migrations(app)
+    except Exception:  # never let a migration issue block app startup
+        import logging
+        logging.getLogger("whatsapp_bot").exception("wa migrate: run_migrations failed")
     return app

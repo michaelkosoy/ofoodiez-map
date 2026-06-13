@@ -63,8 +63,9 @@ def handle(user, conv, payload, text):
 
 
 def enter_main(user, conv):
-    """After candidate registration, go to company search."""
-    return candidate.start(user, conv)
+    """After fresh candidate registration, go to company search (welcome-aboard,
+    not welcome-back)."""
+    return candidate.start(user, conv, returning=False)
 
 
 def _send_review(user, data):

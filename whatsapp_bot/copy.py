@@ -92,9 +92,14 @@ CAND_COMPANY = (
     "You're all set — welcome aboard! 🎉🚀\n"
     "Which company are you aiming for?"
 )
+CAND_WELCOME_BACK = (
+    "Hey {first}, welcome back! 👋🧡\n"
+    "Which company are you aiming for?"
+)
 CAND_ROLE = (
-    "Great news — we've got advocates at *{company}*! 🎉\n"
-    "What role are you aiming for? (e.g. Product Manager, Software Engineer, Analyst)"
+    "Amazing — I found *{advocate}* at *{company}*! 🎉\n"
+    "They can refer you in. What role are you aiming for? "
+    "(e.g. Product Manager, Software Engineer, Analyst)"
 )
 CAND_JOB_LINK = "Nice — *{company}* it is! 🎯\nPaste the link to the exact job posting you want in for."
 CAND_JOB_LINK_INVALID = (
@@ -115,13 +120,14 @@ CAND_RESUME_SOON = (
     "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
 )
 CAND_RESUME_PROMPT = (
-    "Last step! 📄 Send your résumé as a *PDF* and we'll get it to the advocates.\n"
+    "Last step! 📄 Send your *CV/résumé as a PDF* and I'll forward it to the advocate.\n"
     "Make it shine — tailor it to the role if you can. ✨"
 )
 CAND_RESUME_NOT_PDF = "I need your résumé as a *PDF file* 🙏 — attach the PDF and send again."
 CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending the PDF again."
 CAND_SUBMITTED = (
-    "Sent to *{n}* advocate(s) — fingers crossed! 🤞🎉\n"
+    "Done! ✅ I've forwarded your application to *{advocate}* at *{company}* — "
+    "fingers crossed! 🤞🎉\n"
     "Pick what's next below, or type *menu* anytime."
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"

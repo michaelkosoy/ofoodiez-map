@@ -1,8 +1,9 @@
 -- ============================================================================
--- WhatsApp Referral Bot — database schema (canonical schema-of-record).
--- Run ONCE in the Supabase SQL editor before the webhook serves real traffic.
--- Future schema changes: add the ALTER here and run it BEFORE merging the
--- matching model edit (create_all cannot migrate existing tables).
+-- WhatsApp Referral Bot — database schema (human reference).
+-- NOTE: Part 1 below now runs AUTOMATICALLY at app startup via
+-- whatsapp_bot/migrate.py (idempotent CREATE/ALTER/INDEX + RLS), so you no
+-- longer have to run it by hand — keep this file in sync as documentation.
+-- Part 2 (site-table RLS) is still optional and manual.
 -- See docs/whatsapp-referral-bot-plan.md §4.
 -- ============================================================================
 
