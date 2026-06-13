@@ -1,21 +1,25 @@
-"""Dispatch + Welcome flow.
+"""Dispatch, Welcome menu, and path routing.
 
-Phase A only routes the Welcome menu and Back-to-Menu. The three path
-selections set the flow and reply with a transitional stub; Phases B-F replace
-those stubs with the real registration/candidate/employee/contact handlers.
+Phase A welcomed everything; Phase B adds flow-aware dispatch: a path button
+enters its flow, running the shared registration sub-flow first if the user
+isn't registered yet. The post-registration "main" steps (candidate/employee)
+are Phase C/E and are stubbed for now; Contact Us returns contact info.
 """
 import logging
 
-from . import conversation, messaging
+from . import conversation, copy, messaging, registration
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
 
-# Transitional stubs (replaced in Phases B-F).
-_PATH_STUBS = {
-    "PATH_CANDIDATE": ("candidate", "You're in the Candidate flow! (coming soon)"),
-    "PATH_EMPLOYEE": ("employee", "You're in the Employee flow! (coming soon)"),
-    "PATH_CONTACT": ("contact", "You're in Contact Us! (coming soon)"),
+# Words that always reset to the Welcome menu. Kept minimal so they don't eat
+# valid free-text answers (like a first name).
+RESET_WORDS = {"menu", "restart"}
+
+_PATHS = {
+    "PATH_CANDIDATE": "candidate",
+    "PATH_EMPLOYEE": "employee",
+    "PATH_CONTACT": "contact",
 }
 
 
@@ -23,20 +27,36 @@ def handle(inbound):
     user = conversation.get_or_create_user(inbound["phone"], inbound.get("profile_name"))
     conv = conversation.get_state(user)
     payload = inbound.get("button_payload")
+    text = (inbound.get("body") or "").strip()
 
-    # PATH_* buttons start a new flow — handle BEFORE anything else so that tapping
-    # a path right after the welcome menu (where flow=None) enters the flow instead
-    # of re-showing the menu.
-    if payload in _PATH_STUBS:
-        flow, stub = _PATH_STUBS[payload]
-        conversation.set_state(conv, flow, "start", {})
-        messaging.send_text(user.phone, stub)
-        return f"enter_{flow}"
+    # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
+    if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
+        return _welcome(user, conv)
 
-    # Phase A: everything else (Back-to-Menu, reset words, mid-stub, unrecognized)
-    # resets and re-shows the Welcome menu. Phase B inserts reset-keyword handling
-    # and flow-aware dispatch here for users with an active flow.
+    # Path selection from the Welcome menu.
+    if payload in _PATHS:
+        return _enter_path(user, conv, _PATHS[payload])
+
+    # In-flow dispatch for the candidate/employee paths.
+    if conv.flow in ("candidate", "employee"):
+        if conv.step and conv.step.startswith("reg_"):
+            return registration.handle(user, conv, payload, text)
+        # Post-registration main steps (Phase C/E) — gentle nudge for now.
+        messaging.send_text(user.phone, copy.MAIN_COMING_SOON)
+        return "main_coming_soon"
+
+    # No active flow / anything unrecognized → Welcome.
     return _welcome(user, conv)
+
+
+def _enter_path(user, conv, flow):
+    if flow == "contact":
+        messaging.send_text(user.phone, copy.CONTACT_INFO)
+        conversation.reset_state(conv)
+        return "enter_contact"
+    if user.is_registered:
+        return registration.enter_main(user, conv)
+    return registration.start(user, conv, flow)
 
 
 def _welcome(user, conv):

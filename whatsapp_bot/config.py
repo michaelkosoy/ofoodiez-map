@@ -44,6 +44,10 @@ class _WaConfig:
     def WA_CT_BACK_TO_MENU(self):
         return os.environ.get("WA_CT_BACK_TO_MENU")
 
+    @property
+    def WA_CT_REGISTER_REVIEW(self):
+        return os.environ.get("WA_CT_REGISTER_REVIEW")
+
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property
     def MAX_BODY_LENGTH(self):
