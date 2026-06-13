@@ -35,10 +35,24 @@ if _db_url:
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instagram_automation.db'
 
+# Connection-pool hardening for the shared SQLAlchemy engine. Must be set BEFORE
+# init_ig_automation (which calls db.init_app): pool_pre_ping avoids stale
+# Supabase pooler connections after idle periods, pool_recycle refreshes them.
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 1800,
+}
+
 
 # Register Instagram Automation blueprint
 from instagram_automation import init_app as init_ig_automation
 init_ig_automation(app)
+
+# Register WhatsApp referral-bot blueprint (after IG init: reuses the shared db,
+# does not re-init the extension or call create_all — wa_ tables are created by
+# the one-time Supabase SQL script; see docs/whatsapp-referral-bot-plan.md §4).
+from whatsapp_bot import init_app as init_wa_bot
+init_wa_bot(app)
 
 # Start Telegram bot in a background thread
 import threading

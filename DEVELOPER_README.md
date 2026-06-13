@@ -33,6 +33,10 @@ This document tracks all external services, APIs, and platforms integrated into 
 * **Usage:** Used for the Telegram Bot Content Management system to process and manage popups or happy hour places.
 * **Owner:** [Michael / Ofir - Please update]
 
+### Twilio (WhatsApp Referral Bot)
+* **Usage:** Powers the WhatsApp referral-link bot at `/wa/webhook`. Inbound messages are verified against the Twilio account Auth Token (`TWILIO_AUTH_TOKEN`) via `RequestValidator`, using the pinned `TWILIO_WEBHOOK_URL`. Replies are synchronous TwiML (no outbound REST calls in MVP). Full design in `docs/whatsapp-referral-bot-plan.md`.
+* **Owner:** [Michael / Ofir - Please update]
+
 ---
 
 ## 3. Data & Content
