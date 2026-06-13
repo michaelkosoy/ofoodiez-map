@@ -19,6 +19,10 @@ TEST_WEBHOOK_URL = "https://example.com/wa/webhook"
 def app(monkeypatch):
     monkeypatch.setenv("TWILIO_AUTH_TOKEN", TEST_AUTH_TOKEN)
     monkeypatch.setenv("TWILIO_WEBHOOK_URL", TEST_WEBHOOK_URL)
+    monkeypatch.setenv("TWILIO_ACCOUNT_SID", "AC_test")
+    monkeypatch.setenv("TWILIO_MESSAGING_SERVICE_SID", "MG_test")
+    monkeypatch.setenv("WA_CT_WELCOME", "HX_welcome")
+    monkeypatch.setenv("WA_CT_BACK_TO_MENU", "HX_back")
 
     flask_app = Flask(__name__)
     flask_app.config.update(
@@ -65,3 +69,20 @@ def sign():
         return {"X-Twilio-Signature": signature}
 
     return _sign
+
+
+@pytest.fixture
+def mock_twilio(monkeypatch):
+    sent = []
+
+    class _FakeMessages:
+        def create(self, **kwargs):
+            sent.append(kwargs)
+            return type("Msg", (), {"sid": f"SM_fake_{len(sent)}", "status": "queued"})()
+
+    class _FakeClient:
+        def __init__(self, *a, **k):
+            self.messages = _FakeMessages()
+
+    monkeypatch.setattr("whatsapp_bot.messaging.Client", _FakeClient)
+    return sent
