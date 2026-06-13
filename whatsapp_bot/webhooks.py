@@ -26,7 +26,7 @@ from sqlalchemy.exc import IntegrityError
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
-from instagram_automation.database import db
+from database.models import db
 
 from . import messaging, router, wa_bp
 from .config import WaConfig

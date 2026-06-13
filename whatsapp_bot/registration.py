@@ -9,7 +9,7 @@ needs a Content template.
 import re
 from datetime import datetime
 
-from instagram_automation.database import db
+from database.models import db
 
 from . import conversation, copy, messaging
 from .config import WaConfig

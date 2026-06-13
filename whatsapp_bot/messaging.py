@@ -8,7 +8,7 @@ import logging
 
 from twilio.rest import Client
 
-from instagram_automation.database import db
+from database.models import db
 
 from .config import WaConfig
 from .models import WaOutboundMessage

@@ -2,13 +2,13 @@
 
 These mirror the one-time Supabase SQL schema (docs/whatsapp-referral-bot-plan.md
 §4) and hang off the single shared ``db`` defined in
-``instagram_automation.database``. In production the wa_ tables are created by
+``database.models``. In production the wa_ tables are created by
 that SQL script (with RLS + indexes); ``db.create_all()`` only materialises them
 in tests (sqlite).
 """
 from datetime import datetime
 
-from instagram_automation.database import db
+from database.models import db
 
 
 def _pk():

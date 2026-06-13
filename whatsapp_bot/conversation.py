@@ -1,7 +1,7 @@
 """User identity + per-user conversation state (DB-backed state machine store)."""
 from datetime import datetime
 
-from instagram_automation.database import db
+from database.models import db
 
 from .models import WaConversation, WaUser
 
