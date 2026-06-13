@@ -118,12 +118,14 @@ def webhook():
         }
         parsed_command = router.handle(inbound)
     except Exception as exc:
+        db.session.rollback()  # clear any aborted transaction so we can log + reply
         logger.exception("wa webhook: handler error for sid %s", message_sid)
         parsed_command = "error"
         error_text = str(exc)
         try:
             messaging.send_text(from_phone, ERROR["en"])
         except Exception:
+            db.session.rollback()
             logger.exception("wa webhook: failed to send error reply")
     finally:
         audit.parsed_command = parsed_command
