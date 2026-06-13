@@ -23,3 +23,12 @@ def test_send_buttons_uses_content_sid_and_variables(app, mock_twilio):
         assert call["content_sid"] == "HX_welcome"
         assert json.loads(call["content_variables"]) == {"1": "Ofoodiez"}
         assert WaOutboundMessage.query.one().content_sid == "HX_welcome"
+
+
+def test_send_uses_from_number_when_configured(app, mock_twilio, monkeypatch):
+    monkeypatch.setenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+    with app.app_context():
+        messaging.send_text("+972500000099", "hi")
+        call = mock_twilio[0]
+        assert call["from_"] == "whatsapp:+14155238886"
+        assert "messaging_service_sid" not in call

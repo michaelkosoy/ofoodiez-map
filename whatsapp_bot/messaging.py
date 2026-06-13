@@ -24,6 +24,16 @@ def _to(phone):
     return phone if phone.startswith("whatsapp:") else f"whatsapp:{phone}"
 
 
+def _route_kwargs():
+    """Choose the outbound sender: an explicit WhatsApp `from` number (the sandbox
+    shared number, which can't belong to a Messaging Service) takes priority;
+    otherwise route via the Messaging Service (the production sender)."""
+    wa_from = WaConfig.TWILIO_WHATSAPP_FROM
+    if wa_from:
+        return {"from_": wa_from}
+    return {"messaging_service_sid": WaConfig.TWILIO_MESSAGING_SERVICE_SID}
+
+
 def _log(to_phone, twilio_sid=None, status=None, body=None, content_sid=None, error=None):
     row = WaOutboundMessage(
         to_phone=to_phone, body=body, content_sid=content_sid,
@@ -36,8 +46,7 @@ def _log(to_phone, twilio_sid=None, status=None, body=None, content_sid=None, er
 def send_text(to_phone, body):
     try:
         msg = _client().messages.create(
-            messaging_service_sid=WaConfig.TWILIO_MESSAGING_SERVICE_SID,
-            to=_to(to_phone), body=body,
+            to=_to(to_phone), body=body, **_route_kwargs(),
         )
         _log(to_phone, twilio_sid=msg.sid, status=getattr(msg, "status", None), body=body)
         return msg.sid
@@ -50,9 +59,8 @@ def send_text(to_phone, body):
 def send_buttons(to_phone, content_sid, variables=None):
     try:
         msg = _client().messages.create(
-            messaging_service_sid=WaConfig.TWILIO_MESSAGING_SERVICE_SID,
             to=_to(to_phone), content_sid=content_sid,
-            content_variables=json.dumps(variables or {}),
+            content_variables=json.dumps(variables or {}), **_route_kwargs(),
         )
         _log(to_phone, twilio_sid=msg.sid, status=getattr(msg, "status", None), content_sid=content_sid)
         return msg.sid

@@ -31,6 +31,12 @@ class _WaConfig:
         return os.environ.get("TWILIO_MESSAGING_SERVICE_SID")
 
     @property
+    def TWILIO_WHATSAPP_FROM(self):
+        # Sandbox shared sender (e.g. "whatsapp:+14155238886"). When set, outbound
+        # uses this `from` number; otherwise it routes via the Messaging Service.
+        return os.environ.get("TWILIO_WHATSAPP_FROM")
+
+    @property
     def WA_CT_WELCOME(self):
         return os.environ.get("WA_CT_WELCOME")
 
