@@ -38,14 +38,14 @@ def send_application_email(to_email, advocate_name, candidate_name, role, compan
     else:
         detail = ""
     body = (
-        f"Hey {advocate_name or 'there'}! :)\n\n"
+        f"Hey {advocate_name or 'there'}! 😊\n\n"
         f"{candidate_name} is interested in a {role or 'role'} at {company} and "
         f"would love a referral from you.\n\n"
         f"{detail}"
         f"Their CV is attached.\n\n"
-        f"Thanks so much for being an Ofoodiez advocate - you're helping someone "
-        f"land their dream job!\n\n"
-        f"- The Ofoodiez team"
+        f"Thanks so much for being an Ofoodiez advocate — you're helping someone "
+        f"land their dream job! 🙏\n\n"
+        f"— The Ofoodiez team"
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
