@@ -1,5 +1,7 @@
+from datetime import datetime
 from flask import jsonify, request
 from database.models import db, HappyHourPlace, PopupEvent
+from whatsapp_bot.models import WaConversation, WaCompany, WaAdvocate, WaUser
 from . import admin_bp
 from .auth import login_required
 
@@ -184,3 +186,52 @@ def delete_event(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
+
+# --- WhatsApp Bot API ---
+
+@admin_bp.route('/api/whatsapp/stats', methods=['GET'])
+@login_required
+def get_whatsapp_stats():
+    # Active chats today (conversations updated today)
+    start_of_day = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    active_chats_today = WaConversation.query.filter(WaConversation.updated_at >= start_of_day).count()
+    
+    # Companies
+    companies = WaCompany.query.order_by(WaCompany.name).all()
+    companies_count = len(companies)
+    companies_list = [{"id": c.id, "name": c.name} for c in companies]
+    
+    return jsonify({
+        "active_chats_today": active_chats_today,
+        "companies_count": companies_count,
+        "companies": companies_list
+    })
+
+@admin_bp.route('/api/whatsapp/advocates', methods=['GET'])
+@login_required
+def get_whatsapp_advocates():
+    # Join WaAdvocate, WaUser, WaCompany
+    results = db.session.query(
+        WaAdvocate, WaUser, WaCompany
+    ).join(
+        WaUser, WaAdvocate.user_id == WaUser.id
+    ).join(
+        WaCompany, WaAdvocate.company_id == WaCompany.id
+    ).all()
+    
+    advocates = []
+    for adv, usr, comp in results:
+        name = usr.profile_name or f"{usr.first_name or ''} {usr.last_name or ''}".strip()
+        if not name:
+            name = "Unknown"
+            
+        advocates.append({
+            "id": adv.id,
+            "name": name,
+            "company": comp.name,
+            "number": usr.phone,
+            "title": adv.role_title or "",
+            "status": adv.status
+        })
+        
+    return jsonify(advocates)

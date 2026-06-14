@@ -17,3 +17,8 @@ def places():
 @login_required
 def events():
     return render_template('admin/events.html')
+
+@admin_bp.route('/whatsapp')
+@login_required
+def whatsapp():
+    return render_template('admin/whatsapp.html')

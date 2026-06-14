@@ -1,0 +1,147 @@
+{% extends "admin/base.html" %}
+
+{% block title %}WhatsApp Bot Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .stat-card i {
+        font-size: 2.5rem;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--sidebar-bg);
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 600;
+    }
+    
+    .dashboard-section {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    .dashboard-section h3 {
+        margin-bottom: 20px;
+        color: var(--sidebar-bg);
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    
+    .companies-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 10px;
+        background: #fafafa;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    .company-badge {
+        background: var(--sidebar-bg);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>WhatsApp Bot Dashboard</h2>
+</div>
+
+<div class="stats-container">
+    <div class="stat-card">
+        <i class="fas fa-comments"></i>
+        <div class="stat-value" id="active-chats">...</div>
+        <div class="stat-label">Active Chats Today</div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-building"></i>
+        <div class="stat-value" id="total-companies">...</div>
+        <div class="stat-label">Total Companies in DB</div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h3>Registered Companies</h3>
+    <div class="companies-list" id="companies-container">
+        <!-- Badges will be inserted here -->
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h3>Advocates Table</h3>
+    <div id="advocates-table"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Fetch stats
+    fetch("{{ url_for('admin.get_whatsapp_stats') }}")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('active-chats').textContent = data.active_chats_today;
+            document.getElementById('total-companies').textContent = data.companies_count;
+            
+            const container = document.getElementById('companies-container');
+            if (data.companies && data.companies.length > 0) {
+                data.companies.forEach(company => {
+                    const span = document.createElement('span');
+                    span.className = 'company-badge';
+                    span.textContent = company.name;
+                    container.appendChild(span);
+                });
+            } else {
+                container.innerHTML = '<span style="color: #888;">No companies found.</span>';
+            }
+        });
+
+    // Initialize Tabulator
+    var table = new Tabulator("#advocates-table", {
+        layout: "fitColumns",
+        ajaxURL: "{{ url_for('admin.get_whatsapp_advocates') }}",
+        history: true,
+        pagination: "local",
+        paginationSize: 20,
+        columns: [
+            { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
+            { title: "Name", field: "name", headerFilter: "input", minWidth: 150 },
+            { title: "Company", field: "company", headerFilter: "input", minWidth: 150 },
+            { title: "Number", field: "number", headerFilter: "input", minWidth: 150 },
+            { title: "Title", field: "title", headerFilter: "input", minWidth: 150 },
+            { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 100 }
+        ]
+    });
+</script>
+{% endblock %}
