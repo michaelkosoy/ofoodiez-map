@@ -119,6 +119,7 @@ _STATEMENTS = [
     "alter table public.wa_advocates add column if not exists email text",
     "alter table public.wa_advocates add column if not exists role_title text",
     "alter table public.wa_application_recipients add column if not exists email text",
+    "alter table public.wa_applications add column if not exists job_description text",
     # ---- indexes ----
     """create index if not exists ix_wa_inbound_from_created
         on public.wa_inbound_messages (from_phone, created_at)""",

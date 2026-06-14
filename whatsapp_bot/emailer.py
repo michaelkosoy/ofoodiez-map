@@ -17,20 +17,28 @@ _SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
 def send_application_email(to_email, candidate_name, role, company, job_url,
-                           resume_bytes=None, resume_filename="resume.pdf"):
-    """Email an advocate a candidate's application (résumé attached). Returns
-    True if sent, False if SendGrid isn't configured or the send failed."""
+                           job_description="", resume_bytes=None,
+                           resume_filename="resume.pdf",
+                           resume_content_type="application/pdf"):
+    """Email an advocate a candidate's application (CV attached). Returns True if
+    sent, False if SendGrid isn't configured or the send failed."""
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
         return False
 
+    if job_url:
+        detail = f"Job posting: {job_url}\n\n"
+    elif job_description:
+        detail = f"Role details: {job_description}\n\n"
+    else:
+        detail = ""
     body = (
         f"Hi,\n\n"
         f"{candidate_name} is interested in a {role or 'role'} at {company} and "
         f"would love your referral.\n\n"
-        f"Job posting: {job_url}\n\n"
-        f"Their résumé is attached. Sent via Ofoodiez Referrals."
+        f"{detail}"
+        f"Their CV is attached. Sent via Ofoodiez Referrals."
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
@@ -41,8 +49,8 @@ def send_application_email(to_email, candidate_name, role, company, job_url,
     if resume_bytes:
         payload["attachments"] = [{
             "content": base64.b64encode(resume_bytes).decode("ascii"),
-            "type": "application/pdf",
-            "filename": resume_filename,
+            "type": resume_content_type or "application/octet-stream",
+            "filename": resume_filename or "resume.pdf",
             "disposition": "attachment",
         }]
 

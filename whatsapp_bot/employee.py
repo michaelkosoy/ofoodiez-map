@@ -15,7 +15,6 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from database.models import db
 
 from . import conversation, copy, messaging
-from .config import WaConfig
 from .models import WaAdvocate, WaCompany
 
 logger = logging.getLogger("whatsapp_bot")
@@ -142,17 +141,11 @@ def _finalize(user, conv, data):
         conversation.set_state(conv, "employee", "emp_emails", data)
         messaging.send_prompt(user.phone, copy.EMP_SAVE_FAILED.format(company=company_name))
         return "emp_save_failed"
+    # Flow done — leave it; no auto Welcome (user can type 'menu' to do more).
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
         company=company_name, emails=", ".join(saved or emails)))
-    _send_menu(user)
     return "advocate_created"
-
-
-def _send_menu(user):
-    """Drop the user back on the Welcome menu so they can pick any path next."""
-    if WaConfig.WA_CT_WELCOME:
-        messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
 
 
 def _parse_emails(text):

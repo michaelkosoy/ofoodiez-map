@@ -22,6 +22,14 @@ from .models import (
 )
 
 
+# Accepted CV file types (Twilio MediaContentType0 -> file extension).
+_RESUME_TYPES = {
+    "application/pdf": ".pdf",
+    "application/msword": ".doc",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+}
+
+
 def _normalize(name):
     return " ".join((name or "").strip().lower().split())
 
@@ -62,13 +70,25 @@ def handle(user, conv, inbound):
         return "cand_role"
 
     if step == "cand_job_link":
-        if not _valid_url(text):
-            messaging.send_prompt(user.phone, copy.CAND_JOB_LINK_INVALID)
-            return "cand_job_link_invalid"
-        data["job_posting_url"] = text.strip()
+        if _valid_url(text):
+            data["job_posting_url"] = text.strip()
+            conversation.set_state(conv, "candidate", "cand_resume", data)
+            messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
+            return "cand_job_link"
+        # No link given — ask for a short description instead (just this once).
+        conversation.set_state(conv, "candidate", "cand_job_desc", data)
+        messaging.send_prompt(user.phone, copy.CAND_JOB_DESC_PROMPT)
+        return "cand_job_link_no_url"
+
+    if step == "cand_job_desc":
+        # They might still paste a link here; take it as a URL if so.
+        if _valid_url(text):
+            data["job_posting_url"] = text.strip()
+        else:
+            data["job_description"] = text.strip()
         conversation.set_state(conv, "candidate", "cand_resume", data)
         messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
-        return "cand_job_link"
+        return "cand_job_desc"
 
     if step == "cand_resume":
         return _handle_resume(user, conv, data, inbound)
@@ -122,34 +142,36 @@ def _notify_ops(user, company_name, reason):
 def _handle_resume(user, conv, data, inbound):
     num_media = inbound.get("num_media") or 0
     media_url = inbound.get("media_url")
-    ctype = (inbound.get("media_content_type") or "").lower()
+    ctype = (inbound.get("media_content_type") or "").split(";")[0].strip().lower()
 
     if not num_media or not media_url:
         messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
         return "cand_resume_waiting"
-    if "pdf" not in ctype:
-        messaging.send_prompt(user.phone, copy.CAND_RESUME_NOT_PDF)
-        return "cand_resume_not_pdf"
+    ext = _RESUME_TYPES.get(ctype)
+    if ext is None:
+        messaging.send_prompt(user.phone, copy.CAND_RESUME_BAD_TYPE)
+        return "cand_resume_bad_type"
 
     content, _ = storage.download_twilio_media(media_url)
     if content is None:
         messaging.send_prompt(user.phone, copy.CAND_RESUME_FAILED)
         return "cand_resume_download_failed"
 
-    resume_path = storage.upload_resume(user.id, content) or media_url
-    application = _create_application(user, data, resume_path)
-    recipients = _notify_advocates(application, user, data, content)
+    resume_filename = f"resume{ext}"
+    resume_path = storage.upload_resume(user.id, content, ctype, ext) or media_url
+    application = _create_application(user, data, resume_path, resume_filename)
+    recipients = _notify_advocates(application, user, data, content, ctype, resume_filename)
 
     if WaConfig.WA_CT_EXPLORE_MORE:
         conversation.set_state(conv, "candidate", "cand_explore_more",
                                {"company_id": data.get("company_id"), "company_name": data.get("company_name")})
         messaging.send_buttons(user.phone, WaConfig.WA_CT_EXPLORE_MORE, {"1": str(recipients)})
     else:
+        # Flow done — leave it; no auto Welcome (user can type 'menu' to do more).
         conversation.reset_state(conv)
         messaging.send_prompt(user.phone, copy.CAND_SUBMITTED.format(
             advocate=data.get("advocate_name", "the advocate"),
             company=data.get("company_name", "the company")))
-        _send_menu(user)
     return "cand_submitted"
 
 
@@ -158,24 +180,18 @@ def _handle_explore(user, conv, payload):
         return start(user, conv)
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.CAND_FINISHED)
-    _send_menu(user)
     return "cand_finished"
 
 
-def _send_menu(user):
-    """Drop the user back on the Welcome menu so they can pick any path next."""
-    if WaConfig.WA_CT_WELCOME:
-        messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
-
-
-def _create_application(user, data, resume_path):
+def _create_application(user, data, resume_path, resume_filename):
     application = WaApplication(
         candidate_user_id=user.id,
         company_id=data.get("company_id"),
         role_query=data.get("role_query"),
         job_posting_url=data.get("job_posting_url"),
+        job_description=data.get("job_description"),
         resume_path=resume_path,
-        resume_filename="resume.pdf",
+        resume_filename=resume_filename,
         status="submitted",
     )
     db.session.add(application)
@@ -183,14 +199,17 @@ def _create_application(user, data, resume_path):
     return application
 
 
-def _notify_advocates(application, candidate_user, data, resume_bytes):
+def _notify_advocates(application, candidate_user, data, resume_bytes,
+                      resume_content_type, resume_filename):
     advocates = WaAdvocate.query.filter_by(company_id=data.get("company_id"), status="active").all()
     name = f"{candidate_user.first_name or ''} {candidate_user.last_name or ''}".strip() or "A candidate"
     for advocate in advocates:
         to_email = advocate.email
         ok = emailer.send_application_email(
             to_email, name, data.get("role_query", ""), data.get("company_name", ""),
-            data.get("job_posting_url", ""), resume_bytes=resume_bytes,
+            data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
+            resume_bytes=resume_bytes, resume_filename=resume_filename,
+            resume_content_type=resume_content_type,
         )
         db.session.add(WaApplicationRecipient(
             application_id=application.id,

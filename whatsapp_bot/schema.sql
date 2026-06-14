@@ -101,6 +101,7 @@ create table if not exists public.wa_applications (
     company_id        bigint not null references public.wa_companies(id),
     role_query        text,
     job_posting_url   text,
+    job_description   text,
     resume_path       text,
     resume_filename   text,
     status            text not null default 'submitted',

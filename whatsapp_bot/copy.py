@@ -88,7 +88,7 @@ EMP_SAVE_FAILED = (
 ADVOCATE_DONE = (
     "You're officially an Ofoodiez advocate for *{company}*! 🎉🙏\n"
     "We'll send candidate referrals to: *{emails}* ✨\n"
-    "Want to do more? Tap a button below or type *menu* anytime."
+    "Type *menu* anytime if you'd like to do more."
 )
 
 # ---- Phase C: candidate company search ----
@@ -110,6 +110,11 @@ CAND_JOB_LINK_INVALID = (
     "That doesn't look like a valid link 🤔\n"
     "Please paste the full *https://* URL of the job posting."
 )
+CAND_JOB_DESC_PROMPT = (
+    "No link? No worries 🙂\n"
+    "Just *describe the role* you're after — title, team, anything that helps — "
+    "and I'll pass it along."
+)
 CAND_NO_ADVOCATES = (
     "We know *{company}*, but there are no advocates there *yet* 😕\n"
     "We've put it on our radar — check back soon, or try another company. 🔜"
@@ -124,14 +129,16 @@ CAND_RESUME_SOON = (
     "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
 )
 CAND_RESUME_PROMPT = (
-    "Last step! 📄 Send your *CV/résumé as a PDF* and I'll forward it to the advocate.\n"
+    "Last step! 📄 Send your *CV as a PDF or Word doc* and I'll forward it to the advocate.\n"
     "Make it shine — tailor it to the role if you can. ✨"
 )
-CAND_RESUME_NOT_PDF = "I need your résumé as a *PDF file* 🙏 — attach the PDF and send again."
-CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending the PDF again."
+CAND_RESUME_BAD_TYPE = (
+    "I need your CV as a *PDF or Word* file (.pdf, .doc, .docx) 🙏 — attach it and send again."
+)
+CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending it again."
 CAND_SUBMITTED = (
     "Done! ✅ I've forwarded your application to *{advocate}* at *{company}* — "
     "fingers crossed! 🤞🎉\n"
-    "Pick what's next below, or type *menu* anytime."
+    "Type *menu* anytime if you'd like to do more."
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"

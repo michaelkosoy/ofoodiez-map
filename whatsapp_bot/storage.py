@@ -37,20 +37,21 @@ def download_twilio_media(media_url):
         return None, None
 
 
-def upload_resume(user_id, content):
-    """Upload résumé bytes to the private Supabase Storage bucket. Returns the
-    object path, or None if Storage isn't configured / the upload failed."""
+def upload_resume(user_id, content, content_type="application/pdf", ext=".pdf"):
+    """Upload résumé bytes (PDF or Word doc) to the private Supabase Storage
+    bucket. Returns the object path, or None if Storage isn't configured / the
+    upload failed."""
     base = WaConfig.SUPABASE_URL
     key = WaConfig.SUPABASE_SERVICE_ROLE_KEY
     if not base or not key:
         return None
-    path = f"applications/{user_id}/{uuid.uuid4().hex}.pdf"
+    path = f"applications/{user_id}/{uuid.uuid4().hex}{ext}"
     try:
         resp = requests.post(
             f"{base.rstrip('/')}/storage/v1/object/{WaConfig.SUPABASE_RESUME_BUCKET}/{path}",
             headers={
                 "Authorization": f"Bearer {key}",
-                "Content-Type": "application/pdf",
+                "Content-Type": content_type or "application/octet-stream",
                 "x-upsert": "true",
             },
             data=content,

@@ -86,6 +86,7 @@ class WaApplication(db.Model):
     company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
     role_query = db.Column(db.Text)
     job_posting_url = db.Column(db.Text)
+    job_description = db.Column(db.Text)     # free-text role details when no link is given
     resume_path = db.Column(db.Text)        # Supabase Storage object path (or a fallback ref)
     resume_filename = db.Column(db.Text)
     status = db.Column(db.Text, nullable=False, default="submitted")
