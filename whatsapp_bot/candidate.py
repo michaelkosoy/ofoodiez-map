@@ -103,7 +103,20 @@ def _handle_company(user, conv, data, text):
     norm = _normalize(text)
     company = WaCompany.query.filter_by(normalized_name=norm).first()
     if company:
-        advocate = WaAdvocate.query.filter_by(company_id=company.id, status="active").first()
+        # Prefer a self-serve referral link: hand it over instantly, no waiting.
+        link_adv = (WaAdvocate.query
+                    .filter_by(company_id=company.id, status="active")
+                    .filter(WaAdvocate.referral_link.isnot(None)).first())
+        if link_adv:
+            conversation.reset_state(conv)
+            messaging.send_prompt(user.phone, copy.CAND_REFERRAL_LINK.format(
+                advocate=_advocate_name(link_adv), company=company.name,
+                link=link_adv.referral_link))
+            return "cand_referral_link"
+        # Otherwise an email advocate: collect role/CV and email them.
+        advocate = (WaAdvocate.query
+                    .filter_by(company_id=company.id, status="active")
+                    .filter(WaAdvocate.email.isnot(None)).first())
         if advocate:
             data["company_id"] = company.id
             data["company_name"] = company.name
@@ -201,12 +214,16 @@ def _create_application(user, data, resume_path, resume_filename):
 
 def _notify_advocates(application, candidate_user, data, resume_bytes,
                       resume_content_type, resume_filename):
-    advocates = WaAdvocate.query.filter_by(company_id=data.get("company_id"), status="active").all()
+    advocates = (WaAdvocate.query
+                 .filter_by(company_id=data.get("company_id"), status="active")
+                 .filter(WaAdvocate.email.isnot(None)).all())
     name = f"{candidate_user.first_name or ''} {candidate_user.last_name or ''}".strip() or "A candidate"
     for advocate in advocates:
         to_email = advocate.email
+        adv_user = WaUser.query.get(advocate.user_id)
+        adv_first = (adv_user.first_name if adv_user else None) or ""
         ok = emailer.send_application_email(
-            to_email, name, data.get("role_query", ""), data.get("company_name", ""),
+            to_email, adv_first, name, data.get("role_query", ""), data.get("company_name", ""),
             data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
             resume_bytes=resume_bytes, resume_filename=resume_filename,
             resume_content_type=resume_content_type,

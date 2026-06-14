@@ -62,6 +62,27 @@ CONTACT_INFO = (
 EMP_FIRST_NAME = "Awesome — let's set you up as an advocate! 🙌\nWhat's your *first name*?"
 EMP_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
 EMP_COMPANY = "Which company do you work at (and can refer candidates into)? 🏢"
+EMP_METHOD_PROMPT = (
+    "How would you like to refer candidates at *{company}*? 🤝\n\n"
+    "*1* 📧 *Email me* — I'll get a candidate's CV by email and refer them myself.\n"
+    "*2* 🔗 *Share my referral link* — candidates get my link automatically, "
+    "no work for me.\n\n"
+    "Reply *1* or *2*."
+)
+EMP_LINK_PROMPT = (
+    "Awesome — paste your *referral link* for *{company}* 🔗\n"
+    "(the personal link your company gives you to refer people)."
+)
+EMP_LINK_INVALID = (
+    "That doesn't look like a valid link 🤔\n"
+    "Please paste the full *https://…* referral link."
+)
+ADVOCATE_LINK_DONE = (
+    "Done! 🎉🔗 Your referral link for *{company}* is saved.\n"
+    "Anyone who asks for a referral there will get it automatically — no work "
+    "for you. 🙌\n{link}\n\n"
+    "Type *menu* anytime if you'd like to do more."
+)
 EMP_EMAIL = (
     "Awesome — *{company}*! 💼\n"
     "Which *work email(s)* should we send candidate referrals to?\n"
@@ -99,6 +120,12 @@ CAND_COMPANY = (
 CAND_WELCOME_BACK = (
     "Hey {first}, welcome back! 👋🧡\n"
     "Which company are you aiming for?"
+)
+CAND_REFERRAL_LINK = (
+    "Great news — *{advocate}* from *{company}* shared a referral link with you! 🔗🎉\n"
+    "This is a referral link by *{advocate}* from *{company}* — tap it and fill in "
+    "your details:\n{link}\n\n"
+    "Good luck! 🤞 Type *menu* anytime to explore more."
 )
 CAND_ROLE = (
     "Amazing — I found *{advocate}* at *{company}*! 🎉\n"

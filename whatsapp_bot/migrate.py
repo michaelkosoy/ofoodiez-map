@@ -117,6 +117,7 @@ _STATEMENTS = [
     )""",
     # ---- heal older tables that predate later columns ----
     "alter table public.wa_advocates add column if not exists email text",
+    "alter table public.wa_advocates add column if not exists referral_link text",
     "alter table public.wa_advocates add column if not exists role_title text",
     "alter table public.wa_application_recipients add column if not exists email text",
     "alter table public.wa_applications add column if not exists job_description text",

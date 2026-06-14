@@ -16,12 +16,16 @@ logger = logging.getLogger("whatsapp_bot")
 _SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
-def send_application_email(to_email, candidate_name, role, company, job_url,
+def send_application_email(to_email, advocate_name, candidate_name, role, company, job_url,
                            job_description="", resume_bytes=None,
                            resume_filename="resume.pdf",
                            resume_content_type="application/pdf"):
     """Email an advocate a candidate's application (CV attached). Returns True if
-    sent, False if SendGrid isn't configured or the send failed."""
+    sent, False if SendGrid isn't configured or the send failed.
+
+    Body is kept plain ASCII on purpose: accented characters (the old
+    "résumé") were mojibaking in some mail clients.
+    """
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
@@ -34,11 +38,14 @@ def send_application_email(to_email, candidate_name, role, company, job_url,
     else:
         detail = ""
     body = (
-        f"Hi,\n\n"
+        f"Hey {advocate_name or 'there'}! :)\n\n"
         f"{candidate_name} is interested in a {role or 'role'} at {company} and "
-        f"would love your referral.\n\n"
+        f"would love a referral from you.\n\n"
         f"{detail}"
-        f"Their CV is attached. Sent via Ofoodiez Referrals."
+        f"Their CV is attached.\n\n"
+        f"Thanks so much for being an Ofoodiez advocate - you're helping someone "
+        f"land their dream job!\n\n"
+        f"- The Ofoodiez team"
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
@@ -93,6 +100,12 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
 
 def _post(payload):
     api_key = WaConfig.SENDGRID_API_KEY
+    # Don't let SendGrid rewrite links into ct.sendgrid.net click-tracking URLs
+    # (the advocate must see the real job link the candidate provided).
+    payload.setdefault("tracking_settings", {
+        "click_tracking": {"enable": False, "enable_text": False},
+        "open_tracking": {"enable": False},
+    })
     try:
         resp = requests.post(
             _SENDGRID_URL,

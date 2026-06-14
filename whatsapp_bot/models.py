@@ -42,7 +42,8 @@ class WaAdvocate(db.Model):
     id = _pk()
     user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"), nullable=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey("wa_companies.id"), nullable=False)
-    email = db.Column(db.Text)          # company/work email — where applications are sent
+    email = db.Column(db.Text)          # work email where applications are emailed (email method)
+    referral_link = db.Column(db.Text)  # self-serve coded link auto-shared with candidates (link method)
     role_title = db.Column(db.Text)
     status = db.Column(db.Text, nullable=False, default="active")  # active|pending|inactive
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -60,6 +60,13 @@ class _WaConfig:
         return os.environ.get("WA_CT_EMPLOYEE_CONFIRM")
 
     @property
+    def WA_CT_EMP_METHOD(self):
+        # Optional quick-reply template (no variables) for the email-vs-link
+        # choice: buttons EMP_METHOD_EMAIL / EMP_METHOD_LINK. Falls back to a
+        # plain 1/2 text prompt when unset.
+        return os.environ.get("WA_CT_EMP_METHOD")
+
+    @property
     def WA_CT_EXPLORE_MORE(self):
         return os.environ.get("WA_CT_EXPLORE_MORE")
 
