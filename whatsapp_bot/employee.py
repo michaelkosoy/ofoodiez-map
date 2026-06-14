@@ -61,35 +61,16 @@ def get_or_create_company(name):
 
 
 def start(user, conv):
-    # Returning users (already named) skip straight to their company.
-    if user.is_registered:
-        conversation.set_state(conv, "employee", "emp_company", {})
-        messaging.send_prompt(user.phone, copy.EMP_COMPANY)
-    else:
-        conversation.set_state(conv, "employee", "emp_first_name", {})
-        messaging.send_prompt(user.phone, copy.EMP_FIRST_NAME)
+    # Sign-up already happened up front (router gates on is_registered), so the
+    # advocate goes straight to picking their company.
+    conversation.set_state(conv, "employee", "emp_company", {})
+    messaging.send_prompt(user.phone, copy.EMP_COMPANY)
     return "emp_start"
 
 
 def handle(user, conv, payload, text):
     step = conv.step
     data = dict(conv.data or {})
-
-    if step == "emp_first_name":
-        data["first_name"] = text
-        conversation.set_state(conv, "employee", "emp_last_name", data)
-        messaging.send_prompt(user.phone, copy.EMP_LAST_NAME.format(first=text))
-        return "emp_first_name"
-
-    if step == "emp_last_name":
-        data["last_name"] = text
-        user.first_name = data.get("first_name")
-        user.last_name = text
-        user.terms_accepted_at = user.terms_accepted_at or datetime.utcnow()
-        db.session.commit()
-        conversation.set_state(conv, "employee", "emp_company", data)
-        messaging.send_prompt(user.phone, copy.EMP_COMPANY)
-        return "emp_last_name"
 
     if step == "emp_company":
         company = get_or_create_company(text)

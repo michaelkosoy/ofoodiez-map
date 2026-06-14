@@ -31,7 +31,10 @@ ERROR = {
 WELCOME_GREETING = "Welcome to Ofoodiez{name}! 🧡🚀"
 
 # ---- Phase B: registration (English v1; young & upbeat) ----
-REG_FIRST_NAME = "Awesome — let's get you set up! 🙌\nWhat's your *first name*?"
+REG_FIRST_NAME = (
+    "Welcome to Ofoodiez Referrals! 🧡🚀\n"
+    "Let's get you set up — what's your *first name*? 🙌"
+)
 REG_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
 REG_EMAIL = "Almost there, {first}! 📧\nWhat's the best *email* to reach you at?"
 REG_EMAIL_INVALID = (

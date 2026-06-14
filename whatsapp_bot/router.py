@@ -31,49 +31,57 @@ def handle(inbound):
     payload = inbound.get("button_payload")
     text = (inbound.get("body") or "").strip()
 
-    # Idle timeout: if it's been a while since the last activity, treat this
-    # message as a brand-new conversation (fresh, personalised Welcome).
+    # Idle timeout: a long-idle message starts fresh — sign-up if needed, else
+    # the personalised Welcome.
     if _is_stale(conv):
-        return _welcome(user, conv)
+        return _entry(user, conv)
+
+    # Mid sign-up: finish it first. A registered phone never reaches here again.
+    # Back-to-Menu / reset still escape, but just re-trigger sign-up while the
+    # phone is still unregistered.
+    if conv.flow == "registration":
+        if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
+            return _entry(user, conv)
+        return registration.handle(user, conv, payload, text)
 
     # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
     if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
-        return _welcome(user, conv)
+        return _entry(user, conv)
 
     # Path selection from the Welcome menu.
     if payload in _PATHS:
         return _enter_path(user, conv, _PATHS[payload])
 
     # In-flow dispatch.
-    if conv.flow == "candidate":
-        if conv.step and conv.step.startswith("reg_"):
-            return registration.handle(user, conv, payload, text)
-        if conv.step and conv.step.startswith("cand_"):
-            return candidate.handle(user, conv, inbound)
-        messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
-        return "main_coming_soon"
+    if conv.flow == "candidate" and conv.step and conv.step.startswith("cand_"):
+        return candidate.handle(user, conv, inbound)
+    if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
+        return employee.handle(user, conv, payload, text)
 
-    if conv.flow == "employee":
-        if conv.step and conv.step.startswith("emp_"):
-            return employee.handle(user, conv, payload, text)
-        messaging.send_prompt(user.phone, copy.MAIN_COMING_SOON)
-        return "main_coming_soon"
+    # No active flow / anything unrecognized → sign-up (if needed) or Welcome.
+    return _entry(user, conv)
 
-    # No active flow / anything unrecognized → Welcome.
+
+def _entry(user, conv):
+    """The single front door. Sign-up is the first thing a new phone does; a
+    registered phone goes straight to the Welcome menu."""
+    if not user.is_registered:
+        return registration.start(user, conv)
     return _welcome(user, conv)
 
 
 def _enter_path(user, conv, flow):
+    # Contact info needs no account.
     if flow == "contact":
         messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"
+    # Everything else requires sign-up first (safety net; _entry already gates).
+    if not user.is_registered:
+        return registration.start(user, conv)
     if flow == "employee":
         return employee.start(user, conv)
-    # candidate
-    if user.is_registered:
-        return candidate.start(user, conv)
-    return registration.start(user, conv, "candidate")
+    return candidate.start(user, conv)
 
 
 def _welcome(user, conv):
