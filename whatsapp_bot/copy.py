@@ -26,6 +26,10 @@ ERROR = {
     "he": "יש לנו תקלה קטנה, נסה/י שוב בעוד רגע 🙏",
 }
 
+# Personalised greeting sent right before the Welcome menu buttons. {name} is
+# already formatted as ", Michael" (or "" if we don't know it yet).
+WELCOME_GREETING = "Welcome to Ofoodiez{name}! 🧡🚀"
+
 # ---- Phase B: registration (English v1; young & upbeat) ----
 REG_FIRST_NAME = "Awesome — let's get you set up! 🙌\nWhat's your *first name*?"
 REG_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"

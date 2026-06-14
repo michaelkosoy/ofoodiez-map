@@ -111,6 +111,12 @@ class _WaConfig:
         return int(os.environ.get("WA_SELECTION_TTL_MINUTES", "30"))
 
     @property
+    def IDLE_RESET_MINUTES(self):
+        # After this many minutes of inactivity, the next inbound message starts
+        # a fresh conversation (personalised Welcome) instead of resuming.
+        return int(os.environ.get("WA_IDLE_RESET_MINUTES", "30"))
+
+    @property
     def MAX_RESULTS(self):
         return int(os.environ.get("WA_MAX_RESULTS", "5"))
 

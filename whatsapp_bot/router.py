@@ -7,6 +7,7 @@
 Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 """
 import logging
+from datetime import datetime, timedelta, timezone
 
 from . import candidate, conversation, copy, employee, messaging, registration
 from .config import WaConfig
@@ -29,6 +30,11 @@ def handle(inbound):
     conv = conversation.get_state(user)
     payload = inbound.get("button_payload")
     text = (inbound.get("body") or "").strip()
+
+    # Idle timeout: if it's been a while since the last activity, treat this
+    # message as a brand-new conversation (fresh, personalised Welcome).
+    if _is_stale(conv):
+        return _welcome(user, conv)
 
     # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
     if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
@@ -72,5 +78,28 @@ def _enter_path(user, conv, flow):
 
 def _welcome(user, conv):
     conversation.reset_state(conv)
+    name = _display_name(user)
+    messaging.send_text(user.phone, copy.WELCOME_GREETING.format(
+        name=f", {name}" if name else ""))
     messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
     return "welcome"
+
+
+def _display_name(user):
+    """Best name to greet by: their registered first name, else the first token
+    of their WhatsApp profile name, else nothing (we key users by phone)."""
+    name = (user.first_name or "").strip()
+    if not name:
+        profile = (user.profile_name or "").strip()
+        name = profile.split()[0] if profile else ""
+    return name
+
+
+def _is_stale(conv):
+    """True when the last activity was over IDLE_RESET_MINUTES ago."""
+    last = conv.updated_at
+    if last is None:
+        return False
+    if last.tzinfo is not None:  # a timestamptz column can come back tz-aware
+        last = last.astimezone(timezone.utc).replace(tzinfo=None)
+    return datetime.utcnow() - last > timedelta(minutes=WaConfig.IDLE_RESET_MINUTES)
