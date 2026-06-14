@@ -180,11 +180,17 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
 def _post(payload):
     api_key = WaConfig.SENDGRID_API_KEY
     # Don't let SendGrid rewrite links into ct.sendgrid.net click-tracking URLs
-    # (the advocate must see the real job link the candidate provided).
+    # (the advocate must see the real job link the candidate provided, and
+    # rewritten links + open-tracking pixels hurt inbox placement).
     payload.setdefault("tracking_settings", {
         "click_tracking": {"enable": False, "enable_text": False},
         "open_tracking": {"enable": False},
     })
+    # A real reply path (on the authenticated domain) reads as legitimate and
+    # lets candidates/advocates reply straight to the team.
+    reply_to = WaConfig.WA_OPS_EMAIL or WaConfig.WA_FROM_EMAIL
+    if reply_to:
+        payload.setdefault("reply_to", {"email": reply_to, "name": "Ofoodiez"})
     try:
         resp = requests.post(
             _SENDGRID_URL,
