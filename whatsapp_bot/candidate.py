@@ -5,6 +5,7 @@ active advocates at their company email (best-effort: Supabase Storage + SendGri
 are config-gated, so the flow still completes and the application is recorded
 even if they're unset).
 """
+import difflib
 import re
 import secrets
 from datetime import datetime
@@ -29,6 +30,10 @@ _RESUME_TYPES = {
     "application/msword": ".doc",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
 }
+
+# "Did you mean X?" confirmation words; and words that skip the optional job link.
+_CONFIRM_WORDS = {"yes", "y", "yep", "yeah", "yup", "ok", "okay", "sure", "correct", "👍"}
+_SKIP_WORDS = {"pass", "skip", "no", "none", "n/a", "na", "-", "later"}
 
 
 def _normalize(name):
@@ -64,6 +69,9 @@ def handle(user, conv, inbound):
     if step == "cand_company":
         return _handle_company(user, conv, data, text)
 
+    if step == "cand_company_suggest":
+        return _handle_suggestion(user, conv, data, text)
+
     if step == "cand_role":
         data["role_query"] = text
         conversation.set_state(conv, "candidate", "cand_job_link", data)
@@ -71,25 +79,17 @@ def handle(user, conv, inbound):
         return "cand_role"
 
     if step == "cand_job_link":
-        if _valid_url(text):
-            data["job_posting_url"] = text.strip()
-            conversation.set_state(conv, "candidate", "cand_resume", data)
-            messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
-            return "cand_job_link"
-        # No link given — ask for a short description instead (just this once).
-        conversation.set_state(conv, "candidate", "cand_job_desc", data)
-        messaging.send_prompt(user.phone, copy.CAND_JOB_DESC_PROMPT)
-        return "cand_job_link_no_url"
-
-    if step == "cand_job_desc":
-        # They might still paste a link here; take it as a URL if so.
-        if _valid_url(text):
-            data["job_posting_url"] = text.strip()
+        # Optional: a URL → store it; "pass"/etc → skip; anything else → role description.
+        t = text.strip()
+        if _valid_url(t):
+            data["job_posting_url"] = t
+        elif t.lower() in _SKIP_WORDS:
+            pass
         else:
-            data["job_description"] = text.strip()
+            data["job_description"] = t
         conversation.set_state(conv, "candidate", "cand_resume", data)
         messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
-        return "cand_job_desc"
+        return "cand_job_link"
 
     if step == "cand_resume":
         return _handle_resume(user, conv, data, inbound)
@@ -104,36 +104,109 @@ def _handle_company(user, conv, data, text):
     norm = _normalize(text)
     company = WaCompany.query.filter_by(normalized_name=norm).first()
     if company:
-        # Prefer a self-serve referral link: hand it over instantly, no waiting.
-        link_adv = (WaAdvocate.query
-                    .filter_by(company_id=company.id, status="active")
-                    .filter(WaAdvocate.referral_link.isnot(None)).first())
-        if link_adv:
-            conversation.reset_state(conv)
-            messaging.send_prompt(user.phone, copy.CAND_REFERRAL_LINK.format(
-                advocate=_advocate_name(link_adv), company=company.name,
-                link=link_adv.referral_link))
-            return "cand_referral_link"
-        # Otherwise an email advocate: collect role/CV and email them.
-        advocate = (WaAdvocate.query
-                    .filter_by(company_id=company.id, status="active")
-                    .filter(WaAdvocate.email.isnot(None)).first())
-        if advocate:
-            data["company_id"] = company.id
-            data["company_name"] = company.name
-            data["advocate_name"] = _advocate_name(advocate)
-            conversation.set_state(conv, "candidate", "cand_role", data)
-            messaging.send_prompt(user.phone, copy.CAND_ROLE.format(
-                company=company.name, advocate=data["advocate_name"]))
-            return "cand_company_found"
-        _log_request(user, text, norm, company.id, "no_advocates")
-        _notify_ops(user, text.strip(), "no_advocates")
-        messaging.send_prompt(user.phone, copy.CAND_NO_ADVOCATES.format(company=company.name))
-        return "cand_no_advocates"
+        return _resolve_company(user, conv, data, company)
+    # No exact match → offer close matches instead of forcing exact spelling.
+    similar = _find_similar(norm)
+    if similar:
+        data["suggestions"] = [c.id for c in similar]
+        conversation.set_state(conv, "candidate", "cand_company_suggest", data)
+        messaging.send_prompt(user.phone, _suggest_text(similar))
+        return "cand_company_suggest"
+    # Genuinely unknown → log + flag ops.
     _log_request(user, text, norm, None, "unknown_company")
     _notify_ops(user, text.strip(), "unknown_company")
     messaging.send_prompt(user.phone, copy.CAND_NOT_FOUND.format(company=text.strip()))
     return "cand_not_found"
+
+
+def _resolve_company(user, conv, data, company):
+    """Route a chosen company: self-serve link → email advocate → no advocates."""
+    # Prefer a self-serve referral link: hand it over instantly, no waiting.
+    link_adv = (WaAdvocate.query
+                .filter_by(company_id=company.id, status="active")
+                .filter(WaAdvocate.referral_link.isnot(None)).first())
+    if link_adv:
+        conversation.reset_state(conv)
+        messaging.send_prompt(user.phone, copy.CAND_REFERRAL_LINK.format(
+            advocate=_advocate_name(link_adv), company=company.name,
+            link=link_adv.referral_link))
+        return "cand_referral_link"
+    # Otherwise an email advocate: collect role/CV and email them.
+    advocate = (WaAdvocate.query
+                .filter_by(company_id=company.id, status="active")
+                .filter(WaAdvocate.email.isnot(None)).first())
+    if advocate:
+        data["company_id"] = company.id
+        data["company_name"] = company.name
+        data["advocate_name"] = _advocate_name(advocate)
+        data.pop("suggestions", None)
+        conversation.set_state(conv, "candidate", "cand_role", data)
+        messaging.send_prompt(user.phone, copy.CAND_ROLE.format(
+            company=company.name, advocate=data["advocate_name"]))
+        return "cand_company_found"
+    _log_request(user, company.name, company.normalized_name, company.id, "no_advocates")
+    _notify_ops(user, company.name, "no_advocates")
+    messaging.send_prompt(user.phone, copy.CAND_NO_ADVOCATES.format(company=company.name))
+    return "cand_no_advocates"
+
+
+def _handle_suggestion(user, conv, data, text):
+    """Resolve a 'did you mean' reply: a number picks from the list, 'yes' picks the
+    sole suggestion, anything else is treated as a brand-new company search."""
+    suggestions = data.get("suggestions") or []
+    t = text.strip().lower()
+    chosen_id = None
+    if t.isdigit():
+        idx = int(t) - 1
+        if 0 <= idx < len(suggestions):
+            chosen_id = suggestions[idx]
+    elif len(suggestions) == 1 and t in _CONFIRM_WORDS:
+        chosen_id = suggestions[0]
+    if chosen_id:
+        company = WaCompany.query.get(chosen_id)
+        if company:
+            return _resolve_company(user, conv, data, company)
+    # Not a selection → re-run the search with whatever they typed.
+    data.pop("suggestions", None)
+    conversation.set_state(conv, "candidate", "cand_company", data)
+    return _handle_company(user, conv, data, text)
+
+
+def _find_similar(norm, limit=3):
+    """Companies close to the typed name: fast substring match first, then a
+    bounded fuzzy/typo pass. Companies that have active advocates are preferred."""
+    if not norm:
+        return []
+    hits = (WaCompany.query
+            .filter(WaCompany.normalized_name.contains(norm))
+            .limit(20).all())
+    if not hits:
+        qtokens = set(norm.split())
+        scored = []
+        for c in WaCompany.query.all():  # company table is small; bounded scan
+            n = c.normalized_name or ""
+            if not n:
+                continue
+            ratio = difflib.SequenceMatcher(None, norm, n).ratio()
+            score = max(ratio, 0.85 if (qtokens & set(n.split())) else 0.0)
+            if n in norm or score >= 0.6:
+                scored.append((score, c))
+        scored.sort(key=lambda sc: -sc[0])
+        hits = [c for _, c in scored[: limit * 2]]
+    # advocate-having companies first (more useful suggestions), order otherwise kept
+    hits = sorted(hits, key=lambda c: 0 if _has_active_advocate(c.id) else 1)
+    return hits[:limit]
+
+
+def _has_active_advocate(company_id):
+    return WaAdvocate.query.filter_by(company_id=company_id, status="active").first() is not None
+
+
+def _suggest_text(similar):
+    if len(similar) == 1:
+        return copy.CAND_DID_YOU_MEAN_ONE.format(company=similar[0].name)
+    options = "\n".join(f"{i}. {c.name}" for i, c in enumerate(similar, 1))
+    return copy.CAND_DID_YOU_MEAN_MANY.format(options=options)
 
 
 def _advocate_name(advocate):

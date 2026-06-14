@@ -135,15 +135,20 @@ CAND_ROLE = (
     "They can refer you in. What role are you aiming for? "
     "(e.g. Product Manager, Software Engineer, Analyst)"
 )
-CAND_JOB_LINK = "Nice — *{company}* it is! 🎯\nPaste the link to the exact job posting you want in for."
-CAND_JOB_LINK_INVALID = (
-    "That doesn't look like a valid link 🤔\n"
-    "Please paste the full *https://* URL of the job posting."
+CAND_JOB_LINK = (
+    "Nice — *{company}* it is! 🎯\n"
+    "If you have it, paste the *link to the job posting*. It's optional, but it "
+    "really helps your advocate refer you to the right role — so better to add it. 🙌\n"
+    "No link? Type *pass*, or just *describe the role* in a few words."
 )
-CAND_JOB_DESC_PROMPT = (
-    "No link? No worries 🙂\n"
-    "Just *describe the role* you're after — title, team, anything that helps — "
-    "and I'll pass it along."
+CAND_DID_YOU_MEAN_ONE = (
+    "Hmm, I couldn't find an exact match 🤔\n"
+    "Did you mean *{company}*? Reply *yes* to pick it, or type another company name."
+)
+CAND_DID_YOU_MEAN_MANY = (
+    "Hmm, I couldn't find an exact match 🤔\n"
+    "Did you mean one of these?\n{options}\n\n"
+    "Reply with the *number*, or type another company name."
 )
 CAND_NO_ADVOCATES = (
     "We know *{company}*, but there are no advocates there *yet* 😕\n"
