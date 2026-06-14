@@ -108,7 +108,12 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
 
 
 def send_referral_confirmed_email(to_email, candidate_name, advocate_name, company, role):
-    """Tell the candidate an advocate confirmed their referral. Best-effort."""
+    """Tell the candidate an advocate confirmed their referral. Best-effort.
+
+    Sent as PLAIN TEXT ONLY with a personal subject (no HTML, no links, no emoji
+    in the subject) so Gmail files it in Primary, not Promotions — this is the
+    one a candidate must actually see.
+    """
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
@@ -117,28 +122,15 @@ def send_referral_confirmed_email(to_email, candidate_name, advocate_name, compa
     text_body = (
         f"Hey {candidate_name or 'there'}! 😊\n\n"
         f"Great news — {advocate_name} from {company} just confirmed your referral "
-        f"for {role or 'the role'}! 🎉\n\n"
+        f"for {role or 'the role'}.\n\n"
         f"Fingers crossed — we're rooting for you. 🤞\n\n"
         f"— The Ofoodiez team"
-    )
-    html_body = (
-        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;line-height:1.55;">'
-        f"<p>Hey {html.escape(candidate_name or 'there')}! 😊</p>"
-        f"<p>Great news — <b>{html.escape(advocate_name)}</b> from "
-        f"<b>{html.escape(str(company))}</b> just confirmed your referral for "
-        f"<b>{html.escape(role or 'the role')}</b>! 🎉</p>"
-        "<p>Fingers crossed — we're rooting for you. 🤞</p>"
-        "<p>— The Ofoodiez team</p>"
-        "</div>"
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
         "from": {"email": from_email, "name": "Ofoodiez Referrals"},
-        "subject": f"You've been referred at {company}! 🎉",
-        "content": [
-            {"type": "text/plain", "value": text_body},
-            {"type": "text/html", "value": html_body},
-        ],
+        "subject": f"{advocate_name} referred you at {company}",
+        "content": [{"type": "text/plain", "value": text_body}],
     }
     return _post(payload)
 
