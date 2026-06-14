@@ -54,7 +54,9 @@ def referral_approve_submit():
     return _page(
         "Thank you! 🎉",
         f"Thanks for confirming — we've let {html.escape(ctx['candidate'])} know "
-        f"they've been referred at {html.escape(ctx['company'])}. 🙏",
+        f"they've been referred at {html.escape(ctx['company'])}. 🙏<br><br>"
+        f"Now go bag that referral bonus 💸 — tech referrals are basically "
+        f"corporate bounty hunting via PDF. 🤠",
     )
 
 
