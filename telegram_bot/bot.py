@@ -164,7 +164,10 @@ if bot:
         bot.answer_callback_query(call.id, f"Mode set to {selected_mode}")
 
     # Callback Query Handler for Approve/Edit/Discard buttons
-    @bot.callback_query_handler(func=lambda call: call.data in ['action_approve', 'action_edit', 'action_discard', 'action_back_to_confirm'])
+    @bot.callback_query_handler(func=lambda call: call.data in [
+        'action_approve', 'action_edit', 'action_discard', 'action_back_to_confirm',
+        'action_update_duplicate', 'action_save_new'
+    ])
     def handle_action_callbacks(call):
         if not is_authorized(call.from_user.id):
             bot.answer_callback_query(call.id, "🚫 Access Denied.")
@@ -207,29 +210,84 @@ if bot:
             bot.answer_callback_query(call.id)
             return
 
+        global _flask_app
+        if not _flask_app:
+            bot.edit_message_text("❌ App error: Flask context is missing.", chat_id, call.message.message_id)
+            bot.answer_callback_query(call.id)
+            return
+
+        handler = HANDLERS.get(active_mode)
+        if not handler:
+            bot.edit_message_text(f"❌ Error: No handler found for mode '{active_mode}'.", chat_id, call.message.message_id)
+            bot.answer_callback_query(call.id)
+            return
+
         if call.data == 'action_approve':
-            bot.edit_message_text("💾 Uploading and saving details to database...", chat_id, call.message.message_id)
-            
-            # Execute saving inside Flask App Context
-            global _flask_app
-            if not _flask_app:
-                bot.edit_message_text("❌ App error: Flask context is missing.", chat_id, call.message.message_id)
+            # Check for duplicates before approving for Happy Hour
+            if active_mode == 'happyhour':
+                duplicate = handler.check_duplicate(_flask_app, pending)
+                if duplicate:
+                    state['duplicate_id'] = duplicate.get('id')
+                    markup = InlineKeyboardMarkup()
+                    markup.row_width = 1
+                    markup.add(
+                        InlineKeyboardButton("🔄 Update Existing Place", callback_data="action_update_duplicate"),
+                        InlineKeyboardButton("➕ Save as New Row Anyway", callback_data="action_save_new"),
+                        InlineKeyboardButton("❌ Cancel / Discard", callback_data="action_discard")
+                    )
+                    bot.edit_message_text(
+                        f"⚠️ **Duplicate Found!**\n\nA place named '{duplicate.get('Name')}' already exists in the database (ID: {duplicate.get('id')}).\n\n"
+                        f"**Existing Address:** {duplicate.get('Address')}\n"
+                        f"**New Address:** {pending.get('address')}\n\n"
+                        "What would you like to do?",
+                        chat_id,
+                        call.message.message_id,
+                        parse_mode="Markdown",
+                        reply_markup=markup
+                    )
+                    bot.answer_callback_query(call.id)
+                    return
+
+            # If no duplicate, or it's a popup, proceed as normal
+            call.data = 'action_save_new'
+
+        if call.data == 'action_update_duplicate':
+            bot.edit_message_text("💾 Updating existing database row...", chat_id, call.message.message_id)
+            duplicate_id = state.get('duplicate_id')
+            if not duplicate_id:
+                bot.edit_message_text("❌ Error: Lost track of duplicate ID.", chat_id, call.message.message_id)
+                bot.answer_callback_query(call.id)
                 return
                 
-            handler = HANDLERS.get(active_mode)
-            if not handler:
-                bot.edit_message_text(f"❌ Error: No handler found for mode '{active_mode}'.", chat_id, call.message.message_id)
-                return
-                
-            success = handler.save(_flask_app, pending)
+            success = handler.update(_flask_app, duplicate_id, pending)
             if success:
                 bot.edit_message_text(
-                    f"🎉 **Success!**\n\nThe event '{pending.get('title')}' is now live on Ofoodiez!",
+                    f"🎉 **Success!**\n\nThe place '{pending.get('name')}' has been updated!",
                     chat_id,
                     call.message.message_id,
                     parse_mode="Markdown"
                 )
-                # Clear state
+                user_states[chat_id] = {'mode': None, 'pending_data': None}
+            else:
+                bot.edit_message_text(
+                    "❌ **Error:** Failed to update database. Please check server logs.",
+                    chat_id,
+                    call.message.message_id,
+                    parse_mode="Markdown"
+                )
+
+        elif call.data == 'action_save_new':
+            bot.edit_message_text("💾 Uploading and saving details to database...", chat_id, call.message.message_id)
+            success = handler.save(_flask_app, pending)
+            
+            title_key = 'title' if active_mode == 'popup' else 'name'
+            if success:
+                bot.edit_message_text(
+                    f"🎉 **Success!**\n\nThe item '{pending.get(title_key)}' is now saved!",
+                    chat_id,
+                    call.message.message_id,
+                    parse_mode="Markdown"
+                )
                 user_states[chat_id] = {'mode': None, 'pending_data': None}
             else:
                 bot.edit_message_text(
@@ -238,7 +296,8 @@ if bot:
                     call.message.message_id,
                     parse_mode="Markdown"
                 )
-        else:  # action_discard
+
+        elif call.data == 'action_discard':
             bot.edit_message_text(
                 "🗑️ **Discarded.**\n\nNo changes were made. You can send new flyer details or type /reset to change the mode.",
                 chat_id,
