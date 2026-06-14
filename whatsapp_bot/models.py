@@ -109,6 +109,8 @@ class WaApplicationRecipient(db.Model):
     emailed_at = db.Column(db.DateTime)
     email_status = db.Column(db.Text)       # sent | pending | failed
     error = db.Column(db.Text)
+    approval_token = db.Column(db.Text, unique=True)  # capability token in the advocate's "I referred them" link
+    approved_at = db.Column(db.DateTime)              # set when the advocate confirms the referral
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

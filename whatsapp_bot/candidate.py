@@ -6,6 +6,7 @@ are config-gated, so the flow still completes and the application is recorded
 even if they're unset).
 """
 import re
+import secrets
 from datetime import datetime
 
 from database.models import db
@@ -222,11 +223,14 @@ def _notify_advocates(application, candidate_user, data, resume_bytes,
         to_email = advocate.email
         adv_user = WaUser.query.get(advocate.user_id)
         adv_first = (adv_user.first_name if adv_user else None) or ""
+        token = secrets.token_urlsafe(24)
+        approval_url = f"{WaConfig.WA_PUBLIC_BASE_URL}/wa/referral/approve?t={token}"
         ok = emailer.send_application_email(
-            to_email, adv_first, name, data.get("role_query", ""), data.get("company_name", ""),
+            to_email, adv_first, name, candidate_user.email or "",
+            data.get("role_query", ""), data.get("company_name", ""),
             data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
-            resume_bytes=resume_bytes, resume_filename=resume_filename,
-            resume_content_type=resume_content_type,
+            approval_url=approval_url, resume_bytes=resume_bytes,
+            resume_filename=resume_filename, resume_content_type=resume_content_type,
         )
         db.session.add(WaApplicationRecipient(
             application_id=application.id,
@@ -234,6 +238,7 @@ def _notify_advocates(application, candidate_user, data, resume_bytes,
             email=to_email,
             emailed_at=datetime.utcnow() if ok else None,
             email_status="sent" if ok else "pending",
+            approval_token=token,
         ))
     db.session.commit()
     return len(advocates)

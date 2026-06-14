@@ -118,6 +118,8 @@ create table if not exists public.wa_application_recipients (
     emailed_at     timestamptz,
     email_status   text,                                 -- sent | pending | failed
     error          text,
+    approval_token text,                                 -- token in the advocate's "I referred them" link
+    approved_at    timestamptz,                          -- set when the advocate confirms
     created_at     timestamptz not null default now()
 );
 

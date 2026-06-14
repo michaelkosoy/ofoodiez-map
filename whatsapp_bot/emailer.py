@@ -5,6 +5,7 @@ False and the caller records the recipient as 'pending' — the application is
 still saved, the email just isn't sent.
 """
 import base64
+import html
 import logging
 
 import requests
@@ -16,15 +17,15 @@ logger = logging.getLogger("whatsapp_bot")
 _SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
-def send_application_email(to_email, advocate_name, candidate_name, role, company, job_url,
-                           job_description="", resume_bytes=None,
-                           resume_filename="resume.pdf",
+def send_application_email(to_email, advocate_name, candidate_name, candidate_email,
+                           role, company, job_url, job_description="", approval_url="",
+                           resume_bytes=None, resume_filename="resume.pdf",
                            resume_content_type="application/pdf"):
-    """Email an advocate a candidate's application (CV attached). Returns True if
-    sent, False if SendGrid isn't configured or the send failed.
+    """Email an advocate a candidate's application (CV attached). Includes the
+    candidate's email and an "I referred them" confirmation button (approval_url).
+    Returns True if sent, False if SendGrid isn't configured or the send failed.
 
-    Body is kept plain ASCII on purpose: accented characters (the old
-    "résumé") were mojibaking in some mail clients.
+    Sends both a text/plain and a text/html part so the button renders.
     """
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
@@ -32,26 +33,68 @@ def send_application_email(to_email, advocate_name, candidate_name, role, compan
         return False
 
     if job_url:
-        detail = f"Job posting: {job_url}\n\n"
+        detail_txt = f"Job posting: {job_url}\n"
+        detail_html = f'<p>🔗 Job posting: <a href="{html.escape(job_url)}">{html.escape(job_url)}</a></p>'
     elif job_description:
-        detail = f"Role details: {job_description}\n\n"
+        detail_txt = f"Role details: {job_description}\n"
+        detail_html = f"<p>📝 Role details: {html.escape(job_description)}</p>"
     else:
-        detail = ""
-    body = (
+        detail_txt, detail_html = "", ""
+
+    confirm_txt = (
+        f"\n✅ Did you refer them? Confirm here and we'll let them know:\n{approval_url}\n"
+        if approval_url else ""
+    )
+    confirm_html = (
+        f'<p style="margin:24px 0;">'
+        f'<a href="{html.escape(approval_url)}" '
+        f'style="background:#ff7a59;color:#fff;text-decoration:none;padding:12px 22px;'
+        f'border-radius:8px;font-weight:bold;display:inline-block;">'
+        f'✅ Yes, I referred them</a></p>'
+        f'<p style="font-size:13px;color:#666;">Tapping this confirms you referred '
+        f'{html.escape(candidate_name)} — we\'ll let them know. 🎉</p>'
+        if approval_url else ""
+    )
+
+    text_body = (
         f"Hey {advocate_name or 'there'}! 😊\n\n"
         f"{candidate_name} is interested in a {role or 'role'} at {company} and "
         f"would love a referral from you.\n\n"
-        f"{detail}"
-        f"Their CV is attached.\n\n"
+        f"Candidate email: {candidate_email or '—'}\n"
+        f"{detail_txt}\n"
+        f"Their CV is attached.\n"
+        f"{confirm_txt}\n"
         f"Thanks so much for being an Ofoodiez advocate — you're helping someone "
         f"land their dream job! 🙏\n\n"
         f"— The Ofoodiez team"
+    )
+    cand_email_html = (
+        f'<a href="mailto:{html.escape(candidate_email)}">{html.escape(candidate_email)}</a>'
+        if candidate_email else "—"
+    )
+    html_body = (
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;line-height:1.55;">'
+        f"<p>Hey {html.escape(advocate_name or 'there')}! 😊</p>"
+        f"<p><b>{html.escape(candidate_name)}</b> is interested in a "
+        f"<b>{html.escape(role or 'role')}</b> at <b>{html.escape(str(company))}</b> "
+        f"and would love a referral from you.</p>"
+        f"<p>📧 Candidate email: {cand_email_html}</p>"
+        f"{detail_html}"
+        f"<p>📎 Their CV is attached.</p>"
+        f"{confirm_html}"
+        "<p>Thanks so much for being an Ofoodiez advocate — you're helping someone "
+        "land their dream job! 🙏</p>"
+        "<p>— The Ofoodiez team</p>"
+        "</div>"
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
         "from": {"email": from_email, "name": "Ofoodiez Referrals"},
         "subject": f"New candidate for {role or 'a role'} at {company}",
-        "content": [{"type": "text/plain", "value": body}],
+        "content": [
+            {"type": "text/plain", "value": text_body},
+            {"type": "text/html", "value": html_body},
+        ],
     }
     if resume_bytes:
         payload["attachments"] = [{
@@ -61,6 +104,42 @@ def send_application_email(to_email, advocate_name, candidate_name, role, compan
             "disposition": "attachment",
         }]
 
+    return _post(payload)
+
+
+def send_referral_confirmed_email(to_email, candidate_name, advocate_name, company, role):
+    """Tell the candidate an advocate confirmed their referral. Best-effort."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+
+    text_body = (
+        f"Hey {candidate_name or 'there'}! 😊\n\n"
+        f"Great news — {advocate_name} from {company} just confirmed your referral "
+        f"for {role or 'the role'}! 🎉\n\n"
+        f"Fingers crossed — we're rooting for you. 🤞\n\n"
+        f"— The Ofoodiez team"
+    )
+    html_body = (
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;line-height:1.55;">'
+        f"<p>Hey {html.escape(candidate_name or 'there')}! 😊</p>"
+        f"<p>Great news — <b>{html.escape(advocate_name)}</b> from "
+        f"<b>{html.escape(str(company))}</b> just confirmed your referral for "
+        f"<b>{html.escape(role or 'the role')}</b>! 🎉</p>"
+        "<p>Fingers crossed — we're rooting for you. 🤞</p>"
+        "<p>— The Ofoodiez team</p>"
+        "</div>"
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez Referrals"},
+        "subject": f"You've been referred at {company}! 🎉",
+        "content": [
+            {"type": "text/plain", "value": text_body},
+            {"type": "text/html", "value": html_body},
+        ],
+    }
     return _post(payload)
 
 

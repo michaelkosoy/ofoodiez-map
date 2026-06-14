@@ -120,6 +120,8 @@ _STATEMENTS = [
     "alter table public.wa_advocates add column if not exists referral_link text",
     "alter table public.wa_advocates add column if not exists role_title text",
     "alter table public.wa_application_recipients add column if not exists email text",
+    "alter table public.wa_application_recipients add column if not exists approval_token text",
+    "alter table public.wa_application_recipients add column if not exists approved_at timestamptz",
     "alter table public.wa_applications add column if not exists job_description text",
     # ---- indexes ----
     """create index if not exists ix_wa_inbound_from_created
@@ -128,6 +130,9 @@ _STATEMENTS = [
     "drop index if exists uq_wa_advocates_user_company",
     """create unique index if not exists uq_wa_advocates_user_company_email
         on public.wa_advocates (user_id, company_id, email)""",
+    # fast lookup of a referral by its approval-link token
+    """create unique index if not exists uq_wa_recipient_approval_token
+        on public.wa_application_recipients (approval_token)""",
     # ---- lock the PII tables out of the anon PostgREST API (owner bypasses) ----
     "alter table public.wa_companies             enable row level security",
     "alter table public.wa_users                 enable row level security",

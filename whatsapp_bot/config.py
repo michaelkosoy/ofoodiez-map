@@ -27,6 +27,19 @@ class _WaConfig:
         return os.environ.get("TWILIO_ACCOUNT_SID")
 
     @property
+    def WA_PUBLIC_BASE_URL(self):
+        """Public origin for links we email out (e.g. the referral-approval link).
+        Defaults to the host of TWILIO_WEBHOOK_URL so it tracks the deployment."""
+        explicit = os.environ.get("WA_PUBLIC_BASE_URL")
+        if explicit:
+            return explicit.rstrip("/")
+        url = self.TWILIO_WEBHOOK_URL or ""
+        for suffix in ("/wa/webhook", "/webhook"):
+            if url.endswith(suffix):
+                return url[: -len(suffix)]
+        return url.rstrip("/")
+
+    @property
     def TWILIO_MESSAGING_SERVICE_SID(self):
         return os.environ.get("TWILIO_MESSAGING_SERVICE_SID")
 
