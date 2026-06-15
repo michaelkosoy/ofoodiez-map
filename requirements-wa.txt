@@ -1,0 +1,10 @@
+# Slim dependency set for the standalone WhatsApp bot service (wa_wsgi:app).
+# Render build command for that service: pip install -r requirements-wa.txt
+# (The main site keeps using the full requirements.txt.)
+Flask==3.1.2
+Flask-SQLAlchemy==3.1.1
+twilio==9.10.9
+requests==2.32.5
+psycopg2-binary==2.9.10
+python-dotenv==1.2.1
+gunicorn==23.0.0

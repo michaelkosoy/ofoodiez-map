@@ -66,6 +66,12 @@ def _twiml(text):
     return Response(str(resp), mimetype="application/xml")
 
 
+@wa_bp.route("/healthz", methods=["GET"])
+def healthz():
+    """Lightweight liveness check (no DB hit) for keep-warm pingers / monitors."""
+    return Response("ok", mimetype="text/plain")
+
+
 @wa_bp.route("/webhook", methods=["POST"])
 def webhook():
     started = time.monotonic()

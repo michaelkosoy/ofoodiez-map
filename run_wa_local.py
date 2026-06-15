@@ -21,7 +21,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
-from instagram_automation.database import db
+from database.models import db
 from whatsapp_bot import init_app as init_wa_bot
 
 load_dotenv()  # picks up TWILIO_AUTH_TOKEN from .env; shell env still wins
