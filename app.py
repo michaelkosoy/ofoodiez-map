@@ -49,11 +49,9 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 from instagram_automation import init_app as init_ig_automation
 init_ig_automation(app)
 
-# Register WhatsApp referral-bot blueprint (after IG init: reuses the shared db,
-# does not re-init the extension or call create_all — wa_ tables are created by
-# the one-time Supabase SQL script; see docs/whatsapp-referral-bot-plan.md §4).
-from whatsapp_bot import init_app as init_wa_bot
-init_wa_bot(app)
+# The WhatsApp referral bot now runs as its OWN Render service (wa_wsgi:app) —
+# see docs/whatsapp-bot-standalone-service-plan.md. It is intentionally NOT
+# mounted here, so this service is purely the map/site.
 
 # Register Admin blueprint
 from admin import admin_bp
