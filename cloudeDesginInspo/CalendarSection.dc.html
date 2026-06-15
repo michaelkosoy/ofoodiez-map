@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,700;1,6..96,500&family=Outfit:wght@400;600;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</helmet>
+
+<section style="padding:30px;background:linear-gradient(#f4ecda,#faf5e6);">
+  <div style="margin-bottom:20px;">
+    <div style="font:600 10px/1 'Outfit',sans-serif;letter-spacing:3px;text-transform:uppercase;color:#720815;margin-bottom:12px;">{{ popk }}</div>
+    <h2 style="margin:0;font-family:'Bodoni Moda','Frank Ruhl Libre',serif;font-weight:700;font-size:36px;line-height:.96;letter-spacing:-1px;color:#362118;" dir="{{ dir }}">{{ popL1 }}<br>{{ popL2 }}</h2>
+  </div>
+
+  <div style="background:rgba(255,255,255,.7);border:1px solid #ece1cb;border-radius:18px;padding:16px;margin-bottom:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <button onClick="{{ prevMonth }}" style="border:none;background:rgba(114,8,21,.08);color:#720815;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-chevron-left"></i></button>
+      <span ref="{{ setTitleEl }}" style="font:700 13px/1 'Outfit',sans-serif;color:#362118;"></span>
+      <button onClick="{{ nextMonth }}" style="border:none;background:rgba(114,8,21,.08);color:#720815;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;text-align:center;">
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Su</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Mo</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Tu</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">We</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Th</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Fr</div>
+      <div style="font:600 10px/1 'Outfit',sans-serif;color:#845649;text-transform:uppercase;">Sa</div>
+    </div>
+    <div ref="{{ setDaysEl }}" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+  </div>
+
+  <div style="background:rgba(255,255,255,.7);border:1px solid #ece1cb;border-radius:18px;padding:16px;">
+    <div style="font:700 13px/1 'Outfit',sans-serif;color:#362118;margin-bottom:12px;">✨ {{ upcoming }}</div>
+    <div ref="{{ setListEl }}" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:460},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;he&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'he'&quot;}}">
+class Component extends DCLogic {
+  state = { m: 5, y: 2026 };
+
+  EVENTS = [
+    { date:'2026-06-12', title:'Neapolitan Pizza & Wine', time:'18:00', location:'Herzl 16' },
+    { date:'2026-06-14', title:'Tacos & Mezcal Night', time:'19:00', location:'La Tigra' },
+    { date:'2026-06-18', title:'Secret Ramen Speakeasy', time:'19:30', location:'Men Tenten' },
+    { date:'2026-06-20', title:'Wine & Cheese Garden', time:'17:00', location:'Neve Tzedek' }
+  ];
+
+  MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  MONTHS_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  renderVals() {
+    const he = this.props.lang === 'he';
+    return {
+      dir: he ? 'rtl' : 'ltr',
+      popk: he ? 'פופ-אפ · תל אביב' : 'Pop-ups · TLV',
+      popL1: he ? 'הפופ-אפים' : 'Pop-ups',
+      popL2: he ? 'של החודש' : 'this month',
+      upcoming: he ? 'הקרובים' : 'Upcoming',
+      prevMonth: () => this.changeMonth(-1),
+      nextMonth: () => this.changeMonth(1),
+      setTitleEl: (el) => { this.titleEl = el; this.renderCalendar(); },
+      setDaysEl: (el) => { this.daysEl = el; this.renderCalendar(); },
+      setListEl: (el) => { this.listEl = el; this.renderCalendar(); }
+    };
+  }
+
+  componentDidUpdate() { this.renderCalendar(); }
+
+  changeMonth(delta) {
+    let m = this.state.m + delta;
+    let y = this.state.y;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    this.setState({ m, y });
+  }
+
+  renderCalendar() {
+    const { m, y } = this.state;
+    if (!this.daysEl || !this.titleEl || !this.listEl) return;
+    const he = this.props.lang === 'he';
+    const months = he ? this.MONTHS_HE : this.MONTHS;
+    this.titleEl.textContent = months[m] + ' ' + y;
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const today = new Date();
+    const isThisMonth = today.getMonth() === m && today.getFullYear() === y;
+    this.daysEl.innerHTML = '';
+    for (let i = 0; i < firstDay; i++) this.daysEl.appendChild(document.createElement('div'));
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = document.createElement('div');
+      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const hasEvent = this.EVENTS.some(e => e.date === dateStr);
+      const isToday = isThisMonth && d === today.getDate();
+      el.style.cssText = 'padding:6px;text-align:center;font:600 11px "Outfit",sans-serif;border-radius:8px;cursor:pointer;';
+      el.textContent = d;
+      if (hasEvent) el.style.cssText += 'background:#720815;color:#f9f6eb;border:2px solid #720815;';
+      else if (isToday) el.style.cssText += 'background:rgba(114,8,21,.1);color:#720815;border:2px solid #720815;';
+      else el.style.cssText += 'color:#362118;border:2px solid transparent;';
+      this.daysEl.appendChild(el);
+    }
+    this.listEl.innerHTML = '';
+    const evts = this.EVENTS
+      .filter(e => e.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`))
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
+    if (!evts.length) {
+      this.listEl.innerHTML = '<div style="font-size:12px;color:#999;text-align:center;padding:12px;">No events this month</div>';
+      return;
+    }
+    evts.forEach(e => {
+      const [,mo,d] = e.date.split('-');
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;gap:10px;align-items:center;background:rgba(249,246,235,.5);border:1px solid #ece1cb;border-radius:12px;padding:10px;';
+      item.innerHTML = `<div style="flex:0 0 40px;text-align:center;background:#720815;color:#f9f6eb;border-radius:8px;padding:6px;"><div style="font:700 10px 'Outfit',sans-serif;">${d}</div><div style="font:600 8px 'Outfit',sans-serif;">${this.MONTHS_SHORT[parseInt(mo)-1]}</div></div><div style="flex:1;min-width:0;"><div style="font:600 11px 'Outfit',sans-serif;color:#362118;line-height:1.2;">${e.title}</div><div style="font-size:10px;color:#845649;margin-top:3px;"><i class="fas fa-clock" style="font-size:9px;"></i> ${e.time} · ${e.location}</div></div>`;
+      this.listEl.appendChild(item);
+    });
+  }
+}
+</script>
+</body>
+</html>

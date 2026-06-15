@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,800;1,6..96,500&family=Outfit:wght@300;400;500;600;700;800&family=Heebo:wght@300;400;500;700;800&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#e7e1d5;}
+  [data-scroll]::-webkit-scrollbar{width:0;height:0;display:none;}
+  [data-scroll]{scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  [data-reveal]{opacity:0;transform:translateY(32px);}
+  @keyframes ofBob{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+</style>
+</helmet>
+
+<div ref="{{ setRoot }}" style="min-height:100vh;background:radial-gradient(120% 80% at 50% 0%, #ece6da 0%, #e2dccf 100%);font-family:'Outfit','Heebo',sans-serif;padding:38px 20px 80px;">
+
+  <!-- PAGE HEADER -->
+  <div style="max-width:780px;margin:0 auto 40px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px;">
+      <div style="max-width:500px;">
+        <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:3px;text-transform:uppercase;color:#845649;margin-bottom:12px;">Ofoodiez · Home</div>
+        <h1 style="margin:0;font-family:'Bodoni Moda','Frank Ruhl Libre',serif;font-weight:800;font-size:40px;line-height:.98;letter-spacing:-1px;color:#362118;">Maison</h1>
+        <p style="margin:10px 0 0;font-size:14px;line-height:1.55;color:#603e35;">Editorial mobile home · single scroll with scene transitions.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font:600 10px/1 'Outfit',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#845649;">Lang</span>
+        <div style="display:inline-flex;background:#f9f6eb;border:1px solid #d9cdb8;border-radius:999px;padding:4px;box-shadow:0 6px 18px -12px rgba(54,33,24,.5);">
+          <button data-lang-btn="en" onClick="{{ toEN }}" style="border:none;cursor:pointer;font:600 13px/1 'Outfit',sans-serif;padding:8px 14px;border-radius:999px;background:#362118;color:#f9f6eb;">EN</button>
+          <button data-lang-btn="he" onClick="{{ toHE }}" style="border:none;cursor:pointer;font:600 13px/1 'Heebo',sans-serif;padding:8px 14px;border-radius:999px;background:transparent;color:#603e35;">עברית</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE SHELL -->
+  <div style="width:392px;padding:11px;margin:0 auto;background:linear-gradient(160deg,#2b2320,#161210);border-radius:54px;box-shadow:0 40px 80px -28px rgba(54,33,24,.7),0 0 0 1px rgba(255,255,255,.05) inset;">
+    <div style="position:relative;width:370px;height:760px;border-radius:44px;overflow:hidden;background:#f9f6eb;">
+
+      <!-- STATUS BAR -->
+      <div style="position:absolute;top:0;left:0;right:0;height:48px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 26px;pointer-events:none;">
+        <span style="font:600 14px/1 'Outfit',sans-serif;color:#362118;">9:41</span>
+        <div style="display:flex;gap:6px;align-items:center;color:#362118;font-size:12px;"><i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-three-quarters"></i></div>
+      </div>
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:108px;height:30px;background:#161210;border-radius:18px;z-index:31;"></div>
+
+      <!-- IN-PHONE LANG TOGGLE -->
+      <div style="position:absolute;top:52px;right:14px;z-index:28;display:inline-flex;background:rgba(249,246,235,.85);backdrop-filter:blur(10px);border:1px solid rgba(217,205,184,.8);border-radius:999px;padding:3px;box-shadow:0 6px 16px -10px rgba(54,33,24,.6);">
+        <button data-lang-btn="en" onClick="{{ toEN }}" style="border:none;cursor:pointer;font:700 11px/1 'Outfit',sans-serif;padding:6px 11px;border-radius:999px;background:#362118;color:#f9f6eb;">EN</button>
+        <button data-lang-btn="he" onClick="{{ toHE }}" style="border:none;cursor:pointer;font:700 11px/1 'Heebo',sans-serif;padding:6px 11px;border-radius:999px;background:transparent;color:#603e35;">עב</button>
+      </div>
+
+      <!-- SCROLL CONTAINER -->
+      <div data-scroll style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;">
+
+        <!-- HERO -->
+        <section style="position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:90px 30px 48px;overflow:hidden;background:radial-gradient(125% 80% at 50% 4%, #fdf2cf 0%, #faf5e6 45%, #f4ecda 100%);">
+          <img src="app/static/img/logo.png" data-herofade data-parallax="0.12" style="position:absolute;top:60px;left:50%;width:330px;margin-left:-165px;opacity:.07;pointer-events:none;">
+          <div data-herofade style="position:relative;">
+            <div style="font:600 11px/1 'Outfit',sans-serif;letter-spacing:4px;text-transform:uppercase;color:#720815;margin-bottom:18px;" data-i18n="kloc">Tel Aviv · Worldwide</div>
+            <div style="width:34px;height:1.5px;background:#845649;margin:0 auto 22px;"></div>
+            <h1 style="margin:0;font-family:'Bodoni Moda','Frank Ruhl Libre',serif;font-weight:800;font-size:66px;line-height:.86;letter-spacing:-2px;color:#720815;">Ofoodiez</h1>
+            <p style="margin:24px auto 0;max-width:280px;font-size:15px;line-height:1.6;color:#5b3d33;" data-i18n="slogan">Everything new in Tel Aviv before everyone else.</p>
+          </div>
+          <div data-herofade style="position:absolute;bottom:26px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:7px;color:#845649;">
+            <span style="font:600 10px/1 'Outfit',sans-serif;letter-spacing:2.5px;text-transform:uppercase;" data-i18n="scroll">Scroll</span>
+            <i class="fas fa-chevron-down" style="font-size:13px;animation:ofBob 1.8s ease-in-out infinite;"></i>
+          </div>
+        </section>
+
+        <!-- BLOG CATEGORY PILLS -->
+        <div style="padding:22px 0 6px;background:#faf5e6;">
+          <div style="padding:0 24px 4px;font:600 9px/1 'Outfit',sans-serif;letter-spacing:2.5px;text-transform:uppercase;color:#a98e6f;" data-i18n="blogk">Explore the blog</div>
+          <div style="display:flex;gap:9px;overflow-x:auto;padding:12px 24px 6px;">
+            <a href="#" style="flex:0 0 auto;font:700 12px/1 'Outfit','Heebo',sans-serif;color:#f9f6eb;text-decoration:none;padding:10px 16px;background:#603e35;border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:7px;"><i class="fas fa-home" style="font-size:11px;"></i><span data-i18n="blog_home">Home</span></a>
+            <a href="#" style="flex:0 0 auto;font:600 12px/1 'Outfit','Heebo',sans-serif;color:#603e35;text-decoration:none;padding:10px 16px;background:#fff;border:1px solid rgba(96,62,53,.18);border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:7px;"><i class="fas fa-glass-cheers" style="font-size:11px;"></i><span data-i18n="blog_bach">Bachelorette Party</span></a>
+            <a href="#" style="flex:0 0 auto;font:600 12px/1 'Outfit','Heebo',sans-serif;color:#603e35;text-decoration:none;padding:10px 16px;background:#fff;border:1px solid rgba(96,62,53,.18);border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:7px;"><i class="fas fa-plane" style="font-size:11px;"></i><span data-i18n="blog_japan">Japan Guide</span></a>
+            <a href="#" style="flex:0 0 auto;font:600 12px/1 'Outfit','Heebo',sans-serif;color:#603e35;text-decoration:none;padding:10px 16px;background:#fff;border:1px solid rgba(96,62,53,.18);border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:7px;"><i class="fab fa-instagram" style="font-size:12px;"></i><span data-i18n="blog_ig">Instagram</span></a>
+          </div>
+        </div>
+
+        <!-- MAP ANIMATION (child DC) -->
+        <dc-import name="MapAnimation" lang="{{ lang }}" hint-size="100%,480px"></dc-import>
+
+        <!-- COMMUNITY INSIDER -->
+        <section style="padding:30px 24px;">
+          <div data-reveal style="">
+            <div style="position:relative;overflow:hidden;background:linear-gradient(150deg,#7e0c1a,#5a0610);border-radius:26px;padding:38px 30px 36px;text-align:center;box-shadow:0 26px 50px -24px rgba(114,8,21,.7);">
+              <i class="fab fa-whatsapp" style="font-size:40px;color:#ECC873;"></i>
+              <div style="font:600 10px/1 'Outfit',sans-serif;letter-spacing:3px;text-transform:uppercase;color:#f0b9bf;margin:18px 0 10px;" data-i18n="comk">The community</div>
+              <h2 style="margin:0;font-family:'Bodoni Moda','Frank Ruhl Libre',serif;font-weight:700;font-size:32px;line-height:1;color:#fff7ef;" data-i18n="comt">The Insider List</h2>
+              <p style="margin:14px auto 24px;max-width:250px;font-size:13.5px;line-height:1.55;color:#f4d9d2;" data-i18n="coms">Secret deals, new openings &amp; pop-ups — straight to your WhatsApp.</p>
+              <a href="#" style="display:inline-flex;align-items:center;gap:10px;background:#ECC873;color:#5a0610;font:700 14px/1 'Outfit','Heebo',sans-serif;padding:15px 28px;border-radius:999px;text-decoration:none;box-shadow:0 14px 28px -10px rgba(0,0,0,.4);"><i class="fab fa-whatsapp"></i><span data-i18n="comc">Join the community</span></a>
+            </div>
+          </div>
+        </section>
+
+        <!-- WORLD MAPS (child DC) -->
+        <dc-import name="WorldMaps" lang="{{ lang }}" hint-size="100%,400px"></dc-import>
+
+        <!-- POP-UPS CALENDAR (child DC) -->
+        <dc-import name="CalendarSection" lang="{{ lang }}" hint-size="100%,460px"></dc-import>
+
+        <!-- ABOUT -->
+        <section id="about" style="padding:30px 30px 50px;">
+          <div data-reveal style="">
+            <div style="position:relative;height:320px;border-radius:22px;overflow:hidden;background:repeating-linear-gradient(135deg,#efe6d3,#efe6d3 11px,#e8dcc4 11px,#e8dcc4 22px);display:flex;align-items:center;justify-content:center;border:1px solid #e2d5bd;margin-bottom:24px;">
+              <span style="font:500 11px/1.4 monospace;color:#9a836b;text-align:center;">[ YOUR PHOTO ]<br>drop your portrait</span>
+            </div>
+            <div style="font:600 10px/1 'Outfit',sans-serif;letter-spacing:3px;text-transform:uppercase;color:#720815;margin-bottom:11px;" data-i18n="abk">Who I am</div>
+            <h2 style="margin:0;font-family:'Bodoni Moda','Frank Ruhl Libre',serif;font-weight:700;font-size:38px;line-height:.94;letter-spacing:-1px;color:#362118;" data-i18n="abt">Hey, I'm Ofir</h2>
+            <p style="margin:14px 0 20px;font-size:13.5px;line-height:1.65;color:#5b3d33;" data-i18n="abb">I live and breathe food — hunting the best deals, openings and tables in Tel Aviv and around the world.</p>
+            <a href="#" style="display:inline-flex;align-items:center;gap:9px;background:#362118;color:#f9f6eb;font:600 14px/1 'Outfit','Heebo',sans-serif;padding:14px 24px;border-radius:999px;text-decoration:none;"><i class="fas fa-envelope"></i><span data-i18n="abc">Say hello</span></a>
+          </div>
+          <footer style="margin-top:38px;margin-left:-30px;margin-right:-30px;margin-bottom:-50px;padding:32px 30px 48px;background:#2b1a13;text-align:center;">
+            <div style="display:flex;justify-content:center;gap:22px;font-size:18px;color:#ECC873;margin-bottom:16px;"><i class="fab fa-instagram"></i><i class="fab fa-tiktok"></i><i class="fab fa-facebook"></i><i class="fab fa-threads"></i></div>
+            <div style="font-size:11px;color:#9a7f66;letter-spacing:.3px;"><span data-i18n="ftc">Made with love in Tel Aviv</span> · Terms · Privacy</div>
+          </footer>
+        </section>
+
+        <div style="height:72px;"></div>
+      </div>
+
+      <!-- BOTTOM APP NAV -->
+      <div style="position:absolute;left:0;right:0;bottom:0;z-index:25;display:flex;justify-content:space-around;align-items:center;padding:10px 8px 14px;background:rgba(249,246,235,.92);backdrop-filter:blur(14px);border-top:1px solid #e7dcc6;box-shadow:0 -8px 24px -16px rgba(54,33,24,.5);">
+        <a href="#" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#720815;"><i class="fas fa-home" style="font-size:18px;"></i><span style="font:700 9px/1 'Outfit',sans-serif;">Blog</span></a>
+        <a href="#" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#9a8470;"><i class="fas fa-map-marked-alt" style="font-size:18px;"></i><span style="font:600 9px/1 'Outfit',sans-serif;">Map</span></a>
+        <a href="#" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#9a8470;"><i class="fas fa-user" style="font-size:18px;"></i><span style="font:600 9px/1 'Outfit',sans-serif;">About</span></a>
+        <a href="#" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#c4b39c;"><i class="fas fa-building" style="font-size:18px;"></i><span style="font:600 9px/1 'Outfit',sans-serif;">HiTech</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lang: 'en' };
+
+  HE = {
+    kloc:'תל אביב · מסביב לעולם', slogan:'כל מה שחדש בתל אביב לפני כולם.',
+    scroll:'גללו', comk:'הקהילה', comt:'הרשימה הפנימית',
+    coms:'דילים סודיים, פתיחות חדשות ופופ-אפים — ישר לוואטסאפ שלכם.', comc:'להצטרף לקהילה',
+    abk:'מי אני', abt:'היי, אני אופיר',
+    abb:'אני חיה ונושמת אוכל — מחפשת את הדילים, הפתיחות והשולחנות הכי שווים, בתל אביב ומסביב לעולם.',
+    abc:'דברו איתי', ftc:'נוצר באהבה בתל אביב',
+    blogk:'לגלות את הבלוג', blog_home:'בית', blog_bach:'מסיבת רווקות',
+    blog_japan:'מדריך יפן', blog_ig:'אינסטגרם'
+  };
+
+  renderVals() {
+    return {
+      lang: this.state.lang,
+      setRoot: (el) => { this.root = el; this.tryInit(0); },
+      toEN: () => this.setLang('en'),
+      toHE: () => this.setLang('he')
+    };
+  }
+
+  tryInit(n) {
+    const cont = this.root && this.root.querySelector('[data-scroll]');
+    if (!cont) { if (n < 50) setTimeout(() => this.tryInit(n + 1), 50); return; }
+    this.wire(cont);
+    let k = 0;
+    const iv = setInterval(() => { this.repair(cont); if (++k > 16) clearInterval(iv); }, 170);
+  }
+
+  wire(cont) {
+    const tick = () => {
+      const cb = cont.getBoundingClientRect().bottom, st = cont.scrollTop;
+      cont.querySelectorAll('[data-reveal]').forEach(el => { if (!el.dataset.shown && el.getBoundingClientRect().top < cb - 48) this.tween(el); });
+      cont.querySelectorAll('[data-parallax]').forEach(p => { p.style.transform = 'translate3d(0,' + (st * (parseFloat(p.getAttribute('data-parallax')) || .2)) + 'px,0)'; });
+      cont.querySelectorAll('[data-herofade]').forEach(h => { if (h.dataset.base === undefined) h.dataset.base = getComputedStyle(h).opacity; h.style.opacity = String(Math.max(0, parseFloat(h.dataset.base) * (1 - st / 460))); });
+    };
+    tick();
+    cont.addEventListener('scroll', tick, { passive: true });
+  }
+
+  repair(cont) {
+    const cb = cont.getBoundingClientRect().bottom;
+    cont.querySelectorAll('[data-reveal]').forEach(el => {
+      if (el.getBoundingClientRect().top >= cb - 48) return;
+      if (!el.dataset.shown) this.tween(el);
+      else if (parseFloat(getComputedStyle(el).opacity) < 0.95) { el.style.opacity = '1'; el.style.transform = 'none'; }
+    });
+  }
+
+  tween(el) {
+    if (el.dataset.shown) return;
+    el.dataset.shown = '1';
+    const dur = 760, t0 = performance.now();
+    const step = t => { const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3); el.style.opacity = String(e); el.style.transform = e>=1?'none':'translateY('+(32*(1-e))+'px)'; if(k<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+
+  setLang(lang) {
+    if (!this.root) return;
+    this.setState({ lang });
+    this.root.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (el.dataset.en === undefined) el.dataset.en = el.innerHTML;
+      if (lang === 'he') { const t = this.HE[k]; if (t) { el.innerHTML = t; el.setAttribute('dir','rtl'); } }
+      else { el.innerHTML = el.dataset.en; el.removeAttribute('dir'); }
+    });
+    this.root.querySelectorAll('[data-lang-btn]').forEach(b => {
+      const on = b.getAttribute('data-lang-btn') === lang;
+      b.style.background = on ? '#362118' : 'transparent';
+      b.style.color = on ? '#f9f6eb' : '#603e35';
+    });
+  }
+}
+</script>
+</body>
+</html>
