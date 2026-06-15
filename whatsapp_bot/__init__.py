@@ -7,6 +7,8 @@ SQLAlchemy `db` instance.
 
 See docs/whatsapp-referral-bot-plan.md for the full design.
 """
+import logging
+
 from flask import Blueprint
 
 wa_bp = Blueprint("whatsapp_bot", __name__, url_prefix="/wa")
@@ -32,6 +34,15 @@ def init_app(app):
     try:
         run_migrations(app)
     except Exception:  # never let a migration issue block app startup
-        import logging
         logging.getLogger("whatsapp_bot").exception("wa migrate: run_migrations failed")
+
+    # Startup visibility: surface whether the RUNNING process actually sees the
+    # email/storage config, so a missing env var isn't an invisible no-op.
+    from .config import WaConfig
+    logging.getLogger("whatsapp_bot").info(
+        "wa: startup — SendGrid configured=%s (from=%s) · Supabase storage=%s",
+        bool(WaConfig.SENDGRID_API_KEY and WaConfig.WA_FROM_EMAIL),
+        WaConfig.WA_FROM_EMAIL or "(unset)",
+        bool(WaConfig.SUPABASE_URL and WaConfig.SUPABASE_SERVICE_ROLE_KEY),
+    )
     return app
