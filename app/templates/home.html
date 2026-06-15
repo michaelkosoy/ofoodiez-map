@@ -13,21 +13,19 @@
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
-    <meta name="theme-color" content="#5A3A31">
+    <meta name="theme-color" content="#720815">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playpen+Sans:wght@400;600;800&family=Sour+Gummy:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,800;1,6..96,500&family=Outfit:wght@300;400;600;700;800&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=6">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=4">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ofoodiez.com/">
     <meta property="og:title" content="Ofoodiez - Best Happy Hours & Food Guides">
@@ -47,20 +45,15 @@
     <div id="splash-screen">
         <div class="splash-animation-container">
             <div class="splash-drinks">
-                <img src="{{ url_for('static', filename='img/splash_1.png') }}" class="splash-frame frame-1"
-                    alt="Drink 1">
-                <img src="{{ url_for('static', filename='img/splash_2.png') }}" class="splash-frame frame-2"
-                    alt="Drink 2">
-                <img src="{{ url_for('static', filename='img/splash_3.png') }}" class="splash-frame frame-3"
-                    alt="Drink 3">
+                <img src="{{ url_for('static', filename='img/splash_1.png') }}" class="splash-frame frame-1" alt="Drink 1">
+                <img src="{{ url_for('static', filename='img/splash_2.png') }}" class="splash-frame frame-2" alt="Drink 2">
+                <img src="{{ url_for('static', filename='img/splash_3.png') }}" class="splash-frame frame-3" alt="Drink 3">
                 <div class="splash-frame frame-4">
-                    <img src="{{ url_for('static', filename='img/splash_4.png') }}" class="splash-drink-img"
-                        alt="Drink 4">
+                    <img src="{{ url_for('static', filename='img/splash_4.png') }}" class="splash-drink-img" alt="Drink 4">
                 </div>
             </div>
             <div class="splash-final-brand">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" class="splash-site-icon"
-                    alt="Ofoodiez Logo">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" class="splash-site-icon" alt="Ofoodiez Logo">
                 <div class="splash-logo">Ofoodiez</div>
             </div>
         </div>
@@ -74,113 +67,177 @@
         }
     </script>
 
-    <!-- Hero Section -->
+    <!-- =========================================
+         HERO
+         ========================================= -->
     <section class="hero">
-        <div class="hero-overlay">
+        <img src="{{ url_for('static', filename='img/logo.png') }}"
+             class="hero-watermark" alt="" id="hero-watermark">
+
+        <div class="hero-content" id="hero-content">
+            <div class="hero-eyebrow">Tel Aviv · Worldwide</div>
+            <div class="hero-divider"></div>
             <h1 class="hero-title">Ofoodiez</h1>
             <p class="hero-subtitle">{{ data.slogan }}</p>
         </div>
+
+        <div class="hero-scroll-cue" id="hero-scroll-cue">
+            <span>Scroll</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
     </section>
 
+    <!-- Blog Category Menu -->
     {% set active_page = 'home' %}
     {% include 'components/blog_menu.html' %}
 
-    <div class="container">
-        <!-- Happy Hour Map Promo Section -->
-        <section class="section">
-            <a href="/map" class="promo-card happy-hour-card">
-                <div class="promo-content">
-                    <h2>🍹 Happy Hour Map</h2>
-                    <p>Find the best happy hour deals near you</p>
-                    <span class="promo-button"><i class="fas fa-map-marker-alt"></i> Open Happy Hour Map</span>
-                </div>
-            </a>
-        </section>
-
-        <!-- Community Insider Section -->
-        <section class="section">
-            <div class="community-card">
-                <h3>{{ data.community.title }}</h3>
-                <p>{{ data.community.description }}</p>
-                <a href="{{ data.community.link }}" target="_blank" class="btn">
-                    <i class="fab fa-whatsapp"></i> {{ data.community.link_text }}
-                </a>
-            </div>
-        </section>
-
-        <!-- World Food Maps Section -->
-        <section class="section" id="destinations">
-            <h3 class="section-title">Travel like Ofoodiez</h3>
-            <div class="world-grid">
-                {% for item in data.world_maps %}
-                <a href="{{ item.map_link }}" class="country-card"
-                    data-bg="{{ url_for('static', filename='img/' + item.country.lower() + '.png') }}" {% if 'http' in
-                    item.map_link %}target="_blank" {% endif %}>
-                    <div class="country-overlay">
-                        <span class="country-name">{{ item.country }}</span>
-                        <span class="cities">{{ item.cities }}</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Pop-ups Calendar Section -->
-        <section class="section" id="popups-section">
-            <h3 class="section-title">📅 Pop Ups Events Calender TLV</h3>
-            <div class="calendar-layout">
-                <!-- Left Column: Calendar and Details below it -->
-                <div class="calendar-main-col">
-                    <!-- Calendar Card -->
-                    <div class="calendar-card glass-card">
-                        <div class="calendar-header">
-                            <button class="calendar-nav-btn calendar-prev-btn"><i class="fas fa-chevron-left"></i></button>
-                            <span class="calendar-title">June 2026</span>
-                            <button class="calendar-nav-btn calendar-next-btn"><i class="fas fa-chevron-right"></i></button>
-                        </div>
-                        <div class="calendar-weekdays">
-                            <div>Su</div>
-                            <div>Mo</div>
-                            <div>Tu</div>
-                            <div>We</div>
-                            <div>Th</div>
-                            <div>Fr</div>
-                            <div>Sa</div>
-                        </div>
-                        <div class="calendar-days">
-                            <!-- Days will be dynamically rendered by JS -->
+    <!-- =========================================
+         HAPPY HOUR MAP — Dark Cinematic
+         ========================================= -->
+    <section class="map-section">
+        <!-- Animated iPhone stage -->
+        <div class="map-iphone-stage">
+            <div class="map-glow-ring"></div>
+            <div class="map-iphone-wrapper">
+                <div class="map-iphone-body">
+                    <div class="iphone-shine"></div>
+                    <div class="iphone-btn iphone-btn-l1"></div>
+                    <div class="iphone-btn iphone-btn-l2"></div>
+                    <div class="iphone-btn iphone-btn-r"></div>
+                    <div class="iphone-screen-clip">
+                        <div class="iphone-island"></div>
+                        <div class="iphone-boot"></div>
+                        <div class="iphone-map-layer">
+                            <div class="map-canvas">
+                                <div class="map-water"></div>
+                                <div class="map-road map-road-h1"></div>
+                                <div class="map-road map-road-h2"></div>
+                                <div class="map-road map-road-h3"></div>
+                                <div class="map-road map-road-v1"></div>
+                                <div class="map-road map-road-v2"></div>
+                                <div class="map-block map-block-1"></div>
+                                <div class="map-block map-block-2"></div>
+                                <div class="map-block map-block-3"></div>
+                                <div class="map-block map-block-4"></div>
+                                <div class="map-block map-block-5"></div>
+                                <div class="map-block map-block-6"></div>
+                                <div class="map-block map-block-7"></div>
+                                <div class="map-block map-block-8"></div>
+                                <div class="map-block map-block-9"></div>
+                                <div class="map-block map-block-10"></div>
+                                <div class="map-block map-block-11"></div>
+                                <div class="map-label">Tel Aviv</div>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Dynamic Details Panel (below calendar) -->
-                    <div class="details-card glass-card hidden">
-                        <!-- Will be dynamically populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Sidebar (laptop upcoming list) -->
-                <div class="events-sidebar">
-                    <!-- All Upcoming Events List -->
-                    <div class="list-card glass-card">
-                        <h4 class="list-card-title">✨ Upcoming Events</h4>
-                        <div class="upcoming-events-list">
-                            <!-- Will be dynamically populated by JS -->
-                        </div>
-                    </div>
+                    <!-- Pins layer (outside screen clip so they float above) -->
+                    <div class="map-pin red  map-pin-1"></div>
+                    <div class="map-pin gold map-pin-2"></div>
+                    <div class="map-pin red  map-pin-3"></div>
+                    <div class="map-pin gold map-pin-4"></div>
+                    <div class="map-pin red  map-pin-5"></div>
                 </div>
             </div>
-        </section>
-
-        <!-- Contact Section -->
-        <div class="contact-section" style="text-align: center; margin-top: 40px;">
-            <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-color);">Let's
-                Connect!</h3>
-            <a href="{{ data.about.contact_link }}" class="btn">
-                <i class="fas fa-envelope"></i> {{ data.about.contact_text }}
-            </a>
         </div>
 
-        <!-- Social Media Links -->
+        <div class="map-bg-overlay"></div>
+
+        <!-- Text overlay -->
+        <div class="map-overlay-content">
+            <div class="map-overlay-eyebrow">Live map</div>
+            <h2 class="map-overlay-title">The Happy<br>Hour Map</h2>
+            <p class="map-overlay-desc">Every great deal in the city, pinned in one place.</p>
+            <a href="/map" class="btn-gold">
+                <i class="fas fa-location-dot"></i> Open the map
+            </a>
+        </div>
+    </section>
+
+    <!-- =========================================
+         COMMUNITY INSIDER
+         ========================================= -->
+    <div class="community-section">
+        <div class="community-card" data-reveal>
+            <i class="fab fa-whatsapp whatsapp-icon"></i>
+            <div class="community-eyebrow">The community</div>
+            <h3>{{ data.community.title }}</h3>
+            <p>{{ data.community.description }}</p>
+            <a href="{{ data.community.link }}" target="_blank" class="btn-gold">
+                <i class="fab fa-whatsapp"></i> {{ data.community.link_text }}
+            </a>
+        </div>
+    </div>
+
+    <!-- =========================================
+         WORLD MAPS — Horizontal Carousel
+         ========================================= -->
+    <section class="world-maps-section" id="destinations">
+        <div class="world-maps-header">
+            <div class="section-eyebrow">Foodie maps</div>
+            <h2 class="section-title">Travel like Ofoodiez</h2>
+            <p>Curated maps for 8+ countries — every spot worth a detour.</p>
+        </div>
+        <div class="world-carousel">
+            {% for item in data.world_maps %}
+            <a href="{{ item.map_link }}" class="country-card"
+               {% if 'http' in item.map_link %}target="_blank"{% endif %}>
+                <img src="{{ url_for('static', filename='img/' + item.country.lower() + '.png') }}"
+                     alt="{{ item.country }}" loading="lazy">
+                <div class="country-card-overlay"></div>
+                <div class="country-overlay">
+                    <span class="country-name">{{ item.country }}</span>
+                    <span class="cities">{{ item.cities }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- =========================================
+         POP-UPS CALENDAR
+         ========================================= -->
+    <section class="calendar-section-wrap" id="popups-section">
+        <div class="calendar-header-block">
+            <div class="section-eyebrow">Pop-ups · TLV</div>
+            <h2 class="section-title">Pop-ups<br>this month</h2>
+        </div>
+
+        <div class="calendar-layout">
+            <!-- Calendar Card -->
+            <div class="calendar-main-col">
+                <div class="glass-card calendar-card">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn calendar-prev-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="calendar-title">June 2026</span>
+                        <button class="calendar-nav-btn calendar-next-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div>
+                        <div>Th</div><div>Fr</div><div>Sa</div>
+                    </div>
+                    <div class="calendar-days"></div>
+                </div>
+
+                <!-- Dynamic details panel (populated by JS) -->
+                <div class="details-card glass-card hidden"></div>
+            </div>
+
+            <!-- Upcoming Events Sidebar -->
+            <div class="events-sidebar">
+                <div class="glass-card list-card">
+                    <h4 class="list-card-title">✨ Upcoming Events</h4>
+                    <div class="upcoming-events-list"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dark Footer -->
+    <footer class="site-footer">
         <div class="social-media">
             {% for social in data.social_media %}
             <a href="{{ social.link }}" target="_blank" class="social-icon">
@@ -188,21 +245,22 @@
             </a>
             {% endfor %}
         </div>
-
-        <!-- Legal Footer -->
-        <div class="legal-footer">
-            <a href="/terms">Terms</a> |
+        <div class="footer-legal">
+            Made with love in Tel Aviv ·
+            <a href="/terms">Terms</a> ·
             <a href="/privacy">Privacy</a>
         </div>
+    </footer>
 
-        <!-- Spacer for bottom nav -->
-        <div class="bottom-nav-spacer"></div>
-    </div>
+    <!-- Spacer for bottom nav -->
+    <div class="bottom-nav-spacer"></div>
 
-    <!-- Sticky Bottom Navigation -->
+    <!-- =========================================
+         BOTTOM NAVIGATION
+         ========================================= -->
     {% include 'components/bottom_nav.html' %}
 
-    <!-- PWA Service Worker Registration -->
+    <!-- Scripts -->
     <script>
         function showComingSoon(event) {
             event.preventDefault();
@@ -212,85 +270,90 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
             });
         }
 
-        // Smooth scroll to top
-        function scrollToTop(event) {
-            event.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // Hero parallax / fade on scroll
+        (function () {
+            const watermark = document.getElementById('hero-watermark');
+            const heroContent = document.getElementById('hero-content');
+            const scrollCue = document.getElementById('hero-scroll-cue');
 
-        // Active state for bottom nav
+            function onScroll() {
+                const st = window.pageYOffset;
+                if (watermark) {
+                    watermark.style.transform = 'translate3d(0,' + (st * 0.12) + 'px,0)';
+                }
+                const fade = Math.max(0, 1 - st / 460);
+                if (heroContent) heroContent.style.opacity = fade;
+                if (scrollCue) scrollCue.style.opacity = fade;
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+        })();
+
+        // Reveal on scroll
+        (function () {
+            const els = document.querySelectorAll('[data-reveal]');
+            if (!els.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('is-visible');
+                        observer.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+
+            els.forEach(el => observer.observe(el));
+        })();
+
+        // Bottom nav active state on scroll
         document.addEventListener('DOMContentLoaded', function () {
             const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
             const sections = document.querySelectorAll('section[id]');
 
-            // Handle hash navigation for bottom nav
             bottomNavItems.forEach(item => {
                 item.addEventListener('click', function (e) {
-                    if (this.getAttribute('href').startsWith('#')) {
+                    const href = this.getAttribute('href');
+                    if (href && href.startsWith('#')) {
                         e.preventDefault();
-                        const targetId = this.getAttribute('href');
-
-                        // Remove active from all
                         bottomNavItems.forEach(nav => nav.classList.remove('active'));
-
-                        // Add active to clicked
                         this.classList.add('active');
-
-                        // Scroll to section
-                        if (targetId !== '#') {
-                            const targetSection = document.querySelector(targetId);
-                            if (targetSection) {
-                                targetSection.scrollIntoView({ behavior: 'smooth' });
-                            }
+                        if (href !== '#') {
+                            const target = document.querySelector(href);
+                            if (target) target.scrollIntoView({ behavior: 'smooth' });
                         }
                     }
                 });
             });
 
-            // Update active state on scroll
             window.addEventListener('scroll', () => {
                 let current = '';
                 sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    const sectionHeight = section.clientHeight;
-                    if (window.pageYOffset >= sectionTop - 200) {
+                    if (window.pageYOffset >= section.offsetTop - 200) {
                         current = section.getAttribute('id');
                     }
                 });
 
-                // If near top, set home as active
                 if (window.pageYOffset < 300) {
                     bottomNavItems.forEach(item => {
                         item.classList.remove('active');
-                        if (item.getAttribute('href') === '#') {
-                            item.classList.add('active');
-                        }
+                        if (item.getAttribute('href') === '#') item.classList.add('active');
                     });
                 } else if (current) {
                     bottomNavItems.forEach(item => {
                         item.classList.remove('active');
-                        if (item.getAttribute('href') === '#' + current) {
-                             item.classList.add('active');
-                        }
+                        if (item.getAttribute('href') === '#' + current) item.classList.add('active');
                     });
                 }
             });
         });
     </script>
-    <script>
-        document.querySelectorAll('.country-card[data-bg]').forEach(function (el) {
-            el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
-        });
-    </script>
+
+    <!-- Calendar data + script -->
     <script>
         const POPUP_EVENTS = {{ data.popups | tojson | safe }};
     </script>

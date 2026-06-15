@@ -3,7 +3,7 @@
 data = {
     "slogan": "Everything new in Tel Aviv before everyone else, Happy Hours, and curated Foodie Maps for 8+ countries around the world.",
     "community": {
-        "title": "Community Insider",
+        "title": "Ofoodiez Insider",
         "description": "Join our WhatsApp group to get the latest updates, secret deals, and new resturants and Pop Ups in TLV!",
         "link": "https://chat.whatsapp.com/KC3Dxo3Y9xZFHBUuI0WeAp?s=cl&p=i&ilr=1", 
         "link_text": "Join WhatsApp Group"
