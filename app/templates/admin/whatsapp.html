@@ -6,13 +6,13 @@
 <style>
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 26px;
     }
     .stat-card {
         background: white;
-        padding: 25px;
+        padding: 20px;
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         display: flex;
@@ -20,56 +20,30 @@
         align-items: center;
         text-align: center;
     }
-    .stat-card i {
-        font-size: 2.5rem;
-        color: var(--accent-color);
-        margin-bottom: 15px;
+    .stat-card i { font-size: 2rem; color: var(--accent-color); margin-bottom: 10px; }
+    .stat-value { font-size: 2.1rem; font-weight: 800; color: var(--sidebar-bg); }
+    .stat-label { font-size: 0.95rem; color: #666; font-weight: 600; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .tab-btn {
+        background: #fff; border: 1px solid #e3d6cd; color: var(--sidebar-bg);
+        padding: 9px 18px; border-radius: 22px; cursor: pointer; font-weight: 600;
+        font-family: inherit; font-size: 0.95rem;
     }
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--sidebar-bg);
-        margin-bottom: 5px;
-    }
-    .stat-label {
-        font-size: 1.1rem;
-        color: #666;
-        font-weight: 600;
-    }
-    
-    .dashboard-section {
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
+    .tab-btn.active { background: var(--sidebar-bg); color: #fff; border-color: var(--sidebar-bg); }
+
+    .tab-section {
+        background: white; padding: 22px; border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 30px;
     }
-    .dashboard-section h3 {
-        margin-bottom: 20px;
-        color: var(--sidebar-bg);
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 10px;
+    .tab-section h3 { margin-bottom: 16px; color: var(--sidebar-bg); }
+
+    button.act {
+        background: var(--sidebar-bg); color: #fff; border: none; padding: 5px 12px;
+        border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 600;
     }
-    
-    .companies-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        max-height: 200px;
-        overflow-y: auto;
-        padding: 10px;
-        background: #fafafa;
-        border-radius: 8px;
-        border: 1px solid #eee;
-    }
-    .company-badge {
-        background: var(--sidebar-bg);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
+    button.act.danger { background: #e74c3c; }
+    button.act.ok { background: #2e7d32; }
 </style>
 {% endblock %}
 
@@ -79,69 +53,172 @@
 </div>
 
 <div class="stats-container">
-    <div class="stat-card">
-        <i class="fas fa-comments"></i>
-        <div class="stat-value" id="active-chats">...</div>
-        <div class="stat-label">Active Chats Today</div>
-    </div>
-    <div class="stat-card">
-        <i class="fas fa-building"></i>
-        <div class="stat-value" id="total-companies">...</div>
-        <div class="stat-label">Total Companies in DB</div>
-    </div>
+    <div class="stat-card"><i class="fas fa-comments"></i><div class="stat-value" id="s-chats">…</div><div class="stat-label">Active chats today</div></div>
+    <div class="stat-card"><i class="fas fa-building"></i><div class="stat-value" id="s-companies">…</div><div class="stat-label">Companies</div></div>
+    <div class="stat-card"><i class="fas fa-user-tie"></i><div class="stat-value" id="s-advocates">…</div><div class="stat-label">Active advocates</div></div>
+    <div class="stat-card"><i class="fas fa-users"></i><div class="stat-value" id="s-candidates">…</div><div class="stat-label">Candidates</div></div>
+    <div class="stat-card"><i class="fas fa-paper-plane"></i><div class="stat-value" id="s-applications">…</div><div class="stat-label">Applications</div></div>
+    <div class="stat-card"><i class="fas fa-clipboard-list"></i><div class="stat-value" id="s-requests">…</div><div class="stat-label">Open backfill requests</div></div>
 </div>
 
-<div class="dashboard-section">
-    <h3>Registered Companies</h3>
-    <div class="companies-list" id="companies-container">
-        <!-- Badges will be inserted here -->
-    </div>
+<div class="tabs">
+    <button class="tab-btn" data-tab="companies">Companies</button>
+    <button class="tab-btn" data-tab="advocates">Advocates</button>
+    <button class="tab-btn" data-tab="candidates">Candidates</button>
+    <button class="tab-btn" data-tab="applications">Applications &amp; referrals</button>
+    <button class="tab-btn" data-tab="requests">Backfill requests</button>
 </div>
 
-<div class="dashboard-section">
-    <h3>Advocates Table</h3>
-    <div id="advocates-table"></div>
-</div>
-
+<div class="tab-section" id="section-companies" style="display:none;"><h3>Companies</h3><div id="t-companies"></div></div>
+<div class="tab-section" id="section-advocates" style="display:none;"><h3>Advocates (employees)</h3><div id="t-advocates"></div></div>
+<div class="tab-section" id="section-candidates" style="display:none;"><h3>Candidates</h3><div id="t-candidates"></div></div>
+<div class="tab-section" id="section-applications" style="display:none;"><h3>Applications &amp; referrals</h3><div id="t-applications"></div></div>
+<div class="tab-section" id="section-requests" style="display:none;"><h3>Backfill requests (companies we don't serve yet)</h3><div id="t-requests"></div></div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Fetch stats
-    fetch("{{ url_for('admin.get_whatsapp_stats') }}")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('active-chats').textContent = data.active_chats_today;
-            document.getElementById('total-companies').textContent = data.companies_count;
-            
-            const container = document.getElementById('companies-container');
-            if (data.companies && data.companies.length > 0) {
-                data.companies.forEach(company => {
-                    const span = document.createElement('span');
-                    span.className = 'company-badge';
-                    span.textContent = company.name;
-                    container.appendChild(span);
-                });
-            } else {
-                container.innerHTML = '<span style="color: #888;">No companies found.</span>';
-            }
-        });
+// ---- stat cards ----
+fetch("{{ url_for('admin.get_whatsapp_stats') }}").then(r => r.json()).then(d => {
+    document.getElementById('s-chats').textContent = d.active_chats_today;
+    document.getElementById('s-companies').textContent = d.companies_count;
+    document.getElementById('s-advocates').textContent = d.advocates_count;
+    document.getElementById('s-candidates').textContent = d.candidates_count;
+    document.getElementById('s-applications').textContent = d.applications_count;
+    document.getElementById('s-requests').textContent = d.open_requests_count;
+});
 
-    // Initialize Tabulator
-    var table = new Tabulator("#advocates-table", {
-        layout: "fitColumns",
-        ajaxURL: "{{ url_for('admin.get_whatsapp_advocates') }}",
-        history: true,
-        pagination: "local",
-        paginationSize: 20,
-        columns: [
-            { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
-            { title: "Name", field: "name", headerFilter: "input", minWidth: 150 },
-            { title: "Company", field: "company", headerFilter: "input", minWidth: 150 },
-            { title: "Number", field: "number", headerFilter: "input", minWidth: 150 },
-            { title: "Title", field: "title", headerFilter: "input", minWidth: 150 },
-            { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 100 }
-        ]
-    });
+// ---- helpers ----
+function linkCell(cell) {
+    var v = cell.getValue();
+    return v ? '<a href="' + v + '" target="_blank" rel="noopener">link ↗</a>' : '';
+}
+function jobCell(cell) {
+    var v = cell.getValue() || '';
+    return v.indexOf('http') === 0 ? '<a href="' + v + '" target="_blank" rel="noopener">' + v + '</a>' : v;
+}
+function act(url, body, msg, table) {
+    Swal.fire({ title: 'Are you sure?', icon: 'question', showCancelButton: true, confirmButtonText: 'Yes' })
+        .then(function (res) {
+            if (!res.isConfirmed) return;
+            fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+                .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+                .then(function () { table.replaceData(); Swal.fire({ icon: 'success', title: msg, timer: 1000, showConfirmButton: false }); })
+                .catch(function () { Swal.fire({ icon: 'error', title: 'Failed' }); });
+        });
+}
+
+// ---- table definitions ----
+var COLS = {
+    companies: [
+        { title: "Company", field: "name", headerFilter: "input", minWidth: 180 },
+        { title: "Advocates", field: "total_advocates", width: 100 },
+        { title: "via Email", field: "email_advocates", width: 100 },
+        { title: "via Link", field: "link_advocates", width: 100 },
+        { title: "Serviceable", field: "serviceable", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
+        { title: "Created", field: "created", width: 150 }
+    ],
+    advocates: [
+        { title: "Name", field: "name", headerFilter: "input", minWidth: 150 },
+        { title: "Company", field: "company", headerFilter: "input", minWidth: 140 },
+        { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
+        { title: "Method", field: "method", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
+        { title: "Work email", field: "email", headerFilter: "input", minWidth: 170 },
+        { title: "Referral link", field: "referral_link", formatter: linkCell, width: 110 },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
+        { title: "Joined", field: "created", width: 150 },
+        {
+            title: "Actions", headerSort: false, width: 120,
+            formatter: function (c) {
+                var d = c.getRow().getData();
+                return d.status === 'active' ? '<button class="act danger">Deactivate</button>' : '<button class="act ok">Activate</button>';
+            },
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                act('/admin/api/whatsapp/advocates/' + d.id, { status: d.status === 'active' ? 'inactive' : 'active' }, 'Updated', c.getTable());
+            }
+        }
+    ],
+    candidates: [
+        { title: "Name", field: "name", headerFilter: "input", minWidth: 150 },
+        { title: "Email", field: "email", headerFilter: "input", minWidth: 180 },
+        { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
+        { title: "Applications", field: "applications", width: 120 },
+        { title: "Advocate?", field: "is_advocate", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
+        { title: "Blocked", field: "blocked", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
+        { title: "Joined", field: "joined", width: 150 },
+        {
+            title: "Actions", headerSort: false, width: 110,
+            formatter: function (c) {
+                var d = c.getRow().getData();
+                return d.blocked === 'Yes' ? '<button class="act ok">Unblock</button>' : '<button class="act danger">Block</button>';
+            },
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                act('/admin/api/whatsapp/users/' + d.id, { is_blocked: d.blocked !== 'Yes' }, 'Updated', c.getTable());
+            }
+        }
+    ],
+    applications: [
+        { title: "When", field: "created", width: 150 },
+        { title: "Candidate", field: "candidate", headerFilter: "input", minWidth: 140 },
+        { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
+        { title: "Company", field: "company", headerFilter: "input", minWidth: 140 },
+        { title: "Role", field: "role", headerFilter: "input", minWidth: 140 },
+        { title: "Job link / details", field: "job", formatter: jobCell, minWidth: 180 },
+        { title: "Résumé", field: "resume", width: 130 },
+        { title: "Emailed", field: "emailed", width: 90 },
+        { title: "Approved", field: "approved", width: 100 },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 }
+    ],
+    requests: [
+        { title: "When", field: "created", width: 150 },
+        { title: "Company searched", field: "company", headerFilter: "input", minWidth: 180 },
+        { title: "Reason", field: "reason", headerFilter: "select", headerFilterParams: { values: true }, width: 150 },
+        { title: "Candidate", field: "candidate", headerFilter: "input", minWidth: 140 },
+        { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
+        {
+            title: "Actions", headerSort: false, width: 140,
+            formatter: function (c) {
+                var d = c.getRow().getData();
+                return d.status === 'open' ? '<button class="act ok">Mark handled</button>' : '<button class="act">Reopen</button>';
+            },
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                act('/admin/api/whatsapp/requests/' + d.id, { status: d.status === 'open' ? 'handled' : 'open' }, 'Updated', c.getTable());
+            }
+        }
+    ]
+};
+var URLS = {
+    companies: "{{ url_for('admin.get_whatsapp_companies') }}",
+    advocates: "{{ url_for('admin.get_whatsapp_advocates') }}",
+    candidates: "{{ url_for('admin.get_whatsapp_candidates') }}",
+    applications: "{{ url_for('admin.get_whatsapp_applications') }}",
+    requests: "{{ url_for('admin.get_whatsapp_requests') }}"
+};
+
+// ---- tabs (lazy-init Tabulator so hidden tables size correctly) ----
+var TABLES = {};
+function showTab(name) {
+    document.querySelectorAll('.tab-section').forEach(function (s) { s.style.display = 'none'; });
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.getElementById('section-' + name).style.display = 'block';
+    document.querySelector('.tab-btn[data-tab="' + name + '"]').classList.add('active');
+    if (!TABLES[name]) {
+        TABLES[name] = new Tabulator("#t-" + name, {
+            layout: "fitColumns", ajaxURL: URLS[name],
+            pagination: "local", paginationSize: 25, columns: COLS[name],
+            placeholder: "No data yet"
+        });
+    } else {
+        TABLES[name].redraw(true);
+    }
+}
+document.querySelectorAll('.tab-btn').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+});
+showTab('companies');  // default tab
 </script>
 {% endblock %}

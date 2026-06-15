@@ -1,7 +1,10 @@
 from datetime import datetime
 from flask import jsonify, request
 from database.models import db, HappyHourPlace, PopupEvent
-from whatsapp_bot.models import WaConversation, WaCompany, WaAdvocate, WaUser
+from whatsapp_bot.models import (
+    WaConversation, WaCompany, WaAdvocate, WaUser,
+    WaApplication, WaApplicationRecipient, WaCompanyRequest,
+)
 from . import admin_bp
 from .auth import login_required
 
@@ -189,49 +192,192 @@ def delete_event(id):
 
 # --- WhatsApp Bot API ---
 
+def _fmt(dt):
+    return dt.strftime("%Y-%m-%d %H:%M") if dt else ""
+
+
+def _name(usr):
+    return (f"{usr.first_name or ''} {usr.last_name or ''}".strip()
+            or usr.profile_name or "Unknown")
+
+
 @admin_bp.route('/api/whatsapp/stats', methods=['GET'])
 @login_required
 def get_whatsapp_stats():
-    # Active chats today (conversations updated today)
     start_of_day = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    active_chats_today = WaConversation.query.filter(WaConversation.updated_at >= start_of_day).count()
-    
-    # Companies
-    companies = WaCompany.query.order_by(WaCompany.name).all()
-    companies_count = len(companies)
-    companies_list = [{"id": c.id, "name": c.name} for c in companies]
-    
     return jsonify({
-        "active_chats_today": active_chats_today,
-        "companies_count": companies_count,
-        "companies": companies_list
+        "active_chats_today": WaConversation.query.filter(WaConversation.updated_at >= start_of_day).count(),
+        "companies_count": WaCompany.query.count(),
+        "advocates_count": WaAdvocate.query.filter_by(status="active").count(),
+        "candidates_count": WaUser.query.filter(WaUser.first_name.isnot(None)).count(),
+        "applications_count": WaApplication.query.count(),
+        "open_requests_count": WaCompanyRequest.query.filter_by(status="open").count(),
     })
+
+
+@admin_bp.route('/api/whatsapp/companies', methods=['GET'])
+@login_required
+def get_whatsapp_companies():
+    agg = {}
+    for adv in WaAdvocate.query.filter_by(status="active").all():
+        a = agg.setdefault(adv.company_id, {"email": 0, "link": 0, "total": 0})
+        a["total"] += 1
+        if adv.email:
+            a["email"] += 1
+        if adv.referral_link:
+            a["link"] += 1
+    out = []
+    for c in WaCompany.query.order_by(WaCompany.name).all():
+        a = agg.get(c.id, {"email": 0, "link": 0, "total": 0})
+        out.append({
+            "id": c.id, "name": c.name,
+            "total_advocates": a["total"],
+            "email_advocates": a["email"],
+            "link_advocates": a["link"],
+            "serviceable": "Yes" if a["total"] > 0 else "No",
+            "created": _fmt(c.created_at),
+        })
+    return jsonify(out)
+
 
 @admin_bp.route('/api/whatsapp/advocates', methods=['GET'])
 @login_required
 def get_whatsapp_advocates():
-    # Join WaAdvocate, WaUser, WaCompany
-    results = db.session.query(
-        WaAdvocate, WaUser, WaCompany
-    ).join(
-        WaUser, WaAdvocate.user_id == WaUser.id
-    ).join(
-        WaCompany, WaAdvocate.company_id == WaCompany.id
-    ).all()
-    
+    results = db.session.query(WaAdvocate, WaUser, WaCompany).join(
+        WaUser, WaAdvocate.user_id == WaUser.id).join(
+        WaCompany, WaAdvocate.company_id == WaCompany.id).all()
     advocates = []
     for adv, usr, comp in results:
-        name = usr.profile_name or f"{usr.first_name or ''} {usr.last_name or ''}".strip()
-        if not name:
-            name = "Unknown"
-            
+        if adv.referral_link and adv.email:
+            method = "email + link"
+        elif adv.referral_link:
+            method = "link"
+        elif adv.email:
+            method = "email"
+        else:
+            method = "—"
         advocates.append({
             "id": adv.id,
-            "name": name,
+            "name": _name(usr),
             "company": comp.name,
             "number": usr.phone,
+            "method": method,
+            "email": adv.email or "",
+            "referral_link": adv.referral_link or "",
             "title": adv.role_title or "",
-            "status": adv.status
+            "status": adv.status,
+            "created": _fmt(adv.created_at),
         })
-        
     return jsonify(advocates)
+
+
+@admin_bp.route('/api/whatsapp/candidates', methods=['GET'])
+@login_required
+def get_whatsapp_candidates():
+    app_counts = {}
+    for (uid,) in db.session.query(WaApplication.candidate_user_id).all():
+        app_counts[uid] = app_counts.get(uid, 0) + 1
+    advocate_uids = {uid for (uid,) in db.session.query(WaAdvocate.user_id).distinct().all()}
+    out = []
+    for u in WaUser.query.filter(WaUser.first_name.isnot(None)).order_by(WaUser.created_at.desc()).all():
+        out.append({
+            "id": u.id,
+            "name": _name(u),
+            "email": u.email or "",
+            "number": u.phone,
+            "applications": app_counts.get(u.id, 0),
+            "is_advocate": "Yes" if u.id in advocate_uids else "No",
+            "blocked": "Yes" if u.is_blocked else "No",
+            "joined": _fmt(u.created_at),
+        })
+    return jsonify(out)
+
+
+@admin_bp.route('/api/whatsapp/applications', methods=['GET'])
+@login_required
+def get_whatsapp_applications():
+    rec_agg = {}
+    for r in WaApplicationRecipient.query.all():
+        a = rec_agg.setdefault(r.application_id, {"emailed": 0, "approved": 0})
+        a["emailed"] += 1
+        if r.approved_at:
+            a["approved"] += 1
+    results = db.session.query(WaApplication, WaUser, WaCompany).join(
+        WaUser, WaApplication.candidate_user_id == WaUser.id).join(
+        WaCompany, WaApplication.company_id == WaCompany.id).order_by(
+        WaApplication.created_at.desc()).all()
+    out = []
+    for app_row, usr, comp in results:
+        ra = rec_agg.get(app_row.id, {"emailed": 0, "approved": 0})
+        job = app_row.job_posting_url or (("desc: " + app_row.job_description) if app_row.job_description else "")
+        out.append({
+            "id": app_row.id,
+            "candidate": _name(usr),
+            "number": usr.phone,
+            "company": comp.name,
+            "role": app_row.role_query or "",
+            "job": job,
+            "resume": app_row.resume_filename or "",
+            "emailed": ra["emailed"],
+            "approved": ra["approved"],
+            "status": app_row.status,
+            "created": _fmt(app_row.created_at),
+        })
+    return jsonify(out)
+
+
+@admin_bp.route('/api/whatsapp/requests', methods=['GET'])
+@login_required
+def get_whatsapp_requests():
+    results = db.session.query(WaCompanyRequest, WaUser).join(
+        WaUser, WaCompanyRequest.candidate_user_id == WaUser.id).order_by(
+        WaCompanyRequest.created_at.desc()).all()
+    out = []
+    for req, usr in results:
+        out.append({
+            "id": req.id,
+            "company": req.company_name_raw,
+            "reason": req.reason,
+            "candidate": _name(usr),
+            "number": usr.phone,
+            "status": req.status,
+            "created": _fmt(req.created_at),
+        })
+    return jsonify(out)
+
+
+# --- WhatsApp Bot: light actions (DB-only status toggles) ---
+
+@admin_bp.route('/api/whatsapp/advocates/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_advocate(id):
+    adv = WaAdvocate.query.get_or_404(id)
+    status = (request.json or {}).get("status")
+    if status not in ("active", "inactive", "pending"):
+        return jsonify({"error": "invalid status"}), 400
+    adv.status = status
+    db.session.commit()
+    return jsonify({"id": adv.id, "status": adv.status})
+
+
+@admin_bp.route('/api/whatsapp/requests/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_request(id):
+    req = WaCompanyRequest.query.get_or_404(id)
+    status = (request.json or {}).get("status")
+    if status not in ("open", "handled"):
+        return jsonify({"error": "invalid status"}), 400
+    req.status = status
+    db.session.commit()
+    return jsonify({"id": req.id, "status": req.status})
+
+
+@admin_bp.route('/api/whatsapp/users/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_user(id):
+    usr = WaUser.query.get_or_404(id)
+    data = request.json or {}
+    if "is_blocked" in data:
+        usr.is_blocked = bool(data["is_blocked"])
+        db.session.commit()
+    return jsonify({"id": usr.id, "is_blocked": usr.is_blocked})
