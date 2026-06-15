@@ -135,6 +135,29 @@ def send_referral_confirmed_email(to_email, candidate_name, advocate_name, compa
     return _post(payload)
 
 
+def send_company_available_email(to_email, candidate_name, company_name):
+    """Tell a candidate that a company they asked about is now serviceable (has an
+    advocate). Plain text + personal subject so it lands in Primary. Best-effort."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+    text_body = (
+        f"Hey {candidate_name or 'there'}! 😊\n\n"
+        f"Good news — {company_name} is now on Ofoodiez Referrals, and we have someone "
+        f"there who can refer you! 🎉\n\n"
+        f"Just message us on WhatsApp and ask for a referral to {company_name} to get started.\n\n"
+        f"— The Ofoodiez team"
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez Referrals"},
+        "subject": f"{company_name} is now on Ofoodiez — ask for your referral",
+        "content": [{"type": "text/plain", "value": text_body}],
+    }
+    return _post(payload)
+
+
 def send_company_request_email(company_name, candidate_name, candidate_phone,
                                candidate_email, reason):
     """Notify ops (WA_OPS_EMAIL, default contact@ofoodiez.com) that a candidate
