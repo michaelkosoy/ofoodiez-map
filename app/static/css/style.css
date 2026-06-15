@@ -806,7 +806,7 @@ nav.bottom-nav.map-bottom-nav {
     }
 
     .sidebar-content {
-        padding: 4px 12px 20px 12px;
+        padding: 4px 12px 90px 12px;
         overflow-y: auto;
         background: rgba(255, 255, 255, 0.95);
     }
@@ -870,15 +870,10 @@ nav.bottom-nav.map-bottom-nav {
     }
 
     .sidebar-content {
-        padding: 3px 10px 20px 10px;
+        padding: 3px 10px 90px 10px;
     }
 
-    /* When collapsed, restrict content height to fit visible area */
-    .sidebar:not(.expanded) .sidebar-content {
-        max-height: calc(260px - 110px);
-        /* 260px visible - approx header height */
-        overflow-y: auto;
-    }
+
 
     #category-filter,
     .choices-days-filter .choices__inner,
