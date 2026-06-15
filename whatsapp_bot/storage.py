@@ -64,6 +64,26 @@ def upload_resume(user_id, content, content_type="application/pdf", ext=".pdf"):
         return None
 
 
+def download_object(path):
+    """Fetch a private Storage object's bytes using the service-role key.
+    Returns (content, content_type) or (None, None)."""
+    base = WaConfig.SUPABASE_URL
+    key = WaConfig.SUPABASE_SERVICE_ROLE_KEY
+    if not base or not key or not path:
+        return None, None
+    try:
+        resp = requests.get(
+            f"{base.rstrip('/')}/storage/v1/object/{WaConfig.SUPABASE_RESUME_BUCKET}/{path}",
+            headers={"Authorization": f"Bearer {key}"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+    except Exception:
+        logger.exception("wa: failed to download résumé object")
+        return None, None
+
+
 def signed_url(path, expires=3600):
     """Create a short-lived signed download URL for a private Storage object.
     Returns None if Storage isn't configured / the object/path is missing."""

@@ -170,10 +170,14 @@ var COLS = {
             cellClick: function (e, c) {
                 var d = c.getRow().getData();
                 editModal('Edit advocate', [
+                    { key: 'first_name', label: 'First name', value: d.first_name },
+                    { key: 'last_name', label: 'Last name', value: d.last_name },
+                    { key: 'phone', label: 'WhatsApp number', value: d.number },
+                    { key: 'company', label: 'Company', value: d.company },
                     { key: 'email', label: 'Work email', value: d.email },
                     { key: 'referral_link', label: 'Referral link', value: d.referral_link },
                     { key: 'role_title', label: 'Role title', value: d.title },
-                    { key: 'company', label: 'Company', value: d.company }
+                    { key: 'status', label: 'Status (active / inactive / pending)', value: d.status }
                 ], function (v) { putSave('/admin/api/whatsapp/advocates/' + d.id, v, c.getTable()); });
             }
         }
@@ -204,7 +208,8 @@ var COLS = {
                 editModal('Edit candidate', [
                     { key: 'first_name', label: 'First name', value: d.first_name },
                     { key: 'last_name', label: 'Last name', value: d.last_name },
-                    { key: 'email', label: 'Email', value: d.email }
+                    { key: 'email', label: 'Email', value: d.email },
+                    { key: 'phone', label: 'WhatsApp number', value: d.number }
                 ], function (v) { putSave('/admin/api/whatsapp/users/' + d.id, v, c.getTable()); });
             }
         }
@@ -224,18 +229,24 @@ var COLS = {
             },
             cellClick: function (e, c) {
                 var d = c.getRow().getData();
-                if (!d.resume) return;
-                fetch('/admin/api/whatsapp/applications/' + d.id + '/cv')
-                    .then(function (r) { return r.json(); })
-                    .then(function (j) {
-                        if (j.url) window.open(j.url, '_blank', 'noopener');
-                        else Swal.fire({ icon: 'info', title: 'CV not available', text: j.error || '' });
-                    });
+                if (d.resume) window.open('/admin/api/whatsapp/applications/' + d.id + '/cv', '_blank', 'noopener');
             }
         },
         { title: "Emailed", field: "emailed", width: 90 },
         { title: "Approved", field: "approved", width: 100 },
-        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 }
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
+        {
+            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                editModal('Edit application', [
+                    { key: 'role', label: 'Role', value: d.role },
+                    { key: 'job_posting_url', label: 'Job link', value: d.job_posting_url },
+                    { key: 'job_description', label: 'Job description', value: d.job_description },
+                    { key: 'status', label: 'Status', value: d.status }
+                ], function (v) { putSave('/admin/api/whatsapp/applications/' + d.id, v, c.getTable()); });
+            }
+        }
     ],
     requests: [
         { title: "When", field: "created", width: 150 },

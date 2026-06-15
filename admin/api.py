@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import jsonify, request
+from flask import jsonify, request, Response
 from database.models import db, HappyHourPlace, PopupEvent
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
@@ -214,6 +214,18 @@ def _resolve_company(name):
     return c
 
 
+def _set_phone(usr, phone):
+    """Update a user's WhatsApp number with a uniqueness guard.
+    Returns an error string, or None on success/no-op."""
+    phone = (phone or "").strip()
+    if not phone or phone == usr.phone:
+        return None
+    if WaUser.query.filter(WaUser.phone == phone, WaUser.id != usr.id).first():
+        return "another user already has that WhatsApp number"
+    usr.phone = phone
+    return None
+
+
 @admin_bp.route('/api/whatsapp/stats', methods=['GET'])
 @login_required
 def get_whatsapp_stats():
@@ -272,6 +284,8 @@ def get_whatsapp_advocates():
         advocates.append({
             "id": adv.id,
             "name": _name(usr),
+            "first_name": usr.first_name or "",
+            "last_name": usr.last_name or "",
             "company": comp.name,
             "number": usr.phone,
             "method": method,
@@ -332,6 +346,8 @@ def get_whatsapp_applications():
             "company": comp.name,
             "role": app_row.role_query or "",
             "job": job,
+            "job_posting_url": app_row.job_posting_url or "",
+            "job_description": app_row.job_description or "",
             "resume": app_row.resume_filename or "",
             "emailed": ra["emailed"],
             "approved": ra["approved"],
@@ -382,6 +398,17 @@ def update_whatsapp_advocate(id):
         c = _resolve_company(data["company"])
         if c:
             adv.company_id = c.id
+    # underlying user fields (name + WhatsApp number)
+    usr = WaUser.query.get(adv.user_id)
+    if usr is not None:
+        if "first_name" in data:
+            usr.first_name = (data["first_name"] or "").strip() or None
+        if "last_name" in data:
+            usr.last_name = (data["last_name"] or "").strip() or None
+        if "phone" in data:
+            err = _set_phone(usr, data["phone"])
+            if err:
+                return jsonify({"error": err}), 400
     db.session.commit()
     return jsonify({"id": adv.id, "status": adv.status})
 
@@ -427,8 +454,29 @@ def update_whatsapp_user(id):
         usr.first_name = (data["first_name"] or "").strip() or None
     if "last_name" in data:
         usr.last_name = (data["last_name"] or "").strip() or None
+    if "phone" in data:
+        err = _set_phone(usr, data["phone"])
+        if err:
+            return jsonify({"error": err}), 400
     db.session.commit()
     return jsonify({"id": usr.id, "is_blocked": usr.is_blocked, "email": usr.email})
+
+
+@admin_bp.route('/api/whatsapp/applications/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_application(id):
+    ap = WaApplication.query.get_or_404(id)
+    data = request.json or {}
+    if "role" in data:
+        ap.role_query = (data["role"] or "").strip() or None
+    if "job_posting_url" in data:
+        ap.job_posting_url = (data["job_posting_url"] or "").strip() or None
+    if "job_description" in data:
+        ap.job_description = (data["job_description"] or "").strip() or None
+    if data.get("status"):
+        ap.status = data["status"].strip()
+    db.session.commit()
+    return jsonify({"id": ap.id, "status": ap.status})
 
 
 @admin_bp.route('/api/whatsapp/applications/<int:id>/cv', methods=['GET'])
@@ -438,10 +486,16 @@ def whatsapp_application_cv(id):
     app_row = WaApplication.query.get_or_404(id)
     path = app_row.resume_path or ""
     if not path:
-        return jsonify({"error": "No CV on file for this application."}), 404
+        return "No CV on file for this application.", 404
+    # Fetch the file server-side (with backend credentials) and stream it to the
+    # already-logged-in admin, so the browser never hits a Twilio/Supabase auth prompt.
     if path.startswith("http"):
-        return jsonify({"url": path})  # legacy fallback (e.g. Twilio media URL)
-    url = storage.signed_url(path)
-    if not url:
-        return jsonify({"error": "CV not available — Supabase Storage isn't configured on the bot service, or the file is missing."}), 404
-    return jsonify({"url": url})
+        content, ctype = storage.download_twilio_media(path)
+    else:
+        content, ctype = storage.download_object(path)
+    if content is None:
+        return ("Couldn't fetch the CV — the link may have expired, or Supabase "
+                "Storage isn't configured on the bot service."), 502
+    filename = app_row.resume_filename or "cv.pdf"
+    return Response(content, mimetype=ctype or "application/octet-stream",
+                    headers={"Content-Disposition": f'inline; filename="{filename}"'})
