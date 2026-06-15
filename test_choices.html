@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+</head>
+<body>
+<select id="myselect"><option value="1">1</option></select>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+const select = document.getElementById('myselect');
+const choices = new Choices(select);
+select.addEventListener('showDropdown', () => console.log('showDropdown fired'));
+</script>
+</body>
+</html>

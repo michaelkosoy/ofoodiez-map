@@ -18,6 +18,131 @@ function calcDistance(lat1, lng1, lat2, lng2) {
 }
 
 // =========================================
+// MOBILE FILTERS FUNCTIONALITY
+// =========================================
+
+function setupMobileFiltersLayout() {
+    const isMobile = window.innerWidth <= 768;
+    const dest = document.getElementById('mobile-filters-dest');
+    const source = document.getElementById('map-filters-card').querySelector('.filters-wrapper');
+    const togglesRow = document.getElementById('toggles-row-wrapper');
+
+    if (isMobile && dest && togglesRow) {
+        // Move extra toggles to modal
+        dest.appendChild(togglesRow);
+    } else if (!isMobile && source && togglesRow) {
+        // Move them back to main card
+        const moreBtn = document.getElementById('mobile-more-filters-btn');
+        if (moreBtn) {
+            source.insertBefore(togglesRow, moreBtn);
+        } else {
+            source.appendChild(togglesRow);
+        }
+    }
+}
+
+// Run layout setup on load and resize
+document.addEventListener('DOMContentLoaded', () => {
+    setupMobileFiltersLayout();
+
+    // Javascript dropdown positioning logic removed in favor of native CSS behavior
+
+    // Hide dropdowns on scroll to prevent detachment
+    const filtersCard = document.getElementById('map-filters-card');
+    if (filtersCard) {
+        filtersCard.addEventListener('scroll', () => {
+            if (typeof choicesInstance !== 'undefined' && choicesInstance) choicesInstance.hideDropdown();
+            if (typeof daysChoicesInstance !== 'undefined' && daysChoicesInstance) daysChoicesInstance.hideDropdown();
+        });
+    }
+});
+window.addEventListener('resize', () => {
+    // Debounce the layout change slightly
+    clearTimeout(window.layoutResizeTimer);
+    window.layoutResizeTimer = setTimeout(setupMobileFiltersLayout, 100);
+});
+
+window.toggleMoreFilters = () => {
+    const modal = document.getElementById('more-filters-modal');
+    if (!modal) return;
+
+    if (modal.classList.contains('show')) {
+        modal.classList.remove('show');
+        setTimeout(() => { modal.style.display = 'none'; }, 300); // Wait for transition
+    } else {
+        modal.style.display = 'block';
+        // Force reflow
+        void modal.offsetWidth;
+        modal.classList.add('show');
+    }
+};
+
+window.clearAllFilters = () => {
+    // Reset category
+    if (typeof choicesInstance !== 'undefined' && choicesInstance) {
+        choicesInstance.setChoiceByValue('all');
+    }
+    if (typeof modalChoicesInstance !== 'undefined' && modalChoicesInstance) {
+        modalChoicesInstance.setChoiceByValue('all');
+    }
+
+    // Reset days
+    if (typeof daysChoicesInstance !== 'undefined' && daysChoicesInstance) {
+        daysChoicesInstance.setChoiceByValue('all');
+    }
+    if (typeof modalDaysChoicesInstance !== 'undefined' && modalDaysChoicesInstance) {
+        modalDaysChoicesInstance.setChoiceByValue('all');
+    }
+
+    // Reset city
+    if (typeof cityChoicesInstance !== 'undefined' && cityChoicesInstance) {
+        cityChoicesInstance.setChoiceByValue('all');
+    }
+    if (typeof modalCityChoicesInstance !== 'undefined' && modalCityChoicesInstance) {
+        modalCityChoicesInstance.setChoiceByValue('all');
+    }
+
+    // Reset toggles
+    const verifiedFilter = document.getElementById('verified-filter');
+    if (verifiedFilter) verifiedFilter.checked = false;
+
+    const kosherFilter = document.getElementById('kosher-filter');
+    if (kosherFilter) kosherFilter.checked = false;
+
+    // Reset sort to discount
+    toggleSortMode('discount');
+
+    // Update badge and apply
+    updateFilterBadge();
+    applyAllFilters();
+};
+
+window.updateFilterBadge = () => {
+    let count = 0;
+
+    const categorySelect = document.getElementById('category-filter');
+    if (categorySelect && categorySelect.value !== 'all') count++;
+
+    const daysSelect = document.getElementById('days-filter');
+    if (daysSelect && daysSelect.value !== 'all') count++;
+
+    const citySelect = document.getElementById('city-filter');
+    if (citySelect && citySelect.value !== 'all') count++;
+
+    const verifiedFilter = document.getElementById('verified-filter');
+    if (verifiedFilter && verifiedFilter.checked) count++;
+
+    const kosherFilter = document.getElementById('kosher-filter');
+    if (kosherFilter && kosherFilter.checked) count++;
+
+    const badge = document.getElementById('filter-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+};
+
+// =========================================
 // SEARCH FUNCTIONALITY
 // =========================================
 
@@ -223,6 +348,28 @@ function fetchPlaces() {
         .then(response => response.json())
         .then(data => {
             allPlaces = data;
+
+            // Normalize cities to avoid duplicates (e.g., 'kiryat Ono' vs 'Kiryat Ono')
+            allPlaces.forEach(p => {
+                if (p.City) {
+                    const c = p.City.trim().toLowerCase();
+                    if (c === 'tel aviv') p.City = 'Tel Aviv';
+                    else if (c === 'kiryat ono') p.City = 'Kiryat Ono';
+                    else if (c === 'rishon letsiyon' || c === 'rishon lezion') p.City = 'Rishon LeZion';
+                    else if (c === "be'er sheva") p.City = "Be'er Sheva";
+                    else if (c === 'ramat hasharon') p.City = 'Ramat HaSharon';
+                    else if (c === 'hefer valley') p.City = 'Hefer Valley';
+                    else if (c === 'savyon') p.City = 'Savyon';
+                    else if (c === 'petah tikva') p.City = 'Petah Tikva';
+                    else if (c === 'kfar saba') p.City = 'Kfar Saba';
+                    else if (c === 'ramat gan') p.City = 'Ramat Gan';
+                    else if (c === 'givatayim') p.City = 'Givatayim';
+                    else if (c === 'hod hasharon') p.City = 'Hod HaSharon';
+                    else if (c === 'jerusalem') p.City = 'Jerusalem';
+                    else p.City = p.City.trim();
+                }
+            });
+
             populateFilter(allPlaces);
             populateDaysFilter();
             populateCityFilter(allPlaces);
@@ -235,7 +382,9 @@ function fetchPlaces() {
 let infoWindow;
 
 let choicesInstance = null;
+let modalChoicesInstance = null;
 let daysChoicesInstance = null;
+let modalDaysChoicesInstance = null;
 let cityChoicesInstance = null;
 
 function populateDaysFilter() {
@@ -262,10 +411,32 @@ function populateDaysFilter() {
             }
         });
 
-        daysSelect.addEventListener('change', () => {
+        const modalDaysSelect = document.getElementById('modal-days-filter');
+        if (modalDaysSelect) {
+            modalDaysChoicesInstance = new Choices(modalDaysSelect, {
+                searchEnabled: false,
+                itemSelectText: '',
+                shouldSort: false,
+                choices: days,
+                classNames: {
+                    containerOuter: 'choices-days-filter',
+                }
+            });
+        }
+
+        daysSelect.addEventListener('change', (e) => {
+            if (modalDaysChoicesInstance) modalDaysChoicesInstance.setChoiceByValue(e.target.value);
             const categorySelect = document.getElementById('category-filter');
             filterPlacesBy(categorySelect.value);
         });
+
+        if (modalDaysSelect) {
+            modalDaysSelect.addEventListener('change', (e) => {
+                if (daysChoicesInstance) daysChoicesInstance.setChoiceByValue(e.target.value);
+                const categorySelect = document.getElementById('category-filter');
+                filterPlacesBy(categorySelect.value);
+            });
+        }
     }
 }
 
@@ -274,11 +445,33 @@ function populateCityFilter(places) {
     const cities = new Set(places.map(p => p.City).filter(c => c && String(c).trim()));
     const sortedCities = Array.from(cities).sort((a, b) => a.localeCompare(b));
 
+    const hebrewCityLabels = {
+        "Tel Aviv": "תל אביב",
+        "Ramat Gan": "רמת גן",
+        "Givatayim": "גבעתיים",
+        "Herzliya": "הרצליה",
+        "Holon": "חולון",
+        "Rishon LeZion": "ראשון לציון",
+        "Petah Tikva": "פתח תקווה",
+        "Bat Yam": "בת ים",
+        "Kfar Saba": "כפר סבא",
+        "Ra'anana": "רעננה",
+        "Hod HaSharon": "הוד השרון",
+        "Netanya": "נתניה",
+        "Jerusalem": "ירושלים",
+        "Haifa": "חיפה",
+        "Savyon": "סביון",
+        "Be'er Sheva": "באר שבע",
+        "Kiryat Ono": "קרית אונו",
+        "Ramat HaSharon": "רמת השרון",
+        "Hefer Valley": "עמק חפר"
+    };
+
     const choicesArray = [
         { value: 'all', label: 'כל הערים', selected: true }
     ];
     sortedCities.forEach(city => {
-        choicesArray.push({ value: city, label: city, selected: false });
+        choicesArray.push({ value: city, label: hebrewCityLabels[city] || city, selected: false });
     });
 
     if (!cityChoicesInstance) {
@@ -292,38 +485,62 @@ function populateCityFilter(places) {
             }
         });
 
-        citySelect.addEventListener('change', () => {
+        const modalCitySelect = document.getElementById('modal-city-filter');
+        if (modalCitySelect) {
+            modalCityChoicesInstance = new Choices(modalCitySelect, {
+                searchEnabled: false,
+                itemSelectText: '',
+                shouldSort: false,
+                choices: choicesArray,
+                classNames: {
+                    containerOuter: 'choices-city-filter',
+                }
+            });
+        }
+
+        citySelect.addEventListener('change', (e) => {
+            if (modalCityChoicesInstance) modalCityChoicesInstance.setChoiceByValue(e.target.value);
             const categorySelect = document.getElementById('category-filter');
             filterPlacesBy(categorySelect.value);
         });
+
+        if (modalCitySelect) {
+            modalCitySelect.addEventListener('change', (e) => {
+                if (cityChoicesInstance) cityChoicesInstance.setChoiceByValue(e.target.value);
+                const categorySelect = document.getElementById('category-filter');
+                filterPlacesBy(categorySelect.value);
+            });
+        }
     } else {
         cityChoicesInstance.clearChoices();
         cityChoicesInstance.setChoices(choicesArray, 'value', 'label', true);
+        if (modalCityChoicesInstance) {
+            modalCityChoicesInstance.clearChoices();
+            modalCityChoicesInstance.setChoices(choicesArray, 'value', 'label', true);
+        }
     }
 }
 
 function populateFilter(places) {
     const filterSelect = document.getElementById('category-filter');
-    const categories = new Set(places.map(p => p.Category).filter(c => c));
+    const categories = new Set(places.map(p => p.Category).filter(c => c && c !== "Not TLV" && c !== "Weekends"));
 
     // Define the priority order
     const priorityOrder = [
+        "Until 18:00",
         "Until 19:00",
         "Until 19:30",
         "Until 20:00",
-        "After 20:00",
-        "Weekends",
-        "Not TLV"
+        "After 20:00"
     ];
 
     // Hebrew mappings
     const hebrewLabels = {
+        "Until 18:00": "עד 18:00",
         "Until 19:00": "עד 19:00",
         "Until 19:30": "עד 19:30",
         "Until 20:00": "עד 20:00",
-        "After 20:00": "אחרי 20:00",
-        "Weekends": "סופ״ש",
-        "Not TLV": "מחוץ לת״א"
+        "After 20:00": "אחרי 20:00"
     };
 
     // Convert to array and sort
@@ -359,6 +576,8 @@ function populateFilter(places) {
     if (!choicesInstance) {
         // Clear any existing options first
         filterSelect.innerHTML = '';
+        const modalFilterSelect = document.getElementById('modal-category-filter');
+        if (modalFilterSelect) modalFilterSelect.innerHTML = '';
 
         choicesInstance = new Choices(filterSelect, {
             searchEnabled: false,
@@ -370,15 +589,40 @@ function populateFilter(places) {
             }
         });
 
+        if (modalFilterSelect) {
+            modalChoicesInstance = new Choices(modalFilterSelect, {
+                searchEnabled: false,
+                itemSelectText: '',
+                shouldSort: false,
+                choices: choicesArray,
+                classNames: {
+                    containerOuter: 'choices-custom',
+                }
+            });
+        }
+
         // Add event listener for Choices.js
         filterSelect.addEventListener('change', function (e) {
             const selectedValue = e.detail.value;
+            if (modalChoicesInstance) modalChoicesInstance.setChoiceByValue(selectedValue);
             filterPlacesBy(selectedValue);
         });
+
+        if (modalFilterSelect) {
+            modalFilterSelect.addEventListener('change', function (e) {
+                const selectedValue = e.detail.value;
+                if (choicesInstance) choicesInstance.setChoiceByValue(selectedValue);
+                filterPlacesBy(selectedValue);
+            });
+        }
     } else {
         // Update existing choices
         choicesInstance.clearChoices();
         choicesInstance.setChoices(choicesArray, 'value', 'label', true);
+        if (modalChoicesInstance) {
+            modalChoicesInstance.clearChoices();
+            modalChoicesInstance.setChoices(choicesArray, 'value', 'label', true);
+        }
     }
 }
 
@@ -471,8 +715,13 @@ window.toggleSortMode = (mode) => {
 
     const discountBtn = document.getElementById('sort-discount-btn');
     const distanceBtn = document.getElementById('sort-distance-btn');
+    const modalDiscountBtn = document.getElementById('modal-sort-discount-btn');
+    const modalDistanceBtn = document.getElementById('modal-sort-distance-btn');
+
     if (discountBtn) discountBtn.classList.toggle('active', mode === 'discount');
     if (distanceBtn) distanceBtn.classList.toggle('active', mode === 'distance');
+    if (modalDiscountBtn) modalDiscountBtn.classList.toggle('active', mode === 'discount');
+    if (modalDistanceBtn) modalDistanceBtn.classList.toggle('active', mode === 'distance');
 
     if (mode === 'distance' && userLat === null) {
         // Request location - list will re-render once coords are received
@@ -691,22 +940,14 @@ function renderPlaceList(places) {
         <ul class="place-list">
             ${sortedPlaces.map(place => {
         const daysText = formatDays(place);
-        // Show distance whenever user location is known (not only in distance sort mode)
-        const distanceKm = (userLat !== null && userLng !== null && place.Latitude && place.Longitude)
-            ? calcDistance(userLat, userLng, place.Latitude, place.Longitude)
-            : null;
-        const distanceBadge = distanceKm !== null
-            ? `<span class="distance-badge">${distanceKm < 1 ? Math.round(distanceKm * 1000) + ' m' : distanceKm.toFixed(1) + ' km'}</span>`
-            : '';
         return `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
                     <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
                         <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0;">
-                            ${place.Description ? `<p class="place-description" style="margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: right;">${place.Description}</p>` : ''}
+                            ${place.Description ? `<p class="place-description" style="margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; direction: rtl;">${place.Description}</p>` : ''}
                             <h3 style="white-space: nowrap; flex-shrink: 0;">${place.Name}</h3>
                         </div>
                         <div style="display: flex; flex-direction: row; gap: 4px; flex-shrink: 0; align-items: center;">
-                            <div style="width: 44px; display: flex; justify-content: center; align-items: center;">${distanceBadge}</div>
                             <div style="width: 20px; display: flex; justify-content: center; align-items: center;">
                                 ${(place.Verified === true || (typeof place.Verified === 'string' && ['yes', 'true'].includes(place.Verified.toLowerCase().trim()))) ?
                 `<div class="verified-badge" title="Verified Place"><i class="fas fa-certificate" style="position: relative;"><i class="fas fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.5em;"></i></i></div>`
@@ -865,7 +1106,7 @@ if (window.innerWidth <= 768) {
 
     sidebarHeader.addEventListener('touchend', (e) => {
         if (e.target.closest('.filters-wrapper, .search-container')) return;
-        
+
         isDragging = false;
         sidebar.classList.remove('is-dragging');
         sidebar.style.transform = ''; // Clear inline style to let CSS take over

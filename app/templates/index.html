@@ -8,7 +8,8 @@
     <title>Ofoodiez Map - מפת האפי האוור תל אביב</title>
     <meta name="description"
         content="Discover the best Happy Hours, great deals, and top food spots in Tel Aviv. מפת ההאפי האוור של תל אביב - מצאו את המבצעים הכי שווים, שעות שמחות ומסעדות מומלצות.">
-    <meta name="keywords" content="happy hour tel aviv, מפת האפי האוור, תל אביב, מבצעים במסעדות, שעה שמחה, happy hour, ofoodiez, אוכל">
+    <meta name="keywords"
+        content="happy hour tel aviv, מפת האפי האוור, תל אביב, מבצעים במסעדות, שעה שמחה, happy hour, ofoodiez, אוכל">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
@@ -45,15 +46,6 @@
         <span>Back</span>
     </a>
 
-    <!-- Top Banner -->
-    <div class="update-banner" id="update-banner">
-        <span class="banner-text">
-            השעות וההטבות עלולות להשתנות מעת לעת
-            <span class="update-date">עודכן: {{ last_update }}</span>
-        </span>
-        <button class="banner-close" onclick="closeBanner()">&times;</button>
-    </div>
-
     <div id="map"></div>
 
     <!-- Locate Me Button -->
@@ -61,13 +53,109 @@
         <i class="fas fa-location-arrow"></i>
     </button>
 
+    <!-- More Filters Modal (Empty container for mobile) -->
+    <div class="more-filters-modal" id="more-filters-modal" style="display: none;">
+        <div class="filters-overlay" id="filters-overlay" onclick="toggleMoreFilters()"></div>
+        <div class="more-filters-content">
+            <div class="filters-modal-header">
+                <h3>סינון</h3>
+                <div class="filters-modal-actions">
+                    <button class="clear-filters-btn" onclick="clearAllFilters()">נקה הכל</button>
+                    <button class="close-filters-btn" onclick="toggleMoreFilters()">&times;</button>
+                </div>
+            </div>
+            <!-- City and Toggles will be moved here by JS on mobile -->
+            <div id="modal-quick-filters">
+                <div class="filter-section">
+                    <select id="modal-category-filter" class="form-control">
+                        <option value="all">כל השעות</option>
+                    </select>
+                </div>
+                <div class="filter-section">
+                    <select id="modal-days-filter" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="filter-section">
+                    <select id="modal-city-filter" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="filter-section sort-section">
+                    <div class="sort-toggle-group">
+                        <button id="modal-sort-discount-btn" class="sort-btn active"
+                            onclick="toggleSortMode('discount')">% הנחה</button>
+                        <button id="modal-sort-distance-btn" class="sort-btn" onclick="toggleSortMode('distance')">📍
+                            מרחק</button>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-filters-dest"></div>
+        </div>
+    </div>
+
+    <div class="map-filters-card" id="map-filters-card">
+        <div class="header-filters-row">
+            <div class="filters-wrapper">
+                <!-- Filter Dropdown -->
+                <div class="filter-container">
+                    <select id="category-filter" class="form-control">
+                        <option value="all">All Hours</option>
+                    </select>
+                </div>
+                <!-- Days Filter -->
+                <div class="days-filter-container">
+                    <select id="days-filter" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <!-- Sort Toggle -->
+                <div class="sort-toggle-group quick-sort">
+                    <button id="sort-discount-btn" class="sort-btn active" onclick="toggleSortMode('discount')">%
+                        הנחה</button>
+                    <button id="sort-distance-btn" class="sort-btn" onclick="toggleSortMode('distance')">📍
+                        מרחק</button>
+                </div>
+
+                <!-- These will be moved on mobile -->
+                <div class="city-filter-container" id="city-filter-wrapper">
+                    <select id="city-filter" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="toggles-row" id="toggles-row-wrapper">
+                    <label class="verified-toggle">
+                        <input type="checkbox" id="verified-filter">
+                        <span class="slider round"></span>
+                        <span class="toggle-label">מומלץ</span>
+                    </label>
+                    <label class="verified-toggle">
+                        <input type="checkbox" id="kosher-filter">
+                        <span class="slider round"></span>
+                        <span class="toggle-label">כשר</span>
+                    </label>
+                </div>
+
+                <!-- More Filters Button (Mobile Only) -->
+                <button class="mobile-more-filters-btn" id="mobile-more-filters-btn" onclick="toggleMoreFilters()">
+                    <i class="fas fa-sliders-h"></i>
+                    <span class="filter-badge" id="filter-badge" style="display: none;">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="header-logo-row">
-                <h1>Ofoodiez</h1>
-                <p>Happy Hour's Map</p>
+            <!-- Update Banner -->
+            <div class="update-banner" id="update-banner">
+                <span class="banner-text">
+                    השעות וההטבות עלולות להשתנות.
+                    <span class="update-date">עדכון אחרון: {{ last_update }}</span>
+                </span>
+                <button class="banner-close" onclick="closeBanner()">&times;</button>
             </div>
-            
+
             <!-- Search Container -->
             <div class="search-container" id="search-container">
                 <button class="search-toggle" id="search-toggle" onclick="toggleSearch()">
@@ -79,51 +167,6 @@
                     <button class="search-clear" onclick="clearSearch()">
                         <i class="fas fa-times"></i>
                     </button>
-                </div>
-            </div>
-            
-            <div class="map-filters-card">
-
-                <div class="header-filters-row">
-                    <div class="filters-wrapper">
-                        <!-- Filter Dropdown -->
-                        <div class="filter-container">
-                            <select id="category-filter" class="form-control">
-                                <option value="all">All Hours</option>
-                            </select>
-                        </div>
-                        <!-- Days Filter -->
-                        <div class="days-filter-container">
-                            <select id="days-filter" class="form-control">
-                                <!-- Populated by JS -->
-                            </select>
-                        </div>
-                        <!-- City Filter -->
-                        <div class="city-filter-container">
-                            <select id="city-filter" class="form-control">
-                                <!-- Populated by JS -->
-                            </select>
-                        </div>
-                        <!-- Toggles Row -->
-                        <div class="toggles-row">
-                            <label class="verified-toggle">
-                                <input type="checkbox" id="verified-filter">
-                                <span class="slider round"></span>
-                                <span class="toggle-label">Verified</span>
-                            </label>
-                            <label class="verified-toggle">
-                                <input type="checkbox" id="kosher-filter">
-                                <span class="slider round"></span>
-                                <span class="toggle-label">כשר</span>
-                            </label>
-                            <div class="sort-toggle-group">
-                                <button id="sort-discount-btn" class="sort-btn active"
-                                    onclick="toggleSortMode('discount')">% הנחה</button>
-                                <button id="sort-distance-btn" class="sort-btn" onclick="toggleSortMode('distance')">📍
-                                    מרחק</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -189,11 +232,11 @@
                 <div class="form-group" id="group-category">
                     <label for="category">קטגוריה <span class="required-star">*</span></label>
                     <select id="category" name="category" required>
+                        <option value="Until 18:00">עד 18:00</option>
                         <option value="Until 19:00">עד 19:00</option>
                         <option value="Until 19:30">עד 19:30</option>
                         <option value="Until 20:00">עד 20:00</option>
                         <option value="After 20:00">אחרי 20:00</option>
-                        <option value="Not TLV">מחוץ לת״א</option>
                     </select>
                 </div>
                 <div class="form-group">

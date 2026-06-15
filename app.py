@@ -194,7 +194,16 @@ def clear_data_cache():
     print("🗑️ Data cache cleared")
 
 def get_last_update():
-    """Get the last update date from config file."""
+    """Get the last update date from the database, fallback to config file."""
+    try:
+        from database.models import HappyHourPlace
+        # Get the latest updated_at from the database
+        latest_place = HappyHourPlace.query.order_by(HappyHourPlace.updated_at.desc()).first()
+        if latest_place and latest_place.updated_at:
+            return latest_place.updated_at.strftime("%d-%m-%Y")
+    except Exception as e:
+        print(f"⚠️ Could not fetch last update from DB: {e}")
+
     config_file = os.path.join(CACHE_DIR, 'config.json')
     try:
         if os.path.exists(config_file):

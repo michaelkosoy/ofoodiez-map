@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .scroll-container {
+    width: 300px;
+    overflow-x: auto;
+    background: #eee;
+    white-space: nowrap;
+    padding: 10px;
+  }
+  .item {
+    display: inline-block;
+    position: relative;
+    width: 100px;
+    height: 40px;
+    background: #ccc;
+    margin-right: 10px;
+  }
+  .dropdown {
+    position: fixed;
+    /* top: auto and left: auto */
+    margin-top: 40px; /* shift down by the height of the item */
+    width: 100px;
+    height: 100px;
+    background: red;
+    display: none;
+  }
+  .item:hover .dropdown {
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div class="scroll-container">
+    <div class="item">
+      Item 1
+      <div class="dropdown">Dropdown 1</div>
+    </div>
+    <div class="item">
+      Item 2
+      <div class="dropdown">Dropdown 2</div>
+    </div>
+  </div>
+</body>
+</html>

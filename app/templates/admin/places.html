@@ -26,9 +26,10 @@
             { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
             { title: "English Name", field: "Name", editor: "input", headerFilter: "input", minWidth: 150 },
             { title: "Hebrew Name", field: "NameHebrew", editor: "input", headerFilter: "input", minWidth: 150 },
+            { title: "Description", field: "Description", editor: "input", width: 200 },
             { title: "Address", field: "Address", editor: "input", headerFilter: "input", minWidth: 200 },
             { title: "City", field: "City", editor: "input", width: 100 },
-            { title: "Category", field: "Category", editor: "list", editorParams: { values: ["Until 19:00", "Until 19:30", "Until 20:00", "After 20:00", "Not TLV"] }, width: 120 },
+            { title: "Category", field: "Category", editor: "list", editorParams: { values: ["Until 18:00", "Until 19:00", "Until 19:30", "Until 20:00", "After 20:00"] }, width: 120 },
             { title: "Sun", field: "Sunday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
             { title: "Mon", field: "Monday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
             { title: "Tue", field: "Tuesday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
@@ -36,11 +37,9 @@
             { title: "Thu", field: "Thursday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
             { title: "Fri", field: "Friday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
             { title: "Sat", field: "Saturday", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 60 },
-            { title: "Latitude", field: "Latitude", editor: "input", width: 100 },
-            { title: "Longitude", field: "Longitude", editor: "input", width: 100 },
             { title: "Instagram URL", field: "InstagramURL", editor: "input", width: 150 },
             { title: "Reservation Link", field: "ReservationLink", editor: "input", width: 150 },
-            { title: "Description", field: "Description", editor: "input", width: 200 },
+            { title: "Video Link", field: "Recommended", editor: "input", width: 150 },
             { title: "Verified", field: "Verified", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 80 },
             { title: "Kosher", field: "Kosher", editor: "tickCross", formatter: "tickCross", hozAlign: "center", width: 80 },
             {
@@ -129,18 +128,18 @@
                     </div>
                     <div class="form-group">
                         <label>City</label>
-                        <input id="hh-city" class="form-control" value="תל אביב">
+                        <input id="hh-city" class="form-control" placeholder="e.g. תל אביב">
                     </div>
 
                     <div class="form-group">
                         <label>Category <span class="required">*</span></label>
                         <select id="hh-category" class="form-control">
                             <option value="" disabled selected>Select Category</option>
+                            <option value="Until 18:00">Until 18:00</option>
                             <option value="Until 19:00">Until 19:00</option>
                             <option value="Until 19:30">Until 19:30</option>
                             <option value="Until 20:00">Until 20:00</option>
                             <option value="After 20:00">After 20:00</option>
-                            <option value="Not TLV">Not TLV</option>
                         </select>
                     </div>
                     <div class="form-group">
