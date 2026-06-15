@@ -201,6 +201,19 @@ def _name(usr):
             or usr.profile_name or "Unknown")
 
 
+def _resolve_company(name):
+    """Find a company by normalized name, creating it if it doesn't exist."""
+    norm = " ".join((name or "").strip().lower().split())
+    if not norm:
+        return None
+    c = WaCompany.query.filter_by(normalized_name=norm).first()
+    if not c:
+        c = WaCompany(name=name.strip(), normalized_name=norm)
+        db.session.add(c)
+        db.session.commit()
+    return c
+
+
 @admin_bp.route('/api/whatsapp/stats', methods=['GET'])
 @login_required
 def get_whatsapp_stats():
@@ -283,6 +296,8 @@ def get_whatsapp_candidates():
         out.append({
             "id": u.id,
             "name": _name(u),
+            "first_name": u.first_name or "",
+            "last_name": u.last_name or "",
             "email": u.email or "",
             "number": u.phone,
             "applications": app_counts.get(u.id, 0),
@@ -346,18 +361,45 @@ def get_whatsapp_requests():
     return jsonify(out)
 
 
-# --- WhatsApp Bot: light actions (DB-only status toggles) ---
+# --- WhatsApp Bot: edits + light actions ---
 
 @admin_bp.route('/api/whatsapp/advocates/<int:id>', methods=['PUT'])
 @login_required
 def update_whatsapp_advocate(id):
     adv = WaAdvocate.query.get_or_404(id)
-    status = (request.json or {}).get("status")
-    if status not in ("active", "inactive", "pending"):
-        return jsonify({"error": "invalid status"}), 400
-    adv.status = status
+    data = request.json or {}
+    if "status" in data:
+        if data["status"] not in ("active", "inactive", "pending"):
+            return jsonify({"error": "invalid status"}), 400
+        adv.status = data["status"]
+    if "email" in data:
+        adv.email = (data["email"] or "").strip() or None
+    if "referral_link" in data:
+        adv.referral_link = (data["referral_link"] or "").strip() or None
+    if "role_title" in data:
+        adv.role_title = (data["role_title"] or "").strip() or None
+    if data.get("company"):
+        c = _resolve_company(data["company"])
+        if c:
+            adv.company_id = c.id
     db.session.commit()
     return jsonify({"id": adv.id, "status": adv.status})
+
+
+@admin_bp.route('/api/whatsapp/companies/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_company(id):
+    c = WaCompany.query.get_or_404(id)
+    name = ((request.json or {}).get("name") or "").strip()
+    if name:
+        norm = " ".join(name.lower().split())
+        clash = WaCompany.query.filter(WaCompany.normalized_name == norm, WaCompany.id != c.id).first()
+        if clash:
+            return jsonify({"error": "another company already uses that name"}), 400
+        c.name = name
+        c.normalized_name = norm
+        db.session.commit()
+    return jsonify({"id": c.id, "name": c.name})
 
 
 @admin_bp.route('/api/whatsapp/requests/<int:id>', methods=['PUT'])
@@ -379,5 +421,27 @@ def update_whatsapp_user(id):
     data = request.json or {}
     if "is_blocked" in data:
         usr.is_blocked = bool(data["is_blocked"])
-        db.session.commit()
-    return jsonify({"id": usr.id, "is_blocked": usr.is_blocked})
+    if "email" in data:
+        usr.email = (data["email"] or "").strip() or None
+    if "first_name" in data:
+        usr.first_name = (data["first_name"] or "").strip() or None
+    if "last_name" in data:
+        usr.last_name = (data["last_name"] or "").strip() or None
+    db.session.commit()
+    return jsonify({"id": usr.id, "is_blocked": usr.is_blocked, "email": usr.email})
+
+
+@admin_bp.route('/api/whatsapp/applications/<int:id>/cv', methods=['GET'])
+@login_required
+def whatsapp_application_cv(id):
+    from whatsapp_bot import storage
+    app_row = WaApplication.query.get_or_404(id)
+    path = app_row.resume_path or ""
+    if not path:
+        return jsonify({"error": "No CV on file for this application."}), 404
+    if path.startswith("http"):
+        return jsonify({"url": path})  # legacy fallback (e.g. Twilio media URL)
+    url = storage.signed_url(path)
+    if not url:
+        return jsonify({"error": "CV not available — Supabase Storage isn't configured on the bot service, or the file is missing."}), 404
+    return jsonify({"url": url})

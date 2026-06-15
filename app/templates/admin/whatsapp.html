@@ -108,6 +108,25 @@ function act(url, body, msg, table) {
         });
 }
 
+function putSave(url, body, table) {
+    fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'failed'); }); return r.json(); })
+        .then(function () { table.replaceData(); Swal.fire({ icon: 'success', title: 'Saved', timer: 900, showConfirmButton: false }); })
+        .catch(function (e) { Swal.fire({ icon: 'error', title: 'Save failed', text: e.message || '' }); });
+}
+function editModal(title, fields, onSave) {
+    var html = fields.map(function (f) {
+        var v = (f.value === null || f.value === undefined) ? '' : String(f.value);
+        return '<label style="display:block;text-align:left;margin:10px 2px 2px;font-size:.8rem;color:#555;font-weight:600;">' + f.label + '</label>' +
+            '<input id="ef-' + f.key + '" class="swal2-input" style="margin:0;width:100%;box-sizing:border-box;" value="' + v.replace(/"/g, '&quot;') + '">';
+    }).join('');
+    Swal.fire({
+        title: title, html: html, showCancelButton: true, confirmButtonText: 'Save', focusConfirm: false,
+        preConfirm: function () { var o = {}; fields.forEach(function (f) { o[f.key] = document.getElementById('ef-' + f.key).value; }); return o; }
+    }).then(function (res) { if (res.isConfirmed) onSave(res.value); });
+}
+function editBtn() { return '<button class="act">Edit</button>'; }
+
 // ---- table definitions ----
 var COLS = {
     companies: [
@@ -116,7 +135,15 @@ var COLS = {
         { title: "via Email", field: "email_advocates", width: 100 },
         { title: "via Link", field: "link_advocates", width: 100 },
         { title: "Serviceable", field: "serviceable", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
-        { title: "Created", field: "created", width: 150 }
+        { title: "Created", field: "created", width: 150 },
+        {
+            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                editModal('Rename company', [{ key: 'name', label: 'Company name', value: d.name }],
+                    function (v) { putSave('/admin/api/whatsapp/companies/' + d.id, v, c.getTable()); });
+            }
+        }
     ],
     advocates: [
         { title: "Name", field: "name", headerFilter: "input", minWidth: 150 },
@@ -136,6 +163,18 @@ var COLS = {
             cellClick: function (e, c) {
                 var d = c.getRow().getData();
                 act('/admin/api/whatsapp/advocates/' + d.id, { status: d.status === 'active' ? 'inactive' : 'active' }, 'Updated', c.getTable());
+            }
+        },
+        {
+            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                editModal('Edit advocate', [
+                    { key: 'email', label: 'Work email', value: d.email },
+                    { key: 'referral_link', label: 'Referral link', value: d.referral_link },
+                    { key: 'role_title', label: 'Role title', value: d.title },
+                    { key: 'company', label: 'Company', value: d.company }
+                ], function (v) { putSave('/admin/api/whatsapp/advocates/' + d.id, v, c.getTable()); });
             }
         }
     ],
@@ -157,6 +196,17 @@ var COLS = {
                 var d = c.getRow().getData();
                 act('/admin/api/whatsapp/users/' + d.id, { is_blocked: d.blocked !== 'Yes' }, 'Updated', c.getTable());
             }
+        },
+        {
+            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                editModal('Edit candidate', [
+                    { key: 'first_name', label: 'First name', value: d.first_name },
+                    { key: 'last_name', label: 'Last name', value: d.last_name },
+                    { key: 'email', label: 'Email', value: d.email }
+                ], function (v) { putSave('/admin/api/whatsapp/users/' + d.id, v, c.getTable()); });
+            }
         }
     ],
     applications: [
@@ -166,7 +216,23 @@ var COLS = {
         { title: "Company", field: "company", headerFilter: "input", minWidth: 140 },
         { title: "Role", field: "role", headerFilter: "input", minWidth: 140 },
         { title: "Job link / details", field: "job", formatter: jobCell, minWidth: 180 },
-        { title: "Résumé", field: "resume", width: 130 },
+        {
+            title: "CV", field: "resume", headerSort: false, width: 120,
+            formatter: function (c) {
+                var d = c.getRow().getData();
+                return d.resume ? '<button class="act">Download</button>' : '<span style="color:#999">—</span>';
+            },
+            cellClick: function (e, c) {
+                var d = c.getRow().getData();
+                if (!d.resume) return;
+                fetch('/admin/api/whatsapp/applications/' + d.id + '/cv')
+                    .then(function (r) { return r.json(); })
+                    .then(function (j) {
+                        if (j.url) window.open(j.url, '_blank', 'noopener');
+                        else Swal.fire({ icon: 'info', title: 'CV not available', text: j.error || '' });
+                    });
+            }
+        },
         { title: "Emailed", field: "emailed", width: 90 },
         { title: "Approved", field: "approved", width: 100 },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 }

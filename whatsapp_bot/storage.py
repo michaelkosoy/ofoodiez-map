@@ -62,3 +62,26 @@ def upload_resume(user_id, content, content_type="application/pdf", ext=".pdf"):
     except Exception:
         logger.exception("wa: failed to upload résumé to Supabase Storage")
         return None
+
+
+def signed_url(path, expires=3600):
+    """Create a short-lived signed download URL for a private Storage object.
+    Returns None if Storage isn't configured / the object/path is missing."""
+    base = WaConfig.SUPABASE_URL
+    key = WaConfig.SUPABASE_SERVICE_ROLE_KEY
+    if not base or not key or not path:
+        return None
+    try:
+        resp = requests.post(
+            f"{base.rstrip('/')}/storage/v1/object/sign/{WaConfig.SUPABASE_RESUME_BUCKET}/{path}",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={"expiresIn": expires},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        signed = resp.json().get("signedURL")
+        if signed:
+            return f"{base.rstrip('/')}/storage/v1{signed}"
+    except Exception:
+        logger.exception("wa: failed to sign résumé URL")
+    return None

@@ -31,6 +31,11 @@ def handle(inbound):
     payload = inbound.get("button_payload")
     text = (inbound.get("body") or "").strip()
 
+    # Blocked users (flagged in the admin) are silently ignored — no reply.
+    if user.is_blocked:
+        logger.info("wa: ignoring message from blocked user %s", user.phone)
+        return "blocked"
+
     # Idle timeout: a long-idle message starts fresh — sign-up if needed, else
     # the personalised Welcome.
     if _is_stale(conv):
