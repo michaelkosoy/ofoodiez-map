@@ -475,28 +475,36 @@ html, body {
 /* Responsiveness Settings */
 @media (max-width: 1023px) {
     .calendar-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 25px;
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
     }
-    
+
     .calendar-main-col, .events-sidebar {
         width: 100% !important;
         max-width: 100% !important;
+        min-width: 0 !important;
         box-sizing: border-box !important;
     }
-    
+
     .glass-card {
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
     }
 
     .upcoming-events-list {
         max-height: 250px;
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
+    }
+
+    /* Ensure the calendar section wrapper clips any overflow symmetrically */
+    #popups-section {
+        overflow: hidden;
     }
 }
 
@@ -526,12 +534,16 @@ html, body {
     }
 
     .calendar-days {
-        gap: 4px;
+        gap: 0 !important;
     }
-    
+
+    .calendar-weekdays {
+        gap: 0 !important;
+    }
+
     .calendar-day-cell {
-        font-size: 0.85rem !important;
-        max-width: 32px !important;
+        font-size: 0.78rem !important;
+        max-width: 26px !important;
     }
     
     /* Shrink list and items to fit exactly 3.5 items vertically */
