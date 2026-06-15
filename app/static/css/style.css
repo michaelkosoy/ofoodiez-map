@@ -110,6 +110,7 @@ nav.bottom-nav.map-bottom-nav {
 .sidebar {
     /* Positioning: Flush to left edge, full height minus nav */
     position: fixed;
+
     top: 0;
     left: 0;
     bottom: 80px;
@@ -738,18 +739,35 @@ nav.bottom-nav.map-bottom-nav {
         transition: none;
     }
 
-    /* Drag handle */
-    .sidebar::before {
-        content: '';
-        position: absolute;
-        top: 6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 4px;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 2px;
-        z-index: 10;
+    /* Drag Indicator Container */
+    .sidebar-drag-indicator {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar-drag-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 12px;
+            color: rgba(0, 0, 0, 0.4);
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .drag-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.expanded .drag-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Remove old pill handle */
+        .sidebar::before {
+            display: none !important;
+        }
     }
 
     .sidebar-header {
