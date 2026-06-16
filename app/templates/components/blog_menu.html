@@ -3,9 +3,10 @@
     {% if active_page != 'home' %}
     <div class="blog-menu-header" style="display: flex; justify-content: center; align-items: center; gap: 10px; padding: 0 20px; margin-bottom: 15px; margin-top: 30px;">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" style="width: 32px; height: 32px; border-radius: 50%;">
-        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--text-main, #2D3436);">Ofoodiez</span>
+        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--text-color, #362118);">Ofoodiez</span>
     </div>
     {% endif %}
+    <span class="blog-category-label">Explore the blog</span>
     <div class="category-scroll-container">
         <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
             <i class="fas fa-home"></i> Home
