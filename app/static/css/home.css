@@ -1061,9 +1061,10 @@ a { text-decoration: none; color: inherit; }
     width: 100%; height: 100%;
     object-fit: contain;
     opacity: 0;
+    mix-blend-mode: multiply;
 }
 
-.splash-drink-img { width: 100%; height: 100%; object-fit: contain; }
+.splash-drink-img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
 
 .frame-1 { animation: showFrame 0.15s linear 0.1s forwards; }
 .frame-2 { animation: showFrame 0.15s linear 0.25s forwards; }
@@ -1086,6 +1087,7 @@ a { text-decoration: none; color: inherit; }
     width: 200px; height: 250px;
     object-fit: contain;
     opacity: 0;
+    mix-blend-mode: multiply;
     animation: fadeInIcon 0.3s ease-out 0.8s forwards;
 }
 
