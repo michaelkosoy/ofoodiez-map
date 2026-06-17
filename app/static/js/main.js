@@ -1165,7 +1165,7 @@ let userMarker = null;
 
 async function showUserLocation(fromSortToggle = false) {
     if (!navigator.geolocation) {
-        const sortGroup = document.querySelector('.sort-toggle-group');
+        const sortGroup = document.querySelector('.sort-toggle-group.quick-sort');
         if (sortGroup) sortGroup.style.display = 'none';
         alert("Geolocation is not supported by your browser");
         return;
@@ -1188,7 +1188,7 @@ async function showUserLocation(fromSortToggle = false) {
 
             // Re-render list if in distance sort mode
             // Show the toggle group if location succeeds
-            const sortGroup = document.querySelector('.sort-toggle-group');
+            const sortGroup = document.querySelector('.sort-toggle-group.quick-sort');
             if (sortGroup) sortGroup.style.display = 'inline-flex';
 
             if (currentSortMode === 'distance') {
@@ -1229,7 +1229,7 @@ async function showUserLocation(fromSortToggle = false) {
             btn.innerHTML = '<i class="fas fa-location-arrow"></i>';
 
             // Hide the sort toggle group completely since distance sort is impossible
-            const sortGroup = document.querySelector('.sort-toggle-group');
+            const sortGroup = document.querySelector('.sort-toggle-group.quick-sort');
             if (sortGroup) sortGroup.style.display = 'none';
 
             // Only revert sort mode if this call was triggered by the distance sort toggle

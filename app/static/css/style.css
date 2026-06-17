@@ -2051,18 +2051,6 @@ input:checked~.toggle-label {
         color: #555;
     }
 
-    .filter-section .sort-toggle-group {
-        display: flex;
-        width: 100%;
-        gap: 8px;
-    }
-
-    .filter-section .sort-btn {
-        flex: 1;
-        height: 44px;
-        font-size: 1rem;
-    }
-
     .choices-city-filter .choices__inner,
     #modal-quick-filters .choices__inner {
         min-height: 44px !important;
