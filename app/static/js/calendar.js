@@ -315,6 +315,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Cap events sidebar height to calendar card height on desktop so list scrolls
+    function equalizeHeights() {
+        const calCard = document.querySelector('.glass-card.calendar-card');
+        const sidebar = document.querySelector('.events-sidebar');
+        if (!calCard || !sidebar) return;
+        if (window.innerWidth > 1023) {
+            sidebar.style.maxHeight = calCard.offsetHeight + 'px';
+        } else {
+            sidebar.style.maxHeight = '';
+        }
+    }
+
     // Start everything
     init();
+    // Run after initial render so heights are known
+    setTimeout(equalizeHeights, 0);
+
+    // Re-run on month navigation and resize
+    document.querySelectorAll('.calendar-prev-btn, .calendar-next-btn').forEach(btn => {
+        btn.addEventListener('click', () => setTimeout(equalizeHeights, 0));
+    });
+    window.addEventListener('resize', equalizeHeights);
 });

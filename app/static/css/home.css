@@ -771,7 +771,7 @@ a { text-decoration: none; color: inherit; }
     border: 1px solid var(--border-warm);
     border-radius: 18px;
     padding: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .calendar-card { }

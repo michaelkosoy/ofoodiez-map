@@ -200,6 +200,16 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
+    overflow: hidden;
+}
+
+/* On desktop, JS caps this to calendar card height so list scrolls internally */
+.list-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Details Card styling */
@@ -335,7 +345,8 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 310px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 5px;
 }
