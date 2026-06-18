@@ -22,3 +22,8 @@ def events():
 @login_required
 def whatsapp():
     return render_template('admin/whatsapp.html')
+
+@admin_bp.route('/hitech')
+@login_required
+def hitech_emails():
+    return render_template('admin/hitech.html')

@@ -3,8 +3,22 @@ Core Database Configuration and Models for the Website.
 """
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy as sa
 
 db = SQLAlchemy()
+
+def _run_migrations():
+    """Add any columns that are missing from existing tables (safe to run repeatedly)."""
+    migrations = [
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS linkedin_url TEXT",
+    ]
+    for stmt in migrations:
+        try:
+            db.session.execute(sa.text(stmt))
+        except Exception:
+            db.session.rollback()
+    db.session.commit()
+
 
 def init_db(app):
     """Initialize the database with the Flask app."""
@@ -26,6 +40,7 @@ def init_db(app):
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        _run_migrations()
 
 
 class PopupEvent(db.Model):
@@ -126,3 +141,16 @@ class HappyHourPlace(db.Model):
 
     def __repr__(self):
         return f'<HappyHourPlace "{self.name}">'
+
+
+class HitechEmail(db.Model):
+    """Waitlist email collected from the HiTech community page."""
+    __tablename__ = 'hitech_emails'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), nullable=False, unique=True)
+    linkedin_url = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<HitechEmail "{self.email}">'

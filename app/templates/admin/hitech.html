@@ -1,0 +1,85 @@
+{% extends "admin/base.html" %}
+
+{% block title %}HiTech Waitlist{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>HiTech Waitlist <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span></h2>
+    <button class="btn" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+</div>
+
+<div id="hitech-table"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var table = new Tabulator("#hitech-table", {
+        layout: "fitColumns",
+        ajaxURL: "{{ url_for('admin.get_hitech_emails') }}",
+        pagination: "local",
+        paginationSize: 50,
+        initialSort: [{ column: "joined", dir: "desc" }],
+        columns: [
+            { title: "#", field: "id", width: 60, headerSort: false },
+            { title: "Email", field: "email", headerFilter: "input", minWidth: 240 },
+            {
+                title: "LinkedIn",
+                field: "linkedin_url",
+                minWidth: 200,
+                formatter: function(cell) {
+                    const url = cell.getValue();
+                    if (!url) return '<span style="color:#aaa;">—</span>';
+                    return `<a href="${url}" target="_blank" style="color:#5A3A31; text-decoration:underline;">${url}</a>`;
+                }
+            },
+            { title: "Joined", field: "joined", width: 160 },
+            {
+                title: "",
+                width: 60,
+                hozAlign: "center",
+                headerSort: false,
+                formatter: function () {
+                    return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1rem;'><i class='fas fa-trash'></i></button>";
+                },
+                cellClick: function (e, cell) {
+                    Swal.fire({
+                        title: 'Remove email?',
+                        text: cell.getRow().getData().email,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#aaa',
+                        confirmButtonText: 'Delete'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const id = cell.getRow().getData().id;
+                            fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, { method: 'DELETE' })
+                                .then(res => {
+                                    if (res.ok) {
+                                        cell.getRow().delete();
+                                        updateCount();
+                                    } else {
+                                        Swal.fire('Error', 'Could not delete entry.', 'error');
+                                    }
+                                });
+                        }
+                    });
+                }
+            }
+        ]
+    });
+
+    table.on("dataLoaded", function (data) {
+        document.getElementById('email-count').textContent = '(' + data.length + ' emails)';
+    });
+
+    function updateCount() {
+        const rows = table.getData();
+        document.getElementById('email-count').textContent = '(' + rows.length + ' emails)';
+    }
+
+    function exportCSV() {
+        table.download("csv", "hitech_waitlist.csv");
+    }
+</script>
+{% endblock %}

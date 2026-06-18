@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import requests
 from io import StringIO
 from data import data as home_data, bachelorette_data
-from database.models import PopupEvent, HappyHourPlace
+from database.models import PopupEvent, HappyHourPlace, HitechEmail
 from instagram_automation.models import User
 from instagram_automation.config import Config
 
@@ -261,6 +261,38 @@ def bachelorette_page():
 def about_page():
     """About Me page."""
     return render_template('about.html', data=home_data)
+
+@app.route('/hitech')
+def hitech_page():
+    """HiTech exclusive community waitlist page."""
+    return render_template('hitech.html', active_page='hitech')
+
+@app.route('/api/hitech/subscribe', methods=['POST'])
+def hitech_subscribe():
+    """Collect email for the HiTech waitlist."""
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    linkedin_url = (data.get('linkedin_url') or '').strip()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'message': 'Invalid email address.'}), 400
+
+    from database.models import db as _db
+    existing = HitechEmail.query.filter_by(email=email).first()
+    if existing:
+        return jsonify({'success': True, 'message': 'already_registered'})
+
+    entry = HitechEmail(email=email, linkedin_url=linkedin_url or None)
+    _db.session.add(entry)
+    _db.session.commit()
+
+    try:
+        from whatsapp_bot.emailer import send_hitech_signup_email
+        send_hitech_signup_email(email, linkedin_url)
+    except Exception:
+        pass  # don't block the response if email fails
+
+    return jsonify({'success': True, 'message': 'subscribed'})
 
 @app.route('/privacy')
 def privacy_policy():

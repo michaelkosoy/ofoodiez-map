@@ -192,6 +192,30 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
     return _post(payload)
 
 
+def send_hitech_signup_email(email, linkedin_url=""):
+    """Notify ops that a new person joined the HiTech waitlist. Best-effort."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    to_email = WaConfig.WA_OPS_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+
+    linkedin_line = f"\nLinkedIn: {linkedin_url}" if linkedin_url else ""
+    body = (
+        f"New HiTech waitlist signup!\n\n"
+        f"Email: {email}"
+        f"{linkedin_line}\n\n"
+        f"— Ofoodiez"
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez"},
+        "subject": f"HiTech signup: {email}",
+        "content": [{"type": "text/plain", "value": body}],
+    }
+    return _post(payload)
+
+
 def _post(payload):
     api_key = WaConfig.SENDGRID_API_KEY
     # Don't let SendGrid rewrite links into ct.sendgrid.net click-tracking URLs

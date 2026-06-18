@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from flask import jsonify, request, Response
-from database.models import db, HappyHourPlace, PopupEvent
+from database.models import db, HappyHourPlace, PopupEvent, HitechEmail
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
     WaApplication, WaApplicationRecipient, WaCompanyRequest,
@@ -549,3 +549,25 @@ def whatsapp_application_cv(id):
     filename = app_row.resume_filename or "cv.pdf"
     return Response(content, mimetype=ctype or "application/octet-stream",
                     headers={"Content-Disposition": f'inline; filename="{filename}"'})
+
+
+# --- HiTech Waitlist Emails API ---
+
+@admin_bp.route('/api/hitech-emails', methods=['GET'])
+@login_required
+def get_hitech_emails():
+    emails = HitechEmail.query.order_by(HitechEmail.created_at.desc()).all()
+    return jsonify([{
+        'id': e.id,
+        'email': e.email,
+        'linkedin_url': e.linkedin_url or '',
+        'joined': e.created_at.strftime('%Y-%m-%d %H:%M') if e.created_at else ''
+    } for e in emails])
+
+@admin_bp.route('/api/hitech-emails/<int:id>', methods=['DELETE'])
+@login_required
+def delete_hitech_email(id):
+    entry = HitechEmail.query.get_or_404(id)
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({'success': True})

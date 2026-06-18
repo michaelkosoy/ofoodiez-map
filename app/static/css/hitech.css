@@ -1,0 +1,262 @@
+/* HiTech — Exclusive Community Waitlist */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:           #08060a;
+    --bg-card:      #100810;
+    --burgundy:     #720815;
+    --burgundy-mid: #9b1a2a;
+    --burgundy-glow:rgba(114, 8, 21, 0.22);
+    --butter:       #f9f6eb;
+    --butter-dim:   rgba(249, 246, 235, 0.55);
+    --butter-faint: rgba(249, 246, 235, 0.18);
+    --border:       rgba(114, 8, 21, 0.3);
+}
+
+html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--butter);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+}
+
+/* ── Ambient glow ── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 70% 45% at 50% -8%, rgba(114, 8, 21, 0.28) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 25% at 85% 95%, rgba(114, 8, 21, 0.12) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Layout ── */
+.hitech-page {
+    position: relative;
+    z-index: 1;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Top bar ── */
+.hitech-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+}
+
+.hitech-wordmark {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--burgundy-mid);
+}
+
+.hitech-topbar-back {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--butter-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.hitech-topbar-back:hover { color: var(--butter); }
+
+/* ── Hero ── */
+.hitech-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px 80px;
+}
+
+.hitech-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--burgundy-mid);
+    margin-bottom: 24px;
+}
+
+.hitech-headline {
+    font-family: 'Bodoni Moda', Georgia, serif;
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    font-weight: 700;
+    line-height: 1.08;
+    color: var(--butter);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+}
+
+.hitech-headline em {
+    font-style: italic;
+    color: var(--burgundy-mid);
+    /* subtle warm glow on the italic word */
+    text-shadow: 0 0 40px rgba(114, 8, 21, 0.6);
+}
+
+.hitech-rule {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--burgundy), transparent);
+    margin: 28px auto;
+}
+
+/* ── Typing animation ── */
+.hitech-subtext {
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+    font-weight: 300;
+    color: var(--butter-dim);
+    max-width: 420px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    min-height: 5.4em; /* reserve space so form doesn't jump */
+    white-space: pre-line; /* honours \n on mobile */
+}
+
+@media (min-width: 768px) {
+    .hitech-subtext {
+        max-width: none;
+        width: 100%;
+        white-space: pre-line;
+        text-align: center;
+        min-height: 3.4em;
+    }
+}
+
+/* blinking cursor while typing */
+.hitech-subtext.typing::after {
+    content: '|';
+    margin-left: 1px;
+    color: var(--burgundy-mid);
+    animation: cursor-blink 0.72s step-end infinite;
+}
+
+@keyframes cursor-blink {
+    50% { opacity: 0; }
+}
+
+/* ── Form card ── */
+.hitech-form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+}
+
+.hitech-form-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(114,8,21,0.06) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.hitech-input-wrap {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.hitech-input {
+    width: 100%;
+    background: rgba(249, 246, 235, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 15px 18px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--butter);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.hitech-input::placeholder {
+    color: rgba(249, 246, 235, 0.28);
+}
+
+.hitech-input:focus {
+    border-color: var(--burgundy-mid);
+    box-shadow: 0 0 0 3px rgba(114, 8, 21, 0.18);
+}
+
+.hitech-input.invalid {
+    border-color: #e07070;
+    box-shadow: 0 0 0 3px rgba(224, 112, 112, 0.15);
+}
+
+.hitech-submit {
+    width: 100%;
+    background: var(--burgundy);
+    color: var(--butter);
+    border: none;
+    border-radius: 10px;
+    padding: 15px 24px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.hitech-submit:hover {
+    background: var(--burgundy-mid);
+    box-shadow: 0 4px 24px rgba(114, 8, 21, 0.45);
+}
+
+.hitech-submit:active { transform: scale(0.98); }
+
+.hitech-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Feedback ── */
+.hitech-feedback {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    min-height: 20px;
+    text-align: center;
+    transition: opacity 0.3s;
+}
+
+.hitech-feedback.success { color: #d4a0a8; }
+.hitech-feedback.error   { color: #e07070; }
+
+/* ── Footer note ── */
+.hitech-footnote {
+    margin-top: 28px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--butter-faint);
+    text-transform: uppercase;
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+    .hitech-topbar { padding: 18px 20px; }
+    .hitech-hero   { padding: 20px 18px 80px; }
+    .hitech-form-card { padding: 28px 20px; border-radius: 14px; }
+    .hitech-headline  { font-size: 2.4rem; }
+}

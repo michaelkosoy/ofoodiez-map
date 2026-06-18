@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OfTech — Exclusive Foodiez Community</title>
+    <meta name="description" content="An exclusive community for food-loving entrepreneurs, business leaders, and builders.">
+    <meta name="robots" content="noindex">
+
+    <!-- PWA & Icons -->
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=3">
+</head>
+
+<body>
+    <div class="hitech-page">
+
+        <!-- Top bar -->
+        <header class="hitech-topbar">
+            <span class="hitech-wordmark">Ofoodiez</span>
+            <a href="/" class="hitech-topbar-back">← Back</a>
+        </header>
+
+        <!-- Hero -->
+        <main class="hitech-hero">
+
+            <p class="hitech-eyebrow">Invite Only</p>
+
+            <h1 class="hitech-headline">
+                For people<br>
+                with good <em>taste.</em>
+            </h1>
+
+            <div class="hitech-rule"></div>
+
+            <p class="hitech-subtext typing" id="hitech-subtext"></p>
+
+            <!-- Form card -->
+            <div class="hitech-form-card">
+                <div class="hitech-input-wrap">
+                    <input
+                        id="hitech-email"
+                        class="hitech-input"
+                        type="email"
+                        placeholder="Email address"
+                        autocomplete="email"
+                        spellcheck="false"
+                    >
+                </div>
+                <div class="hitech-input-wrap">
+                    <input
+                        id="hitech-linkedin"
+                        class="hitech-input"
+                        type="url"
+                        placeholder="LinkedIn profile URL"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                </div>
+                <button class="hitech-submit" id="hitech-submit-btn" onclick="submitHitech()">
+                    Join the waiting list
+                </button>
+                <p class="hitech-feedback" id="hitech-feedback"></p>
+            </div>
+
+
+        </main>
+    </div>
+
+    <script>
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidLinkedIn(url) {
+            if (!url) return true; // optional
+            try {
+                const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+                return u.hostname.includes('linkedin.com') && u.pathname.length > 1;
+            } catch { return false; }
+        }
+
+        async function submitHitech() {
+            const emailInput    = document.getElementById('hitech-email');
+            const linkedinInput = document.getElementById('hitech-linkedin');
+            const submitBtn     = document.getElementById('hitech-submit-btn');
+            const feedback      = document.getElementById('hitech-feedback');
+            const email         = emailInput.value.trim();
+            const linkedin_url  = linkedinInput.value.trim();
+
+            feedback.className = 'hitech-feedback';
+            feedback.textContent = '';
+
+            emailInput.classList.remove('invalid');
+            linkedinInput.classList.remove('invalid');
+
+            if (!isValidEmail(email)) {
+                feedback.className = 'hitech-feedback error';
+                feedback.textContent = 'Please enter a valid email address.';
+                emailInput.classList.add('invalid');
+                emailInput.focus();
+                return;
+            }
+
+            if (linkedin_url && !isValidLinkedIn(linkedin_url)) {
+                feedback.className = 'hitech-feedback error';
+                feedback.textContent = 'Please enter a valid LinkedIn profile URL (e.g. linkedin.com/in/yourname).';
+                linkedinInput.classList.add('invalid');
+                linkedinInput.focus();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            try {
+                const res  = await fetch('/api/hitech/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, linkedin_url })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.message === 'already_registered') {
+                        feedback.className = 'hitech-feedback success';
+                        feedback.textContent = "You're already on the list — we'll be in touch.";
+                    } else {
+                        feedback.className = 'hitech-feedback success';
+                        feedback.textContent = "You're in. We'll reach out when the community opens.";
+                        emailInput.value  = '';
+                        linkedinInput.value = '';
+                    }
+                    submitBtn.textContent = 'Done ✓';
+                } else {
+                    throw new Error(data.message || 'Something went wrong.');
+                }
+            } catch (err) {
+                feedback.className = 'hitech-feedback error';
+                feedback.textContent = err.message || 'Something went wrong. Please try again.';
+                submitBtn.disabled  = false;
+                submitBtn.textContent = 'Request Access';
+            }
+        }
+
+        document.getElementById('hitech-email').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') submitHitech();
+        });
+        document.getElementById('hitech-email').addEventListener('input', function () {
+            this.classList.remove('invalid');
+        });
+        document.getElementById('hitech-linkedin').addEventListener('input', function () {
+            this.classList.remove('invalid');
+        });
+
+        // Typing animation for subtext
+        (function () {
+            const el   = document.getElementById('hitech-subtext');
+            const full = 'An exclusive community for tech people who take food as seriously as their work.\nWe host unique culinary experiences you won\'t find on any menu, built around great food and the right people.';
+            let i = 0;
+
+            function type() {
+                if (i < full.length) {
+                    el.textContent += full[i++];
+                    setTimeout(type, i < 30 ? 38 : 22); // slightly slower at start
+                } else {
+                    // keep cursor blinking for a beat, then fade it out
+                    setTimeout(() => el.classList.remove('typing'), 1400);
+                }
+            }
+
+            setTimeout(type, 600); // short pause before typing starts
+        })();
+    </script>
+</body>
+</html>
