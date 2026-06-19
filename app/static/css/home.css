@@ -689,6 +689,12 @@ a { text-decoration: none; color: inherit; }
     max-width: 270px;
 }
 
+@media (min-width: 768px) {
+    .world-maps-header p {
+        max-width: none;
+    }
+}
+
 .world-carousel {
     display: flex;
     gap: 16px;
@@ -909,6 +915,67 @@ a { text-decoration: none; color: inherit; }
 .calendar-main-col { width: 100%; }
 .events-sidebar { margin-top: 16px; }
 .details-card.hidden { display: none; }
+
+/* =====================================================
+   ABOUT (HOME)
+   ===================================================== */
+.about-home-section {
+    padding: 30px 24px 50px;
+}
+
+.about-home-photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.about-home-photo {
+    border-radius: var(--radius);
+    overflow: hidden;
+    aspect-ratio: 1;
+    box-shadow: var(--shadow);
+}
+
+.about-home-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.about-home-bio {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+}
+
+.about-home-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--text-color);
+    color: var(--bg-color);
+    font-family: 'Outfit', 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 24px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.about-home-cta:hover { opacity: 0.85; }
+
+@media (min-width: 768px) {
+    .about-home-section {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 24px 60px;
+    }
+    .about-home-bio { font-size: 15px; }
+}
 
 /* =====================================================
    DARK FOOTER

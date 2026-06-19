@@ -175,7 +175,7 @@
         <div class="world-maps-header">
             <div class="section-eyebrow">Foodie maps</div>
             <h2 class="section-title">Travel like Ofoodiez</h2>
-            <p>Curated maps for 8+ countries — every spot worth a detour.</p>
+            <p>City guides for people who plan their trips around where to eat. I've explored each place myself, dug past the tourist traps, and mapped out the spots worth your time — so you can skip the research and just eat and drink well.</p>
         </div>
         <div class="world-carousel">
             {% for item in data.world_maps %}
@@ -236,6 +236,30 @@
         </div>
     </section>
 
+    <!-- About Section -->
+    <section class="about-home-section" id="about">
+        <div data-reveal>
+            <div class="about-home-photos">
+                <div class="about-home-photo">
+                    <img src="{{ url_for('static', filename='img/about-photo-3.jpg') }}" alt="Ofir">
+                </div>
+                <div class="about-home-photo">
+                    <img src="{{ url_for('static', filename='img/about-photo-2.jpg') }}" alt="Ofir">
+                </div>
+            </div>
+            <div class="section-eyebrow">Who I am</div>
+            <h2 class="section-title" style="margin-bottom:14px;">Hey, I'm Ofir</h2>
+            <p class="about-home-bio">Hi, I'm Ofir!<br><br>
+                I'm a Tel Aviv–based food enthusiast and lifestyle blogger, sharing my love for great happy hours, restaurant discoveries, and the joy of living well.<br><br>
+                By day I'm a software engineer — and on the side, I'm building a community for people like me: tech-minded, with good taste.<br><br>
+                Follow along, and don't hesitate to reach out.
+            </p>
+            <a href="{{ data.about.contact_link }}" class="about-home-cta">
+                <i class="fas fa-envelope"></i> Reach out
+            </a>
+        </div>
+    </section>
+
     <!-- Dark Footer -->
     <footer class="site-footer">
         <div class="social-media">
@@ -246,9 +270,11 @@
             {% endfor %}
         </div>
         <div class="footer-legal">
-            Made with love in Tel Aviv ·
             <a href="/terms">Terms</a> ·
             <a href="/privacy">Privacy</a>
+        </div>
+        <div class="footer-legal" style="margin-top:8px;">
+            <a href="mailto:contact@ofoodiez.com">contact@ofoodiez.com</a>
         </div>
     </footer>
 
