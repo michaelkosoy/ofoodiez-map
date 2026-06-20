@@ -4,6 +4,7 @@ Core Database Configuration and Models for the Website.
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -154,3 +155,33 @@ class HitechEmail(db.Model):
 
     def __repr__(self):
         return f'<HitechEmail "{self.email}">'
+
+
+class User(db.Model):
+    """Site member account: registration/login + paid 'Services' access.
+
+    Table auto-creates via init_db()'s db.create_all() at startup (this model is
+    registered when database.models is imported, before init_db runs).
+    """
+    __tablename__ = 'site_users'  # explicit; avoids clashing with the bot's wa_users
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), nullable=False, unique=True)  # stored lowercased
+    password_hash = db.Column(db.Text, nullable=False)
+    name = db.Column(db.String(128))
+    is_paid = db.Column(db.Boolean, default=False)   # admin grants this until online payment is wired
+    paid_until = db.Column(db.DateTime)              # set by the payment webhook later (subscription expiry)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def has_access(self):
+        """True if the member may enter the gated Services area."""
+        return bool(self.is_paid or (self.paid_until and self.paid_until > datetime.utcnow()))
+
+    def __repr__(self):
+        return f'<User {self.email}>'

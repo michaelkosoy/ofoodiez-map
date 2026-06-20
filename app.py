@@ -57,6 +57,10 @@ init_ig_automation(app)
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 
+# Register site member accounts (registration/login + gated Services)
+from accounts import accounts_bp
+app.register_blueprint(accounts_bp)
+
 # Start Telegram bot in a background thread
 import threading
 from telegram_bot.bot import run_bot
