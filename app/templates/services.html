@@ -60,8 +60,8 @@
                 <div class="lock-icon"><i class="fas fa-lock"></i></div>
                 <h2>Subscription required</h2>
                 <p>Your account is registered. Complete payment to unlock Services.</p>
-                <form method="POST" action="{{ url_for('accounts.pay') }}">
-                    <button type="submit" class="subscribe-btn"><i class="fas fa-credit-card"></i> Mock Pay — unlock access</button>
+                <form method="POST" action="{{ url_for('billing.pay') }}">
+                    <button type="submit" class="subscribe-btn"><i class="fas fa-credit-card"></i> Subscribe</button>
                 </form>
             </div>
             {% endif %}

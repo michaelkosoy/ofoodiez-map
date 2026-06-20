@@ -19,6 +19,12 @@
         .form-control:focus { border-color:var(--accent); outline:none; box-shadow:0 0 0 2px rgba(211,167,138,0.25); }
         .btn { width:100%; padding:12px; background:var(--brand); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; transition:0.3s; }
         .btn:hover { opacity:0.92; }
+        .google-btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:11px; border:1px solid #ddd; border-radius:8px; background:#fff; color:#333; font-weight:600; font-size:15px; text-decoration:none; box-sizing:border-box; }
+        .google-btn:hover { background:#f7f7f7; }
+        .google-btn .fa-google { color:#4285F4; }
+        .divider { display:flex; align-items:center; text-align:center; color:#bbb; font-size:13px; margin:16px 0; }
+        .divider::before, .divider::after { content:""; flex:1; border-bottom:1px solid #eee; }
+        .divider span { padding:0 12px; }
         .flash-messages { color:var(--danger); margin-bottom:14px; font-size:14px; }
         .switch-link { margin-top:18px; font-size:14px; color:#666; }
         .switch-link a { color:var(--brand); font-weight:600; text-decoration:none; }
@@ -38,6 +44,11 @@
                 </div>
             {% endif %}
         {% endwith %}
+
+        <a href="{{ url_for('accounts.google_login') }}" class="google-btn">
+            <i class="fab fa-google"></i> Continue with Google
+        </a>
+        <div class="divider"><span>or</span></div>
 
         <form method="POST">
             <div class="form-group"><input type="email" name="email" class="form-control" placeholder="Email" required autofocus></div>

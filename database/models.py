@@ -12,6 +12,9 @@ def _run_migrations():
     """Add any columns that are missing from existing tables (safe to run repeatedly)."""
     migrations = [
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS linkedin_url TEXT",
+        "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS google_id VARCHAR(64)",
+        "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS payplus_sub_uid VARCHAR(64)",
+        "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
     ]
     for stmt in migrations:
         try:
@@ -167,10 +170,12 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(256), nullable=False, unique=True)  # stored lowercased
-    password_hash = db.Column(db.Text, nullable=False)
+    password_hash = db.Column(db.Text)                # null for Google-SSO-only accounts
     name = db.Column(db.String(128))
-    is_paid = db.Column(db.Boolean, default=False)   # admin grants this until online payment is wired
-    paid_until = db.Column(db.DateTime)              # set by the payment webhook later (subscription expiry)
+    google_id = db.Column(db.String(64), unique=True) # Google "sub"; set for SSO accounts
+    is_paid = db.Column(db.Boolean, default=False)    # set True by the PayPlus callback on a successful charge
+    paid_until = db.Column(db.DateTime)               # subscription period end (extended each recurring charge)
+    payplus_sub_uid = db.Column(db.String(64))        # PayPlus recurring_uid, for reference/cancellation
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):

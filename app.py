@@ -57,9 +57,13 @@ init_ig_automation(app)
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 
-# Register site member accounts (registration/login + gated Services)
+# Register site member accounts (registration/login + Google SSO + gated Services)
 from accounts import accounts_bp
 app.register_blueprint(accounts_bp)
+
+# Register PayPlus billing (Subscribe -> hosted checkout -> signed callback)
+from billing import billing_bp
+app.register_blueprint(billing_bp)
 
 # Start Telegram bot in a background thread
 import threading
