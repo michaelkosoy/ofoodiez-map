@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Members{% endblock %}
+
+{% block extra_css %}
+<style>
+    .members-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-size:14px; }
+    .members-table th { background:var(--sidebar-bg); color:#fff; text-align:left; padding:13px 12px; font-weight:600; white-space:nowrap; }
+    .members-table td { padding:11px 12px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+    .members-table tr:nth-child(even) { background:#fafafa; }
+    .badge { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap; }
+    .badge.paid { background:#e6f4ea; color:var(--success-color); }
+    .badge.free { background:#f1f1f1; color:#888; }
+    .method { font-size:12px; color:#555; white-space:nowrap; }
+    .muted { color:#bbb; }
+    .summary { color:#666; margin-bottom:16px; }
+    .empty { padding:30px; text-align:center; color:#999; background:#fff; border-radius:12px; }
+    code { background:#f3f3f3; padding:2px 5px; border-radius:4px; font-size:12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>Members</h2>
+</div>
+<div class="summary">{{ users|length }} registered &middot; {{ paid_count }} with active access</div>
+
+{% if users %}
+<table class="members-table">
+    <thead>
+        <tr><th>Email</th><th>Name</th><th>Sign-up</th><th>Status</th><th>Paid until</th><th>PayPlus sub</th><th>Joined</th></tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+        <tr>
+            <td>{{ u.email }}</td>
+            <td>{{ u.name or '—' }}</td>
+            <td class="method">
+                {% if u.google_id and u.password_hash %}Email + Google
+                {% elif u.google_id %}Google
+                {% else %}Email{% endif %}
+            </td>
+            <td>{% if u.has_access() %}<span class="badge paid">Paid</span>{% else %}<span class="badge free">Free</span>{% endif %}</td>
+            <td>{{ u.paid_until.strftime('%Y-%m-%d') if u.paid_until else '—' }}</td>
+            <td>{% if u.payplus_sub_uid %}<code>{{ u.payplus_sub_uid[:12] }}…</code>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty">No members have signed up yet.</div>
+{% endif %}
+{% endblock %}

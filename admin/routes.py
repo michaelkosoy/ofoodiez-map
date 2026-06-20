@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for
+from database.models import User
 from . import admin_bp
 from .auth import login_required
 
@@ -27,3 +28,10 @@ def whatsapp():
 @login_required
 def hitech_emails():
     return render_template('admin/hitech.html')
+
+@admin_bp.route('/members')
+@login_required
+def members():
+    users = User.query.order_by(User.created_at.desc()).all()
+    paid_count = sum(1 for u in users if u.has_access())
+    return render_template('admin/members.html', users=users, paid_count=paid_count)
