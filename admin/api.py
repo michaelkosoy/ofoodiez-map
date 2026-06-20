@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from flask import jsonify, request, Response
-from database.models import db, HappyHourPlace, PopupEvent, HitechEmail
+from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
     WaApplication, WaApplicationRecipient, WaCompanyRequest,
@@ -571,3 +571,52 @@ def delete_hitech_email(id):
     db.session.delete(entry)
     db.session.commit()
     return jsonify({'success': True})
+
+
+# --- Site Members API ---
+
+def _user_method(u):
+    if u.google_id and u.password_hash:
+        return "Email + Google"
+    if u.google_id:
+        return "Google"
+    return "Email"
+
+def _user_dict(u):
+    return {
+        'id': u.id,
+        'email': u.email,
+        'name': u.name or '',
+        'method': _user_method(u),
+        'is_paid': bool(u.is_paid),                                   # raw manual flag (editable)
+        'paid_until': u.paid_until.strftime('%Y-%m-%d') if u.paid_until else '',
+        'payplus_sub_uid': u.payplus_sub_uid or '',
+        'created_at': u.created_at.strftime('%Y-%m-%d') if u.created_at else '',
+    }
+
+@admin_bp.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    users = User.query.order_by(User.created_at.desc()).all()
+    return jsonify([_user_dict(u) for u in users])
+
+@admin_bp.route('/api/users/<int:id>', methods=['PUT'])
+@login_required
+def update_user(id):
+    user = User.query.get_or_404(id)
+    data = request.json or {}
+    if 'name' in data:
+        user.name = (data.get('name') or '').strip() or None
+    if 'is_paid' in data:
+        user.is_paid = bool(data.get('is_paid'))
+    if 'paid_until' in data:
+        raw = (data.get('paid_until') or '').strip()
+        if not raw:
+            user.paid_until = None
+        else:
+            try:
+                user.paid_until = datetime.strptime(raw, '%Y-%m-%d')
+            except ValueError:
+                return jsonify({'error': 'Paid until must be YYYY-MM-DD (or blank)'}), 400
+    db.session.commit()
+    return jsonify(_user_dict(user))

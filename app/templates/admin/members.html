@@ -2,53 +2,52 @@
 
 {% block title %}Members{% endblock %}
 
-{% block extra_css %}
-<style>
-    .members-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-size:14px; }
-    .members-table th { background:var(--sidebar-bg); color:#fff; text-align:left; padding:13px 12px; font-weight:600; white-space:nowrap; }
-    .members-table td { padding:11px 12px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-    .members-table tr:nth-child(even) { background:#fafafa; }
-    .badge { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap; }
-    .badge.paid { background:#e6f4ea; color:var(--success-color); }
-    .badge.free { background:#f1f1f1; color:#888; }
-    .method { font-size:12px; color:#555; white-space:nowrap; }
-    .muted { color:#bbb; }
-    .summary { color:#666; margin-bottom:16px; }
-    .empty { padding:30px; text-align:center; color:#999; background:#fff; border-radius:12px; }
-    code { background:#f3f3f3; padding:2px 5px; border-radius:4px; font-size:12px; }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="header-controls">
     <h2>Members</h2>
 </div>
-<div class="summary">{{ users|length }} registered &middot; {{ paid_count }} with active access</div>
 
-{% if users %}
-<table class="members-table">
-    <thead>
-        <tr><th>Email</th><th>Name</th><th>Sign-up</th><th>Status</th><th>Paid until</th><th>PayPlus sub</th><th>Joined</th></tr>
-    </thead>
-    <tbody>
-    {% for u in users %}
-        <tr>
-            <td>{{ u.email }}</td>
-            <td>{{ u.name or '—' }}</td>
-            <td class="method">
-                {% if u.google_id and u.password_hash %}Email + Google
-                {% elif u.google_id %}Google
-                {% else %}Email{% endif %}
-            </td>
-            <td>{% if u.has_access() %}<span class="badge paid">Paid</span>{% else %}<span class="badge free">Free</span>{% endif %}</td>
-            <td>{{ u.paid_until.strftime('%Y-%m-%d') if u.paid_until else '—' }}</td>
-            <td>{% if u.payplus_sub_uid %}<code>{{ u.payplus_sub_uid[:12] }}…</code>{% else %}<span class="muted">—</span>{% endif %}</td>
-            <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="empty">No members have signed up yet.</div>
-{% endif %}
+<div id="members-table"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var table = new Tabulator("#members-table", {
+        layout: "fitColumns",
+        ajaxURL: "{{ url_for('admin.get_users') }}",
+        pagination: "local",
+        paginationSize: 50,
+        initialSort: [{ column: "created_at", dir: "desc" }],
+        columns: [
+            { title: "ID", field: "id", width: 60, headerSort: false, cssClass: "readonly" },
+            { title: "Email", field: "email", headerFilter: "input", minWidth: 200 },
+            { title: "Name", field: "name", editor: "input", headerFilter: "input", width: 150 },
+            { title: "Sign-up", field: "method", headerFilter: "input", width: 130 },
+            { title: "Paid", field: "is_paid", editor: "tickCross", formatter: "tickCross", hozAlign: "center", headerFilter: "tickCross", width: 80 },
+            { title: "Paid until", field: "paid_until", editor: "input", headerFilter: "input", width: 130, tooltip: "YYYY-MM-DD, or blank for none" },
+            { title: "PayPlus sub", field: "payplus_sub_uid", headerFilter: "input", width: 180 },
+            { title: "Joined", field: "created_at", headerFilter: "input", width: 110 },
+        ]
+    });
+
+    // Persist inline edits (Name, Paid, Paid until)
+    table.on("cellEdited", function (cell) {
+        var data = cell.getRow().getData();
+        fetch("{{ url_for('admin.get_users') }}/" + data.id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(res => {
+            if (!res.ok) {
+                res.json().then(j => Swal.fire('Error', (j && j.error) || 'Failed to save.', 'error'))
+                          .catch(() => Swal.fire('Error', 'Failed to save.', 'error'));
+                cell.restoreOldValue();
+            }
+        }).catch(() => {
+            Swal.fire('Error', 'Failed to save.', 'error');
+            cell.restoreOldValue();
+        });
+    });
+</script>
 {% endblock %}
