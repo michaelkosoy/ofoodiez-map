@@ -678,6 +678,10 @@ nav.bottom-nav.map-bottom-nav {
 
 /* Mobile Responsiveness - Fullscreen Map with Minimal List */
 
+.sidebar-drag-indicator {
+    display: none;
+}
+
 /* Tablet (768px and below) */
 @media (max-width: 768px) {
 

@@ -243,12 +243,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         upcomingListContainer.innerHTML = '';
 
-        // Sort EXPANDED events chronologically
-        const sortedEvents = [...EXPANDED_EVENTS].sort((a, b) => {
-            const dateA = a.date.trim();
-            const dateB = b.date.trim();
-            return new Date(dateA) - new Date(dateB);
-        });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Sort EXPANDED events chronologically, excluding past dates
+        const sortedEvents = [...EXPANDED_EVENTS]
+            .filter(e => new Date(e.date.trim()) >= today)
+            .sort((a, b) => new Date(a.date.trim()) - new Date(b.date.trim()));
 
         if (sortedEvents.length === 0) {
             upcomingListContainer.innerHTML = `
