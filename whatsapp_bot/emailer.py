@@ -197,7 +197,12 @@ def send_hitech_signup_email(email, linkedin_url=""):
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     to_email = WaConfig.WA_OPS_EMAIL
+    logger.info(
+        "[hitech emailer] api_key=%s from=%s to=%s",
+        bool(api_key), from_email, to_email,
+    )
     if not api_key or not from_email or not to_email:
+        logger.warning("[hitech emailer] missing config — email NOT sent")
         return False
 
     linkedin_line = f"\nLinkedIn: {linkedin_url}" if linkedin_url else ""

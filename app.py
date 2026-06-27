@@ -321,9 +321,11 @@ def hitech_subscribe():
 
     try:
         from whatsapp_bot.emailer import send_hitech_signup_email
-        send_hitech_signup_email(email, linkedin_url)
-    except Exception:
-        pass  # don't block the response if email fails
+        print(f"📧 [hitech] Sending signup notification for {email}")
+        result = send_hitech_signup_email(email, linkedin_url)
+        print(f"📧 [hitech] send_hitech_signup_email returned: {result}")
+    except Exception as _email_err:
+        print(f"📧 [hitech] Email send FAILED with exception: {_email_err}")
 
     return jsonify({'success': True, 'message': 'subscribed'})
 
