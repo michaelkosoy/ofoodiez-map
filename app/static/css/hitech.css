@@ -134,7 +134,7 @@ body::before {
     line-height: 1.7;
     margin-bottom: 48px;
     /* Reserve space for the full 4-line typing text so the form card never jumps */
-    min-height: 10.6em;
+    min-height: 9.6em;
     white-space: pre-line;
     /* honours \n on mobile */
 }
