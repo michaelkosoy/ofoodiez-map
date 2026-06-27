@@ -290,7 +290,32 @@ def hitech_subscribe():
     if existing:
         return jsonify({'success': True, 'message': 'already_registered'})
 
-    entry = HitechEmail(email=email, linkedin_url=linkedin_url or None)
+    # Best-effort: scrape the LinkedIn job title from the public profile page
+    job_title = None
+    if linkedin_url:
+        try:
+            import re as _re
+            headers = {
+                'User-Agent': (
+                    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
+                    'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+                ),
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+            _url = linkedin_url if linkedin_url.startswith('http') else 'https://' + linkedin_url
+            resp = requests.get(_url, headers=headers, timeout=6, allow_redirects=True)
+            if resp.status_code == 200:
+                # LinkedIn embeds the title in <title>: "First Last - Title - Company | LinkedIn"
+                m = _re.search(r'<title[^>]*>([^<]+)</title>', resp.text, _re.IGNORECASE)
+                if m:
+                    parts = [p.strip() for p in m.group(1).split(' - ')]
+                    # parts[0] = name, parts[1] = title (if present)
+                    if len(parts) >= 2 and 'linkedin' not in parts[1].lower():
+                        job_title = parts[1]
+        except Exception:
+            pass  # scraping is best-effort; never block signup
+
+    entry = HitechEmail(email=email, linkedin_url=linkedin_url or None, job_title=job_title)
     _db.session.add(entry)
     _db.session.commit()
 
@@ -301,6 +326,7 @@ def hitech_subscribe():
         pass  # don't block the response if email fails
 
     return jsonify({'success': True, 'message': 'subscribed'})
+
 
 @app.route('/privacy')
 def privacy_policy():

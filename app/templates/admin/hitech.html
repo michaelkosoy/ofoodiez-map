@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 
-{% block title %}HiTech Waitlist{% endblock %}
+{% block title %}Tech Community Members{% endblock %}
 
 {% block content %}
 <div class="header-controls">
-    <h2>HiTech Waitlist <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span></h2>
+    <h2>Tech Community Members <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span></h2>
     <button class="btn" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
 </div>
 
@@ -21,18 +21,57 @@
         initialSort: [{ column: "joined", dir: "desc" }],
         columns: [
             { title: "#", field: "id", width: 60, headerSort: false },
-            { title: "Email", field: "email", headerFilter: "input", minWidth: 240 },
+            { title: "Email", field: "email", headerFilter: "input", minWidth: 220 },
             {
                 title: "LinkedIn",
                 field: "linkedin_url",
-                minWidth: 200,
+                minWidth: 180,
                 formatter: function(cell) {
                     const url = cell.getValue();
                     if (!url) return '<span style="color:#aaa;">—</span>';
                     return `<a href="${url}" target="_blank" style="color:#5A3A31; text-decoration:underline;">${url}</a>`;
                 }
             },
-            { title: "Joined", field: "joined", width: 160 },
+            {
+                title: "Job Title",
+                field: "job_title",
+                minWidth: 180,
+                headerFilter: "input",
+                editor: "input",
+                cellEdited: function(cell) {
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ job_title: cell.getValue() })
+                    });
+                },
+                formatter: function(cell) {
+                    const v = cell.getValue();
+                    return v ? v : '<span style="color:#aaa;">—</span>';
+                }
+            },
+            {
+                title: "List",
+                field: "list_name",
+                width: 160,
+                headerFilter: "input",
+                editor: "input",
+                cellEdited: function(cell) {
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ list_name: cell.getValue() })
+                    });
+                },
+                formatter: function(cell) {
+                    const v = cell.getValue();
+                    if (!v) return '<span style="color:#bbb; font-style:italic;">—</span>';
+                    return `<span style="background:#f0ece4; color:#603e35; border-radius:4px; padding:2px 8px; font-size:0.82rem; font-weight:600;">${v}</span>`;
+                }
+            },
+            { title: "Joined", field: "joined", width: 150 },
             {
                 title: "",
                 width: 60,
@@ -43,7 +82,7 @@
                 },
                 cellClick: function (e, cell) {
                     Swal.fire({
-                        title: 'Remove email?',
+                        title: 'Remove member?',
                         text: cell.getRow().getData().email,
                         icon: 'warning',
                         showCancelButton: true,
@@ -70,16 +109,16 @@
     });
 
     table.on("dataLoaded", function (data) {
-        document.getElementById('email-count').textContent = '(' + data.length + ' emails)';
+        document.getElementById('email-count').textContent = '(' + data.length + ' members)';
     });
 
     function updateCount() {
         const rows = table.getData();
-        document.getElementById('email-count').textContent = '(' + rows.length + ' emails)';
+        document.getElementById('email-count').textContent = '(' + rows.length + ' members)';
     }
 
     function exportCSV() {
-        table.download("csv", "hitech_waitlist.csv");
+        table.download("csv", "tech_community_members.csv");
     }
 </script>
 {% endblock %}

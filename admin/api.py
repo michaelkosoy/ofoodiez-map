@@ -551,7 +551,7 @@ def whatsapp_application_cv(id):
                     headers={"Content-Disposition": f'inline; filename="{filename}"'})
 
 
-# --- HiTech Waitlist Emails API ---
+# --- HiTech / Tech Community API ---
 
 @admin_bp.route('/api/hitech-emails', methods=['GET'])
 @login_required
@@ -561,8 +561,23 @@ def get_hitech_emails():
         'id': e.id,
         'email': e.email,
         'linkedin_url': e.linkedin_url or '',
+        'job_title': e.job_title or '',
+        'list_name': e.list_name or '',
         'joined': e.created_at.strftime('%Y-%m-%d %H:%M') if e.created_at else ''
     } for e in emails])
+
+@admin_bp.route('/api/hitech-emails/<int:id>', methods=['PATCH'])
+@login_required
+def update_hitech_email(id):
+    """Update editable fields (currently: list_name, job_title) on a tech community member."""
+    entry = HitechEmail.query.get_or_404(id)
+    data = request.json or {}
+    if 'list_name' in data:
+        entry.list_name = (data['list_name'] or '').strip() or None
+    if 'job_title' in data:
+        entry.job_title = (data['job_title'] or '').strip() or None
+    db.session.commit()
+    return jsonify({'id': entry.id, 'list_name': entry.list_name or '', 'job_title': entry.job_title or ''})
 
 @admin_bp.route('/api/hitech-emails/<int:id>', methods=['DELETE'])
 @login_required
@@ -571,6 +586,7 @@ def delete_hitech_email(id):
     db.session.delete(entry)
     db.session.commit()
     return jsonify({'success': True})
+
 
 
 # --- Site Members API ---

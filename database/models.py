@@ -12,6 +12,8 @@ def _run_migrations():
     """Add any columns that are missing from existing tables (safe to run repeatedly)."""
     migrations = [
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS linkedin_url TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS job_title TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS list_name TEXT",
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS google_id VARCHAR(64)",
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS payplus_sub_uid VARCHAR(64)",
         "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
@@ -148,12 +150,14 @@ class HappyHourPlace(db.Model):
 
 
 class HitechEmail(db.Model):
-    """Waitlist email collected from the HiTech community page."""
+    """Tech community member collected from the HiTech community page."""
     __tablename__ = 'hitech_emails'
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(256), nullable=False, unique=True)
     linkedin_url = db.Column(db.Text)
+    job_title = db.Column(db.Text)       # scraped from LinkedIn profile at sign-up
+    list_name = db.Column(db.Text)       # admin-assigned email list tag (e.g. "founders", "cto")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
