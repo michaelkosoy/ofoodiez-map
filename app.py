@@ -319,13 +319,34 @@ def hitech_subscribe():
     _db.session.add(entry)
     _db.session.commit()
 
-    try:
-        from whatsapp_bot.emailer import send_hitech_signup_email
-        print(f"📧 [hitech] Sending signup notification for {email}")
-        result = send_hitech_signup_email(email, linkedin_url)
-        print(f"📧 [hitech] send_hitech_signup_email returned: {result}")
-    except Exception as _email_err:
-        print(f"📧 [hitech] Email send FAILED with exception: {_email_err}")
+    # Notify ops of the new signup via Formspree (same path as the happy-hour form).
+    # Never block the signup response on the email; log so failures are visible.
+    if FORMSPREE_ENDPOINT:
+        try:
+            extra = ""
+            if job_title:
+                extra += f"\nTitle: {job_title}"
+            if linkedin_url:
+                extra += f"\nLinkedIn: {linkedin_url}"
+            resp = requests.post(
+                FORMSPREE_ENDPOINT,
+                json={
+                    '_subject': f"🚀 New HiTech waitlist signup: {email}",
+                    'email': email,
+                    'message': f"New HiTech waitlist signup!\n\nEmail: {email}{extra}",
+                    'linkedin_url': linkedin_url or '',
+                    'job_title': job_title or '',
+                },
+                headers={'Accept': 'application/json'},
+                timeout=10,
+            )
+            if resp.status_code != 200:
+                app.logger.warning("HiTech Formspree notify failed: %s %s",
+                                   resp.status_code, resp.text[:200])
+        except Exception:
+            app.logger.exception("HiTech signup notification error for %s", email)
+    else:
+        app.logger.warning("HiTech signup: FORMSPREE_ENDPOINT not set — no notification for %s", email)
 
     return jsonify({'success': True, 'message': 'subscribed'})
 
