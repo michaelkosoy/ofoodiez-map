@@ -1,20 +1,27 @@
 /* HiTech — Exclusive Community Waitlist */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-    --bg:           #08060a;
-    --bg-card:      #100810;
-    --burgundy:     #720815;
-    --burgundy-mid: #9b1a2a;
-    --burgundy-glow:rgba(114, 8, 21, 0.22);
-    --butter:       #f9f6eb;
-    --butter-dim:   rgba(249, 246, 235, 0.55);
-    --butter-faint: rgba(249, 246, 235, 0.18);
-    --border:       rgba(114, 8, 21, 0.3);
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-html, body {
+:root {
+    --bg: #08060a;
+    --bg-card: #100810;
+    --burgundy: #720815;
+    --burgundy-mid: #9b1a2a;
+    --burgundy-glow: rgba(114, 8, 21, 0.22);
+    --butter: #f9f6eb;
+    --butter-dim: rgba(249, 246, 235, 0.55);
+    --butter-faint: rgba(249, 246, 235, 0.18);
+    --border: rgba(114, 8, 21, 0.3);
+}
+
+html,
+body {
     height: 100%;
     background: var(--bg);
     color: var(--butter);
@@ -69,7 +76,10 @@ body::before {
     text-decoration: none;
     transition: color 0.2s;
 }
-.hitech-topbar-back:hover { color: var(--butter); }
+
+.hitech-topbar-back:hover {
+    color: var(--butter);
+}
 
 /* ── Hero ── */
 .hitech-hero {
@@ -124,8 +134,9 @@ body::before {
     line-height: 1.7;
     margin-bottom: 48px;
     /* Reserve space for the full 4-line typing text so the form card never jumps */
-    min-height: 13.6em;
-    white-space: pre-line; /* honours \n on mobile */
+    min-height: 10.6em;
+    white-space: pre-line;
+    /* honours \n on mobile */
 }
 
 @media (min-width: 768px) {
@@ -147,7 +158,9 @@ body::before {
 }
 
 @keyframes cursor-blink {
-    50% { opacity: 0; }
+    50% {
+        opacity: 0;
+    }
 }
 
 /* ── Form card ── */
@@ -166,7 +179,7 @@ body::before {
     position: absolute;
     inset: 0;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(114,8,21,0.06) 0%, transparent 55%);
+    background: linear-gradient(135deg, rgba(114, 8, 21, 0.06) 0%, transparent 55%);
     pointer-events: none;
 }
 
@@ -224,7 +237,9 @@ body::before {
     box-shadow: 0 4px 24px rgba(114, 8, 21, 0.45);
 }
 
-.hitech-submit:active { transform: scale(0.98); }
+.hitech-submit:active {
+    transform: scale(0.98);
+}
 
 .hitech-submit:disabled {
     opacity: 0.55;
@@ -242,8 +257,13 @@ body::before {
     transition: opacity 0.3s;
 }
 
-.hitech-feedback.success { color: #d4a0a8; }
-.hitech-feedback.error   { color: #e07070; }
+.hitech-feedback.success {
+    color: #d4a0a8;
+}
+
+.hitech-feedback.error {
+    color: #e07070;
+}
 
 /* ── Footer note ── */
 .hitech-footnote {
@@ -256,8 +276,20 @@ body::before {
 
 /* ── Mobile ── */
 @media (max-width: 480px) {
-    .hitech-topbar { padding: 18px 20px; }
-    .hitech-hero   { padding: 20px 18px 80px; }
-    .hitech-form-card { padding: 28px 20px; border-radius: 14px; }
-    .hitech-headline  { font-size: 2.4rem; }
+    .hitech-topbar {
+        padding: 18px 20px;
+    }
+
+    .hitech-hero {
+        padding: 20px 18px 80px;
+    }
+
+    .hitech-form-card {
+        padding: 28px 20px;
+        border-radius: 14px;
+    }
+
+    .hitech-headline {
+        font-size: 2.4rem;
+    }
 }
