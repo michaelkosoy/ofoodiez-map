@@ -26,6 +26,15 @@
                 title: "LinkedIn",
                 field: "linkedin_url",
                 minWidth: 180,
+                editor: "input",
+                cellEdited: function(cell) {
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ linkedin_url: cell.getValue() })
+                    });
+                },
                 formatter: function(cell) {
                     const url = cell.getValue();
                     if (!url) return '<span style="color:#aaa;">—</span>';

@@ -576,8 +576,10 @@ def update_hitech_email(id):
         entry.list_name = (data['list_name'] or '').strip() or None
     if 'job_title' in data:
         entry.job_title = (data['job_title'] or '').strip() or None
+    if 'linkedin_url' in data:
+        entry.linkedin_url = (data['linkedin_url'] or '').strip() or None
     db.session.commit()
-    return jsonify({'id': entry.id, 'list_name': entry.list_name or '', 'job_title': entry.job_title or ''})
+    return jsonify({'id': entry.id, 'list_name': entry.list_name or '', 'job_title': entry.job_title or '', 'linkedin_url': entry.linkedin_url or ''})
 
 @admin_bp.route('/api/hitech-emails/<int:id>', methods=['DELETE'])
 @login_required

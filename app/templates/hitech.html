@@ -84,7 +84,7 @@
         }
 
         function isValidLinkedIn(url) {
-            if (!url) return true; // optional
+            if (!url) return false;
             try {
                 const u = new URL(url.startsWith('http') ? url : 'https://' + url);
                 return u.hostname.includes('linkedin.com') && u.pathname.length > 1;
@@ -113,7 +113,7 @@
                 return;
             }
 
-            if (linkedin_url && !isValidLinkedIn(linkedin_url)) {
+            if (!isValidLinkedIn(linkedin_url)) {
                 feedback.className = 'hitech-feedback error';
                 feedback.textContent = 'Please enter a valid LinkedIn profile URL (e.g. linkedin.com/in/yourname).';
                 linkedinInput.classList.add('invalid');
