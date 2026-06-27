@@ -106,6 +106,24 @@ hiring an "opening team" almost always precedes a new venue.
 - `site:instagram.com (<chef/group handle or name>) ("דרושים" OR "בקרוב" OR "מסעדה חדשה")`
 - Also scan each chef/group's **own** public page/site/LinkedIn for "careers"/"דרושים"/"בקרוב".
 
+## G. Scene-change / lifecycle (run every time — see SKILL.md §1)
+
+Detect changes at **existing** places, not just new ones. Run HE + EN; verify each hit (§5 proof rule).
+
+- **Chef/personnel change:** `שף עוזב מסעדה תל אביב` · `שף חדש למסעדה תל אביב` · `מחליף את השף` ·
+  `שף ראשי חדש` · `chef leaves restaurant Tel Aviv` · `new head chef Tel Aviv` · `chef departs`
+- **Ownership/partner:** `שותף חדש מסעדה תל אביב` · `נמכרה מסעדה תל אביב` · `קבוצה רוכשת מסעדה` ·
+  `new partner restaurant Tel Aviv` · `restaurant sold / acquired Tel Aviv`
+- **Closure:** `מסעדה נסגרת תל אביב` · `נסגרה מסעדה תל אביב` · `סוגרת אחרי שנים` · `מסעדה אחרונה` ·
+  `restaurant closing Tel Aviv` · `restaurant shuts down Tel Aviv`
+- **Relocation:** `מסעדה עוברת מיקום תל אביב` · `כתובת חדשה מסעדה` · `restaurant relocates Tel Aviv`
+- **Rebrand / relaunch:** `מסעדה משנה קונספט` · `נולדה מחדש` · `שינוי שם מסעדה` · `מתחדשת` ·
+  `restaurant rebrand Tel Aviv` · `reopens as` · `reimagined as`
+- **Expansion / new branch:** `סניף חדש` · `מתרחבת לסניף` · `מיקום שני` · `opens second location` ·
+  `new branch Tel Aviv`
+- **Brand entering market:** `<brand> מגיעה לישראל` · `<brand> נפתחת בתל אביב` · `<intl brand> opens Tel Aviv first`
+- **Recognition (lower priority):** `מישלן ישראל תל אביב` · `50 Best Tel Aviv` · `דירוג מסעדות תל אביב 2026`
+
 ---
 
 ## Keyword glossary

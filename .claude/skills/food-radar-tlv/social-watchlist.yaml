@@ -75,7 +75,23 @@ platforms:
 
   instagram:
     accounts:
-      food_creators: []        # add verified public TLV food-creator handles as discovered
+      # Verified public TLV/IL food creators (handles seen in indexed results — re-verify, never invent).
+      # Sweep each on BOTH Instagram and TikTok every run for new-place/pop-up/opening signals (§6).
+      food_creators:
+        - "@magazine_food"      # Alon Kirschner / מגזין האוכל — high-volume openings + chef news ("פרסום ראשון")
+        - "@nadavbornstein"     # food creator — new openings, collabs, pop-ups
+        - "@ofirshkovich"       # Ofir Hershkovich (also "ofirshko") — blogger, special menus + new spots
+        - "@shirazoooo"         # (TikTok also @shirazooooo) — new/special restaurants + pop-ups
+        - "@omerz_travel"       # "X new places in Tel Aviv" roundups
+        - "@israel.foodies_"    # EN TLV foodies — "Good news from Tel Aviv" roundups
+        - "@goldritka"          # food creator
+        - "@ofirbaram_"         # food creator — new openings (incl. central Israel)
+        - "@lihiii"             # food creator — new/opening-soon spots
+        - "@idangoldwasser"     # food creator (TikTok-leaning)
+        - "@zachfakiel"         # food creator
+        - "@shirashabtai"       # food creator — pop-ups / festival stands
+        - "@yaara.so"           # travel+food — pop-ups, port events
+        - "@luciana_mamila"     # kosher Italian (more Jerusalem) — include w/ geo check
       pr_agencies: []          # food/hospitality PR handles tip openings early — fill as found
       branding_studios: []     # studios that brand new venues (logo/menu reveals) — fill as found
       architects_designers: [] # designers post fit-outs of venues weeks before opening

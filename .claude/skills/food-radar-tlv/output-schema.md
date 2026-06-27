@@ -15,6 +15,9 @@ finding:
   area: string                      # Tel Aviv neighborhood or city name
   city: string                      # Tel Aviv-Yafo | Ramat Gan | Givatayim | ... (see geography gate)
   status: opened | opening_soon | soft_opening | pop_up | event | hiring_signal | rumor
+        | chef_change | ownership_change | closing | closed | relocating | rebrand | expansion | recognition
+  event_date: string | null         # REQUIRED for pop_up/event — must be today-or-later (§5 forward-date rule)
+  runs_until: string | null         # end date for a multi-day pop-up/run; null otherwise
   why_found: string                 # one short reason
   proof:                            # >= 1 required; no proof => do not output
     - source_name: string
@@ -32,6 +35,14 @@ finding:
     - supplier_or_designer_hint
     - reservation_link_shared
     - event_page_shared
+    - chef_change                   # scene-change / lifecycle signals (§1) ↓
+    - ownership_change
+    - closure
+    - relocation
+    - rebrand
+    - expansion
+    - brand_entry
+    - recognition
   notes: string                     # one short sentence only
   first_seen_at: string             # ISO datetime
   last_seen_at: string              # ISO datetime
@@ -49,6 +60,8 @@ seen_record:
   area: string
   city: string
   status: string                    # same enum as finding.status
+  event_date: string | null         # for pop_up/event — the event/run date (today-or-later when reported)
+  runs_until: string | null         # end date of a multi-day pop-up/run; null otherwise
   first_seen_at: string             # ISO datetime — set once
   last_seen_at: string              # ISO datetime — updated each time the entity reappears
   proof_urls: [string]              # accumulated unique proof URLs

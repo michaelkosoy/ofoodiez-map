@@ -20,6 +20,25 @@ events · culinary collaborations · soft openings · "opening soon" places · n
 new event pages · hiring posts that imply a new place is opening · chef / restaurant-group hints
 about new projects.
 
+**Also detect "scene-change / lifecycle" signals (not new venues, but worth knowing — same bar: real
++ proof + in-window):**
+- **Chef / key-personnel change** — head/exec chef, pastry chef, sommelier or bar manager **leaves or
+  joins** an existing place (often precedes a new venue elsewhere). *e.g. Gal Ben Moshe leaving Pastel.*
+- **Ownership / partner / investor change** — new owner/partner joins, or a group acquires a venue.
+  *e.g. a star chef joining an existing restaurant as partner.*
+- **Closure** — a notable place **closes** (frees a prime space; signals a scene shift; the space often
+  reopens as something new — track it).
+- **Relocation** — an existing venue **moves** to a new address.
+- **Rebrand / concept change / relaunch** — same place, **new identity/concept/name**.
+- **Expansion / new branch** — an existing brand opens a **second location**.
+- **Brand entering the market** — an out-of-town / international brand opens its **first** local venue.
+- **Major recognition** *(lower priority)* — Michelin / 50 Best / notable award or ranking change.
+
+These are **"meaningful update"** signals (§9). Output them with the matching `status`/`signal_types`
+(§6, §12) — and the same hard rules apply: real proof URL, in time-window, geography gate, and
+**proof-link verification (§5)**. Treat a chef/ownership change or a closure of a known venue as a
+**lead** for a *future* opening, too.
+
 ## 2. Trigger
 
 The exact routine trigger is:
@@ -106,12 +125,55 @@ Full URLs + method in **`sources.md` → "Mandatory every-run reservation checks
 Never guess, autocomplete, or invent URLs or dates. If you cannot obtain a real proof URL, **drop the
 item** — do not output it.
 
+**Anti-conflation rule (hard):** a search result's `content`/`raw_content` often **merges** the caption,
+**OCR'd image text**, comments, and even adjacent listings into one blob. **Do not stitch fragments into
+a claim.** Each asserted fact (it's *new*; it's a *bistro*; the *operator/chef*; the *date*) must trace
+to the **same** source, and a venue/operator name must be confirmed from a **clean, untruncated** source
+(the caption itself, the venue/reservation page, or a second post) — never from a truncated title
+(`…`), an OCR layer alone, or your own inference. If a piece is OCR-only or comes from a different
+listing, say so or drop it. (E.g.: a generic group cook-hiring caption + an OCR "new French bistro"
+line ≠ "new bistro by that group.")
+
+**Proof-link verification (hard — do this before output, for EVERY cited URL):** a search result's
+`content` snippet is **not** proof that the cited URL is about your claim. Aggregator pages — TikTok
+`/discover/` and `/video/`, IG explore, "related videos" — return snippets that **bundle many clips'
+text** and bridge unrelated fragments with "…". So:
+1. **Re-extract each proof URL** (or rely on its page **title**) and confirm the entity/claim actually
+   appears **on that page**. The Tavily **title** is usually URL-specific and trustworthy; the
+   **content snippet is not** when the title is generic/unrelated.
+2. If the claim is present **only** in a content snippet and the page **title is unrelated**
+   (e.g. a TikTok video titled about a lawsuit, captioned generically) → the link is **wrong → drop it**.
+3. If the page is **gated** (login wall) and unconfirmable, treat the proof as **unverified**: keep the
+   item only if it has another verified proof; otherwise → `watch`, noting "single/gated source".
+4. An item with **no verified proof survives → do not report it** (move to `watch`).
+Verified examples this is meant to catch: a "Moshik Roth new stand" / "Korean-café pop-up" whose TikTok
+`/video/` titles were actually unrelated clips — the food text was merged in by the aggregator.
+
 **Dating rule (incl. social):** Prefer an explicit date in the page/post body. **If the body has no
 date, use the date the item was *posted/published*** — the platform/extract timestamp (e.g. Tavily's
 publication date, an Instagram/TikTok/Facebook "posted on" / "Video by X on <date>" indicator, or an
 event page's listed date). A tool-surfaced posted-date **counts as the signal date** for the time-window
 test, so a post with no in-text date is **not** automatically dropped — only drop it if **no** real
 posted-date can be obtained from a tool result. Always record where the date came from (body vs posted).
+
+**Forward-date rule (pop-ups & events — MANDATORY for type `pop-up`/`event`):** For these two types the
+eligibility gate is the **event date / run window — NOT the posted date**. Only output a pop-up/event if
+its event date (or the run **end**-date for a multi-day run) is **today or later** (Asia/Jerusalem);
+**drop anything that already ended.** Keep the posted date for recency, but record the **event date**
+separately (`event_date` / `runs_until` — see `output-schema.md`). Get it by **extracting the event
+page** (Secret Tel Aviv ticket pages, Ontopo event pages, Facebook events, or the post body) and reading
+the explicit date / date-range — never infer "upcoming" from the posted date alone. Venues
+(`opened` / `opening_soon` / `soft_opening`) are unaffected by this rule.
+
+**Tavily mode for Israel/Hebrew (important):** the `news` topic is **US-biased** and returns irrelevant
+results for Hebrew queries. Use `topic: "general"` + **`country: "israel"`** + `time_range` (or
+`start_date`+`end_date`) for recency instead. Reserve `news`+`days` for English wire coverage only.
+
+**Social posted-date decoding (reliable, free):** Instagram shortcodes and TikTok IDs encode the post
+creation time — decode them to date a post with no in-text date. IG: base64-decode the shortcode
+(alphabet `A–Za–z0–9-_`) → media id, then `((id >> 23) + 1314220021721)` ms = post time. TikTok:
+`int(video_id) >> 32` = unix seconds. **Validate once per run** against a post whose date is visible,
+then trust it; a decoded timestamp is a tool-derived posted-date, not a guess.
 
 ## 6. Social-media workflow
 
@@ -152,7 +214,8 @@ hiring/new-project signal from a known chef or group as a real lead: extract the
 
 Signal types: `official_announcement` · `chef_hint` · `creator_mention` · `hiring_signal` ·
 `tagged_location` · `pop_up_announcement` · `supplier_or_designer_hint` · `reservation_link_shared` ·
-`event_page_shared`.
+`event_page_shared` · `chef_change` · `ownership_change` · `closure` · `relocation` · `rebrand` ·
+`expansion` · `brand_entry` · `recognition`.
 
 For every social finding store: platform · public URL · public handle/page name · caption excerpt ·
 date (if any) · detected signal type · extracted place/event name · confidence · proof links.
@@ -230,7 +293,9 @@ Run date: `<date/time>`
 
    * Type: restaurant / cafe / bakery / bar / pop-up / event / unknown
    * Area: Tel Aviv neighborhood or city
-   * Status: opened / opening soon / soft opening / pop-up / event / hiring signal / rumor
+   * Status: opened / opening soon / soft opening / pop-up / event / hiring signal / rumor /
+     chef change / ownership change / closing / relocating / rebrand / expansion / recognition
+   * Event date: `<date or date-range>`   ← REQUIRED for pop-up/event; must be today-or-later (see §5 forward-date rule); omit for venues
    * Why found: one short reason
    * Proof:
 
@@ -264,7 +329,8 @@ Full rules in **`compliance.md`**.
 
 1. Resolve search tool (§5) and announce it.
 2. Load `seen-records.json` if present.
-3. Run query banks A–F (`search-queries.md`) in **Hebrew and English**, scoped to the time window.
+3. Run query banks A–G (`search-queries.md`) in **Hebrew and English**, scoped to the time window
+   (G = scene-change / lifecycle: chef/ownership change, closure, relocation, rebrand, expansion).
 4. Collect candidate URLs; **Extract** the top ~15–25 (official/reservation/media first).
 5. **Crawl/Map** the known high-value pages from `sources.md` for newly added items.
 6. **Reservation platforms — MANDATORY, both, every run:** map + search **Ontopo** and **Tabit**
@@ -275,8 +341,12 @@ Full rules in **`compliance.md`**.
 8. For each candidate: extract entity name, area/city, status, date (body date, or **posted date** per
    §5 Dating rule), proof sentence + URL.
 9. Normalize (§8) and **dedupe** (merge HE/EN + cross-source duplicates).
-10. Score confidence (§10); apply the **geography gate** (§11).
+10. Score confidence (§10); apply the **geography gate** (§11). For type `pop-up`/`event`, apply the
+    **forward-date rule** (§5): extract the event date/run-window and **drop anything already ended**.
 11. Diff against `seen-records.json`: keep brand-new items + meaningfully-updated items; drop the rest.
+11b. **Proof-link verification (§5):** re-extract every cited URL and confirm the claim is on that page
+    (title/body), not just a snippet. Drop wrong/merged-snippet links; an item with no verified proof
+    left → `watch`, not reported.
 12. Print the report (§12) — or the exact no-findings sentence (§13).
 13. Write/update `seen-records.json` (set `last_output_at` on items you reported; you may also log
     undated discoveries and out-of-window items as tracked-but-unreported `watch`/`excluded` records).
