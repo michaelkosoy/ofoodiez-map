@@ -1,31 +1,98 @@
 # social-watchlist.yaml — food-radar-tlv
 #
-# Starter watchlist of public accounts / hashtags / keywords to check each run via
-# INDEXED PUBLIC SEARCH ONLY (Tavily). Do NOT log in, scrape private data, or collect
-# personal data beyond a public handle/page name and a public URL. See compliance.md.
+# Social media is the PRIMARY DISCOVERY ENGINE for this skill (see SKILL.md §6). Lean on it
+# heavily every run — it is the fastest source for pop-ups, soft launches, chef collabs and
+# one-off events, usually days/weeks before media or reservation platforms catch up.
 #
-# Fill the empty account lists over time with public handles you want monitored.
+# Use INDEXED PUBLIC SEARCH ONLY (Tavily). Do NOT log in, scrape private data, or collect personal
+# data beyond a public handle/page name and a public URL. See compliance.md.
+#
+# The names below are SEARCH SEEDS — searching a chef/group/restaurant NAME works whether or not we
+# know the exact @handle. Add verified public @handles next to a name as you discover them. Never
+# invent a handle; if unsure, search the name.
+
+# ---------------------------------------------------------------------------------------------
+# TOP CHEFS (Israel / Tel Aviv) — sweep every run for new-place + hiring/"opening team" signals
+# ---------------------------------------------------------------------------------------------
+top_chefs:
+  - { name_he: "אייל שני",        name_en: "Eyal Shani" }
+  - { name_he: "אסף גרניט",       name_en: "Assaf Granit" }
+  - { name_he: "מאיר אדוני",      name_en: "Meir Adoni" }
+  - { name_he: "יוסי שטרית",      name_en: "Yossi Shitrit" }
+  - { name_he: "מושיק רוט",       name_en: "Moshik Roth" }
+  - { name_he: "שרון כהן",        name_en: "Sharon Cohen" }
+  - { name_he: "חיים כהן",        name_en: "Haim Cohen" }
+  - { name_he: "תומר טל",         name_en: "Tomer Tal" }
+  - { name_he: "ברק אהרוני",      name_en: "Barak Aharoni" }
+  - { name_he: "ירון שלו",        name_en: "Yaron Shalev" }
+  - { name_he: "שאול בן אדרת",    name_en: "Shaul Ben Aderet" }
+  - { name_he: "ארז קומרובסקי",   name_en: "Erez Komarovsky" }     # baker
+  - { name_he: "אבי ביטון",       name_en: "Avi Biton" }
+  - { name_he: "מושיקו גמליאלי",  name_en: "Moshiko Gamlieli" }
+  - { name_he: "אביב משה",        name_en: "Aviv Moshe" }
+  - { name_he: "ענר בן רפאל",     name_en: "Anar Ben Rafael" }
+  - { name_he: "שחף שבתאי",       name_en: "Shahaf Shabtai" }
+  - { name_he: "גיל דהאן",        name_en: "Gil Dahan" }
+  - { name_he: "ישראל אהרוני",    name_en: "Israel Aharoni" }
+  - { name_he: "גיא גמזו",        name_en: "Guy Gamzo" }
+  - { name_he: "רותי ומתי ברודו", name_en: "Ruti & Mati Broudo" }
+
+# ---------------------------------------------------------------------------------------------
+# RESTAURANT GROUPS / HOSPITALITY — new concepts + opening-team hiring often start here
+# ---------------------------------------------------------------------------------------------
+restaurant_groups:
+  - "R2M (ברודו)"            # Brasserie, Coffee Bar, Hotel Montefiore, Herzl 16
+  - "קבוצת מחניודה / Machneyuda Group"
+  - "החבר'ה הטובים"          # Eyal Shani / Shahar Segal
+  - "קבוצת פופולר / Popular Group"
+  - "קבוצת אימפריאל / Imperial Group"   # Imperial, LP, La Otra, Bul 8
+  - "קבוצת MELA"             # Dopo, Mela
+  - "NOX Group"              # De Facto, Loullie
+  - "ישראל קנדה הוטלס / Israel-Canada Hotels (F&B)"
+  - "קבוצת בראסרי / R2M"
+
+# ---------------------------------------------------------------------------------------------
+# TOP RESTAURANTS — watch their public pages for spin-offs, pop-ups, "next door" concepts, hiring
+# ---------------------------------------------------------------------------------------------
+top_restaurants:
+  - "השף / HaSalon"
+  - "פורט סעיד / Port Said"
+  - "מיזנון / Miznon"
+  - "אוזה / Onza"
+  - "טאיזו / Taizu"
+  - "ג'ורג' אנד ג'ון / George & John"
+  - "OCD"
+  - "שילה / Shila"
+  - "תריסר / Treisar"
+  - "מנתה ריי / Manta Ray"
+  - "אוזריה / Ouzeria"
+  - "סנטה קתרינה / Santa Katarina"
+  - "בר 51 / Bar 51"
+  - "מסעדת A / Restaurant A"
+  - "משיה / Mashya"
 
 platforms:
 
   instagram:
     accounts:
-      chefs: []
-      food_creators: []
-      restaurant_groups: []
-      bakeries: []
-      coffee_roasters: []
-      pr_agencies: []
-      branding_studios: []
-      architects_designers: []
+      food_creators: []        # add verified public TLV food-creator handles as discovered
+      pr_agencies: []          # food/hospitality PR handles tip openings early — fill as found
+      branding_studios: []     # studios that brand new venues (logo/menu reveals) — fill as found
+      architects_designers: [] # designers post fit-outs of venues weeks before opening
       hospitality_recruiters: []
     hashtags:
       - מסעדהחדשה
+      - בארחדש
       - פתיחהבקרוב
       - פופאפתלאביב
       - אוכלבתלאביב
       - קפהחדש
-      - תל אביב אוכל
+      - בריןחדש
+      - סופטאופנינג
+      - popuptlv
+      - newrestauranttlv
+      - telavivfood
+      - tlvfood
 
   tiktok:
     accounts:
@@ -34,26 +101,64 @@ platforms:
       restaurants: []
     keywords:
       - מסעדה חדשה תל אביב
+      - בר חדש תל אביב
       - פופ אפ אוכל תל אביב
+      - קפה חדש תל אביב
       - new restaurant Tel Aviv
       - Tel Aviv food opening
+      - hidden bar Tel Aviv
+      - secret dinner Tel Aviv
 
   facebook:
     public_pages:
       - Secret Tel Aviv
+      - Debbest Israel
+    groups_public:                      # public foodie/industry groups carry opening + hiring posts
+      - "דרושים מסעדות & בתי קפה"
+      - "דרושים טבחים שפים וקונדיטורים בכל הארץ"
+      - "Restaurant Club Israel"
     keywords:
       - פופ אפ אוכל
       - פתיחה בקרוב
       - מסעדה חדשה
+      - דרושים צוות הקמה
+      - ערב שף חד פעמי
 
   linkedin:
     keywords:
       - restaurant opening team Tel Aviv
       - new restaurant hiring Tel Aviv
       - hospitality Tel Aviv opening
+      - bar manager opening Tel Aviv
+
+# ---------------------------------------------------------------------------------------------
+# CREATIVE COMBINATION BANK — improvise around these every run to surface pop-ups & interesting
+# one-offs. Mix a TRIGGER with an ANGLE + "תל אביב"/"Tel Aviv" (and run HE + EN). Invent fresh
+# combos each run; rotate so you don't fetch the same result set twice.
+# ---------------------------------------------------------------------------------------------
+combination_bank:
+  triggers_he: [ "פופ אפ", "ערב חד פעמי", "סופט אופנינג", "הרצה", "פתיחה בקרוב", "השבוע נפתח",
+                 "קולאב", "שיתוף פעולה", "ארוחת שף", "ערב אורח", "guest chef", "טייק אובר",
+                 "סוף שבוע בלבד", "לזמן מוגבל", "חדש בשכונה", "בקרוב נפתח", "דרושים צוות הקמה" ]
+  triggers_en: [ "pop-up", "soft opening", "one night only", "guest chef", "chef takeover",
+                 "collab dinner", "secret dinner", "supper club", "opening soon", "now open",
+                 "this week only", "limited time", "new in town", "hidden", "speakeasy" ]
+  angles:      [ "טאקו/taco", "ראמן/ramen", "נטורל יין/natural wine", "מאצ'ה/matcha", "ביסטרו/bistro",
+                 "מאפייה/bakery", "גלידה/gelato", "קוקטייל בר/cocktail bar", "אסאדו/asado",
+                 "סושי/sushi handroll", "פיצה נפוליטנה/napoletana", "בראנץ'/brunch", "רוף טופ/rooftop" ]
+  neighborhoods: [ "פלורנטין/Florentin", "נווה צדק/Neve Tzedek", "כרם התימנים/Kerem", "יפו/Jaffa",
+                   "לב העיר/Lev Hair", "מונטיפיורי/Montefiore", "שוק לוינסקי/Levinsky", "נמל ת\"א/TLV Port",
+                   "רוטשילד/Rothschild", "כיכר דיזנגוף/Dizengoff" ]
+  # Examples to riff on (run, then invent more):
+  #   site:instagram.com "פופ אפ" "פלורנטין" טאקו
+  #   site:instagram.com "guest chef" "Tel Aviv" "one night"
+  #   site:tiktok.com "סופט אופנינג" "תל אביב" בר
+  #   site:instagram.com "natural wine" "Jaffa" "now open"
+  #   site:instagram.com (<top_chef name>) "פופ אפ" OR "ערב חד פעמי"
 
 # Usage rules:
-#   - Search indexed public mentions of each account/entity; do not log in.
-#   - Do not scrape private data or collect personal data beyond public handle/page name + public URL.
-#   - Treat social hits as EARLY SIGNALS: verify the entity against web / reservation / media before
+#   - Social is the PRIMARY discovery engine — run it heavily and creatively every run.
+#   - Date each hit by its body date OR its posted/published date (SKILL.md §5 Dating rule).
+#   - Treat social hits as leads: verify the entity against web / reservation / media before
 #     reporting, and never output a social finding without a proof URL.
+#   - Search indexed public mentions only; do not log in or collect private personal data.

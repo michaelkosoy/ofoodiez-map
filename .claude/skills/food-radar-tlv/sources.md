@@ -67,3 +67,24 @@ added URLs under a section. Be economical and respect robots.
 
 **Map is most useful for:** reservation-platform category pages · event pages · food-news archives ·
 restaurant category pages — i.e. sources with many pages where you need only the *newly added* URLs.
+
+---
+
+## Mandatory every-run reservation checks (Ontopo + Tabit — never skip either)
+
+On **every** run you must hit **both** platforms (see `SKILL.md` §5 / §15 step 6). Reservation pages
+rarely expose a "date added", so use them as **discovery + corroboration**: a new or newly-bookable
+page is a strong signal even with no media coverage, and pulling a reservation link for a venue you
+found elsewhere raises its confidence.
+
+**Ontopo** — `tavily_map` the category pages, then `tavily_search` (`include_domains: ["ontopo.com"]`):
+- https://ontopo.com/he/il/tel-aviv  (all TLV) · …/tel-aviv/bars · …/tel-aviv/chef-restaurants
+- https://ontopo.com/he/il  → region pages: אזור המרכז / השרון / רמת גן-גבעתיים / הרצליה / כפר סבא, etc.
+- Search the run's candidate names (e.g. a place just seen on Mako/Time Out) to find its booking page.
+
+**Tabit** — `tavily_search` (`include_domains: ["tabitisrael.co.il","tabit.cloud","tabit.rest"]`):
+- https://tabitisrael.co.il  (home / new listings) · /site/<venue> venue pages · /online-reservations/…
+- Query "מסעדה חדשה / בר חדש / הזמנת שולחן תל אביב" + the run's candidate names.
+
+**If a platform returns nothing usable**, say so in the run notes — do not silently skip it. Log
+undated finds as `watch` records in `seen-records.json` so a later run can promote them once dated.

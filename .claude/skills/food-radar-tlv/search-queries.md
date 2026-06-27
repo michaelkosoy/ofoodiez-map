@@ -66,6 +66,39 @@ for overrides), and use `include_domains` to focus the `site:` groups.
 - `site:facebook.com/events "פופ אפ אוכל" "תל אביב"`
 - `site:linkedin.com "opening team" "Tel Aviv" restaurant`
 
+**Social is the primary discovery layer — run it heavily and improvise.** Beyond the fixed lines
+above, generate fresh TRIGGER × ANGLE × NEIGHBORHOOD combos every run (HE + EN) from the
+`combination_bank` in `social-watchlist.yaml`. Rotate them so each run finds new things. Starters:
+
+- `site:instagram.com "פופ אפ" "פלורנטין"` · `site:instagram.com "פופ אפ" "יפו" אוכל`
+- `site:instagram.com "ערב חד פעמי" "תל אביב"` · `site:instagram.com "ארוחת שף" "תל אביב" קולאב`
+- `site:instagram.com "סופט אופנינג" OR "הרצה" "תל אביב"` · `site:instagram.com "השבוע נפתח" "תל אביב"`
+- `site:instagram.com "לזמן מוגבל" OR "סוף שבוע בלבד" אוכל תל אביב`
+- `site:instagram.com "guest chef" OR "chef takeover" "Tel Aviv"` · `site:instagram.com "supper club" "Tel Aviv"`
+- `site:instagram.com "natural wine" OR "wine bar" "Jaffa" OR "Florentin" "now open"`
+- `site:instagram.com "secret" OR "hidden" OR "speakeasy" bar "Tel Aviv"`
+- `site:tiktok.com "פופ אפ" "תל אביב"` · `site:tiktok.com "מקום חדש" "תל אביב" אוכל`
+- `site:tiktok.com "soft opening" OR "new spot" "Tel Aviv"`
+- `<top_chef / restaurant_group / top_restaurant name>` + `"פופ אפ"` / `"ערב חד פעמי"` / `"בקרוב"` / `"דרושים"`
+- Hashtag sweeps: `#פופאפתלאביב` · `#מסעדהחדשה` · `#popuptlv` · `#newrestauranttlv` · `#tlvfood`
+
+> **Dating social hits:** if a post has no date in its text, use the **posted/published** date the tool
+> returns (platform timestamp / "posted on" / "Video by X on <date>"). That posted-date is the signal
+> date for the time-window test — don't drop a dateless-in-body post if a real posted-date exists.
+
+## F. Top chefs / restaurant groups / top restaurants (hiring + new projects — run every time)
+
+Pair each name from `social-watchlist.yaml` with a hiring/new-project term. A leading chef or group
+hiring an "opening team" almost always precedes a new venue.
+
+- `<chef name> מסעדה חדשה` · `<chef name> פותח` · `<chef name> פרויקט חדש` · `<chef name> דרושים`
+- `<restaurant group> דרושים צוות הקמה` · `<restaurant group> מקום חדש` · `<restaurant group> בקרוב`
+- `<top restaurant> דרושים` · `<top restaurant> צוות הקמה` · `<top restaurant> סניף חדש`
+- `"דרושים" "צוות הקמה" מסעדה תל אביב` · `"opening team" OR "now hiring" chef Tel Aviv new`
+- `site:linkedin.com (<chef/group name>) "Tel Aviv" (hiring OR "opening team")`
+- `site:instagram.com (<chef/group handle or name>) ("דרושים" OR "בקרוב" OR "מסעדה חדשה")`
+- Also scan each chef/group's **own** public page/site/LinkedIn for "careers"/"דרושים"/"בקרוב".
+
 ---
 
 ## Keyword glossary

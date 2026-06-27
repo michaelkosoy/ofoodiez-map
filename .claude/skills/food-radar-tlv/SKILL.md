@@ -93,20 +93,62 @@ export TAVILY_API_KEY=<your-key>
 - **Map** — when a source has many pages and you need newly added URLs: reservation category pages,
   event pages, food-news archives, restaurant category pages.
 
+**Mandatory reservation-platform check (every run — never skip):** You MUST query **both Ontopo and
+Tabit** on every run, even if web/media search already looks "done." Do all of: (a) `tavily_map` the
+Ontopo TLV category pages and the Tabit listings to enumerate venue/reservation URLs; (b) `tavily_search`
+each platform (`include_domains`) for "new"/"חדש"/"בקרוב" venues **and** for the specific names you found
+elsewhere this run (a fresh reservation page is itself a strong signal and a confidence booster). A new
+or newly-bookable reservation page is a first-class finding — log it even when no media has covered it
+yet. If a platform returns nothing usable, say so explicitly in the run notes (don't silently skip it).
+Full URLs + method in **`sources.md` → "Mandatory every-run reservation checks"**.
+
 **Anti-hallucination rule (hard):** every proof URL and date must come from an **actual tool result**.
 Never guess, autocomplete, or invent URLs or dates. If you cannot obtain a real proof URL, **drop the
 item** — do not output it.
 
+**Dating rule (incl. social):** Prefer an explicit date in the page/post body. **If the body has no
+date, use the date the item was *posted/published*** — the platform/extract timestamp (e.g. Tavily's
+publication date, an Instagram/TikTok/Facebook "posted on" / "Video by X on <date>" indicator, or an
+event page's listed date). A tool-surfaced posted-date **counts as the signal date** for the time-window
+test, so a post with no in-text date is **not** automatically dropped — only drop it if **no** real
+posted-date can be obtained from a tool result. Always record where the date came from (body vs posted).
+
 ## 6. Social-media workflow
 
-Social media is an **early-signal layer, not the final truth source**. Workflow:
+Social media is the **PRIMARY DISCOVERY ENGINE** of this skill — **lean on it heavily every run.**
+It is the fastest, richest source for the most interesting finds (pop-ups, soft launches, chef
+collabs, one-off/guest-chef nights, "hidden"/secret dinners) — usually days or weeks before media or
+reservation platforms. It is still **not the final truth source**: discover on social, then **verify
+before output** and attach a proof URL. Do not let a run lean only on media — social comes first.
 
-1. Find social signal (via Tavily indexed search — see `search-queries.md` group E).
+**Improvise creative query combinations every run.** Don't just run the fixed lines — mix a TRIGGER
+(pop-up / soft opening / guest chef / one-night / collab / "this week only") with an ANGLE (taco,
+ramen, natural wine, matcha, rooftop…) and a NEIGHBORHOOD (Florentin, Jaffa, Montefiore, Levinsky…),
+in **Hebrew and English**, and **invent fresh combinations** so each run surfaces new things and
+doesn't re-fetch the same set. The seed lists + `combination_bank` live in **`social-watchlist.yaml`**;
+the worked examples are in **`search-queries.md` group E**. Aim wide and weird — that's where the
+interesting stuff hides.
+
+Workflow:
+
+1. Find social signal (via Tavily indexed search — see `search-queries.md` group E + the
+   `combination_bank` in `social-watchlist.yaml`; run many creative combos, HE + EN).
 2. Extract place/event/person name.
-3. Search Tavily for that same entity across the web.
-4. Confirm against food media / reservation platforms / Google Maps / event pages.
-5. Score confidence (§10).
-6. Output **only** if new or meaningfully updated, **and only with a proof URL**.
+3. **Date it.** Read the date from the post body; if none, use the **posted/published date** surfaced
+   by the tool (platform timestamp, "posted on"/"Video by X on <date>" indicator) — see §5 Dating rule.
+   Apply the time-window test to that date. Do **not** drop a post just because it lacks an in-text date.
+4. Search Tavily for that same entity across the web.
+5. Confirm against food media / reservation platforms / Google Maps / event pages.
+6. Score confidence (§10).
+7. Output **only** if new or meaningfully updated, **and only with a proof URL**.
+
+**Top chefs / restaurant groups / top restaurants (run every time):** Actively sweep the leading
+Israeli chefs, restaurant groups, and top restaurants for **hiring posts** ("דרושים…", "צוות הקמה",
+"opening team") and **new-project hints** — a top chef/group hiring an opening team almost always
+precedes a new venue. Use the named seeds in **`social-watchlist.yaml`** (chefs · restaurant_groups ·
+top_restaurants) and the hiring/chef query banks (`search-queries.md` groups C and F). Treat a
+hiring/new-project signal from a known chef or group as a real lead: extract the implied venue, verify
+(§ steps 4–5), and log it (often confidence 3 until corroborated).
 
 Signal types: `official_announcement` · `chef_hint` · `creator_mention` · `hiring_signal` ·
 `tagged_location` · `pop_up_announcement` · `supplier_or_designer_hint` · `reservation_link_shared` ·
@@ -222,15 +264,22 @@ Full rules in **`compliance.md`**.
 
 1. Resolve search tool (§5) and announce it.
 2. Load `seen-records.json` if present.
-3. Run query banks A–E (`search-queries.md`) in **Hebrew and English**, scoped to the time window.
+3. Run query banks A–F (`search-queries.md`) in **Hebrew and English**, scoped to the time window.
 4. Collect candidate URLs; **Extract** the top ~15–25 (official/reservation/media first).
 5. **Crawl/Map** the known high-value pages from `sources.md` for newly added items.
-6. For each candidate: extract entity name, area/city, status, date, proof sentence + URL.
-7. Normalize (§8) and **dedupe** (merge HE/EN + cross-source duplicates).
-8. Score confidence (§10); apply the **geography gate** (§11).
-9. Diff against `seen-records.json`: keep brand-new items + meaningfully-updated items; drop the rest.
-10. Print the report (§12) — or the exact no-findings sentence (§13).
-11. Write/update `seen-records.json` (set `last_output_at` on items you reported).
+6. **Reservation platforms — MANDATORY, both, every run:** map + search **Ontopo** and **Tabit**
+   (§5 "Mandatory reservation-platform check"). Capture new/newly-bookable venue pages, and pull
+   reservation links for the run's other candidates. Note explicitly if a platform yields nothing.
+7. **Chefs/groups/top restaurants:** sweep `social-watchlist.yaml` seeds + query banks C & F for
+   **hiring/opening-team posts** and new-project hints from leading chefs, groups, and top restaurants.
+8. For each candidate: extract entity name, area/city, status, date (body date, or **posted date** per
+   §5 Dating rule), proof sentence + URL.
+9. Normalize (§8) and **dedupe** (merge HE/EN + cross-source duplicates).
+10. Score confidence (§10); apply the **geography gate** (§11).
+11. Diff against `seen-records.json`: keep brand-new items + meaningfully-updated items; drop the rest.
+12. Print the report (§12) — or the exact no-findings sentence (§13).
+13. Write/update `seen-records.json` (set `last_output_at` on items you reported; you may also log
+    undated discoveries and out-of-window items as tracked-but-unreported `watch`/`excluded` records).
 
 ## 16. Example output
 
