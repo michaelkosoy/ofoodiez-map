@@ -123,7 +123,8 @@ body::before {
     max-width: 420px;
     line-height: 1.7;
     margin-bottom: 48px;
-    min-height: 9em; /* reserve space so form doesn't jump on mobile */
+    /* Reserve space for the full 4-line typing text so the form card never jumps */
+    min-height: 13.6em;
     white-space: pre-line; /* honours \n on mobile */
 }
 
