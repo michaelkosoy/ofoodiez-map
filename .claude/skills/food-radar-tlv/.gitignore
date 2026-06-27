@@ -1,0 +1,7 @@
+# live run state — created on first run, not committed
+seen-records.json
+runs/
+
+# the repo-root .gitignore ignores all `scripts/` dirs; re-include this skill's helpers
+!scripts/
+!scripts/*.py

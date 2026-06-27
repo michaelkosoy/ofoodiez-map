@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "normalized_name": "bua bakery",
+      "original_names": ["Bua Bakery", "מאפיית בועה", "בועה"],
+      "type": "bakery",
+      "area": "Florentin",
+      "city": "Tel Aviv-Yafo",
+      "status": "opening_soon",
+      "first_seen_at": "2026-06-26T08:10:00+03:00",
+      "last_seen_at": "2026-06-27T09:00:00+03:00",
+      "proof_urls": [
+        "https://ontopo.com/he/il/example-bua",
+        "https://instagram.com/p/EXAMPLE"
+      ],
+      "source_names": ["Ontopo", "Instagram (@chef_example)"],
+      "confidence": 4,
+      "signal_types": ["reservation_link_shared", "chef_hint"],
+      "notes": "Soft launch reportedly next week; address listed on reservation page.",
+      "last_output_at": "2026-06-27T09:00:00+03:00"
+    },
+    {
+      "normalized_name": "lila wine bar",
+      "original_names": ["Lila Wine Bar", "לילה בר יין"],
+      "type": "bar",
+      "area": "Lev Ha'ir",
+      "city": "Tel Aviv-Yafo",
+      "status": "soft_opening",
+      "first_seen_at": "2026-06-27T07:30:00+03:00",
+      "last_seen_at": "2026-06-27T09:00:00+03:00",
+      "proof_urls": [
+        "https://www.timeout.co.il/example-lila",
+        "https://ontopo.com/he/il/example-lila"
+      ],
+      "source_names": ["Time Out Tel Aviv", "Ontopo"],
+      "confidence": 5,
+      "signal_types": ["official_announcement", "reservation_link_shared"],
+      "notes": "Chef-led natural-wine bar; soft launch this weekend per the article.",
+      "last_output_at": "2026-06-27T09:00:00+03:00"
+    },
+    {
+      "normalized_name": "unnamed new bakery ramat gan",
+      "original_names": ["דרושים מאפייה חדשה רמת גן"],
+      "type": "bakery",
+      "area": "Ramat Gan",
+      "city": "Ramat Gan",
+      "status": "hiring_signal",
+      "first_seen_at": "2026-06-25T14:00:00+03:00",
+      "last_seen_at": "2026-06-25T14:00:00+03:00",
+      "proof_urls": ["https://www.linkedin.com/posts/EXAMPLE"],
+      "source_names": ["LinkedIn"],
+      "confidence": 3,
+      "signal_types": ["hiring_signal"],
+      "notes": "Secondary city; included because hiring post names a Q3 opening.",
+      "last_output_at": "2026-06-25T14:05:00+03:00"
+    }
+  ]
+}

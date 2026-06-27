@@ -1,0 +1,59 @@
+# social-watchlist.yaml — food-radar-tlv
+#
+# Starter watchlist of public accounts / hashtags / keywords to check each run via
+# INDEXED PUBLIC SEARCH ONLY (Tavily). Do NOT log in, scrape private data, or collect
+# personal data beyond a public handle/page name and a public URL. See compliance.md.
+#
+# Fill the empty account lists over time with public handles you want monitored.
+
+platforms:
+
+  instagram:
+    accounts:
+      chefs: []
+      food_creators: []
+      restaurant_groups: []
+      bakeries: []
+      coffee_roasters: []
+      pr_agencies: []
+      branding_studios: []
+      architects_designers: []
+      hospitality_recruiters: []
+    hashtags:
+      - מסעדהחדשה
+      - פתיחהבקרוב
+      - פופאפתלאביב
+      - אוכלבתלאביב
+      - קפהחדש
+      - תל אביב אוכל
+
+  tiktok:
+    accounts:
+      food_creators: []
+      chefs: []
+      restaurants: []
+    keywords:
+      - מסעדה חדשה תל אביב
+      - פופ אפ אוכל תל אביב
+      - new restaurant Tel Aviv
+      - Tel Aviv food opening
+
+  facebook:
+    public_pages:
+      - Secret Tel Aviv
+    keywords:
+      - פופ אפ אוכל
+      - פתיחה בקרוב
+      - מסעדה חדשה
+
+  linkedin:
+    keywords:
+      - restaurant opening team Tel Aviv
+      - new restaurant hiring Tel Aviv
+      - hospitality Tel Aviv opening
+
+# Usage rules:
+#   - Search indexed public mentions of each account/entity; do not log in.
+#   - Do not scrape private data or collect personal data beyond public handle/page name + public URL.
+#   - Treat social hits as EARLY SIGNALS: verify the entity against web / reservation / media before
+#     reporting, and never output a social finding without a proof URL.
