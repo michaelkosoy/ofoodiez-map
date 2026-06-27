@@ -18,6 +18,10 @@ for overrides), and use `include_domains` to focus the `site:` groups.
 - `פתיחה בקרוב מסעדה תל אביב`
 - `סופט לאנץ מסעדה תל אביב`
 - `מסעדה בהרצה תל אביב`
+- `פופ-אפ תל אביב`
+- `פופ-אפ מסעדה חדשה תל אביב`
+- `חדש בתל אביב מסעדה`
+- `מסעדה חדשה תל אביב נפתחה`
 
 ## B. Broad English discovery
 
@@ -37,6 +41,9 @@ for overrides), and use `include_domains` to focus the `site:` groups.
 - `צוות הקמה מסעדה תל אביב`
 - `טבחים מסעדה חדשה תל אביב`
 - `ברמנים מסעדה חדשה תל אביב`
+- `מגייסים מסעדה חדשה תל אביב`
+- `מגייסים צוות למסעדה תל אביב`
+- `מגייסים לפופ-אפ תל אביב`
 - `hiring new restaurant Tel Aviv`
 - `opening team restaurant Tel Aviv`
 - `new cafe hiring Tel Aviv`
@@ -104,9 +111,10 @@ hiring an "opening team" almost always precedes a new venue.
 ## Keyword glossary
 
 ### Hebrew keywords
-דרושים · דרוש · דרושה · למסעדה חדשה · לבית קפה חדש · פתיחה בקרוב · לפני פתיחה · בהרצה · הרצה ·
-סופט לאנץ׳ · צוות הקמה · שף מחפש · טבחים · מלצרים · ברמנים · מארחים · מסעדת שף חדשה · קפה חדש ·
-פופ אפ · פופאף · אירוע קולינרי · ארוחת שף · ערב חד פעמי · שיתוף פעולה קולינרי
+דרושים · דרוש · דרושה · מגייסים · מגייס · למסעדה חדשה · לבית קפה חדש · חדש · מסעדה חדשה · תל אביב ·
+פתיחה בקרוב · לפני פתיחה · בהרצה · הרצה · סופט לאנץ׳ · צוות הקמה · שף מחפש · טבחים · מלצרים · ברמנים ·
+מארחים · מסעדת שף חדשה · קפה חדש · פופ אפ · פופ-אפ · פופאף · אירוע קולינרי · ארוחת שף · ערב חד פעמי ·
+שיתוף פעולה קולינרי
 
 ### English keywords
 opening soon · soft opening · new restaurant · new cafe · new bakery · food pop-up · chef dinner ·
@@ -123,7 +131,7 @@ Tel Aviv food pop-up · Tel Aviv restaurant opening · Tel Aviv new cafe
 | Yafo · Jaffa · יפו | Yafo |
 | cafe · café · coffee shop · בית קפה | cafe |
 | restaurant · מסעדה | restaurant |
-| pop-up · popup · פופ אפ · פופאף | pop-up |
+| pop-up · popup · פופ אפ · פופ-אפ · פופאף | pop-up |
 | soft launch · soft opening · הרצה · סופט לאנץ׳ · בהרצה | soft_opening |
 
 ## Secondary-geography terms (include only on strong signal — see geography gate)
