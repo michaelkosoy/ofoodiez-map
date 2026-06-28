@@ -18,31 +18,41 @@ class HappyHourParser(BaseEventParser):
 
     def get_prompt(self) -> str:
         return """
-        Analyze this input (which is usually a screenshot of an Instagram Story or Post detailing a Happy Hour deal at a bar/restaurant in Tel Aviv).
+        Analyze this input (a screenshot of an Instagram Story/Post or text describing a Happy Hour deal at a bar/restaurant, likely in Tel Aviv or Israel).
 
-        Follow these steps:
-        1. Identify the Instagram username of the venue or poster (usually visible at the top-left of the story or profile header).
-        2. Using the Instagram username, infer the actual restaurant/bar name. Use your internal knowledge base to find its full physical address in Tel Aviv, regular opening hours, and a standard Google Maps search link.
-        3. Read the text/deals written in the image to extract:
-           - The exact Happy Hour times and days (e.g., 'Sunday - Thursday 18:00 - 20:00').
-           - The specific deals offered (e.g., '1+1 on draft beers', '50% off cocktails & food'). This goes into the 'recommended' field.
-        4. Build a short, attractive 1-2 sentence description in English summarizing the deals and the restaurant/bar's vibe.
-        5. Provide the official Instagram handle link (e.g., 'https://instagram.com/handle').
+        Use BOTH the content in the image/text AND your own knowledge base about the venue to fill in as many fields as possible.
 
-        CRITICAL: If any information is missing or cannot be found in the image/text, DO NOT fail. Instead, leave the corresponding field as an empty string ("") so the user can fill it in manually later.
+        Steps:
+        1. Identify the Instagram username of the venue (top-left of story or profile header).
+        2. Using the username and any visible text, identify the restaurant/bar name in English and in Hebrew.
+           - If the name is only in Hebrew, transliterate/translate it to English for the "name" field.
+           - If the name is only in English, translate it to Hebrew for the "name_hebrew" field.
+        3. Use your knowledge to find the venue's full physical address and city (e.g. "Tel Aviv", "Herzliya").
+        4. Build a Google Maps search link for the venue (format: https://www.google.com/maps/search/?api=1&query=VENUE+NAME+CITY).
+        5. Extract the Happy Hour times and days from the flyer (e.g. "Sunday–Thursday 18:00–20:00").
+        6. Write a single rich description in English that covers BOTH the venue vibe AND the specific deals offered (e.g. "A lively rooftop bar with 1+1 cocktails and 50% off food, Sunday–Thursday from 18:00.").
+        7. If there is a video or Reel URL visible in the content, put it in "recommended". Otherwise leave it empty.
+        8. Provide the Instagram handle and full profile URL.
+        9. Use your knowledge to determine if the venue is kosher (true/false).
+        10. Search your knowledge for a reservation link for this venue — check only Tabit (https://tabit.cloud) or Ontopo (https://ontopo.com). If found on either, provide the direct booking URL. If not found on either, leave empty.
 
-        You must return a single JSON object matching this schema:
+        CRITICAL: Never fail due to missing info — leave unknown fields as empty string "" or false. Return ONLY a raw JSON object with no markdown.
+
+        JSON schema:
         {
-          "name": "Restaurant/Bar Name",
-          "address": "Full physical address, Tel Aviv",
-          "google_maps_link": "Google Maps search link",
-          "opening_hours": "Regular hours & Happy Hour times/days",
-          "recommended": "Specific deals (e.g., 50% off all drinks)",
-          "description": "Short description of the vibe and deals",
+          "name": "Restaurant/Bar name in English",
+          "name_hebrew": "שם בעברית",
+          "address": "Full street address",
+          "city": "City name in English",
+          "google_maps_link": "https://www.google.com/maps/search/...",
+          "opening_hours": "Happy Hour days and times as written on flyer",
+          "description": "Vibe + deals combined, 2-3 sentences in English",
+          "recommended": "Video/Reel URL if present, otherwise empty string",
           "instagram_username": "@handle",
-          "instagram_link": "Instagram URL"
+          "instagram_link": "https://instagram.com/handle",
+          "kosher": false,
+          "reservation_link": "Tabit or Ontopo booking URL, or empty string"
         }
-        Do not add any markdown formatting outside the JSON block. Return ONLY the raw JSON string.
         """
 
     def parse_text(self, text: str) -> dict:

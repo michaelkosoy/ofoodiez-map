@@ -17,6 +17,7 @@ def _run_migrations():
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS google_id VARCHAR(64)",
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS payplus_sub_uid VARCHAR(64)",
         "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
+        "ALTER TABLE ig_happy_hours ADD COLUMN IF NOT EXISTS google_maps_link TEXT",
     ]
     for stmt in migrations:
         try:
@@ -109,6 +110,7 @@ class HappyHourPlace(db.Model):
     
     # Links & Metadata
     reservation_link = db.Column(db.Text)
+    google_maps_link = db.Column(db.Text)
     instagram_url = db.Column(db.Text)
     image_url = db.Column(db.Text)
     verified = db.Column(db.Boolean, default=False)
@@ -138,6 +140,7 @@ class HappyHourPlace(db.Model):
             "Friday": self.friday,
             "Saturday": self.saturday,
             "ReservationLink": self.reservation_link or "",
+            "GoogleMapsLink": self.google_maps_link or "",
             "InstagramURL": self.instagram_url or "",
             "ImageURL": self.image_url or "",
             "Verified": self.verified,

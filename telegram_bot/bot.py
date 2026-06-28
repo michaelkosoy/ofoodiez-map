@@ -196,7 +196,7 @@ if bot:
             if active_mode == 'popup':
                 fields = ['title', 'date', 'time', 'location', 'location_link', 'instagram_username', 'instagram_link', 'description']
             else:
-                fields = ['name', 'address', 'google_maps_link', 'opening_hours', 'recommended', 'description', 'instagram_username', 'instagram_link']
+                fields = ['name', 'name_hebrew', 'address', 'city', 'google_maps_link', 'opening_hours', 'description', 'recommended', 'instagram_username', 'instagram_link', 'reservation_link']
             
             buttons = [InlineKeyboardButton(f"✏️ {f.replace('_', ' ').title()}", callback_data=f"edit_field_{f}") for f in fields]
             markup.add(*buttons)
@@ -508,13 +508,17 @@ def show_confirmation_message(chat_id, message_id, mode, data):
         msg_text = (
             "🔍 **Extracted Happy Hour Details:**\n\n"
             f"🏷️ **Name**: {data.get('name')}\n"
+            f"🔤 **Hebrew**: {data.get('name_hebrew') or '—'}\n"
             f"📍 **Address**: {data.get('address')}\n"
-            f"🗺️ **Maps Link**: {data.get('google_maps_link') or 'None'}\n"
+            f"🏙️ **City**: {data.get('city') or '—'}\n"
+            f"🗺️ **Maps**: {data.get('google_maps_link') or '—'}\n"
             f"⏰ **Hours**: {data.get('opening_hours')}\n"
-            f"🍷 **Deals**: {data.get('recommended')}\n"
-            f"💬 **Insta Tag**: {data.get('instagram_username') or 'None'}\n"
-            f"🔗 **Insta Link**: {data.get('instagram_link') or 'None'}\n"
-            f"📝 **Description**: {data.get('description')}\n\n"
+            f"📝 **Description**: {data.get('description')}\n"
+            f"🎬 **Video**: {data.get('recommended') or '—'}\n"
+            f"💬 **Insta**: {data.get('instagram_username') or '—'}\n"
+            f"🔗 **Insta Link**: {data.get('instagram_link') or '—'}\n"
+            f"🎟️ **Reservation**: {data.get('reservation_link') or '—'}\n"
+            f"✡️ **Kosher**: {'Yes' if data.get('kosher') else 'No'}\n\n"
             "Would you like to approve and publish this?"
         )
         

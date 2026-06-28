@@ -31,15 +31,19 @@ class HappyHourHandler(BaseApprovalHandler):
                 if not place:
                     print(f"❌ Error updating: Place ID {place_id} not found.")
                     return False
-                
-                # Update fields with the newly extracted data
+
+                if data.get('name'): place.name = data.get('name')
+                if data.get('name_hebrew'): place.name_hebrew = data.get('name_hebrew')
                 if data.get('address'): place.address = data.get('address')
+                if data.get('city'): place.city = data.get('city')
+                if data.get('google_maps_link'): place.google_maps_link = data.get('google_maps_link')
                 if data.get('opening_hours'): place.opening_hours = data.get('opening_hours')
                 if data.get('description'): place.description = data.get('description')
                 if data.get('recommended'): place.recommended = data.get('recommended')
                 if data.get('instagram_link'): place.instagram_url = data.get('instagram_link')
-                if data.get('image'): place.image_url = data.get('image')
-                
+                if data.get('reservation_link'): place.reservation_link = data.get('reservation_link')
+                if 'kosher' in data: place.kosher = bool(data.get('kosher'))
+
                 db.session.commit()
                 print(f"🔄 [SUCCESS] Updated Happy Hour place: {place.name}")
                 return True
@@ -52,23 +56,25 @@ class HappyHourHandler(BaseApprovalHandler):
     def save(self, app, data: dict) -> bool:
         try:
             with app.app_context():
-                # Attempt to parse days if included in description/hours (stubbed as False by default)
                 place = HappyHourPlace(
                     name=data.get('name', '') or 'Unknown',
+                    name_hebrew=data.get('name_hebrew', ''),
                     address=data.get('address', ''),
+                    city=data.get('city', ''),
+                    google_maps_link=data.get('google_maps_link', ''),
                     opening_hours=data.get('opening_hours', ''),
                     description=data.get('description', ''),
                     recommended=data.get('recommended', ''),
                     instagram_url=data.get('instagram_link', ''),
-                    image_url=data.get('image', ''),
-                    # Default all days to True for now, can be edited later
-                    sunday=True,
-                    monday=True,
-                    tuesday=True,
-                    wednesday=True,
-                    thursday=True,
+                    reservation_link=data.get('reservation_link', ''),
+                    kosher=bool(data.get('kosher', False)),
+                    sunday=False,
+                    monday=False,
+                    tuesday=False,
+                    wednesday=False,
+                    thursday=False,
                     friday=False,
-                    saturday=False
+                    saturday=False,
                 )
                 db.session.add(place)
                 db.session.commit()
