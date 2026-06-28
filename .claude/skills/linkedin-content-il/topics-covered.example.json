@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "topic_key": "mcp-as-usb-c-for-ai-tools",
+      "title": "MCP is the USB-C moment for AI tooling — here's what that actually buys you",
+      "angle": "builder POV: why a standard protocol beats N bespoke integrations, with the trade-offs",
+      "audience": "AI engineers, technical founders",
+      "pillars": ["ai", "dev-tools", "builder"],
+      "posted_date": "2026-06-22",
+      "post_url": null,
+      "run_file": "runs/2026-06-22.md",
+      "status": "drafted"
+    },
+    {
+      "topic_key": "israeli-cyber-ai-funding-signal",
+      "title": "What this week's Israeli cyber raise tells you about where AI security is heading",
+      "angle": "read the funding as a market signal, not news; what builders should do about it",
+      "audience": "founders, cyber professionals, VCs",
+      "pillars": ["cyber", "israel", "startups"],
+      "posted_date": "2026-06-15",
+      "post_url": "https://www.linkedin.com/posts/example",
+      "run_file": "runs/2026-06-15.md",
+      "status": "published"
+    }
+  ]
+}
