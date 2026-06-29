@@ -45,6 +45,8 @@
             flex-direction: column;
             padding: 20px 0;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
         .sidebar-header {
@@ -192,9 +194,78 @@
             border: 1px solid #eee;
         }
 
+        /* Mobile hamburger button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1100;
+            background: var(--sidebar-bg);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sidebar overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 999;
+        }
+
         @media (max-width: 768px) {
             .modal-grid, .modal-grid.checkbox-grid {
                 grid-template-columns: 1fr;
+            }
+
+            body {
+                overflow: auto;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .main-content {
+                padding: 16px;
+                padding-top: 64px;
+                width: 100%;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .header-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            h2 {
+                font-size: 1.3rem;
             }
         }
 
@@ -251,7 +322,10 @@
 </head>
 <body>
 
-    <aside class="sidebar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
             <h3>Admin Panel</h3>
@@ -294,5 +368,12 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     {% block scripts %}{% endblock %}
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+    </script>
 </body>
 </html>
