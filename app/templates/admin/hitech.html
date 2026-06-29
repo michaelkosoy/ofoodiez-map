@@ -4,8 +4,37 @@
 
 {% block content %}
 <div class="header-controls">
-    <h2>Tech Community Members <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span></h2>
-    <button class="btn" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+    <h2>Tech Community Members <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span> <span id="verified-count" style="font-size:1rem; font-weight:400; color:#27ae60; margin-left:12px;"></span></h2>
+    <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="openAddModal()"><i class="fas fa-plus"></i> Add Member</button>
+        <button class="btn" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+    </div>
+</div>
+
+<!-- Add Member Modal -->
+<div id="add-member-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:32px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <h3 style="margin:0 0 20px;">Add Member</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <input id="add-email" type="email" placeholder="Email *" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <input id="add-linkedin" type="url" placeholder="LinkedIn URL" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <input id="add-job-title" type="text" placeholder="Job Title" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <input id="add-company" type="text" placeholder="Company" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <select id="add-gender" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;color:#555;">
+                <option value="">Gender —</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+            </select>
+            <input id="add-list" type="text" placeholder="List tag (e.g. founders)" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.95rem;">
+                <input id="add-verified" type="checkbox"> Mark as verified
+            </label>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px;">
+            <button onclick="closeAddModal()" style="padding:10px 20px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;">Cancel</button>
+            <button onclick="submitAddMember()" style="padding:10px 20px;background:#5A3A31;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Add</button>
+        </div>
+    </div>
 </div>
 
 <div id="hitech-table"></div>
@@ -101,6 +130,30 @@
                 }
             },
             {
+                title: "Gender",
+                field: "gender",
+                width: 90,
+                hozAlign: "center",
+                headerSort: false,
+                formatter: function(cell) {
+                    const v = cell.getValue();
+                    if (v === 'Female') return '<span style="background:#f8d7ea;color:#c0397a;border-radius:12px;padding:2px 10px;font-weight:700;cursor:pointer;">F</span>';
+                    if (v === 'Male') return '<span style="background:#d6eaf8;color:#2980b9;border-radius:12px;padding:2px 10px;font-weight:700;cursor:pointer;">M</span>';
+                    return '<span style="color:#ccc;cursor:pointer;">—</span>';
+                },
+                cellClick: function(e, cell) {
+                    const cur = cell.getValue();
+                    const next = cur === 'Female' ? 'Male' : cur === 'Male' ? '' : 'Female';
+                    cell.setValue(next);
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gender: next })
+                    });
+                }
+            },
+            {
                 title: "List",
                 field: "list_name",
                 width: 160,
@@ -179,7 +232,7 @@
                                 .then(res => {
                                     if (res.ok) {
                                         cell.getRow().delete();
-                                        updateCount();
+                                        updateCount(table.getData());
                                     } else {
                                         Swal.fire('Error', 'Could not delete entry.', 'error');
                                     }
@@ -192,16 +245,74 @@
     });
 
     table.on("dataLoaded", function (data) {
-        document.getElementById('email-count').textContent = '(' + data.length + ' members)';
+        updateCount(data);
     });
 
-    function updateCount() {
-        const rows = table.getData();
+    function updateCount(rows) {
+        rows = rows || table.getData();
+        const verifiedCount = rows.filter(r => r.verified).length;
         document.getElementById('email-count').textContent = '(' + rows.length + ' members)';
+        document.getElementById('verified-count').textContent = '✓ ' + verifiedCount + ' verified';
+    }
+
+    function openAddModal() {
+        document.getElementById('add-member-modal').style.display = 'flex';
+        document.getElementById('add-email').focus();
+    }
+
+    function closeAddModal() {
+        document.getElementById('add-member-modal').style.display = 'none';
+        ['add-email','add-linkedin','add-job-title','add-company','add-list'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('add-gender').value = '';
+        document.getElementById('add-verified').checked = false;
+    }
+
+    function submitAddMember() {
+        const email = document.getElementById('add-email').value.trim();
+        if (!email) { alert('Email is required.'); return; }
+        fetch("{{ url_for('admin.get_hitech_emails') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: email,
+                linkedin_url: document.getElementById('add-linkedin').value.trim(),
+                job_title: document.getElementById('add-job-title').value.trim(),
+                company: document.getElementById('add-company').value.trim(),
+                gender: document.getElementById('add-gender').value,
+                list_name: document.getElementById('add-list').value.trim(),
+                verified: document.getElementById('add-verified').checked,
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.id) {
+                table.addRow(data, true);
+                updateCount(table.getData());
+                closeAddModal();
+            } else {
+                alert(data.message || 'Failed to add member.');
+            }
+        });
     }
 
     function exportCSV() {
-        table.download("csv", "tech_community_members.csv");
+        const verifiedRows = table.getData().filter(r => r.verified);
+        const fields = ['id', 'email', 'linkedin_url', 'job_title', 'company', 'gender', 'list_name', 'joined'];
+        const header = fields.join(',');
+        const rows = verifiedRows.map(r =>
+            fields.map(f => {
+                const val = (r[f] ?? '').toString().replace(/"/g, '""');
+                return `"${val}"`;
+            }).join(',')
+        );
+        const csv = [header, ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tech_community_verified.csv';
+        a.click();
+        URL.revokeObjectURL(url);
     }
 </script>
 {% endblock %}

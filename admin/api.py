@@ -553,6 +553,34 @@ def whatsapp_application_cv(id):
 
 # --- HiTech / Tech Community API ---
 
+@admin_bp.route('/api/hitech-emails', methods=['POST'])
+@login_required
+def create_hitech_email():
+    data = request.json or {}
+    email = (data.get('email') or '').strip().lower()
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'message': 'Invalid email.'}), 400
+    if HitechEmail.query.filter_by(email=email).first():
+        return jsonify({'success': False, 'message': 'Email already exists.'}), 409
+    entry = HitechEmail(
+        email=email,
+        linkedin_url=(data.get('linkedin_url') or '').strip() or None,
+        job_title=(data.get('job_title') or '').strip() or None,
+        company=(data.get('company') or '').strip() or None,
+        gender=(data.get('gender') or '').strip() or None,
+        list_name=(data.get('list_name') or '').strip() or None,
+        verified=bool(data.get('verified', False)),
+    )
+    db.session.add(entry)
+    db.session.commit()
+    return jsonify({
+        'id': entry.id, 'email': entry.email,
+        'linkedin_url': entry.linkedin_url or '', 'job_title': entry.job_title or '',
+        'company': entry.company or '', 'gender': entry.gender or '',
+        'verified': bool(entry.verified), 'list_name': entry.list_name or '',
+        'joined': entry.created_at.strftime('%Y-%m-%d %H:%M') if entry.created_at else ''
+    }), 201
+
 @admin_bp.route('/api/hitech-emails', methods=['GET'])
 @login_required
 def get_hitech_emails():
@@ -564,6 +592,7 @@ def get_hitech_emails():
         'job_title': e.job_title or '',
         'company': e.company or '',
         'verified': bool(e.verified),
+        'gender': e.gender or '',
         'list_name': e.list_name or '',
         'joined': e.created_at.strftime('%Y-%m-%d %H:%M') if e.created_at else ''
     } for e in emails])
@@ -584,6 +613,8 @@ def update_hitech_email(id):
         entry.company = (data['company'] or '').strip() or None
     if 'verified' in data:
         entry.verified = bool(data['verified'])
+    if 'gender' in data:
+        entry.gender = (data['gender'] or '').strip() or None
     db.session.commit()
     return jsonify({'id': entry.id, 'list_name': entry.list_name or '', 'job_title': entry.job_title or '', 'company': entry.company or '', 'linkedin_url': entry.linkedin_url or ''})
 
