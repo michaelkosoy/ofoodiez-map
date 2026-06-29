@@ -221,6 +221,48 @@ def send_hitech_signup_email(email, linkedin_url=""):
     return _post(payload)
 
 
+def send_hitech_rejection_email(to_email):
+    """Send a rejection email to a HiTech signup whose LinkedIn was invalid."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+
+    text_body = (
+        "Hi,\n\n"
+        "We noticed that you signed up for the Ofoodiez Tech community – food events for people in tech.\n\n"
+        "Unfortunately, we couldn't approve your registration because the LinkedIn profile you provided was incorrect or invalid.\n\n"
+        "As part of our verification process, we ask all members to provide their LinkedIn profile so we can verify participants' identities.\n\n"
+        "Please register again using the link below and make sure to include your correct LinkedIn profile:\n"
+        "https://ofoodiez.com/hitech\n\n"
+        "Thank you, and we look forward to having you in the community!\n\n"
+        "Best,\nOfoodiez"
+    )
+    html_body = (
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;line-height:1.6;">'
+        "<p>Hi,</p>"
+        "<p>We noticed that you signed up for the <b>Ofoodiez Tech community</b> – food events for people in tech.</p>"
+        "<p>Unfortunately, we couldn't approve your registration because the LinkedIn profile you provided was <b>incorrect or invalid</b>.</p>"
+        "<p>As part of our verification process, we ask all members to provide their LinkedIn profile so we can verify participants' identities.</p>"
+        "<p>Please register again using the link below and make sure to include your correct LinkedIn profile:</p>"
+        '<p><a href="https://ofoodiez.com/hitech" style="background:#720815;color:#f9f6eb;text-decoration:none;'
+        'padding:12px 24px;border-radius:8px;font-weight:bold;display:inline-block;">Register Again</a></p>'
+        "<p>Thank you, and we look forward to having you in the community!</p>"
+        "<p>Best,<br>Ofoodiez</p>"
+        "</div>"
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez"},
+        "subject": "Your Ofoodiez Tech Community Registration was not approved",
+        "content": [
+            {"type": "text/plain", "value": text_body},
+            {"type": "text/html", "value": html_body},
+        ],
+    }
+    return _post(payload)
+
+
 def _post(payload):
     api_key = WaConfig.SENDGRID_API_KEY
     # Don't let SendGrid rewrite links into ct.sendgrid.net click-tracking URLs

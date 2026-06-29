@@ -19,6 +19,7 @@ def _run_migrations():
         "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
         "ALTER TABLE ig_happy_hours ADD COLUMN IF NOT EXISTS google_maps_link TEXT",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS company TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE",
     ]
     for stmt in migrations:
         try:
@@ -162,6 +163,7 @@ class HitechEmail(db.Model):
     linkedin_url = db.Column(db.Text)
     job_title = db.Column(db.Text)
     company = db.Column(db.Text)
+    verified = db.Column(db.Boolean, default=False)
     list_name = db.Column(db.Text)       # admin-assigned email list tag (e.g. "founders", "cto")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

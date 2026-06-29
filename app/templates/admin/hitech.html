@@ -23,6 +23,27 @@
             { title: "#", field: "id", width: 60, headerSort: false },
             { title: "Email", field: "email", headerFilter: "input", minWidth: 220 },
             {
+                title: "Verified",
+                field: "verified",
+                width: 90,
+                hozAlign: "center",
+                headerSort: true,
+                formatter: function(cell) {
+                    const checked = cell.getValue() ? "checked" : "";
+                    return `<input type="checkbox" ${checked} style="width:16px;height:16px;cursor:pointer;">`;
+                },
+                cellClick: function(e, cell) {
+                    const newVal = !cell.getValue();
+                    cell.setValue(newVal);
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ verified: newVal })
+                    });
+                }
+            },
+            {
                 title: "LinkedIn",
                 field: "linkedin_url",
                 minWidth: 180,
@@ -100,6 +121,40 @@
                 }
             },
             { title: "Joined", field: "joined", width: 150 },
+            {
+                title: "Rejection Email",
+                width: 130,
+                hozAlign: "center",
+                headerSort: false,
+                formatter: function () {
+                    return "<button title='Send rejection email' style='background:none;border:none;color:#e67e22;cursor:pointer;font-size:1rem;'><i class='fas fa-envelope-open-text'></i></button>";
+                },
+                cellClick: function (e, cell) {
+                    const email = cell.getRow().getData().email;
+                    Swal.fire({
+                        title: 'Send rejection email?',
+                        text: `Send LinkedIn rejection email to ${email}?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e67e22',
+                        cancelButtonColor: '#aaa',
+                        confirmButtonText: 'Send'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const id = cell.getRow().getData().id;
+                            fetch(`{{ url_for('admin.get_hitech_emails') }}/${id}/reject`, { method: 'POST' })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire('Sent!', `Rejection email sent to ${email}.`, 'success');
+                                    } else {
+                                        Swal.fire('Error', data.message || 'Failed to send email.', 'error');
+                                    }
+                                });
+                        }
+                    });
+                }
+            },
             {
                 title: "",
                 width: 60,
