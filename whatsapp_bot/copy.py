@@ -65,6 +65,12 @@ CONTACT_INFO = (
 EMP_FIRST_NAME = "Awesome — let's set you up as an advocate! 🙌\nWhat's your *first name*?"
 EMP_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
 EMP_COMPANY = "Which company do you work at (and can refer candidates into)? 🏢"
+EMP_TITLE = (
+    "Got it — *{company}*! 💼\n"
+    "What's your *role/title* there? This lets me match you to candidates looking "
+    "for that role (e.g. DevOps, Data Scientist, Product Manager).\n"
+    "No title? Reply *skip*."
+)
 EMP_METHOD_PROMPT = (
     "How would you like to refer candidates at *{company}*? 🤝\n\n"
     "*1* 📧 *Email me* — I'll get a candidate's CV by email and refer them myself.\n"
@@ -128,7 +134,40 @@ CAND_REFERRAL_LINK = (
     "Great news — *{advocate}* from *{company}* shared a referral link with you! 🔗🎉\n"
     "This is a referral link by *{advocate}* from *{company}* — tap it and fill in "
     "your details:\n{link}\n\n"
-    "Good luck! 🤞 Type *menu* anytime to explore more."
+    "Aiming for a *different role* at *{company}*? Tell me the role and I'll take your "
+    "CV and pass it to the team too. All set? Type *menu* anytime. 🤞"
+)
+CAND_REFERRAL_LINK_NONAME = (
+    "Great news — here's a referral link for *{company}*! 🔗🎉\n"
+    "Tap it and fill in your details:\n{link}\n\n"
+    "Aiming for a *different role* at *{company}*? Tell me the role and I'll take your "
+    "CV and pass it to the team too. All set? Type *menu* anytime. 🤞"
+)
+CAND_REFERRAL_LINK_TITLED = (
+    "Great news — I found a *{title}* referral at *{company}*! 🔗🎉\n"
+    "Tap it and fill in your details:\n{link}\n\n"
+    "Aiming for a *different role* at *{company}*? Tell me the role and I'll take your "
+    "CV and pass it to the team too. All set? Type *menu* anytime. 🤞"
+)
+CAND_REFERRAL_LINK_TITLED_NAMED = (
+    "Great news — *{name}*, a *{title}* at *{company}*, can refer you! 🔗🎉\n"
+    "Tap their referral link and fill in your details:\n{link}\n\n"
+    "Aiming for a *different role* at *{company}*? Tell me the role and I'll take your "
+    "CV and pass it to the team too. All set? Type *menu* anytime. 🤞"
+)
+CAND_ROLE_MATCH = (
+    "Great — *{company}*! 🎯\n"
+    "What *role* are you aiming for? I'll match you to the right person there "
+    "(e.g. DevOps, Data Scientist, Product Manager)."
+)
+CAND_NO_MATCH_CV = (
+    "I don't have a *{role}* referral at *{company}* just yet 🤔\n"
+    "But send me your CV and I'll pass it to the team there! First — got a *job link*? "
+    "Paste it (optional: type *pass*), or describe the role in a few words."
+)
+CAND_AFTER_LINK_ROLE = (
+    "Sure! Which *role* are you aiming for? "
+    "Tell me and I'll grab your CV next. 🎯"
 )
 CAND_ROLE = (
     "Amazing — I found *{advocate}* at *{company}*! 🎉\n"

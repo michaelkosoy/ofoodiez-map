@@ -30,6 +30,7 @@ _CONFIRM_WORDS = {
 }
 _METHOD_EMAIL_WORDS = {"1", "email", "emails", "e", "mail", "notify"}
 _METHOD_LINK_WORDS = {"2", "link", "links", "l", "code", "referral", "referral link"}
+_SKIP_WORDS = {"skip", "pass", "no", "none", "n/a", "na", "-", "later"}
 
 # Consumer mailbox providers — an advocate must use a work email so referrals
 # land in the right inbox and we can loosely tie them to the company.
@@ -76,9 +77,17 @@ def handle(user, conv, payload, text):
         company = get_or_create_company(text)
         data["company_id"] = company.id
         data["company_name"] = company.name
-        conversation.set_state(conv, "employee", "emp_method", data)
-        _send_method_choice(user, company.name)
+        conversation.set_state(conv, "employee", "emp_title", data)
+        messaging.send_prompt(user.phone, copy.EMP_TITLE.format(company=company.name))
         return "emp_company"
+
+    if step == "emp_title":
+        # Optional: their role at the company, used to match candidates by role.
+        if (text or "").strip().lower() not in _SKIP_WORDS:
+            data["role_title"] = (text or "").strip()
+        conversation.set_state(conv, "employee", "emp_method", data)
+        _send_method_choice(user, data.get("company_name", "your company"))
+        return "emp_title"
 
     if step == "emp_method":
         choice = _method_choice(text, payload)
@@ -230,18 +239,22 @@ def _create_advocates(user, data, emails):
     emails for the same company hit an IntegrityError and are skipped gracefully.
     """
     company_id = data.get("company_id")
+    role_title = (data.get("role_title") or "").strip() or None
     saved = []
     for email in emails:
         advocate = WaAdvocate.query.filter_by(
             user_id=user.id, company_id=company_id, email=email).first()
         if advocate:
             advocate.status = "active"
+            if role_title:
+                advocate.role_title = role_title
             advocate.updated_at = datetime.utcnow()
             db.session.commit()
             saved.append(email)
             continue
         db.session.add(WaAdvocate(
-            user_id=user.id, company_id=company_id, email=email, status="active"))
+            user_id=user.id, company_id=company_id, email=email,
+            role_title=role_title, status="active"))
         try:
             db.session.commit()
             saved.append(email)
@@ -253,17 +266,21 @@ def _create_advocates(user, data, emails):
 def _create_link_advocate(user, data, link):
     """Store the advocate's self-serve referral link (one per user+company)."""
     company_id = data.get("company_id")
+    role_title = (data.get("role_title") or "").strip() or None
     advocate = (WaAdvocate.query
                 .filter_by(user_id=user.id, company_id=company_id)
                 .filter(WaAdvocate.referral_link.isnot(None)).first())
     if advocate:
         advocate.referral_link = link
         advocate.status = "active"
+        if role_title:
+            advocate.role_title = role_title
         advocate.updated_at = datetime.utcnow()
         db.session.commit()
         return advocate
     advocate = WaAdvocate(
-        user_id=user.id, company_id=company_id, referral_link=link, status="active")
+        user_id=user.id, company_id=company_id, referral_link=link,
+        role_title=role_title, status="active")
     db.session.add(advocate)
     try:
         db.session.commit()

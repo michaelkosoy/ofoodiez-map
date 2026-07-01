@@ -119,6 +119,9 @@ _STATEMENTS = [
     "alter table public.wa_advocates add column if not exists email text",
     "alter table public.wa_advocates add column if not exists referral_link text",
     "alter table public.wa_advocates add column if not exists role_title text",
+    "alter table public.wa_advocates add column if not exists advocate_name text",
+    # Person-less curated referral links (no advocate user) need a nullable user_id.
+    "alter table public.wa_advocates alter column user_id drop not null",
     "alter table public.wa_application_recipients add column if not exists email text",
     "alter table public.wa_application_recipients add column if not exists approval_token text",
     "alter table public.wa_application_recipients add column if not exists approved_at timestamptz",

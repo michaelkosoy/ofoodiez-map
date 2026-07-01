@@ -269,7 +269,8 @@ def get_whatsapp_companies():
 @admin_bp.route('/api/whatsapp/advocates', methods=['GET'])
 @login_required
 def get_whatsapp_advocates():
-    results = db.session.query(WaAdvocate, WaUser, WaCompany).join(
+    # Left join on WaUser: curated advocates have no bot user (user_id is NULL).
+    results = db.session.query(WaAdvocate, WaUser, WaCompany).outerjoin(
         WaUser, WaAdvocate.user_id == WaUser.id).join(
         WaCompany, WaAdvocate.company_id == WaCompany.id).all()
     advocates = []
@@ -284,11 +285,12 @@ def get_whatsapp_advocates():
             method = "—"
         advocates.append({
             "id": adv.id,
-            "name": _name(usr),
-            "first_name": usr.first_name or "",
-            "last_name": usr.last_name or "",
+            "name": _name(usr) if usr else (adv.advocate_name or "—"),
+            "first_name": (usr.first_name if usr else "") or "",
+            "last_name": (usr.last_name if usr else "") or "",
+            "advocate_name": adv.advocate_name or "",
             "company": comp.name,
-            "number": usr.phone,
+            "number": usr.phone if usr else "",
             "method": method,
             "email": adv.email or "",
             "referral_link": adv.referral_link or "",
@@ -395,6 +397,8 @@ def update_whatsapp_advocate(id):
         adv.referral_link = (data["referral_link"] or "").strip() or None
     if "role_title" in data:
         adv.role_title = (data["role_title"] or "").strip() or None
+    if "advocate_name" in data:
+        adv.advocate_name = (data["advocate_name"] or "").strip() or None
     if data.get("company"):
         c = _resolve_company(data["company"])
         if c:

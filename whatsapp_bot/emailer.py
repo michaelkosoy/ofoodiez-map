@@ -172,6 +172,8 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
     reason_label = {
         "unknown_company": "is NOT in our database yet",
         "no_advocates": "is in our database but has NO advocates yet",
+        "cv_no_email_advocate": "has only a self-serve referral link — this candidate's CV "
+                                "is saved on the application for manual routing in the admin",
     }.get(reason, reason)
     body = (
         f"A candidate requested a referral we can't fulfil yet.\n\n"
