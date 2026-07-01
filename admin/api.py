@@ -418,6 +418,93 @@ def update_whatsapp_advocate(id):
     return jsonify({"id": adv.id, "status": adv.status})
 
 
+@admin_bp.route('/api/whatsapp/companies/<int:id>/advocates', methods=['GET'])
+@login_required
+def get_company_advocates(id):
+    WaCompany.query.get_or_404(id)
+    results = db.session.query(WaAdvocate, WaUser).join(
+        WaUser, WaAdvocate.user_id == WaUser.id
+    ).filter(WaAdvocate.company_id == id).order_by(WaAdvocate.created_at.desc()).all()
+    out = []
+    for adv, usr in results:
+        out.append({
+            "id": adv.id,
+            "name": _name(usr),
+            "first_name": usr.first_name or "",
+            "last_name": usr.last_name or "",
+            "phone": usr.phone or "",
+            "email": adv.email or "",
+            "referral_link": adv.referral_link or "",
+            "role_title": adv.role_title or "",
+            "status": adv.status,
+            "created": _fmt(adv.created_at),
+        })
+    return jsonify(out)
+
+
+@admin_bp.route('/api/whatsapp/companies/<int:id>/advocates', methods=['POST'])
+@login_required
+def add_company_advocate(id):
+    company = WaCompany.query.get_or_404(id)
+    data = request.json or {}
+    phone = (data.get("phone") or "").strip()
+    if not phone:
+        return jsonify({"error": "Phone number is required"}), 400
+
+    # Find or create WaUser by phone
+    usr = WaUser.query.filter_by(phone=phone).first()
+    if usr is None:
+        usr = WaUser(
+            phone=phone,
+            first_name=(data.get("first_name") or "").strip() or None,
+            last_name=(data.get("last_name") or "").strip() or None,
+        )
+        db.session.add(usr)
+        db.session.flush()
+    else:
+        if data.get("first_name"):
+            usr.first_name = data["first_name"].strip()
+        if data.get("last_name"):
+            usr.last_name = data["last_name"].strip()
+
+    email = (data.get("email") or "").strip() or None
+    existing = WaAdvocate.query.filter_by(user_id=usr.id, company_id=company.id, email=email).first()
+    if existing:
+        return jsonify({"error": "This advocate already exists for this company"}), 409
+
+    adv = WaAdvocate(
+        user_id=usr.id,
+        company_id=company.id,
+        email=email,
+        referral_link=(data.get("referral_link") or "").strip() or None,
+        role_title=(data.get("role_title") or "").strip() or None,
+        status=data.get("status", "active"),
+    )
+    db.session.add(adv)
+    db.session.commit()
+    return jsonify({
+        "id": adv.id,
+        "name": _name(usr),
+        "first_name": usr.first_name or "",
+        "last_name": usr.last_name or "",
+        "phone": usr.phone,
+        "email": adv.email or "",
+        "referral_link": adv.referral_link or "",
+        "role_title": adv.role_title or "",
+        "status": adv.status,
+        "created": _fmt(adv.created_at),
+    }), 201
+
+
+@admin_bp.route('/api/whatsapp/advocates/<int:id>', methods=['DELETE'])
+@login_required
+def delete_whatsapp_advocate(id):
+    adv = WaAdvocate.query.get_or_404(id)
+    db.session.delete(adv)
+    db.session.commit()
+    return '', 204
+
+
 @admin_bp.route('/api/whatsapp/companies/<int:id>', methods=['PUT'])
 @login_required
 def update_whatsapp_company(id):

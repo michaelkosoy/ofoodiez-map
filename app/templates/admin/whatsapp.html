@@ -44,6 +44,32 @@
     }
     button.act.danger { background: #e74c3c; }
     button.act.ok { background: #2e7d32; }
+
+    /* Advocates modal */
+    #adv-modal-overlay {
+        display: none; position: fixed; inset: 0; z-index: 9000;
+        background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+        align-items: center; justify-content: center;
+    }
+    #adv-modal-overlay.open { display: flex; }
+    #adv-modal {
+        background: #fff; border-radius: 16px; width: 90vw; max-width: 900px;
+        max-height: 85vh; display: flex; flex-direction: column;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    }
+    #adv-modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 22px; border-bottom: 1px solid #f0ebe5; flex-shrink: 0;
+    }
+    #adv-modal-title { font-size: 1.1rem; font-weight: 700; color: var(--sidebar-bg); }
+    #adv-modal-header .modal-actions { display: flex; gap: 8px; align-items: center; }
+    #adv-modal-close {
+        background: none; border: none; font-size: 1.4rem; cursor: pointer;
+        color: #999; line-height: 1; padding: 2px 6px;
+    }
+    #adv-modal-close:hover { color: #333; }
+    #adv-modal-body { flex: 1; overflow-y: auto; padding: 20px 22px; min-height: 0; }
+    #adv-modal-table { min-height: 200px; }
 </style>
 {% endblock %}
 
@@ -69,11 +95,31 @@
     <button class="tab-btn" data-tab="requests">Backfill requests</button>
 </div>
 
-<div class="tab-section" id="section-companies" style="display:none;"><h3>Companies</h3><div id="t-companies"></div></div>
+<div class="tab-section" id="section-companies" style="display:none;">
+    <h3>Companies <small style="font-size:.8rem;color:#999;font-weight:400;">— click a row to view advocates</small></h3>
+    <div id="t-companies"></div>
+</div>
 <div class="tab-section" id="section-advocates" style="display:none;"><h3>Advocates (employees)</h3><div id="t-advocates"></div></div>
 <div class="tab-section" id="section-candidates" style="display:none;"><h3>Candidates</h3><div id="t-candidates"></div></div>
 <div class="tab-section" id="section-applications" style="display:none;"><h3>Applications &amp; referrals</h3><div id="t-applications"></div></div>
 <div class="tab-section" id="section-requests" style="display:none;"><h3>Backfill requests (companies we don't serve yet)</h3><div id="t-requests"></div></div>
+<!-- Advocates modal -->
+<div id="adv-modal-overlay">
+    <div id="adv-modal">
+        <div id="adv-modal-header">
+            <span id="adv-modal-title">Advocates</span>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="adv-add-btn" style="font-size:.82rem;padding:7px 14px;">
+                    <i class="fas fa-plus"></i> Add Advocate
+                </button>
+                <button id="adv-modal-close">&times;</button>
+            </div>
+        </div>
+        <div id="adv-modal-body">
+            <div id="adv-modal-table"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -284,11 +330,22 @@ function showTab(name) {
     document.getElementById('section-' + name).style.display = 'block';
     document.querySelector('.tab-btn[data-tab="' + name + '"]').classList.add('active');
     if (!TABLES[name]) {
-        TABLES[name] = new Tabulator("#t-" + name, {
+        var opts = {
             layout: "fitColumns", ajaxURL: URLS[name],
             pagination: "local", paginationSize: 25, columns: COLS[name],
             placeholder: "No data yet"
-        });
+        };
+        if (name === 'companies') {
+            opts.rowClick = function (e, row) {
+                // Don't open modal when clicking the Edit button cell
+                if (e.target.closest('button')) return;
+                openAdvocatesModal(row.getData());
+            };
+            opts.rowFormatter = function (row) {
+                row.getElement().style.cursor = 'pointer';
+            };
+        }
+        TABLES[name] = new Tabulator("#t-" + name, opts);
     } else {
         TABLES[name].redraw(true);
     }
@@ -297,5 +354,109 @@ document.querySelectorAll('.tab-btn').forEach(function (b) {
     b.addEventListener('click', function () { showTab(b.dataset.tab); });
 });
 showTab('companies');  // default tab
+
+// ---- Advocates modal ----
+var advTable = null;
+var currentCompany = null;
+
+function openAdvocatesModal(company) {
+    currentCompany = company;
+    document.getElementById('adv-modal-title').textContent = 'Advocates — ' + company.name;
+    document.getElementById('adv-modal-overlay').classList.add('open');
+
+    if (advTable) {
+        advTable.destroy();
+        advTable = null;
+    }
+
+    advTable = new Tabulator('#adv-modal-table', {
+        layout: 'fitColumns',
+        ajaxURL: '/admin/api/whatsapp/companies/' + company.id + '/advocates',
+        placeholder: 'No advocates yet',
+        columns: [
+            { title: 'Name', field: 'name', editor: false, minWidth: 140,
+              formatter: function(cell) {
+                var d = cell.getRow().getData();
+                return (d.first_name || '') + ' ' + (d.last_name || '');
+              }
+            },
+            { title: 'Email', field: 'email', editor: 'input', minWidth: 160 },
+            { title: 'LinkedIn / Referral link', field: 'referral_link', editor: 'input', minWidth: 180,
+              formatter: function(cell) {
+                var v = cell.getValue();
+                return v ? '<a href="' + v + '" target="_blank" rel="noopener" style="color:#5A3A31;text-decoration:underline;">link ↗</a>' : '<span style="color:#ccc;">—</span>';
+              }
+            },
+            { title: 'Role / Title', field: 'role_title', editor: 'input', minWidth: 140 },
+            { title: 'Status', field: 'status', editor: 'list',
+              editorParams: { values: ['active', 'inactive', 'pending'] }, width: 110 },
+            {
+                title: 'Delete', headerSort: false, width: 70,
+                formatter: function() { return '<button class="act danger" style="font-size:.75rem;padding:4px 9px;"><i class="fas fa-trash"></i></button>'; },
+                cellClick: function(e, cell) {
+                    var d = cell.getRow().getData();
+                    Swal.fire({ title: 'Remove advocate?', text: d.name, icon: 'warning',
+                        showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete'
+                    }).then(function(res) {
+                        if (!res.isConfirmed) return;
+                        fetch('/admin/api/whatsapp/advocates/' + d.id, { method: 'DELETE' })
+                            .then(function(r) {
+                                if (r.ok) { advTable.replaceData(); }
+                                else Swal.fire('Error', 'Could not delete', 'error');
+                            });
+                    });
+                }
+            }
+        ]
+    });
+
+    advTable.on('cellEdited', function(cell) {
+        var d = cell.getRow().getData();
+        fetch('/admin/api/whatsapp/advocates/' + d.id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: d.email, referral_link: d.referral_link, role_title: d.role_title, status: d.status })
+        }).then(function(r) {
+            if (!r.ok) {
+                Swal.fire({ icon: 'error', title: 'Save failed', timer: 1500, showConfirmButton: false });
+                advTable.replaceData();
+            }
+        });
+    });
+}
+
+function closeAdvocatesModal() {
+    document.getElementById('adv-modal-overlay').classList.remove('open');
+    if (advTable) { advTable.destroy(); advTable = null; }
+    currentCompany = null;
+}
+
+document.getElementById('adv-modal-close').addEventListener('click', closeAdvocatesModal);
+document.getElementById('adv-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAdvocatesModal();
+});
+
+document.getElementById('adv-add-btn').addEventListener('click', function() {
+    editModal('Add Advocate — ' + (currentCompany ? currentCompany.name : ''), [
+        { key: 'first_name', label: 'First name', value: '' },
+        { key: 'last_name',  label: 'Last name',  value: '' },
+        { key: 'phone',      label: 'WhatsApp number (e.g. +972501234567)', value: '' },
+        { key: 'email',      label: 'Work email', value: '' },
+        { key: 'referral_link', label: 'LinkedIn / Referral link', value: '' },
+        { key: 'role_title', label: 'Role / Title', value: '' }
+    ], function(v) {
+        fetch('/admin/api/whatsapp/companies/' + currentCompany.id + '/advocates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(v)
+        }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
+            advTable.replaceData();
+            if (TABLES['companies']) TABLES['companies'].replaceData();
+            Swal.fire({ icon: 'success', title: 'Advocate added', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
 </script>
 {% endblock %}
