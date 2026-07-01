@@ -244,6 +244,11 @@ def home():
         
     return render_template('home.html', data=data_to_render)
 
+@app.route('/blog/japan')
+def blog_japan():
+    """Japan travel & food guide."""
+    return render_template('blog_japan.html')
+
 @app.route('/blog/<category>')
 def blog_category(category):
     """Render specific blog category pages."""

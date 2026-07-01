@@ -330,22 +330,22 @@ function showTab(name) {
     document.getElementById('section-' + name).style.display = 'block';
     document.querySelector('.tab-btn[data-tab="' + name + '"]').classList.add('active');
     if (!TABLES[name]) {
-        var opts = {
+        TABLES[name] = new Tabulator("#t-" + name, {
             layout: "fitColumns", ajaxURL: URLS[name],
             pagination: "local", paginationSize: 25, columns: COLS[name],
             placeholder: "No data yet"
-        };
+        });
         if (name === 'companies') {
-            opts.rowClick = function (e, row) {
-                // Don't open modal when clicking the Edit button cell
+            TABLES[name].on("rowClick", function(e, row) {
                 if (e.target.closest('button')) return;
                 openAdvocatesModal(row.getData());
-            };
-            opts.rowFormatter = function (row) {
-                row.getElement().style.cursor = 'pointer';
-            };
+            });
+            TABLES[name].on("dataLoaded", function() {
+                TABLES['companies'].getRows().forEach(function(r) {
+                    r.getElement().style.cursor = 'pointer';
+                });
+            });
         }
-        TABLES[name] = new Tabulator("#t-" + name, opts);
     } else {
         TABLES[name].redraw(true);
     }

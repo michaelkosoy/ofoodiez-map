@@ -187,6 +187,9 @@
                 <div class="country-overlay">
                     <span class="country-name">{{ item.country }}</span>
                     <span class="cities">{{ item.cities }}</span>
+                    {% if item.blog_link %}
+                    <a href="{{ item.blog_link }}" class="country-guide-btn" onclick="event.stopPropagation()">📖 Read the Guide</a>
+                    {% endif %}
                 </div>
             </a>
             {% endfor %}
