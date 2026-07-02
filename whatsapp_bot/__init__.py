@@ -27,7 +27,7 @@ def init_app(app):
     Must be called AFTER ``instagram_automation.init_app`` so the shared db is
     initialized first.
     """
-    from . import approvals, models, webhooks  # noqa: F401  (import for side effects)
+    from . import approvals, backfill, models, webhooks  # noqa: F401  (import for side effects)
     from .migrate import run_migrations
 
     app.register_blueprint(wa_bp)

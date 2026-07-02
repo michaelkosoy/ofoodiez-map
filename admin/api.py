@@ -1,5 +1,8 @@
+import logging
 import os
 from datetime import datetime
+
+import requests
 from flask import jsonify, request, Response
 from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User
 from whatsapp_bot.models import (
@@ -8,6 +11,8 @@ from whatsapp_bot.models import (
 )
 from . import admin_bp
 from .auth import login_required
+
+logger = logging.getLogger("admin")
 
 # --- Happy Hour Places API ---
 
@@ -521,21 +526,20 @@ def update_whatsapp_company(id):
     return jsonify({"id": c.id, "name": c.name})
 
 
-def _notify_request_candidate(req, company=None):
-    """Email the candidate that their requested company is now available.
-    Returns 'sent' | 'no_email' | 'failed'."""
-    from whatsapp_bot import emailer
-    cand = WaUser.query.get(req.candidate_user_id)
-    if not cand or not cand.email:
-        return "no_email"
-    if company is None:
-        if req.resolved_company_id:
-            company = WaCompany.query.get(req.resolved_company_id)
-        if company is None and req.normalized_name:
-            company = WaCompany.query.filter_by(normalized_name=req.normalized_name).first()
-    company_name = company.name if company else (req.company_name_raw or "the company")
-    ok = emailer.send_company_available_email(cand.email, cand.first_name or "there", company_name)
-    return "sent" if ok else "failed"
+def _notify_via_bot(request_id):
+    """Ask the BOT service (which has the SendGrid env vars; this main app does
+    not) to email the candidate that their requested company is now available.
+    Best-effort → returns True iff the bot reports the email was sent. The shared
+    key (WA_CRON_SECRET / ADMIN_SECRET) must match on both services."""
+    base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
+    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
+    try:
+        resp = requests.post(f"{base}/wa/requests/{request_id}/notify",
+                             params={"key": secret}, timeout=15)
+        return bool(resp.ok and resp.json().get("emailed"))
+    except Exception:
+        logger.exception("admin: notify-via-bot failed for request %s", request_id)
+        return False
 
 
 @admin_bp.route('/api/whatsapp/requests/<int:id>', methods=['PUT'])
@@ -549,37 +553,8 @@ def update_whatsapp_request(id):
     req.status = status
     db.session.commit()
     # On "Mark handled", let the candidate know their company is now available.
-    emailed = (_notify_request_candidate(req) == "sent") if newly_handled else False
+    emailed = _notify_via_bot(req.id) if newly_handled else False
     return jsonify({"id": req.id, "status": req.status, "emailed": emailed})
-
-
-@admin_bp.route('/api/whatsapp/backfill-cron', methods=['GET', 'POST'])
-def whatsapp_backfill_cron():
-    """Run twice daily (external cron) to notify candidates when a company they
-    asked about now has an advocate. Secret-protected (no admin session)."""
-    secret = os.environ.get('WA_CRON_SECRET') or os.environ.get('ADMIN_SECRET', 'ofoodiez2025')
-    if request.args.get('key') != secret:
-        return jsonify({"error": "forbidden"}), 403
-    handled, notified = 0, 0
-    for req in WaCompanyRequest.query.filter_by(status="open").all():
-        company = None
-        if req.resolved_company_id:
-            company = WaCompany.query.get(req.resolved_company_id)
-        if company is None and req.normalized_name:
-            company = WaCompany.query.filter_by(normalized_name=req.normalized_name).first()
-        if company is None:
-            continue
-        if WaAdvocate.query.filter_by(company_id=company.id, status="active").first() is None:
-            continue  # still no advocate — leave the request open
-        res = _notify_request_candidate(req, company)
-        if res == "failed":
-            continue  # leave open so the next run retries (e.g. SendGrid hiccup)
-        req.status = "handled"
-        db.session.commit()
-        handled += 1
-        if res == "sent":
-            notified += 1
-    return jsonify({"handled": handled, "notified": notified})
 
 
 @admin_bp.route('/api/whatsapp/users/<int:id>', methods=['PUT'])
