@@ -79,11 +79,13 @@ def _enter_path(user, conv, flow):
         messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"
-    # Candidate/employee: sign up first (remembering the route), then resume into it.
-    if not user.is_registered:
-        return registration.start(user, conv, pending_flow=flow)
+    # Employees collect their identity inside the advocate flow's combined
+    # question, so they skip the separate sign-up.
     if flow == "employee":
         return employee.start(user, conv)
+    # Candidates sign up first (remembering the route), then resume into it.
+    if not user.is_registered:
+        return registration.start(user, conv, pending_flow="candidate")
     return candidate.start(user, conv)
 
 

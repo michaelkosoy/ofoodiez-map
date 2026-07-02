@@ -86,23 +86,25 @@ def handle(user, conv, payload, text):
         company = get_or_create_company(text)
         data["company_id"] = company.id
         data["company_name"] = company.name
-        conversation.set_state(conv, "employee", "emp_title", data)
-        messaging.send_prompt(user.phone, copy.EMP_TITLE.format(company=company.name))
+        conversation.set_state(conv, "employee", "emp_details", data)
+        messaging.send_prompt(user.phone, copy.EMP_DETAILS.format(company=company.name))
         return "emp_company"
 
-    if step == "emp_title":
-        # Optional: their role at the company, used to match candidates by role.
-        if (text or "").strip().lower() not in _SKIP_WORDS:
-            data["role_title"] = (text or "").strip()
-        conversation.set_state(conv, "employee", "emp_method", data)
-        _send_method_choice(user, data.get("company_name", "your company"))
-        return "emp_title"
+    if step == "emp_details":
+        return _handle_details(user, conv, data, text)
+
+    if step == "emp_details_confirm":
+        return _handle_details_confirm(user, conv, data, text, payload)
+
+    if step == "emp_email":
+        return _handle_email(user, conv, data, text)
 
     if step == "emp_method":
         choice = _method_choice(text, payload)
         company_name = data.get("company_name", "your company")
         if choice == "email":
-            conversation.set_state(conv, "employee", "emp_emails", data)
+            # Email is its own question (the work inbox where CVs land).
+            conversation.set_state(conv, "employee", "emp_email", data)
             messaging.send_prompt(user.phone, copy.EMP_EMAIL.format(company=company_name))
             return "emp_method_email"
         if choice == "link":
@@ -162,6 +164,146 @@ def _method_choice(text, payload):
     if t in _METHOD_LINK_WORDS:
         return "link"
     return None
+
+
+# ---- Combined advocate details: name + email + title in ONE message ----
+
+_TITLE_WORDS = {
+    "senior", "junior", "lead", "principal", "staff", "head", "chief", "vp",
+    "director", "manager", "engineer", "developer", "dev", "devops", "sre",
+    "analyst", "scientist", "designer", "architect", "specialist", "consultant",
+    "recruiter", "hr", "pm", "product", "data", "software", "qa", "marketing",
+    "sales", "finance", "operations", "cto", "ceo", "coo", "founder", "intern",
+    "associate", "backend", "frontend", "fullstack", "full-stack", "ml", "ai",
+    "researcher", "team", "tech", "technical", "project", "program", "owner",
+}
+
+
+def _looks_like_title(seg):
+    return any(tok.lower().strip(".,") in _TITLE_WORDS for tok in seg.split())
+
+
+def _split_name_title(seg):
+    """Split one no-separator chunk into (name, title) at the first title keyword,
+    e.g. 'Gil Zohar DevOps Manager' → ('Gil Zohar', 'DevOps Manager')."""
+    toks = seg.split()
+    for i, t in enumerate(toks):
+        if i > 0 and t.lower().strip(".,") in _TITLE_WORDS:
+            return " ".join(toks[:i]), " ".join(toks[i:])
+    if len(toks) <= 2:                       # just a name, no title given
+        return seg, None
+    return " ".join(toks[:2]), " ".join(toks[2:])  # assume the first two are the name
+
+
+def _parse_details(text):
+    """Best-effort pull of first/last name, email, title from one free-text
+    message. Handles commas / newlines / pipes / ' - ' and no-separator forms."""
+    raw = (text or "").strip()
+    out = {"first_name": None, "last_name": None, "email": None, "title": None}
+    m = re.search(r"[^\s,;|/]+@[^\s,;|/]+\.[^\s,;|/]+", raw)
+    if m:
+        out["email"] = m.group(0).strip().strip(".").lower()
+        raw = (raw[:m.start()] + "  " + raw[m.end():]).strip()
+    segments = [t for s in re.split(r"[,\n;|]+|\s[-–—]\s", raw)
+                if (t := s.strip().strip("-–—").strip())]
+    name_part = title_part = None
+    if len(segments) >= 2:
+        idx = next((i for i, s in enumerate(segments) if _looks_like_title(s)), None)
+        if idx is not None:
+            title_part = segments[idx]
+            name_part = " ".join(s for i, s in enumerate(segments) if i != idx) or None
+        else:
+            name_part, title_part = segments[0], " ".join(segments[1:]) or None
+    elif segments:
+        name_part, title_part = _split_name_title(segments[0])
+    if name_part:
+        toks = name_part.split()
+        out["first_name"] = toks[0]
+        out["last_name"] = " ".join(toks[1:]) or None
+    if title_part:
+        out["title"] = title_part.strip()
+    return out
+
+
+def _handle_details(user, conv, data, text):
+    parsed = _parse_details(text)  # any email typed here is ignored — asked separately
+    full = " ".join(x for x in (parsed["first_name"], parsed["last_name"]) if x) or None
+    if not full:
+        messaging.send_prompt(user.phone, copy.EMP_DETAILS.format(
+            company=data.get("company_name", "your company")))
+        return "emp_details"
+    data.update({
+        "first_name": parsed["first_name"], "last_name": parsed["last_name"],
+        "role_title": parsed["title"], "full_name": full,
+    })
+    conversation.set_state(conv, "employee", "emp_details_confirm", data)
+    messaging.send_prompt(user.phone, copy.EMP_DETAILS_CONFIRM.format(
+        name=full, title=data.get("role_title") or "(none)"))
+    return "emp_details"
+
+
+def _handle_details_confirm(user, conv, data, text, payload):
+    if not _is_confirm(text, payload):
+        # Not a yes → treat the message as corrected details and re-parse.
+        return _handle_details(user, conv, data, text)
+    _persist_identity(user, data)
+    conversation.set_state(conv, "employee", "emp_method", data)
+    _send_method_choice(user, data.get("company_name", "your company"))
+    return "emp_details_confirmed"
+
+
+def _persist_identity(user, data):
+    """Save the parsed name/email onto the user so they count as registered."""
+    if data.get("first_name"):
+        user.first_name = data["first_name"]
+    if data.get("last_name"):
+        user.last_name = data["last_name"]
+    if data.get("email"):
+        user.email = data["email"]
+    user.terms_accepted_at = user.terms_accepted_at or datetime.utcnow()
+    db.session.commit()
+
+
+def _handle_email(user, conv, data, text):
+    """The separate work-email question (email method) — the inbox CVs land in."""
+    email = (text or "").strip().strip("<>").lower()
+    if not _EMAIL_RE.match(email):
+        messaging.send_prompt(user.phone, copy.EMP_EMAIL_INVALID.format(
+            company=data.get("company_name", "your company")))
+        return "emp_email_invalid"
+    data["email"] = email
+    user.email = email          # completes their sign-up (name saved on the confirm step)
+    db.session.commit()
+    return _finalize_email_advocate(user, conv, data)
+
+
+def _finalize_email_advocate(user, conv, data):
+    """Email method: create the advocate with the separately-collected email
+    (one row per user+company+email)."""
+    company_name = data.get("company_name", "your company")
+    email = (data.get("email") or "").strip().lower() or None
+    try:
+        advocate = WaAdvocate.query.filter_by(
+            user_id=user.id, company_id=data.get("company_id"), email=email).first()
+        if not advocate:
+            advocate = WaAdvocate(user_id=user.id, company_id=data.get("company_id"),
+                                  email=email, status="active")
+            db.session.add(advocate)
+        advocate.role_title = data.get("role_title") or advocate.role_title
+        advocate.advocate_name = data.get("full_name") or advocate.advocate_name
+        advocate.status = "active"
+        advocate.updated_at = datetime.utcnow()
+        db.session.commit()
+    except SQLAlchemyError:
+        logger.exception("wa: finalize email advocate failed for user %s", user.id)
+        db.session.rollback()
+        conversation.set_state(conv, "employee", "emp_method", data)
+        messaging.send_prompt(user.phone, copy.EMP_SAVE_FAILED.format(company=company_name))
+        return "emp_email_save_failed"
+    conversation.reset_state(conv)
+    messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
+        company=company_name, emails=email or "—"))
+    return "advocate_created"
 
 
 def _save_link(user, conv, data, text):
@@ -290,6 +432,8 @@ def _create_link_advocate(user, data, link):
     """Store the advocate's self-serve referral link (one per user+company)."""
     company_id = data.get("company_id")
     role_title = (data.get("role_title") or "").strip() or None
+    email = (data.get("email") or "").strip().lower() or None
+    full_name = (data.get("full_name") or "").strip() or None
     advocate = (WaAdvocate.query
                 .filter_by(user_id=user.id, company_id=company_id)
                 .filter(WaAdvocate.referral_link.isnot(None)).first())
@@ -298,12 +442,16 @@ def _create_link_advocate(user, data, link):
         advocate.status = "active"
         if role_title:
             advocate.role_title = role_title
+        if email:               # only set when provided (edit-link leaves it untouched)
+            advocate.email = email
+        if full_name:
+            advocate.advocate_name = full_name
         advocate.updated_at = datetime.utcnow()
         db.session.commit()
         return advocate
     advocate = WaAdvocate(
         user_id=user.id, company_id=company_id, referral_link=link,
-        role_title=role_title, status="active")
+        role_title=role_title, email=email, advocate_name=full_name, status="active")
     db.session.add(advocate)
     try:
         db.session.commit()

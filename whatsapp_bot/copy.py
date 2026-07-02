@@ -83,6 +83,19 @@ EMP_TITLE = (
     "for that role (e.g. DevOps, Data Scientist, Product Manager).\n"
     "No title? Reply *skip*."
 )
+# One combined question (name + family name + title) so advocates skip several
+# steps. The work email is asked separately, in the email method.
+EMP_DETAILS = (
+    "Great — *{company}*! 💼\n"
+    "In *one message*, tell me your *full name* and your *title*:\n"
+    "e.g. *Gil Zohar, DevOps Manager*"
+)
+EMP_DETAILS_CONFIRM = (
+    "Got it 👇\n"
+    "• Name: {name}\n"
+    "• Title: {title}\n\n"
+    "Looks right? Reply *yes* — or just *resend* to fix it."
+)
 # ---- Employee: edit an existing submission ----
 EMP_EDIT_MENU = (
     "You're set up to refer for *{company}* 💼\n"
