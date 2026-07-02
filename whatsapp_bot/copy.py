@@ -202,13 +202,16 @@ CAND_DID_YOU_MEAN_MANY = (
     "Reply with the *number*, or type another company name."
 )
 CAND_NO_ADVOCATES = (
-    "We know *{company}*, but there are no advocates there *yet* 😕\n"
-    "We've put it on our radar — check back soon, or try another company. 🔜"
+    "We know *{company}*, but there's no advocate there *yet* 😕\n"
+    "I've logged your request — we'll *message you the moment we have someone* "
+    "who can refer you there. 🙌\n"
+    "Meanwhile, want to try another company?"
 )
 CAND_NOT_FOUND = (
-    "Hmm, couldn't find *{company}* yet 🤔\n"
-    "Double-check the spelling (English works best), or type another company — "
-    "we've flagged it for our team to add! 🔜"
+    "Hmm, I couldn't find *{company}* yet 🤔\n"
+    "I've flagged it for our team — we'll *let you know the moment we've got "
+    "someone there* who can refer you. 🙌\n"
+    "Double-check the spelling (English works best), or try another company."
 )
 CAND_RESUME_SOON = (
     "Awesome — you're almost there! 🙌\n"
