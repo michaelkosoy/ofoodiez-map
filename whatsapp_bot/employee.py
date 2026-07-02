@@ -62,8 +62,17 @@ def get_or_create_company(name):
 
 
 def start(user, conv):
-    # Sign-up already happened up front (router gates on is_registered), so the
-    # advocate goes straight to picking their company.
+    # Returning advocate → show what they submitted so they can edit/remove it.
+    # One company jumps straight to the edit menu; several → pick which first.
+    company_ids = _advocate_company_ids(user)
+    if len(company_ids) == 1:
+        return _open_edit_menu(user, conv, company_ids[0])
+    if company_ids:
+        conversation.set_state(conv, "employee", "emp_edit_pick",
+                               {"edit_company_ids": company_ids})
+        messaging.send_prompt(user.phone, _companies_list_text(user, company_ids))
+        return "emp_edit_pick"
+    # New advocate → sign them up (router already gated on is_registered).
     conversation.set_state(conv, "employee", "emp_company", {})
     messaging.send_prompt(user.phone, copy.EMP_COMPANY)
     return "emp_start"
@@ -114,6 +123,20 @@ def handle(user, conv, payload, text):
             return _finalize(user, conv, data)
         # Anything that isn't a yes → treat it as a correction (new emails).
         return _collect_emails(user, conv, data, text)
+
+    # --- edit / remove an existing submission ---
+    if step == "emp_edit_pick":
+        return _handle_edit_pick(user, conv, data, text)
+    if step == "emp_edit_menu":
+        return _handle_edit_menu(user, conv, data, text)
+    if step == "emp_edit_title":
+        return _apply_edit_title(user, conv, data, text)
+    if step == "emp_edit_link":
+        return _apply_edit_link(user, conv, data, text)
+    if step == "emp_edit_emails":
+        return _apply_edit_emails(user, conv, data, text)
+    if step == "emp_edit_remove_confirm":
+        return _handle_edit_remove(user, conv, data, text, payload)
 
     # Unexpected step inside the employee flow → restart it cleanly.
     return start(user, conv)
@@ -287,3 +310,168 @@ def _create_link_advocate(user, data, link):
     except IntegrityError:
         db.session.rollback()
     return advocate
+
+
+# ---------------- Edit / remove an existing submission ----------------
+
+def _advocate_company_ids(user):
+    """Distinct companies this user is an ACTIVE advocate for, in a stable order."""
+    rows = WaAdvocate.query.filter_by(user_id=user.id, status="active").all()
+    seen, ids = set(), []
+    for a in rows:
+        if a.company_id not in seen:
+            seen.add(a.company_id)
+            ids.append(a.company_id)
+    return ids
+
+
+def _company_name(company_id):
+    c = WaCompany.query.get(company_id)
+    return c.name if c else "your company"
+
+
+def _advocate_summary(user_id, company_id):
+    """(title, link, [emails]) across this user's active rows for one company."""
+    rows = WaAdvocate.query.filter_by(
+        user_id=user_id, company_id=company_id, status="active").all()
+    title = next((a.role_title for a in rows if (a.role_title or "").strip()), None)
+    link = next((a.referral_link for a in rows if a.referral_link), None)
+    emails = [a.email for a in rows if a.email]
+    return title, link, emails
+
+
+def _companies_list_text(user, company_ids):
+    lines = []
+    for i, cid in enumerate(company_ids, 1):
+        title, link, emails = _advocate_summary(user.id, cid)
+        method = "link" if link else ("email" if emails else "—")
+        label = _company_name(cid) + (f", {title}" if title else "")
+        lines.append(f"{i}. {label} ({method})")
+    return copy.EMP_EDIT_LIST.format(companies="\n".join(lines))
+
+
+def _send_edit_menu(user, company_id, company_name, prefix=""):
+    title, link, emails = _advocate_summary(user.id, company_id)
+    details = ["• Role: " + (title if title else "(none set)")]
+    if link:
+        details.append(f"• Link: {link}")
+    if emails:
+        details.append(f"• Email: {', '.join(emails)}")
+    if not link and not emails:
+        details.append("• (no link or email yet)")
+    messaging.send_prompt(user.phone, prefix + copy.EMP_EDIT_MENU.format(
+        company=company_name, details="\n".join(details)))
+
+
+def _open_edit_menu(user, conv, company_id, prefix=""):
+    company_name = _company_name(company_id)
+    conversation.set_state(conv, "employee", "emp_edit_menu",
+                           {"editing": True, "company_id": company_id, "company_name": company_name})
+    _send_edit_menu(user, company_id, company_name, prefix)
+    return "emp_edit_menu"
+
+
+def _start_new_company(user, conv):
+    conversation.set_state(conv, "employee", "emp_company", {})
+    messaging.send_prompt(user.phone, copy.EMP_COMPANY)
+    return "emp_company"
+
+
+def _handle_edit_pick(user, conv, data, text):
+    ids = data.get("edit_company_ids") or []
+    t = (text or "").strip().lower()
+    if t in ("add", "new"):
+        return _start_new_company(user, conv)
+    if t.isdigit() and 1 <= int(t) <= len(ids):
+        return _open_edit_menu(user, conv, ids[int(t) - 1])
+    messaging.send_prompt(user.phone, _companies_list_text(user, ids))
+    return "emp_edit_pick"
+
+
+def _handle_edit_menu(user, conv, data, text):
+    t = (text or "").strip().lower()
+    company_id = data.get("company_id")
+    company_name = data.get("company_name", "your company")
+    if t == "title":
+        conversation.set_state(conv, "employee", "emp_edit_title", data)
+        messaging.send_prompt(user.phone, copy.EMP_EDIT_TITLE.format(company=company_name))
+        return "emp_edit_title"
+    if t == "link":
+        conversation.set_state(conv, "employee", "emp_edit_link", data)
+        messaging.send_prompt(user.phone, copy.EMP_LINK_PROMPT.format(company=company_name))
+        return "emp_edit_link"
+    if t in ("email", "emails"):
+        conversation.set_state(conv, "employee", "emp_edit_emails", data)
+        messaging.send_prompt(user.phone, copy.EMP_EMAIL.format(company=company_name))
+        return "emp_edit_emails"
+    if t == "remove":
+        conversation.set_state(conv, "employee", "emp_edit_remove_confirm", data)
+        messaging.send_prompt(user.phone, copy.EMP_EDIT_REMOVE_CONFIRM.format(company=company_name))
+        return "emp_edit_remove_confirm"
+    if t in ("add", "new"):
+        return _start_new_company(user, conv)
+    _send_edit_menu(user, company_id, company_name)  # unrecognized → re-show
+    return "emp_edit_menu"
+
+
+def _apply_edit_title(user, conv, data, text):
+    company_id = data.get("company_id")
+    t = (text or "").strip()
+    new_title = None if t.lower() in _SKIP_WORDS else (t or None)
+    for a in WaAdvocate.query.filter_by(
+            user_id=user.id, company_id=company_id, status="active").all():
+        a.role_title = new_title
+        a.updated_at = datetime.utcnow()
+    db.session.commit()
+    return _open_edit_menu(user, conv, company_id, prefix="✅ Title updated!\n\n")
+
+
+def _apply_edit_link(user, conv, data, text):
+    company_name = data.get("company_name", "your company")
+    link = (text or "").strip()
+    if not _valid_url(link):
+        messaging.send_prompt(user.phone, copy.EMP_LINK_INVALID)
+        return "emp_edit_link_invalid"
+    data["role_title"] = _advocate_summary(user.id, data["company_id"])[0]  # keep title on a new row
+    try:
+        _create_link_advocate(user, data, link)
+    except SQLAlchemyError:
+        logger.exception("wa: edit link failed for user %s", user.id)
+        db.session.rollback()
+        messaging.send_prompt(user.phone, copy.EMP_SAVE_FAILED.format(company=company_name))
+        return "emp_edit_link_failed"
+    return _open_edit_menu(user, conv, data["company_id"], prefix="✅ Link updated!\n\n")
+
+
+def _apply_edit_emails(user, conv, data, text):
+    company_name = data.get("company_name", "your company")
+    valid, had_personal = _parse_emails(text)
+    if not valid:
+        msg = copy.EMP_EMAIL_PERSONAL if had_personal else copy.EMP_EMAIL_INVALID
+        messaging.send_prompt(user.phone, msg.format(company=company_name))
+        return "emp_edit_emails_invalid"
+    data["role_title"] = _advocate_summary(user.id, data["company_id"])[0]  # keep title on new rows
+    try:
+        _create_advocates(user, data, valid)
+    except SQLAlchemyError:
+        logger.exception("wa: edit emails failed for user %s", user.id)
+        db.session.rollback()
+        messaging.send_prompt(user.phone, copy.EMP_SAVE_FAILED.format(company=company_name))
+        return "emp_edit_emails_failed"
+    return _open_edit_menu(user, conv, data["company_id"], prefix="✅ Email updated!\n\n")
+
+
+def _handle_edit_remove(user, conv, data, text, payload):
+    company_id = data.get("company_id")
+    company_name = data.get("company_name", "your company")
+    if not _is_confirm(text, payload):
+        # Not a confirmation → keep it, back to the edit menu (menu/restart escape globally).
+        return _open_edit_menu(user, conv, company_id)
+    for a in WaAdvocate.query.filter_by(
+            user_id=user.id, company_id=company_id, status="active").all():
+        a.status = "inactive"
+        a.updated_at = datetime.utcnow()
+    db.session.commit()
+    conversation.reset_state(conv)
+    messaging.send_prompt(user.phone, copy.EMP_EDIT_REMOVED.format(company=company_name))
+    return "emp_edit_removed"

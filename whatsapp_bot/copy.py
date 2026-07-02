@@ -83,6 +83,30 @@ EMP_TITLE = (
     "for that role (e.g. DevOps, Data Scientist, Product Manager).\n"
     "No title? Reply *skip*."
 )
+# ---- Employee: edit an existing submission ----
+EMP_EDIT_MENU = (
+    "You're set up to refer for *{company}* 💼\n"
+    "{details}\n\n"
+    "Reply *title*, *link*, or *email* to change one · *remove* to remove this "
+    "referral · *add* for another company · *menu* to exit."
+)
+EMP_EDIT_LIST = (
+    "You're an advocate for a few companies 💼\n"
+    "{companies}\n\n"
+    "Reply the *number* to edit one, *add* for a new company, or *menu*."
+)
+EMP_EDIT_TITLE = (
+    "What's your *role/title* at *{company}* now? "
+    "(or *skip* to clear it)"
+)
+EMP_EDIT_REMOVE_CONFIRM = (
+    "Remove your *{company}* referral? Candidates will no longer be sent to you for it.\n"
+    "Reply *yes* to confirm, or *menu* to keep it."
+)
+EMP_EDIT_REMOVED = (
+    "Done — your *{company}* referral is removed. 🙌\n"
+    "Thanks for being an advocate! Type *menu* anytime."
+)
 EMP_METHOD_PROMPT = (
     "How would you like to refer candidates at *{company}*? 🤝\n\n"
     "*1* 📧 *Email me* — I'll get a candidate's CV by email and refer them myself.\n"
