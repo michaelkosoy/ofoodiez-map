@@ -68,10 +68,8 @@ def handle(inbound):
 
 
 def _entry(user, conv):
-    """The single front door. Sign-up is the first thing a new phone does; a
-    registered phone goes straight to the Welcome menu."""
-    if not user.is_registered:
-        return registration.start(user, conv)
+    """The single front door — everyone lands on the Welcome + route menu.
+    Sign-up now happens only once a route (candidate/employee) is chosen."""
     return _welcome(user, conv)
 
 
@@ -81,9 +79,9 @@ def _enter_path(user, conv, flow):
         messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"
-    # Everything else requires sign-up first (safety net; _entry already gates).
+    # Candidate/employee: sign up first (remembering the route), then resume into it.
     if not user.is_registered:
-        return registration.start(user, conv)
+        return registration.start(user, conv, pending_flow=flow)
     if flow == "employee":
         return employee.start(user, conv)
     return candidate.start(user, conv)
@@ -91,9 +89,12 @@ def _enter_path(user, conv, flow):
 
 def _welcome(user, conv):
     conversation.reset_state(conv)
-    name = _display_name(user)
-    messaging.send_text(user.phone, copy.WELCOME_GREETING.format(
-        name=f", {name}" if name else ""))
+    if user.is_registered:
+        name = _display_name(user)
+        messaging.send_text(user.phone, copy.WELCOME_BACK.format(
+            name=f", {name}" if name else ""))
+    else:
+        messaging.send_text(user.phone, copy.WELCOME_INTRO)
     messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
     return "welcome"
 

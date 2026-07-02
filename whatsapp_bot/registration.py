@@ -17,8 +17,11 @@ from .config import WaConfig
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def start(user, conv):
-    conversation.set_state(conv, "registration", "reg_first_name", {})
+def start(user, conv, pending_flow=None):
+    # pending_flow ("candidate"/"employee") is remembered so we resume into that
+    # route once sign-up is confirmed, instead of bouncing back to the menu.
+    conversation.set_state(conv, "registration", "reg_first_name",
+                           {"pending_flow": pending_flow} if pending_flow else {})
     messaging.send_prompt(user.phone, copy.REG_FIRST_NAME)
     return "reg_start"
 
@@ -51,7 +54,13 @@ def handle(user, conv, payload, text):
     if step == "reg_review":
         if payload == "REG_CONFIRM":
             _persist(user, data)
-            from . import router  # late import (router imports registration)
+            # Resume into the route they picked before sign-up; else the menu.
+            from . import router, candidate, employee  # late import (avoid cycle)
+            pending = data.get("pending_flow")
+            if pending == "candidate":
+                return candidate.start(user, conv, returning=False)
+            if pending == "employee":
+                return employee.start(user, conv)
             return router._welcome(user, conv)
         if payload == "REG_EDIT":
             conversation.set_state(conv, "registration", "reg_first_name", {})

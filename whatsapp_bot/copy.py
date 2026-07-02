@@ -26,14 +26,26 @@ ERROR = {
     "he": "יש לנו תקלה קטנה, נסה/י שוב בעוד רגע 🙏",
 }
 
-# Personalised greeting sent right before the Welcome menu buttons. {name} is
-# already formatted as ", Michael" (or "" if we don't know it yet).
-WELCOME_GREETING = "Welcome to Ofoodiez{name}! 🧡🚀"
+# Sent right before the Welcome menu buttons. WELCOME_INTRO greets a brand-new
+# user, explains in ~2 sentences what the bot does, and notes they can switch
+# routes / type menu anytime; WELCOME_BACK is the shorter returning-user version.
+# {name} is already formatted as ", Michael" (or "" if we don't know it yet).
+WELCOME_INTRO = (
+    "👋 *Welcome to Ofoodiez Referrals!*\n"
+    "I connect you with real people inside companies — find someone who can "
+    "refer *you* for a job, or, if you're already working, refer great people in. 🧡\n"
+    "You can switch routes or type *menu* anytime.\n\n"
+    "What brings you here today? 👇"
+)
+WELCOME_BACK = (
+    "Welcome back{name}! 🧡\n"
+    "What would you like to do? (type *menu* anytime) 👇"
+)
 
 # ---- Phase B: registration (English v1; young & upbeat) ----
 REG_FIRST_NAME = (
-    "Welcome to Ofoodiez Referrals! 🧡🚀\n"
-    "Let's get you set up — what's your *first name*? 🙌"
+    "Awesome — let's get to know each other first! 🙌\n"
+    "What's your *first name*?"
 )
 REG_LAST_NAME = "Nice to meet you, {first}! 😄\nAnd your *last name*?"
 REG_EMAIL = "Almost there, {first}! 📧\nWhat's the best *email* to reach you at?"
