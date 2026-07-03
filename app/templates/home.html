@@ -188,7 +188,7 @@
                     <span class="country-name">{{ item.country }}</span>
                     <span class="cities">{{ item.cities }}</span>
                     {% if item.blog_link %}
-                    <a href="{{ item.blog_link }}" class="country-guide-btn" onclick="event.stopPropagation()">📖 Read the Guide</a>
+                    <div class="country-guide-btn" role="button" onclick="event.stopPropagation(); window.location='{{ item.blog_link }}'">📖 Read the Guide</div>
                     {% endif %}
                 </div>
             </a>
