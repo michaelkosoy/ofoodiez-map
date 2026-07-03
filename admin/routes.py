@@ -32,3 +32,8 @@ def hitech_emails():
 @login_required
 def members():
     return render_template('admin/members.html')
+
+@admin_bp.route('/blog')
+@login_required
+def blog():
+    return render_template('admin/blog.html')

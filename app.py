@@ -244,10 +244,15 @@ def home():
         
     return render_template('home.html', data=data_to_render)
 
+def _load_blog(slug):
+    path = os.path.join(os.path.dirname(__file__), 'app', 'data', f'blog_{slug}.json')
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
+
 @app.route('/blog/japan')
 def blog_japan():
     """Japan travel & food guide."""
-    return render_template('blog_japan.html')
+    return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
 
 @app.route('/blog/<category>')
 def blog_category(category):

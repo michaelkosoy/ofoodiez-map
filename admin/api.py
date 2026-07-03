@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 from datetime import datetime
 
 import requests
@@ -751,3 +752,32 @@ def update_user(id):
                 return jsonify({'error': 'Paid until must be YYYY-MM-DD (or blank)'}), 400
     db.session.commit()
     return jsonify(_user_dict(user))
+
+
+# --- Blog Content API ---
+
+def _blog_path(slug):
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, 'app', 'data', f'blog_{slug}.json')
+
+@admin_bp.route('/api/blog/<slug>', methods=['GET'])
+@login_required
+def get_blog(slug):
+    path = _blog_path(slug)
+    if not os.path.exists(path):
+        return jsonify({'error': 'Not found'}), 404
+    with open(path, encoding='utf-8') as f:
+        return jsonify(json.load(f))
+
+@admin_bp.route('/api/blog/<slug>', methods=['PUT'])
+@login_required
+def save_blog(slug):
+    path = _blog_path(slug)
+    if not os.path.exists(path):
+        return jsonify({'error': 'Not found'}), 404
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data'}), 400
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return jsonify({'ok': True})

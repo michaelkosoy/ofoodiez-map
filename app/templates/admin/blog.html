@@ -1,0 +1,189 @@
+{% extends "admin/base.html" %}
+{% block title %}Blog Content{% endblock %}
+
+{% block extra_css %}
+<style>
+  .blog-editor { max-width: 860px; }
+  .blog-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent-color);
+  }
+  .blog-field { margin-bottom: 18px; }
+  .blog-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .blog-field textarea, .blog-field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: .2s;
+    resize: vertical;
+  }
+  .blog-field textarea:focus, .blog-field input[type="text"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(211,167,138,.2);
+  }
+  .city-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .city-grid { grid-template-columns: 1fr; } }
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--primary-bg);
+    padding: 14px 0 4px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 10;
+  }
+  .save-msg { font-size: 14px; color: var(--success-color); font-weight: 600; display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+  <h2><i class="fas fa-book-open"></i> Blog Content</h2>
+  <div style="display:flex;gap:8px;align-items:center">
+    <select id="blog-slug" class="form-control" style="width:auto">
+      <option value="japan">Japan Guide</option>
+    </select>
+  </div>
+</div>
+
+<div class="blog-editor" id="blog-editor">
+  <div style="color:#999;padding:40px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-success" onclick="saveBlog()"><i class="fas fa-save"></i> Save Changes</button>
+  <span class="save-msg" id="save-msg">Saved!</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var currentSlug = '';
+var blogData = {};
+
+function field(key, label, rows) {
+  rows = rows || 3;
+  var val = (blogData[key] || '').replace(/</g, '&lt;');
+  return '<div class="blog-field"><label>' + label + '</label>' +
+    '<textarea rows="' + rows + '" data-key="' + key + '">' + val + '</textarea></div>';
+}
+
+function cityField(cityKey, subKey, label, rows) {
+  rows = rows || 3;
+  var val = ((blogData.cities || {})[cityKey] || {})[subKey] || '';
+  val = val.replace(/</g, '&lt;');
+  return '<div class="blog-field"><label>' + label + '</label>' +
+    '<textarea rows="' + rows + '" data-city="' + cityKey + '" data-sub="' + subKey + '">' + val + '</textarea></div>';
+}
+
+function renderEditor() {
+  var html = '';
+
+  html += '<p class="blog-section-title">Page</p>';
+  html += field('page_title', 'Page Title', 1);
+
+  html += '<p class="blog-section-title">Intro</p>';
+  html += field('intro_body', 'Intro Body (\\n = line break)', 5);
+  html += field('intro_route', 'Route Block (\\n = line break)', 5);
+
+  html += '<p class="blog-section-title">Cities Section</p>';
+  html += field('cities_lead', 'Cities Lead Text', 2);
+
+  var cities = [
+    ['tokyo',     'Tokyo'],
+    ['yamanashi', 'Yamanashi'],
+    ['kyoto',     'Kyoto'],
+    ['osaka',     'Osaka'],
+    ['okinawa',   'Okinawa'],
+  ];
+  cities.forEach(function(c) {
+    html += '<p class="blog-section-title" style="margin-top:20px">' + c[1] + '</p>';
+    html += '<div class="city-grid">';
+    html += cityField(c[0], 'intro', 'City Intro', 4);
+    html += cityField(c[0], 'accom', 'Where to Stay', 2);
+    html += '</div>';
+  });
+
+  html += '<p class="blog-section-title">Calculator</p>';
+  html += field('calc_lead', 'Calculator Lead Text', 2);
+
+  html += '<p class="blog-section-title">Footer</p>';
+  html += field('footer', 'Footer Text', 2);
+
+  document.getElementById('blog-editor').innerHTML = html;
+}
+
+function collectData() {
+  var out = JSON.parse(JSON.stringify(blogData));
+  document.querySelectorAll('[data-key]').forEach(function(el) {
+    out[el.dataset.key] = el.value;
+  });
+  if (!out.cities) out.cities = {};
+  document.querySelectorAll('[data-city]').forEach(function(el) {
+    var city = el.dataset.city;
+    var sub = el.dataset.sub;
+    if (!out.cities[city]) out.cities[city] = {};
+    out.cities[city][sub] = el.value;
+  });
+  return out;
+}
+
+function loadBlog() {
+  var slug = document.getElementById('blog-slug').value;
+  currentSlug = slug;
+  fetch('/admin/api/blog/' + slug)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      blogData = data;
+      renderEditor();
+    })
+    .catch(function() {
+      document.getElementById('blog-editor').innerHTML = '<p style="color:red">Failed to load blog data.</p>';
+    });
+}
+
+function saveBlog() {
+  var data = collectData();
+  fetch('/admin/api/blog/' + currentSlug, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (res.ok) {
+      var msg = document.getElementById('save-msg');
+      msg.style.display = 'inline';
+      setTimeout(function() { msg.style.display = 'none'; }, 2500);
+    } else {
+      alert('Error: ' + (res.error || 'unknown'));
+    }
+  })
+  .catch(function() { alert('Save failed.'); });
+}
+
+document.getElementById('blog-slug').addEventListener('change', loadBlog);
+loadBlog();
+</script>
+{% endblock %}
