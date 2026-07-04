@@ -1,8 +1,8 @@
 /* Bachelorette Page Styles - Premium & Dynamic */
 :root {
-    --primary-color: #5A3A31;
-    --secondary-color: #8c5b4d;
-    --bg-color: #FBF8ED;
+    --primary-color: #720815;
+    --secondary-color: #845649;
+    --bg-color: #faf5e6;
     --card-bg: #ffffff;
     --text-main: #362118;
     --text-muted: #636E72;
@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: 'Heebo', 'Outfit', sans-serif;
+    font-family: 'Outfit', 'Heebo', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
     margin: 0;

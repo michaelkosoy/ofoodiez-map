@@ -107,7 +107,7 @@ class _WaConfig:
     @property
     def WA_OPS_EMAIL(self):
         # Where "company not found / no advocates yet" requests are emailed.
-        return os.environ.get("WA_OPS_EMAIL", "contact@ofoodiez.com")
+        return os.environ.get("WA_OPS_EMAIL", "info@ofoodiez.com")
 
     # ---- Behaviour thresholds (consumed by later PRs; centralised here) ----
     @property

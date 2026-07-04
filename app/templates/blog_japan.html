@@ -15,84 +15,7 @@
     html,
     body {
       margin: 0;
-      background: #f9f6eb;
-    }
-
-    /* Blog nav menu — matches home page colors */
-    .blog-category-menu {
-      width: 100%;
-      overflow: hidden;
-      background: #faf5e6;
-      padding: 14px 0 10px;
-      border-bottom: 1px solid #ece1cb;
-    }
-
-    .blog-category-label {
-      padding: 0 24px 4px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: #a98e6f;
-      display: block;
-    }
-
-    .category-scroll-container {
-      display: flex;
-      overflow-x: auto;
-      gap: 9px;
-      padding: 8px 24px 4px;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .category-scroll-container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .category-pill {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 9px 16px;
-      background: #fff;
-      color: #603e35;
-      border: 1px solid rgba(96, 62, 53, .18);
-      border-radius: 999px;
-      font-family: 'Outfit', 'Assistant', sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      white-space: nowrap;
-      text-decoration: none;
-      transition: all .2s ease;
-    }
-
-    .category-pill i {
-      font-size: 11px;
-      color: inherit;
-    }
-
-    .category-pill:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
-    }
-
-    .category-pill.active {
-      background: #603e35;
-      color: #f9f6eb;
-      border-color: transparent;
-      font-weight: 700;
-    }
-
-    .category-pill.active i {
-      color: #f9f6eb;
-    }
-
-    .blog-menu-header {
-      display: none;
+      background: var(--bg-color);
     }
 
     /* Section anchor links row */
@@ -136,7 +59,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;800&family=Heebo:wght@300;400;500;700;800&display=swap"
     rel="stylesheet">
 
   <div id="ofz-guide" dir="rtl" lang="he">
@@ -1402,19 +1325,19 @@
 
   <style>
     #ofz-guide {
-      --paper: #F4EFE4;
-      --card: #FFFDF8;
-      --ink: #23262E;
-      --muted: #6E6A5E;
-      --indigo: #1C3D63;
-      --indigo-soft: #E7ECF2;
-      --verm: #D6492F;
-      --gold: #B8893B;
-      --line: #E3D9C6;
-      --line2: #EFE8DA;
+      --paper: #faf5e6;
+      --card: #ffffff;
+      --ink: #362118;
+      --muted: #603e35;
+      --indigo: #720815;
+      --indigo-soft: #f4ecda;
+      --verm: #720815;
+      --gold: #720815;
+      --line: #ece1cb;
+      --line2: #f4ecda;
       background: var(--paper);
       color: var(--ink);
-      font-family: "Assistant", system-ui, sans-serif;
+      font-family: 'Outfit', 'Heebo', sans-serif;
       padding: 0 clamp(16px, 4vw, 40px) 40px;
       border-radius: 18px;
       max-width: 1180px;

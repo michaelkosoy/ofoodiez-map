@@ -62,7 +62,7 @@ data = {
     "about": {
         "title": "About Me",
         "text": "Hi, I'm Ofir! I love exploring food scenes around the world and finding the best deals. Ofoodiez is my way of sharing these gems with you.",
-        "contact_link": "mailto:contact@ofoodiez.com",
+        "contact_link": "mailto:info@ofoodiez.com",
         "contact_text": "Contact Me"
     },
     "extra_page": {

@@ -30,7 +30,7 @@ This document tracks all external services, APIs, and platforms integrated into 
 * **Owner:** Ofir Lazarov
 
 ### ImprovMX (Domain Email Forwarding)
-* **Usage:** Domain email forwarding service used to route emails sent to `contact@ofoodiez.com` to the personal email address.
+* **Usage:** Domain email forwarding service used to route emails sent to `info@ofoodiez.com` to the personal email address.
 * **Forwarding Address:** `ofir.lazarov@gmail.com`
 * **Owner:** Ofir Lazarov
 

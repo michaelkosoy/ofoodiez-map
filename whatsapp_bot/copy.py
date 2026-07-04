@@ -69,7 +69,7 @@ MAIN_COMING_SOON = (
 )
 CONTACT_INFO = (
     "We'd love to hear from you! 💬\n"
-    "Reach us at *contact@ofoodiez.com* or DM us on Instagram *@ofoodiez* 🧡\n"
+    "Reach us at *info@ofoodiez.com* or DM us on Instagram *@ofoodiez* 🧡\n"
     "Type *menu* anytime to start over."
 )
 

@@ -160,7 +160,7 @@ def send_company_available_email(to_email, candidate_name, company_name):
 
 def send_company_request_email(company_name, candidate_name, candidate_phone,
                                candidate_email, reason):
-    """Notify ops (WA_OPS_EMAIL, default contact@ofoodiez.com) that a candidate
+    """Notify ops (WA_OPS_EMAIL, default info@ofoodiez.com) that a candidate
     searched a company we can't yet serve, so it can be backfilled. Best-effort:
     returns False if SendGrid / the ops address aren't configured."""
     api_key = WaConfig.SENDGRID_API_KEY
