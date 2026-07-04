@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Japan Guide — Ofoodiez</title>
+    <meta name="description" content="Unlock the Ofoodiez Japan travel & food guide.">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#5A3A31">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playpen+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=1">
+    <style>
+        .services-page { min-height:100vh; background-color:var(--bg-color,#f9f6eb); padding:20px 20px 120px; }
+        .services-page .container { max-width:640px; margin:0 auto; }
+        .services-topbar { display:flex; justify-content:space-between; align-items:center; margin:10px 0 24px; font-size:14px; color:var(--text-color,#362118); }
+        .services-topbar a { color:var(--text-color,#362118); text-decoration:none; font-weight:600; }
+        .service-card { background:var(--card-bg,#fff); border-radius:var(--radius,16px); padding:36px 30px; box-shadow:var(--shadow,0 4px 15px rgba(0,0,0,0.06)); text-align:center; }
+        .service-card .lock-icon { font-size:3rem; color:#D3A78A; margin-bottom:16px; }
+        .service-card h2 { color:var(--text-color,#362118); margin:0 0 12px; font-size:1.8rem; }
+        .service-card p { font-size:1.05rem; line-height:1.7; color:var(--text-color,#362118); margin:0 0 10px; }
+        .price { font-size:2.2rem; font-weight:800; color:#5A3A31; margin:14px 0; }
+        .buy-btn { display:inline-block; margin-top:10px; padding:14px 34px; background:#5A3A31; color:#fff; border:none; border-radius:50px; font-weight:600; font-size:1.05rem; font-family:inherit; text-decoration:none; cursor:pointer; transition:0.3s; }
+        .buy-btn:hover { opacity:0.92; transform:scale(1.03); }
+        .hint { font-size:0.9rem; color:#8a7a70; margin-top:16px; }
+        .hint a { color:#5A3A31; font-weight:600; }
+        @media (min-width:768px) { .service-card { padding:44px 40px; } }
+    </style>
+</head>
+
+<body>
+    <br>
+    {% set active_page = 'japan' %}
+    {% include 'components/blog_menu.html' %}
+
+    <div class="services-page">
+        <div class="container">
+            <div class="services-topbar">
+                <span><i class="fas fa-user-circle"></i> {{ user.name or user.email }}</span>
+                <a href="{{ url_for('accounts.logout') }}"><i class="fas fa-sign-out-alt"></i> Log out</a>
+            </div>
+
+            <div class="service-card">
+                <div class="lock-icon"><i class="fas fa-lock"></i></div>
+                <h2>Unlock the Japan Guide 🇯🇵</h2>
+                <p>The full travel &amp; food guide — where to eat, drink, and explore.</p>
+                <div class="price">₪{{ price }}</div>
+                <a class="buy-btn" href="{{ pay_link }}"><i class="fas fa-credit-card"></i> Buy the guide</a>
+                <p class="hint">Pay with <strong>{{ user.email }}</strong> so your account unlocks automatically.<br>
+                    Already paid? <a href="{{ url_for('blog_japan') }}">Refresh this page</a> — if it's not open within a minute, contact us.</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+
+</html>

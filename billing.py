@@ -151,10 +151,33 @@ def grow_callback():
     if key and sent and not hmac.compare_digest(str(sent), key):
         return ('bad key', 403)
 
-    # ponytail: receiver stub — logs the real Grow payload so we can wire entitlement
-    # (grant on transaction, extend/revoke on recurring run) once Grow creds + the
-    # createPaymentProcess signup flow + a grow_sub_id column exist.
+    # Log the raw payload so we can confirm Grow's exact field names (docs were medium-confidence).
     current_app.logger.info('GROW webhook: %s', json.dumps(data, ensure_ascii=False)[:2000])
+
+    # Unlock the buyer. A static payment link carries no user id, so match by the email used
+    # at Grow checkout. Gated on an approval marker (asmachta / success status) so a failed
+    # attempt can't unlock. Misses fall back to manual unlock in /admin/members.
+    # ponytail: single product (Japan guide) -> is_paid=True permanently; add per-product
+    # entitlements only if guides ever get separate prices.
+    flat = dict(data)
+    for nest in ('data', 'transaction', 'Transaction'):
+        if isinstance(data.get(nest), dict):
+            flat.update(data[nest])
+    email = _first(flat, 'payerEmail', 'payer_email', 'email', 'customerEmail', 'cardHolderEmail')
+    approved = bool(_first(flat, 'asmachta')) or str(
+        _first(flat, 'statusCode', 'status') or '').lower() in ('000', '1', 'success', 'approved', 'ok')
+    if email and '@' in str(email) and approved:
+        u = User.query.filter_by(email=str(email).strip().lower()).first()
+        if u:
+            if not u.is_paid:
+                u.is_paid = True
+                db.session.commit()
+            current_app.logger.info('GROW: unlocked user %s via %s', u.id, email)
+        else:
+            current_app.logger.warning('GROW: paid email %s has no site account yet', email)
+    else:
+        current_app.logger.warning('GROW: no auto-match (email=%r approved=%s); unlock in admin',
+                                   email, approved)
     return ('', 200)
 
 
@@ -163,3 +186,12 @@ def _safe_int(v):
         return int(v)
     except (TypeError, ValueError):
         return -1
+
+
+def _first(d, *keys):
+    """First present, non-empty value among keys (tolerant webhook parsing)."""
+    for k in keys:
+        v = d.get(k)
+        if v not in (None, ''):
+            return v
+    return None

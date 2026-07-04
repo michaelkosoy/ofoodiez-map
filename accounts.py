@@ -70,7 +70,7 @@ def register():
                 flash('That email is already registered. Try logging in.', 'error')
                 return render_template('register.html')
             session['user_id'] = user.id
-            return redirect(url_for('accounts.services'))
+            return redirect(session.pop('next_after_auth', None) or url_for('accounts.services'))
 
     return render_template('register.html')
 
@@ -86,8 +86,8 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
             session['user_id'] = user.id
-            next_url = request.args.get('next')
-            return redirect(next_url or url_for('accounts.services'))
+            dest = session.pop('next_after_auth', None) or request.args.get('next')
+            return redirect(dest or url_for('accounts.services'))
         flash('Invalid email or password.', 'error')
 
     return render_template('login.html')
@@ -189,7 +189,7 @@ def google_callback():
         db.session.commit()
 
     session['user_id'] = user.id
-    next_url = session.pop('oauth_next', '') or ''
+    next_url = session.pop('next_after_auth', None) or session.pop('oauth_next', '') or ''
     if not next_url.startswith('/') or next_url.startswith('//'):  # avoid open redirect
         next_url = url_for('accounts.services')
     return redirect(next_url)

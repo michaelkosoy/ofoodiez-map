@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 import pandas as pd
 import os
 import json
@@ -58,7 +58,7 @@ from admin import admin_bp
 app.register_blueprint(admin_bp)
 
 # Register site member accounts (registration/login + Google SSO + gated Services)
-from accounts import accounts_bp
+from accounts import accounts_bp, current_user
 app.register_blueprint(accounts_bp)
 
 # Register PayPlus billing (Subscribe -> hosted checkout -> signed callback)
@@ -249,9 +249,23 @@ def _load_blog(slug):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
+# Grow one-time payment link for the Japan guide (public checkout link; env overrides the default).
+GROW_JAPAN_PAY_LINK = os.environ.get(
+    'GROW_JAPAN_PAY_LINK',
+    'https://pay.grow.link/MTAyNjQ5~f7e8a4d50c74bd0636c6bff059e2e951-MzY0NTc2Ng'
+)
+
+
 @app.route('/blog/japan')
 def blog_japan():
-    """Japan travel & food guide."""
+    """Japan travel & food guide — gated: registered + paid only."""
+    user = current_user()
+    if user is None:
+        session['next_after_auth'] = '/blog/japan'          # come back here after login/register
+        return redirect(url_for('accounts.login'))
+    if not user.has_access():
+        return render_template('blog_japan_locked.html', user=user,
+                               pay_link=GROW_JAPAN_PAY_LINK, price=80)
     return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
 
 @app.route('/blog/instagram')
