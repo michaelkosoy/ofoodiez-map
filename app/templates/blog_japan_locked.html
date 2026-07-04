@@ -54,9 +54,9 @@
                 <h2>Unlock the Japan Guide 🇯🇵</h2>
                 <p>The full travel &amp; food guide — where to eat, drink, and explore.</p>
                 <div class="price">₪{{ price }}</div>
-                <a class="buy-btn" href="{{ pay_link }}"><i class="fas fa-credit-card"></i> Buy the guide</a>
-                <p class="hint">Pay with <strong>{{ user.email }}</strong> so your account unlocks automatically.<br>
-                    Already paid? <a href="{{ url_for('blog_japan') }}">Refresh this page</a> — if it's not open within a minute, contact us.</p>
+                <a class="buy-btn" href="{{ pay_link }}" target="_blank" rel="noopener"><i class="fas fa-credit-card"></i> Buy the guide</a>
+                <p class="hint">Already completed payment?
+                    <a href="{{ url_for('billing.paid_japan_return') }}"><strong>Click here to unlock the guide →</strong></a></p>
             </div>
         </div>
     </div>
