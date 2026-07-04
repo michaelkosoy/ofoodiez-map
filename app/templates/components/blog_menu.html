@@ -34,7 +34,23 @@
         background: rgba(96, 62, 53, .1);
         color: #603e35;
     }
+    .account-widget { position: fixed; top: 10px; right: 12px; z-index: 10000; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; }
+    .account-widget a, .account-widget .account-chip { background: rgba(255, 255, 255, .85); padding: 5px 11px; border-radius: 999px; box-shadow: 0 2px 8px rgba(54, 33, 24, .10); white-space: nowrap; }
+    .account-widget .account-chip { color: #362118; font-weight: 600; max-width: 40vw; overflow: hidden; text-overflow: ellipsis; }
+    .account-widget a { color: #603e35; font-weight: 700; text-decoration: none; }
+    .account-widget a:hover { color: #362118; }
 </style>
+
+<!-- Account status (fixed top-right, all pages) -->
+<div class="account-widget" dir="ltr">
+    {% if current_user %}
+    <span class="account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
+    <a href="{{ url_for('accounts.logout') }}"><i class="fas fa-sign-out-alt"></i> Log out</a>
+    {% else %}
+    <a href="{{ url_for('accounts.login') }}"><i class="fas fa-user"></i> Log in</a>
+    {% endif %}
+</div>
+
 <div class="blog-category-menu" dir="ltr">
     {% if active_page != 'home' %}
     <div class="blog-menu-header"

@@ -43,11 +43,6 @@
 
     <div class="services-page">
         <div class="container">
-            <div class="services-topbar">
-                <span><i class="fas fa-user-circle"></i> {{ user.name or user.email }}</span>
-                <a href="{{ url_for('accounts.logout') }}"><i class="fas fa-sign-out-alt"></i> Log out</a>
-            </div>
-
             <h1 class="page-title">Services</h1>
 
             {% if user.has_access() %}

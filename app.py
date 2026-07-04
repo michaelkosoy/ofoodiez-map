@@ -61,6 +61,13 @@ app.register_blueprint(admin_bp)
 from accounts import accounts_bp, current_user
 app.register_blueprint(accounts_bp)
 
+
+@app.context_processor
+def _inject_current_user():
+    """Expose the logged-in member to every template (top-bar account widget)."""
+    return {'current_user': current_user()}
+
+
 # Register PayPlus billing (Subscribe -> hosted checkout -> signed callback)
 from billing import billing_bp
 app.register_blueprint(billing_bp)
