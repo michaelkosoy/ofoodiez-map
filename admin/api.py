@@ -637,6 +637,29 @@ def _delete_company_cascade(company):
     db.session.delete(company)
 
 
+@admin_bp.route('/api/whatsapp/candidates/<int:id>', methods=['DELETE'])
+@login_required
+def delete_whatsapp_candidate(id):
+    u = WaUser.query.get_or_404(id)
+    _delete_user_cascade(u)
+    db.session.commit()
+    return '', 204
+
+
+def _delete_user_cascade(user):
+    """Delete a user (candidate/advocate) and everything that references them —
+    applications (+recipients), advocate rows, backfill requests, conversation."""
+    app_ids = [a.id for a in WaApplication.query.filter_by(candidate_user_id=user.id).all()]
+    if app_ids:
+        WaApplicationRecipient.query.filter(
+            WaApplicationRecipient.application_id.in_(app_ids)).delete(synchronize_session=False)
+        WaApplication.query.filter_by(candidate_user_id=user.id).delete(synchronize_session=False)
+    WaAdvocate.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    WaCompanyRequest.query.filter_by(candidate_user_id=user.id).delete(synchronize_session=False)
+    WaConversation.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    db.session.delete(user)
+
+
 def _notify_via_bot(request_id):
     """Ask the BOT service (which has the SendGrid env vars; this main app does
     not) to email the candidate that their requested company is now available.

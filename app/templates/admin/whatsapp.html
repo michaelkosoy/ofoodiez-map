@@ -201,11 +201,30 @@ var COLS = {
         { title: "Serviceable", field: "serviceable", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
         { title: "Created", field: "created", width: 150 },
         {
-            title: "Edit name", headerSort: false, width: 100, formatter: editNameBtn,
+            title: "Actions", headerSort: false, width: 180, hozAlign: "center",
+            formatter: function () {
+                return '<button class="act" data-a="edit">Edit name</button>' +
+                    ' <button class="act danger" data-a="delete">Delete</button>';
+            },
             cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
-                editModal('Rename company', [{ key: 'name', label: 'Company name', value: d.name }],
-                    function (v) { putSave('/admin/api/whatsapp/companies/' + d.id, v, c.getTable()); });
+                if (btn.dataset.a === 'edit') {
+                    editModal('Rename company', [{ key: 'name', label: 'Company name', value: d.name }],
+                        function (v) { putSave('/admin/api/whatsapp/companies/' + d.id, v, c.getTable()); });
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete company?', icon: 'warning',
+                        html: 'Also removes its advocates &amp; applications.<br><b>' + (d.name || '') + '</b>',
+                        showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete'
+                    }).then(function (res) {
+                        if (!res.isConfirmed) return;
+                        fetch('/admin/api/whatsapp/companies/' + d.id, { method: 'DELETE' })
+                            .then(function (r) {
+                                if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                else Swal.fire('Error', 'Could not delete', 'error');
+                            });
+                    });
+                }
             }
         }
     ],
@@ -268,26 +287,38 @@ var COLS = {
         { title: "Blocked", field: "blocked", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
         { title: "Joined", field: "joined", width: 150 },
         {
-            title: "Actions", headerSort: false, width: 110,
+            title: "Actions", headerSort: false, width: 220, hozAlign: "center",
             formatter: function (c) {
                 var d = c.getRow().getData();
-                return d.blocked === 'Yes' ? '<button class="act ok">Unblock</button>' : '<button class="act danger">Block</button>';
+                var block = d.blocked === 'Yes'
+                    ? '<button class="act ok" data-a="block">Unblock</button>'
+                    : '<button class="act danger" data-a="block">Block</button>';
+                return block + ' <button class="act" data-a="edit">Edit</button>' +
+                    ' <button class="act danger" data-a="delete">Delete</button>';
             },
             cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
-                act('/admin/api/whatsapp/users/' + d.id, { is_blocked: d.blocked !== 'Yes' }, 'Updated', c.getTable());
-            }
-        },
-        {
-            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
-            cellClick: function (e, c) {
-                var d = c.getRow().getData();
-                editModal('Edit candidate', [
-                    { key: 'first_name', label: 'First name', value: d.first_name },
-                    { key: 'last_name', label: 'Last name', value: d.last_name },
-                    { key: 'email', label: 'Email', value: d.email },
-                    { key: 'phone', label: 'WhatsApp number', value: d.number }
-                ], function (v) { putSave('/admin/api/whatsapp/users/' + d.id, v, c.getTable()); });
+                if (btn.dataset.a === 'block') {
+                    act('/admin/api/whatsapp/users/' + d.id, { is_blocked: d.blocked !== 'Yes' }, 'Updated', c.getTable());
+                } else if (btn.dataset.a === 'edit') {
+                    editModal('Edit candidate', [
+                        { key: 'first_name', label: 'First name', value: d.first_name },
+                        { key: 'last_name', label: 'Last name', value: d.last_name },
+                        { key: 'email', label: 'Email', value: d.email },
+                        { key: 'phone', label: 'WhatsApp number', value: d.number }
+                    ], function (v) { putSave('/admin/api/whatsapp/users/' + d.id, v, c.getTable()); });
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete candidate?', text: d.name, icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                        .then(function (res) {
+                            if (!res.isConfirmed) return;
+                            fetch('/admin/api/whatsapp/candidates/' + d.id, { method: 'DELETE' })
+                                .then(function (r) {
+                                    if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    else Swal.fire('Error', 'Could not delete', 'error');
+                                });
+                        });
+                }
             }
         }
     ],
