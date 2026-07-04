@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect
 import pandas as pd
 import os
 import json
@@ -248,6 +248,10 @@ def _load_blog(slug):
     path = os.path.join(os.path.dirname(__file__), 'app', 'data', f'blog_{slug}.json')
     with open(path, encoding='utf-8') as f:
         return json.load(f)
+
+@app.route('/blog/japan-guide')
+def blog_japan_guide_redirect():
+    return redirect('/blog/japan', 301)
 
 @app.route('/blog/japan')
 def blog_japan():
