@@ -132,6 +132,32 @@ def payplus_callback():
     return ('', 200)
 
 
+@billing_bp.route('/webhooks/grow', methods=['GET', 'POST'])
+def grow_callback():
+    """Grow (Meshulam) account-level webhook — transactions + recurring (הוראת קבע) runs.
+
+    GET or empty body = Grow's URL-validation probe; just 200 so the webhook saves.
+    Real events are POSTed; verified against GROW_WEBHOOK_KEY when it's configured.
+    """
+    if request.method == 'GET' or not request.get_data():
+        return ('ok', 200)                             # validation probe
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = request.form.to_dict() or {'raw': request.get_data(as_text=True)[:2000]}
+
+    key = os.environ.get('GROW_WEBHOOK_KEY')
+    sent = data.get('webhookKey') or data.get('webhook_key')
+    if key and sent and not hmac.compare_digest(str(sent), key):
+        return ('bad key', 403)
+
+    # ponytail: receiver stub — logs the real Grow payload so we can wire entitlement
+    # (grant on transaction, extend/revoke on recurring run) once Grow creds + the
+    # createPaymentProcess signup flow + a grow_sub_id column exist.
+    current_app.logger.info('GROW webhook: %s', json.dumps(data, ensure_ascii=False)[:2000])
+    return ('', 200)
+
+
 def _safe_int(v):
     try:
         return int(v)
