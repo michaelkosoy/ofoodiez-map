@@ -195,22 +195,12 @@ def grow_callback():
 
 @billing_bp.route('/paid/japan')
 def paid_japan_return():
-    """Grow payment link's success/redirect URL points here. New-system PaymentLinks
-    don't reliably fire the account webhook, so we unlock the buyer on return: they
-    were logged in when they clicked Buy and come back in the same session. Then we
-    send them to the guide.
-
-    ponytail: this trusts the redirect — a logged-in user could hit this URL without
-    paying (bypass). Acceptable for an 80 ILS guide; harden by moving the unlock to the
-    server-to-server webhook (grow_callback) once it fires, or the createPaymentProcess
-    API. Grow's appended query params are logged so we can gate on them later.
+    """Landing after payment. Access is granted MANUALLY — the admin ticks 'Paid' for
+    the buyer in /admin/members after confirming the payment in Grow. So this only logs
+    the return and sends the buyer back to the guide (which stays locked until approved).
     """
     if request.args:
         current_app.logger.info('GROW return params: %s', dict(request.args))
-    user = current_user()
-    if user is not None and not user.is_paid:
-        _mark_paid(user)
-        current_app.logger.info('GROW: unlocked user %s on payment return', user.id)
     return redirect('/blog/japan')
 
 
