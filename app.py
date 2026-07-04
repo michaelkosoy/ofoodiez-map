@@ -268,10 +268,13 @@ def map_page():
     last_update = get_last_update()
     return render_template('index.html', api_key=GOOGLE_MAPS_API_KEY, last_update=last_update)
 
-@app.route('/bachelorette')
+@app.route('/blog/bachelorette')
 def bachelorette_page():
-    """Bachelorette Party Directory page."""
     return render_template('bachelorette.html', bachelorette_data=bachelorette_data, data=home_data)
+
+@app.route('/bachelorette')
+def bachelorette_redirect():
+    return redirect('/blog/bachelorette', 301)
 
 @app.route('/about')
 def about_page():
