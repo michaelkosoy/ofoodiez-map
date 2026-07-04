@@ -249,10 +249,6 @@ def _load_blog(slug):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
-@app.route('/blog/japan-guide')
-def blog_japan_guide_redirect():
-    return redirect('/blog/japan', 301)
-
 @app.route('/blog/japan')
 def blog_japan():
     """Japan travel & food guide."""
