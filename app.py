@@ -256,13 +256,7 @@ def blog_japan():
 
 @app.route('/blog/<category>')
 def blog_category(category):
-    """Render specific blog category pages."""
-    # Convert category slug to a title-case name (e.g. 'recipes' -> 'Recipes')
-    category_title = category.replace('-', ' ').title()
-    return render_template('blog_category.html', 
-                           category_slug=category,
-                           category_title=category_title,
-                           data=home_data)
+    return redirect('/', 302)
 
 @app.route('/map')
 def map_page():
