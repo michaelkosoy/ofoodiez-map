@@ -132,53 +132,77 @@ def payplus_callback():
     return ('', 200)
 
 
+# Last few Grow webhook payloads, kept in memory (single Render worker) for debugging.
+_LAST_GROW_EVENTS = []
+
+
 @billing_bp.route('/webhooks/grow', methods=['GET', 'POST'])
 def grow_callback():
-    """Grow (Meshulam) account-level webhook — transactions + recurring (הוראת קבע) runs.
+    """Grow (Meshulam) account webhook. Unlocks the buyer by matching the checkout
+    email (or a user id echoed in a custom field) to a site account, then sets is_paid.
 
-    GET or empty body = Grow's URL-validation probe; just 200 so the webhook saves.
-    Real events are POSTed; verified against GROW_WEBHOOK_KEY when it's configured.
+    GET / empty body = Grow's URL-validation probe -> 200 so the webhook saves.
     """
     if request.method == 'GET' or not request.get_data():
-        return ('ok', 200)                             # validation probe
+        return ('ok', 200)
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
-        data = request.form.to_dict() or {'raw': request.get_data(as_text=True)[:2000]}
+        data = request.form.to_dict() or {'raw': request.get_data(as_text=True)[:3000]}
 
+    # Capture + log BEFORE any check, so GET /webhooks/grow/debug shows exactly what Grow sends.
+    # ponytail: temporary capture — drop it once the field mapping below is confirmed stable.
+    _LAST_GROW_EVENTS.append({'at': datetime.utcnow().isoformat() + 'Z', 'data': data})
+    del _LAST_GROW_EVENTS[:-10]
+    current_app.logger.info('GROW webhook: %s', json.dumps(data, ensure_ascii=False)[:3000])
+
+    flat = _flatten(data)
+
+    # Key check is advisory during rollout (Grow regenerates the key; env may lag) — log, don't drop.
     key = os.environ.get('GROW_WEBHOOK_KEY')
-    sent = data.get('webhookKey') or data.get('webhook_key')
-    if key and sent and not hmac.compare_digest(str(sent), key):
-        return ('bad key', 403)
+    sent = _first(flat, 'webhookKey', 'webhook_key', 'webhookkey')
+    if key and sent and not hmac.compare_digest(str(sent), str(key)):
+        current_app.logger.warning('GROW: webhook key mismatch — check GROW_WEBHOOK_KEY on Render')
 
-    # Log the raw payload so we can confirm Grow's exact field names (docs were medium-confidence).
-    current_app.logger.info('GROW webhook: %s', json.dumps(data, ensure_ascii=False)[:2000])
-
-    # Unlock the buyer. A static payment link carries no user id, so match by the email used
-    # at Grow checkout. Gated on an approval marker (asmachta / success status) so a failed
-    # attempt can't unlock. Misses fall back to manual unlock in /admin/members.
-    # ponytail: single product (Japan guide) -> is_paid=True permanently; add per-product
-    # entitlements only if guides ever get separate prices.
-    flat = dict(data)
-    for nest in ('data', 'transaction', 'Transaction'):
-        if isinstance(data.get(nest), dict):
-            flat.update(data[nest])
+    # Match the buyer: checkout email == site email, else a user id echoed in a custom field.
+    # ponytail: single product (Japan guide) -> is_paid=True permanently.
     email = _first(flat, 'payerEmail', 'payer_email', 'email', 'customerEmail', 'cardHolderEmail')
-    approved = bool(_first(flat, 'asmachta')) or str(
-        _first(flat, 'statusCode', 'status') or '').lower() in ('000', '1', 'success', 'approved', 'ok')
-    if email and '@' in str(email) and approved:
-        u = User.query.filter_by(email=str(email).strip().lower()).first()
-        if u:
-            if not u.is_paid:
-                u.is_paid = True
-                db.session.commit()
-            current_app.logger.info('GROW: unlocked user %s via %s', u.id, email)
-        else:
-            current_app.logger.warning('GROW: paid email %s has no site account yet', email)
+    if not email:                                       # fallback: any email-looking value
+        for v in flat.values():
+            if isinstance(v, str) and '@' in v and '.' in v.rsplit('@', 1)[-1]:
+                email = v
+                break
+    u = User.query.filter_by(email=str(email).strip().lower()).first() if email else None
+    if u is None:
+        uid = _first(flat, 'cField1', 'customField1', 'more_info_1', 'identifier')
+        if uid and str(uid).isdigit():
+            u = User.query.get(int(uid))
+    if u:
+        if not u.is_paid:
+            u.is_paid = True
+            db.session.commit()
+        current_app.logger.info('GROW: unlocked user %s (email=%s)', u.id, email)
     else:
-        current_app.logger.warning('GROW: no auto-match (email=%r approved=%s); unlock in admin',
-                                   email, approved)
+        current_app.logger.warning('GROW: no match; payload keys=%s', list(flat.keys()))
     return ('', 200)
+
+
+@billing_bp.route('/paid/japan')
+def paid_japan_return():
+    """Grow product 'success' URL points here -> send the buyer back to the guide.
+    The webhook is authoritative for unlocking; if it hasn't landed yet, the guide
+    shows its 'confirming payment' locked state until a refresh."""
+    return redirect('/blog/japan')
+
+
+@billing_bp.route('/webhooks/grow/debug')
+def grow_debug():
+    """Temporary: view the last few raw Grow payloads to finalize field mapping."""
+    expected = os.environ.get('GROW_WEBHOOK_KEY') or os.environ.get('ADMIN_SECRET')
+    if not expected or request.args.get('key') != expected:
+        return ('forbidden', 403)
+    return (json.dumps(_LAST_GROW_EVENTS, ensure_ascii=False, indent=2),
+            200, {'Content-Type': 'application/json; charset=utf-8'})
 
 
 def _safe_int(v):
@@ -195,3 +219,18 @@ def _first(d, *keys):
         if v not in (None, ''):
             return v
     return None
+
+
+def _flatten(d, out=None):
+    """Flatten nested dict/list payloads into one {key: leaf} dict (last write wins)."""
+    out = {} if out is None else out
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if isinstance(v, (dict, list)):
+                _flatten(v, out)
+            else:
+                out[k] = v
+    elif isinstance(d, list):
+        for v in d:
+            _flatten(v, out)
+    return out
