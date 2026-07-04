@@ -254,6 +254,10 @@ def blog_japan():
     """Japan travel & food guide."""
     return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
 
+@app.route('/blog/instagram')
+def blog_instagram():
+    return render_template('blog_instagram.html')
+
 @app.route('/blog/<category>')
 def blog_category(category):
     return redirect('/', 302)

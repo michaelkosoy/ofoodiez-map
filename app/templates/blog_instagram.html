@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram - Ofoodiez</title>
+    <meta name="description" content="Follow Ofoodiez on Instagram for food recommendations, happy hours and culinary guides.">
+
+    <!-- PWA & Icons -->
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#5A3A31">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/instagram_feed.css') }}?v=4">
+
+    <style>
+        .blog-page-content {
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            padding: 20px 20px 100px 20px;
+        }
+        .blog-page-content .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        @media (min-width: 768px) {
+            .page-title { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    {% set active_page = 'instagram' %}
+    {% include 'components/blog_menu.html' %}
+
+    <div class="blog-page-content">
+        <div class="container">
+            <h1 class="page-title">Instagram</h1>
+            {% include 'components/instagram_feed.html' %}
+            <div class="legal-footer">
+                <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a>
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/bottom_nav.html' %}
+    <script src="{{ url_for('static', filename='js/instagram_feed.js') }}?v=2"></script>
+</body>
+
+</html>
