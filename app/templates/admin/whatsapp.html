@@ -344,15 +344,32 @@ var COLS = {
         { title: "Approved", field: "approved", width: 100 },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
         {
-            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            title: "Actions", headerSort: false, width: 170, hozAlign: "center",
+            formatter: function () {
+                return '<button class="act" data-a="edit">Edit</button>' +
+                    ' <button class="act danger" data-a="delete">Delete</button>';
+            },
             cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
-                editModal('Edit application', [
-                    { key: 'role', label: 'Role', value: d.role },
-                    { key: 'job_posting_url', label: 'Job link', value: d.job_posting_url },
-                    { key: 'job_description', label: 'Job description', value: d.job_description },
-                    { key: 'status', label: 'Status', value: d.status }
-                ], function (v) { putSave('/admin/api/whatsapp/applications/' + d.id, v, c.getTable()); });
+                if (btn.dataset.a === 'edit') {
+                    editModal('Edit application', [
+                        { key: 'role', label: 'Role', value: d.role },
+                        { key: 'job_posting_url', label: 'Job link', value: d.job_posting_url },
+                        { key: 'job_description', label: 'Job description', value: d.job_description },
+                        { key: 'status', label: 'Status', value: d.status }
+                    ], function (v) { putSave('/admin/api/whatsapp/applications/' + d.id, v, c.getTable()); });
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete application?', text: (d.candidate || '') + ' · ' + (d.company || ''), icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                        .then(function (res) {
+                            if (!res.isConfirmed) return;
+                            fetch('/admin/api/whatsapp/applications/' + d.id, { method: 'DELETE' })
+                                .then(function (r) {
+                                    if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    else Swal.fire('Error', 'Could not delete', 'error');
+                                });
+                        });
+                }
             }
         }
     ],
@@ -364,14 +381,30 @@ var COLS = {
         { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
         {
-            title: "Actions", headerSort: false, width: 140,
+            title: "Actions", headerSort: false, width: 220, hozAlign: "center",
             formatter: function (c) {
                 var d = c.getRow().getData();
-                return d.status === 'open' ? '<button class="act ok">Mark handled</button>' : '<button class="act">Reopen</button>';
+                var toggle = d.status === 'open'
+                    ? '<button class="act ok" data-a="toggle">Mark handled</button>'
+                    : '<button class="act" data-a="toggle">Reopen</button>';
+                return toggle + ' <button class="act danger" data-a="delete">Delete</button>';
             },
             cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
-                act('/admin/api/whatsapp/requests/' + d.id, { status: d.status === 'open' ? 'handled' : 'open' }, 'Updated', c.getTable());
+                if (btn.dataset.a === 'toggle') {
+                    act('/admin/api/whatsapp/requests/' + d.id, { status: d.status === 'open' ? 'handled' : 'open' }, 'Updated', c.getTable());
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete request?', text: d.company, icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                        .then(function (res) {
+                            if (!res.isConfirmed) return;
+                            fetch('/admin/api/whatsapp/requests/' + d.id, { method: 'DELETE' })
+                                .then(function (r) {
+                                    if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    else Swal.fire('Error', 'Could not delete', 'error');
+                                });
+                        });
+                }
             }
         }
     ]
