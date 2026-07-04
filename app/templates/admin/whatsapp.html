@@ -70,6 +70,8 @@
     #adv-modal-close:hover { color: #333; }
     #adv-modal-body { flex: 1; overflow-y: auto; padding: 20px 22px; min-height: 0; }
     #adv-modal-table { min-height: 200px; }
+    /* SweetAlert confirms must sit ABOVE the advocates overlay (z-index 9000). */
+    .swal2-container { z-index: 10050 !important; }
 </style>
 {% endblock %}
 
@@ -96,7 +98,10 @@
 </div>
 
 <div class="tab-section" id="section-companies" style="display:none;">
-    <h3>Companies <small style="font-size:.8rem;color:#999;font-weight:400;">— click a row to view advocates</small></h3>
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <span>Companies <small style="font-size:.8rem;color:#999;font-weight:400;">— click a row to view advocates</small></span>
+        <button class="btn btn-success" id="add-company-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add company</button>
+    </h3>
     <div id="t-companies"></div>
 </div>
 <div class="tab-section" id="section-advocates" style="display:none;"><h3>Advocates (employees)</h3><div id="t-advocates"></div></div>
@@ -172,6 +177,7 @@ function editModal(title, fields, onSave) {
     }).then(function (res) { if (res.isConfirmed) onSave(res.value); });
 }
 function editBtn() { return '<button class="act">Edit</button>'; }
+function editNameBtn() { return '<button class="act">Edit name</button>'; }
 
 // ---- table definitions ----
 var COLS = {
@@ -183,7 +189,7 @@ var COLS = {
         { title: "Serviceable", field: "serviceable", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
         { title: "Created", field: "created", width: 150 },
         {
-            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
+            title: "Edit name", headerSort: false, width: 100, formatter: editNameBtn,
             cellClick: function (e, c) {
                 var d = c.getRow().getData();
                 editModal('Rename company', [{ key: 'name', label: 'Company name', value: d.name }],
@@ -201,30 +207,43 @@ var COLS = {
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
         { title: "Joined", field: "created", width: 150 },
         {
-            title: "Actions", headerSort: false, width: 120,
+            title: "Actions", headerSort: false, width: 230, hozAlign: "center",
             formatter: function (c) {
                 var d = c.getRow().getData();
-                return d.status === 'active' ? '<button class="act danger">Deactivate</button>' : '<button class="act ok">Activate</button>';
+                var toggle = d.status === 'active'
+                    ? '<button class="act danger" data-a="toggle">Deactivate</button>'
+                    : '<button class="act ok" data-a="toggle">Activate</button>';
+                return toggle +
+                    ' <button class="act" data-a="edit">Edit</button>' +
+                    ' <button class="act danger" data-a="delete">Delete</button>';
             },
             cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
-                act('/admin/api/whatsapp/advocates/' + d.id, { status: d.status === 'active' ? 'inactive' : 'active' }, 'Updated', c.getTable());
-            }
-        },
-        {
-            title: "Edit", headerSort: false, width: 80, formatter: editBtn,
-            cellClick: function (e, c) {
-                var d = c.getRow().getData();
-                editModal('Edit advocate', [
-                    { key: 'first_name', label: 'First name', value: d.first_name },
-                    { key: 'last_name', label: 'Last name', value: d.last_name },
-                    { key: 'phone', label: 'WhatsApp number', value: d.number },
-                    { key: 'company', label: 'Company', value: d.company },
-                    { key: 'email', label: 'Work email', value: d.email },
-                    { key: 'referral_link', label: 'Referral link', value: d.referral_link },
-                    { key: 'role_title', label: 'Role title', value: d.title },
-                    { key: 'status', label: 'Status (active / inactive / pending)', value: d.status }
-                ], function (v) { putSave('/admin/api/whatsapp/advocates/' + d.id, v, c.getTable()); });
+                if (btn.dataset.a === 'toggle') {
+                    act('/admin/api/whatsapp/advocates/' + d.id, { status: d.status === 'active' ? 'inactive' : 'active' }, 'Updated', c.getTable());
+                } else if (btn.dataset.a === 'edit') {
+                    editModal('Edit advocate', [
+                        { key: 'first_name', label: 'First name', value: d.first_name },
+                        { key: 'last_name', label: 'Last name', value: d.last_name },
+                        { key: 'phone', label: 'WhatsApp number', value: d.number },
+                        { key: 'company', label: 'Company', value: d.company },
+                        { key: 'email', label: 'Work email', value: d.email },
+                        { key: 'referral_link', label: 'Referral link', value: d.referral_link },
+                        { key: 'role_title', label: 'Role title', value: d.title },
+                        { key: 'status', label: 'Status (active / inactive / pending)', value: d.status }
+                    ], function (v) { putSave('/admin/api/whatsapp/advocates/' + d.id, v, c.getTable()); });
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete advocate?', text: d.name, icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                        .then(function (res) {
+                            if (!res.isConfirmed) return;
+                            fetch('/admin/api/whatsapp/advocates/' + d.id, { method: 'DELETE' })
+                                .then(function (r) {
+                                    if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    else Swal.fire('Error', 'Could not delete', 'error');
+                                });
+                        });
+                }
             }
         }
     ],
@@ -401,8 +420,10 @@ function openAdvocatesModal(company) {
                         if (!res.isConfirmed) return;
                         fetch('/admin/api/whatsapp/advocates/' + d.id, { method: 'DELETE' })
                             .then(function(r) {
-                                if (r.ok) { advTable.replaceData(); }
-                                else Swal.fire('Error', 'Could not delete', 'error');
+                                if (!r.ok) { Swal.fire('Error', 'Could not delete', 'error'); return; }
+                                advTable.replaceData();
+                                if (TABLES['companies']) TABLES['companies'].replaceData();
+                                maybeOfferCompanyDelete();
                             });
                     });
                 }
@@ -431,6 +452,31 @@ function closeAdvocatesModal() {
     currentCompany = null;
 }
 
+// After deleting an advocate: if the company is now empty, offer to delete it too.
+function maybeOfferCompanyDelete() {
+    if (!currentCompany) return;
+    var cid = currentCompany.id, cname = currentCompany.name;
+    fetch('/admin/api/whatsapp/companies/' + cid + '/advocates')
+        .then(function(r) { return r.json(); })
+        .then(function(list) {
+            if (list && list.length) return;  // still has advocates
+            Swal.fire({ title: 'No advocates left', icon: 'question',
+                text: cname + ' has no advocates now. Delete the company too?',
+                showCancelButton: true, confirmButtonColor: '#e74c3c',
+                confirmButtonText: 'Delete company', cancelButtonText: 'Keep it'
+            }).then(function(res) {
+                if (!res.isConfirmed) return;
+                fetch('/admin/api/whatsapp/companies/' + cid, { method: 'DELETE' })
+                    .then(function(r) {
+                        if (!r.ok) { Swal.fire('Error', 'Could not delete company', 'error'); return; }
+                        closeAdvocatesModal();
+                        if (TABLES['companies']) TABLES['companies'].replaceData();
+                        Swal.fire({ icon: 'success', title: 'Company deleted', timer: 1100, showConfirmButton: false });
+                    });
+            });
+        });
+}
+
 document.getElementById('adv-modal-close').addEventListener('click', closeAdvocatesModal);
 document.getElementById('adv-modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeAdvocatesModal();
@@ -455,6 +501,20 @@ document.getElementById('adv-add-btn').addEventListener('click', function() {
             advTable.replaceData();
             if (TABLES['companies']) TABLES['companies'].replaceData();
             Swal.fire({ icon: 'success', title: 'Advocate added', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+// ---- Add company (Companies tab) ----
+document.getElementById('add-company-btn').addEventListener('click', function() {
+    editModal('Add company', [{ key: 'name', label: 'Company name', value: '' }], function(v) {
+        fetch('/admin/api/whatsapp/companies', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v)
+        }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
+            if (TABLES['companies']) TABLES['companies'].replaceData();
+            Swal.fire({ icon: 'success', title: 'Company added', timer: 1000, showConfirmButton: false });
         });
     });
 });

@@ -527,6 +527,46 @@ def update_whatsapp_company(id):
     return jsonify({"id": c.id, "name": c.name})
 
 
+@admin_bp.route('/api/whatsapp/companies', methods=['POST'])
+@login_required
+def create_whatsapp_company():
+    name = ((request.json or {}).get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "Company name is required"}), 400
+    norm = " ".join(name.lower().split())
+    existing = WaCompany.query.filter_by(normalized_name=norm).first()
+    if existing:
+        return jsonify({"error": "That company already exists", "id": existing.id}), 409
+    c = WaCompany(name=name, normalized_name=norm)
+    db.session.add(c)
+    db.session.commit()
+    return jsonify({"id": c.id, "name": c.name}), 201
+
+
+@admin_bp.route('/api/whatsapp/companies/<int:id>', methods=['DELETE'])
+@login_required
+def delete_whatsapp_company(id):
+    c = WaCompany.query.get_or_404(id)
+    _delete_company_cascade(c)
+    db.session.commit()
+    return '', 204
+
+
+def _delete_company_cascade(company):
+    """Delete a company plus everything that references it — advocates and
+    applications (with their recipients) — and detach it from backfill requests,
+    so there are no FK violations."""
+    app_ids = [a.id for a in WaApplication.query.filter_by(company_id=company.id).all()]
+    if app_ids:
+        WaApplicationRecipient.query.filter(
+            WaApplicationRecipient.application_id.in_(app_ids)).delete(synchronize_session=False)
+        WaApplication.query.filter_by(company_id=company.id).delete(synchronize_session=False)
+    WaAdvocate.query.filter_by(company_id=company.id).delete(synchronize_session=False)
+    WaCompanyRequest.query.filter_by(resolved_company_id=company.id).update(
+        {WaCompanyRequest.resolved_company_id: None}, synchronize_session=False)
+    db.session.delete(company)
+
+
 def _notify_via_bot(request_id):
     """Ask the BOT service (which has the SendGrid env vars; this main app does
     not) to email the candidate that their requested company is now available.
