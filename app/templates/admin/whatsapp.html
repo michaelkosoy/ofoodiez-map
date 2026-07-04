@@ -104,8 +104,20 @@
     </h3>
     <div id="t-companies"></div>
 </div>
-<div class="tab-section" id="section-advocates" style="display:none;"><h3>Advocates (employees)</h3><div id="t-advocates"></div></div>
-<div class="tab-section" id="section-candidates" style="display:none;"><h3>Candidates</h3><div id="t-candidates"></div></div>
+<div class="tab-section" id="section-advocates" style="display:none;">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <span>Advocates (employees)</span>
+        <button class="btn btn-success" id="add-advocate-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add advocate</button>
+    </h3>
+    <div id="t-advocates"></div>
+</div>
+<div class="tab-section" id="section-candidates" style="display:none;">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <span>Candidates</span>
+        <button class="btn btn-success" id="add-candidate-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add candidate</button>
+    </h3>
+    <div id="t-candidates"></div>
+</div>
 <div class="tab-section" id="section-applications" style="display:none;"><h3>Applications &amp; referrals</h3><div id="t-applications"></div></div>
 <div class="tab-section" id="section-requests" style="display:none;"><h3>Backfill requests (companies we don't serve yet)</h3><div id="t-requests"></div></div>
 <!-- Advocates modal -->
@@ -515,6 +527,49 @@ document.getElementById('add-company-btn').addEventListener('click', function() 
             if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
             if (TABLES['companies']) TABLES['companies'].replaceData();
             Swal.fire({ icon: 'success', title: 'Company added', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+// ---- Add advocate (top-level — company is a field, no need to open a company) ----
+document.getElementById('add-advocate-btn').addEventListener('click', function() {
+    editModal('Add advocate', [
+        { key: 'company', label: 'Company', value: '' },
+        { key: 'first_name', label: 'First name', value: '' },
+        { key: 'last_name', label: 'Last name', value: '' },
+        { key: 'phone', label: 'WhatsApp number (optional)', value: '' },
+        { key: 'email', label: 'Work email', value: '' },
+        { key: 'referral_link', label: 'LinkedIn / Referral link', value: '' },
+        { key: 'role_title', label: 'Role / Title', value: '' },
+        { key: 'status', label: 'Status (active / inactive / pending)', value: 'active' }
+    ], function(v) {
+        fetch('/admin/api/whatsapp/advocates', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v)
+        }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
+            if (TABLES['advocates']) TABLES['advocates'].replaceData();
+            if (TABLES['companies']) TABLES['companies'].replaceData();
+            Swal.fire({ icon: 'success', title: 'Advocate added', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+// ---- Add candidate ----
+document.getElementById('add-candidate-btn').addEventListener('click', function() {
+    editModal('Add candidate', [
+        { key: 'first_name', label: 'First name', value: '' },
+        { key: 'last_name', label: 'Last name', value: '' },
+        { key: 'phone', label: 'WhatsApp number (e.g. +972501234567)', value: '' },
+        { key: 'email', label: 'Email', value: '' }
+    ], function(v) {
+        fetch('/admin/api/whatsapp/candidates', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v)
+        }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
+            if (TABLES['candidates']) TABLES['candidates'].replaceData();
+            Swal.fire({ icon: 'success', title: 'Candidate added', timer: 1000, showConfirmButton: false });
         });
     });
 });
