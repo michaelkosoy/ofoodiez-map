@@ -29,6 +29,11 @@ This document tracks all external services, APIs, and platforms integrated into 
 * **Forwarding Address:** `ofir.lazarov@gmail.com`
 * **Owner:** Ofir Lazarov
 
+### ImprovMX (Domain Email Forwarding)
+* **Usage:** Domain email forwarding service used to route emails sent to `contact@ofoodiez.com` to the personal email address.
+* **Forwarding Address:** `ofir.lazarov@gmail.com`
+* **Owner:** Ofir Lazarov
+
 ### Telegram Bot API
 * **Usage:** Used for the Telegram Bot Content Management system to process and manage popups or happy hour places.
 * **Owner:** [Michael / Ofir - Please update]

@@ -21,16 +21,29 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=5">
 </head>
 
 <body>
+    {% set active_page = 'hitech' %}
+    <style>
+    /* Blog nav bar styles for HiTech page */
+    .blog-category-menu{width:100%;overflow:hidden;background:#0d0a12;padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,.08);}
+    .blog-category-label{padding:0 24px 4px;font-family:'Outfit',sans-serif;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35);display:block;}
+    .category-scroll-container{display:flex;overflow-x:auto;gap:9px;padding:8px 24px 4px;-ms-overflow-style:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .category-scroll-container::-webkit-scrollbar{display:none;}
+    .category-pill{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.12);border-radius:999px;font-family:'Outfit',sans-serif;font-weight:600;font-size:12px;white-space:nowrap;text-decoration:none;transition:all .2s ease;}
+    .category-pill i{font-size:11px;color:inherit;}
+    .category-pill:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);box-shadow:0 4px 12px rgba(0,0,0,.3);color:#fff;}
+    .category-pill.active{background:#b8973a;color:#0d0a12;border-color:transparent;font-weight:700;}
+    .category-pill.active i{color:#0d0a12;}
+    .blog-menu-header{display:none;}
+    .pill-dropdown-menu{background:#1a1523;border-color:rgba(255,255,255,.12);}
+    .pill-dropdown-menu a{color:rgba(255,255,255,.8);}
+    .pill-dropdown-menu a:hover{background:rgba(255,255,255,.08);}
+    </style>
+    {% include 'components/blog_menu.html' %}
     <div class="hitech-page">
-
-        <!-- Top bar -->
-        <header class="hitech-topbar">
-            <span class="hitech-wordmark">Ofoodiez</span>
-            <a href="/" class="hitech-topbar-back">← Back</a>
-        </header>
 
         <!-- Hero -->
         <main class="hitech-hero">
@@ -184,5 +197,6 @@
             setTimeout(type, 600); // short pause before typing starts
         })();
     </script>
+    {% include 'components/bottom_nav.html' %}
 </body>
 </html>

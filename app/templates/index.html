@@ -40,11 +40,29 @@
 </head>
 
 <body>
-    <!-- Floating Back Button for Map Page -->
-    <a href="/" class="floating-back-btn">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
-    </a>
+    {% set active_page = 'map' %}
+    <style>
+    /* Blog nav bar styles for map page */
+    .blog-category-menu{width:100%;overflow:hidden;background:#faf5e6;padding:10px 0 8px;border-bottom:1px solid #ece1cb;position:relative;z-index:10;}
+    .blog-category-label{padding:0 24px 2px;font-family:'Outfit',sans-serif;font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#a98e6f;display:block;}
+    .category-scroll-container{display:flex;overflow-x:auto;gap:9px;padding:6px 24px 4px;-ms-overflow-style:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .category-scroll-container::-webkit-scrollbar{display:none;}
+    .category-pill{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:7px 14px;background:#fff;color:#603e35;border:1px solid rgba(96,62,53,.18);border-radius:999px;font-family:'Outfit','Assistant',sans-serif;font-weight:600;font-size:12px;white-space:nowrap;text-decoration:none;transition:all .2s ease;}
+    .category-pill i{font-size:11px;color:inherit;}
+    .category-pill:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);}
+    .category-pill.active{background:#603e35;color:#f9f6eb;border-color:transparent;font-weight:700;}
+    .category-pill.active i{color:#f9f6eb;}
+    .blog-menu-header{display:none;}
+    /* Offset map and sidebar for the nav bar */
+    #map { height: calc(100vh - 132px) !important; margin-top: 0; }
+    .sidebar { top: 72px !important; bottom: 80px !important; }
+    .map-filters-card { top: 72px !important; }
+    @media (max-width: 768px) {
+      #map { height: 100vh !important; position: fixed; top: 72px !important; }
+      .sidebar { top: auto !important; bottom: 0 !important; }
+    }
+    </style>
+    {% include 'components/blog_menu.html' %}
 
     <div id="map"></div>
 

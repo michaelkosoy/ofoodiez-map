@@ -1,9 +1,48 @@
 <!-- Blog Category Menu -->
+<style>
+    .blog-pill-dropdown {
+        position: relative;
+        flex: 0 0 auto;
+    }
+
+    .pill-dropdown-menu {
+        display: none;
+        position: fixed;
+        background: #faf5e6;
+        border: 1px solid #ece1cb;
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(54, 33, 24, .12);
+        min-width: 155px;
+        z-index: 9999;
+        padding: 6px 0;
+        overflow: hidden;
+    }
+
+    .pill-dropdown-menu a {
+        display: block;
+        padding: 9px 18px;
+        font-family: 'Outfit', 'Assistant', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #362118;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .15s;
+    }
+
+    .pill-dropdown-menu a:hover {
+        background: rgba(96, 62, 53, .1);
+        color: #603e35;
+    }
+</style>
 <div class="blog-category-menu" dir="ltr">
     {% if active_page != 'home' %}
-    <div class="blog-menu-header" style="display: flex; justify-content: center; align-items: center; gap: 10px; padding: 0 20px; margin-bottom: 15px; margin-top: 30px;">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo" style="width: 32px; height: 32px; border-radius: 50%;">
-        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--text-color, #362118);">Ofoodiez</span>
+    <div class="blog-menu-header"
+        style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 0 20px; margin-bottom: 0;">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo"
+            style="width: 54px; border-radius: 50%;">
+        <span
+            style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.7rem; color: var(--text-color, #362118);">Ofoodiez</span>
     </div>
     {% endif %}
     <span class="blog-category-label">Explore the blog</span>
@@ -14,11 +53,47 @@
         <a href="/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
             <i class="fas fa-glass-cheers"></i> Bachelorette Party
         </a>
-        <a href="/blog/japan-guide" class="category-pill {% if active_page == 'japan-guide' %}active{% endif %}">
-            <i class="fas fa-plane"></i> Japan Guide
-        </a>
+        <div class="blog-pill-dropdown" id="japan-pill-wrap">
+            <a href="/blog/japan" id="japan-pill-btn"
+                class="category-pill {% if active_page == 'japan-guide' %}active{% endif %}">
+                <i class="fas fa-plane"></i> Japan Guide <i class="fas fa-chevron-down"
+                    style="font-size:9px;opacity:.7;margin-right:2px;"></i>
+            </a>
+        </div>
         <a href="/blog/instagram" class="category-pill {% if active_page == 'instagram' %}active{% endif %}">
             <i class="fab fa-instagram"></i> Instagram
         </a>
     </div>
 </div>
+
+<!-- Japan dropdown — rendered outside the scroll container so overflow doesn't clip it -->
+<div class="pill-dropdown-menu" id="japan-pill-menu">
+    <a href="/blog/japan#intro">✍️ Intro</a>
+    <a href="/blog/japan#map">🗺️ Map</a>
+    <a href="/blog/japan#cities">🏙️ Cities</a>
+    <a href="/blog/japan#calc">🧮 Calculator</a>
+    <a href="/blog/japan#shop">🛍️ Shopping</a>
+</div>
+
+<script>
+    (function () {
+        var wrap = document.getElementById('japan-pill-wrap');
+        var menu = document.getElementById('japan-pill-menu');
+        if (!wrap || !menu) return;
+
+        function show() {
+            var r = wrap.getBoundingClientRect();
+            menu.style.top = (r.bottom + 6) + 'px';
+            menu.style.left = r.left + 'px';
+            menu.style.display = 'block';
+        }
+        function hide() { menu.style.display = 'none'; }
+
+        wrap.addEventListener('mouseenter', show);
+        wrap.addEventListener('mouseleave', function (e) {
+            // keep open if cursor moves into the menu itself
+            if (!menu.contains(e.relatedTarget)) hide();
+        });
+        menu.addEventListener('mouseleave', hide);
+    })();
+</script>
