@@ -54,6 +54,13 @@ def _activate(user, recurring_uid=None):
     db.session.commit()
 
 
+def _mark_paid(user):
+    """Grant permanent paid access for a one-time purchase (Grow guide). Idempotent."""
+    user.is_paid = True
+    user.paid_at = datetime.utcnow()
+    db.session.commit()
+
+
 @billing_bp.route('/services/pay', methods=['POST'])
 @login_required
 def pay():
@@ -179,8 +186,7 @@ def grow_callback():
             u = User.query.get(int(uid))
     if u:
         if not u.is_paid:
-            u.is_paid = True
-            db.session.commit()
+            _mark_paid(u)
         current_app.logger.info('GROW: unlocked user %s (email=%s)', u.id, email)
     else:
         current_app.logger.warning('GROW: no match; payload keys=%s', list(flat.keys()))
@@ -189,9 +195,22 @@ def grow_callback():
 
 @billing_bp.route('/paid/japan')
 def paid_japan_return():
-    """Grow product 'success' URL points here -> send the buyer back to the guide.
-    The webhook is authoritative for unlocking; if it hasn't landed yet, the guide
-    shows its 'confirming payment' locked state until a refresh."""
+    """Grow payment link's success/redirect URL points here. New-system PaymentLinks
+    don't reliably fire the account webhook, so we unlock the buyer on return: they
+    were logged in when they clicked Buy and come back in the same session. Then we
+    send them to the guide.
+
+    ponytail: this trusts the redirect — a logged-in user could hit this URL without
+    paying (bypass). Acceptable for an 80 ILS guide; harden by moving the unlock to the
+    server-to-server webhook (grow_callback) once it fires, or the createPaymentProcess
+    API. Grow's appended query params are logged so we can gate on them later.
+    """
+    if request.args:
+        current_app.logger.info('GROW return params: %s', dict(request.args))
+    user = current_user()
+    if user is not None and not user.is_paid:
+        _mark_paid(user)
+        current_app.logger.info('GROW: unlocked user %s on payment return', user.id)
     return redirect('/blog/japan')
 
 

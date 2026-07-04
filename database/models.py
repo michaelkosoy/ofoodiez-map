@@ -16,6 +16,7 @@ def _run_migrations():
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS list_name TEXT",
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS google_id VARCHAR(64)",
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS payplus_sub_uid VARCHAR(64)",
+        "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP",
         "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
         "ALTER TABLE ig_happy_hours ADD COLUMN IF NOT EXISTS google_maps_link TEXT",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS company TEXT",
@@ -189,6 +190,7 @@ class User(db.Model):
     is_paid = db.Column(db.Boolean, default=False)    # set True by the PayPlus callback on a successful charge
     paid_until = db.Column(db.DateTime)               # subscription period end (extended each recurring charge)
     payplus_sub_uid = db.Column(db.String(64))        # PayPlus recurring_uid, for reference/cancellation
+    paid_at = db.Column(db.DateTime)                  # when the most recent payment landed (Grow one-time / audit)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
