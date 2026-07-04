@@ -4,9 +4,8 @@
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OfTech — Exclusive Foodiez Community</title>
+    <title>Ofoodiez - tech foodiez community</title>
     <meta name="description" content="An exclusive community for food-loving entrepreneurs, business leaders, and builders.">
-    <meta name="robots" content="noindex">
 
     <!-- PWA & Icons -->
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
@@ -29,8 +28,8 @@
 
         <!-- Top bar -->
         <header class="hitech-topbar">
+            <a href="/" onclick="if(document.referrer && document.referrer.includes(window.location.host)){history.back();return false;}" class="hitech-topbar-back">← Back</a>
             <span class="hitech-wordmark">Ofoodiez</span>
-            <a href="/" class="hitech-topbar-back">← Back</a>
         </header>
 
         <!-- Hero -->
