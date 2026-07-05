@@ -47,6 +47,41 @@ def _valid_url(url):
     return bool(re.match(r"^https://[^\s/]+\.[^\s/]+", url, re.IGNORECASE))
 
 
+# Answers that aren't a real company name — re-asked instead of logged as a
+# backfill request ("all", "tech", "high tech", "don't know", a sentence, …).
+# Sector/generic words are matched whole (squashed) so real companies that merely
+# CONTAIN them (AllCloud, Startup Nation, Check Point Software) still pass.
+_VAGUE_EXACT = {
+    "all", "any", "anything", "everything", "everyone", "everywhere", "anywhere",
+    "none", "nothing", "na", "idk", "whatever", "dunno", "tbd", "open", "many",
+    "tech", "hitech", "hightech", "hightechcompanies", "startup", "startups",
+    "company", "companies", "biotech", "biotechnology", "fintech", "cyber",
+    "ai", "ml", "software", "hardware", "saas", "hr", "sales", "marketing",
+}
+_VAGUE_PHRASE = (
+    "high tech", "high-tech", "hi tech", "hi-tech",
+    "don't know", "dont know", "not sure", "no idea", "not specific",
+    "nothing specific", "not a company", "looking for", "interested in",
+    "no preference", "doesn't matter", "doesnt matter", "not relevant",
+    "not important", "anywhere", "everywhere", "digital / branding",
+    "digital/branding", "entry-lev", "project manager role",
+)
+
+
+def _is_vague_company(text):
+    """True when the text clearly isn't a company name (a generic term or a whole
+    sentence), so we re-ask instead of logging a bogus company request."""
+    norm = _normalize(text)
+    squashed = re.sub(r"[^a-z0-9]", "", norm)
+    if not squashed:
+        return True
+    if squashed in _VAGUE_EXACT or norm in _VAGUE_EXACT:
+        return True
+    if any(p in norm for p in _VAGUE_PHRASE):
+        return True
+    return len(norm.split()) > 5 or len(text.strip()) > 45  # sentence-like
+
+
 def start(user, conv, returning=True):
     """Begin the candidate path. Returning (already-registered) users get a
     by-name welcome-back; a freshly-registered user gets the welcome-aboard."""
@@ -111,6 +146,11 @@ def _handle_company(user, conv, data, text):
     company = WaCompany.query.filter_by(normalized_name=norm).first()
     if company:
         return _resolve_company(user, conv, data, company)
+    # Reject vague / non-company answers ("all", "high tech", "don't know", a
+    # whole sentence) — re-ask instead of logging a bogus company request.
+    if _is_vague_company(text):
+        messaging.send_prompt(user.phone, copy.CAND_COMPANY_VAGUE)
+        return "cand_company_vague"
     # No exact match → offer close matches instead of forcing exact spelling.
     similar = _find_similar(norm)
     if similar:

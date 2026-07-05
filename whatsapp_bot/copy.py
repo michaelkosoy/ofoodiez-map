@@ -250,6 +250,11 @@ CAND_NOT_FOUND = (
     "someone there* who can refer you. 🙌\n"
     "Double-check the spelling (English works best), or try another company."
 )
+CAND_COMPANY_VAGUE = (
+    "I can only look you up by a *specific company* 🙏\n"
+    "Which company would you like a referral to? (e.g. *Google*, *Wix*, *Elbit*)\n"
+    "Type *menu* to go back."
+)
 CAND_RESUME_SOON = (
     "Awesome — you're almost there! 🙌\n"
     "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
