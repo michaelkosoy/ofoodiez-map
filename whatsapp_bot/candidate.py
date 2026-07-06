@@ -67,12 +67,14 @@ _VAGUE_EXACT = {
     "company", "companies", "biotech", "biotechnology", "fintech", "cyber",
     "ai", "ml", "software", "hardware", "saas", "hr", "sales", "marketing",
 }
+# Apostrophe-free forms — matched against text with apostrophes stripped, so
+# "don't know" / "I don't know" (straight OR curly ') are all caught.
 _VAGUE_PHRASE = (
     "high tech", "high-tech", "hi tech", "hi-tech",
-    "don't know", "dont know", "not sure", "no idea", "not specific",
+    "dont know", "no clue", "no idea", "not sure", "not specific",
     "nothing specific", "not a company", "looking for", "interested in",
-    "no preference", "doesn't matter", "doesnt matter", "not relevant",
-    "not important", "anywhere", "everywhere", "digital / branding",
+    "no preference", "doesnt matter", "not relevant", "not important",
+    "undecided", "not decided", "anywhere", "everywhere", "digital / branding",
     "digital/branding", "entry-lev", "project manager role",
 )
 
@@ -81,12 +83,15 @@ def _is_vague_company(text):
     """True when the text clearly isn't a company name (a generic term or a whole
     sentence), so we re-ask instead of logging a bogus company request."""
     norm = _normalize(text)
-    squashed = re.sub(r"[^a-z0-9]", "", norm)
+    clean = norm
+    for ch in ("’", "‘", "'", "`", "´"):  # curly/straight apostrophes
+        clean = clean.replace(ch, "")
+    squashed = re.sub(r"[^a-z0-9]", "", clean)
     if not squashed:
         return True
-    if squashed in _VAGUE_EXACT or norm in _VAGUE_EXACT:
+    if squashed in _VAGUE_EXACT or clean in _VAGUE_EXACT or norm in _VAGUE_EXACT:
         return True
-    if any(p in norm for p in _VAGUE_PHRASE):
+    if any(p in clean for p in _VAGUE_PHRASE):
         return True
     return len(norm.split()) > 5 or len(text.strip()) > 45  # sentence-like
 
