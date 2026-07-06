@@ -211,8 +211,8 @@ CAND_ROLE_MATCH = (
 )
 CAND_NO_MATCH_CV = (
     "I don't have a *{role}* referral at *{company}* just yet 🤔\n"
-    "But send me your CV and I'll pass it to the team there! First — got a *job link*? "
-    "Paste it (optional: type *pass*), or describe the role in a few words."
+    "I can still pass your CV to the team there — first, paste the *link to the job "
+    "posting* (the company's careers page or LinkedIn). 🔗"
 )
 CAND_AFTER_LINK_ROLE = (
     "Sure! Which *role* are you aiming for? "
@@ -225,9 +225,14 @@ CAND_ROLE = (
 )
 CAND_JOB_LINK = (
     "Nice — *{company}* it is! 🎯\n"
-    "If you have it, paste the *link to the job posting*. It's optional, but it "
-    "really helps your advocate refer you to the right role — so better to add it. 🙌\n"
-    "No link? Type *pass*, or just *describe the role* in a few words."
+    "Paste the *link to the exact job posting* you want — from *{company}*'s careers "
+    "page or its *LinkedIn* listing. This is required so your advocate refers you to "
+    "the right role. 🔗"
+)
+CAND_JOB_LINK_REQUIRED = (
+    "I need the *actual link* to the job posting to continue 🙏\n"
+    "Paste the URL from the company's careers page or LinkedIn — it should start "
+    "with *http*."
 )
 CAND_DID_YOU_MEAN_ONE = (
     "Hmm, I couldn't find an exact match 🤔\n"
@@ -251,7 +256,9 @@ CAND_NOT_FOUND = (
     "Double-check the spelling (English works best), or try another company."
 )
 CAND_COMPANY_VAGUE = (
-    "I can only look you up by a *specific company* 🙏\n"
+    "I connect you to a real person *inside a specific company*, so I need the "
+    "company's *exact name* — not a role, a field, or something like 'high tech', "
+    "'startups' or 'all'. 🙏\n"
     "Which company would you like a referral to? (e.g. *Google*, *Wix*, *Elbit*)\n"
     "Type *menu* to go back."
 )

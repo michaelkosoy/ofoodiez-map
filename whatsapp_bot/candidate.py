@@ -47,6 +47,15 @@ def _valid_url(url):
     return bool(re.match(r"^https://[^\s/]+\.[^\s/]+", url, re.IGNORECASE))
 
 
+def _valid_job_link(url):
+    """A job-posting URL (company careers page or LinkedIn). Lenient on domain —
+    we can't know each company's careers host — but it must be a real http(s) URL."""
+    url = (url or "").strip()
+    if not url or len(url) > 2048:
+        return False
+    return bool(re.match(r"^https?://[^\s/]+\.[^\s/]+", url, re.IGNORECASE))
+
+
 # Answers that aren't a real company name — re-asked instead of logged as a
 # backfill request ("all", "tech", "high tech", "don't know", a sentence, …).
 # Sector/generic words are matched whole (squashed) so real companies that merely
@@ -120,14 +129,12 @@ def handle(user, conv, inbound):
         return "cand_role"
 
     if step == "cand_job_link":
-        # Optional: a URL → store it; "pass"/etc → skip; anything else → role description.
+        # Required: a real job-posting URL (company careers page or LinkedIn).
         t = text.strip()
-        if _valid_url(t):
-            data["job_posting_url"] = t
-        elif t.lower() in _SKIP_WORDS:
-            pass
-        else:
-            data["job_description"] = t
+        if not _valid_job_link(t):
+            messaging.send_prompt(user.phone, copy.CAND_JOB_LINK_REQUIRED)
+            return "cand_job_link_invalid"
+        data["job_posting_url"] = t
         conversation.set_state(conv, "candidate", "cand_resume", data)
         messaging.send_prompt(user.phone, copy.CAND_RESUME_PROMPT)
         return "cand_job_link"
