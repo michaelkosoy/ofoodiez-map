@@ -61,21 +61,41 @@ def _valid_job_link(url):
 # Sector/generic words are matched whole (squashed) so real companies that merely
 # CONTAIN them (AllCloud, Startup Nation, Check Point Software) still pass.
 _VAGUE_EXACT = {
-    "all", "any", "anything", "everything", "everyone", "everywhere", "anywhere",
-    "none", "nothing", "na", "idk", "whatever", "dunno", "tbd", "open", "many",
-    "tech", "hitech", "hightech", "hightechcompanies", "startup", "startups",
-    "company", "companies", "biotech", "biotechnology", "fintech", "cyber",
-    "ai", "ml", "software", "hardware", "saas", "hr", "sales", "marketing",
+    "all", "any", "anything", "everything", "everyone", "everybody", "anyone",
+    "anybody", "someone", "somewhere", "everywhere", "anywhere", "none",
+    "nothing", "na", "idk", "whatever", "dunno", "tbd", "open", "many",
+    "options", "flexible", "undecided",
+    "tech", "hitech", "hightech", "hightechcompanies", "bigtech", "faang",
+    "unicorn", "unicorns", "startup", "startups", "company", "companies",
+    "biotech", "biotechnology", "fintech", "cyber", "ai", "ml", "software",
+    "hardware", "saas", "hr", "sales", "marketing",
 }
 # Apostrophe-free forms — matched against text with apostrophes stripped, so
-# "don't know" / "I don't know" (straight OR curly ') are all caught.
+# "don't know" / "I'm open" / "you'll pick" (straight OR curly ') are all caught.
 _VAGUE_PHRASE = (
+    # sectors / generic descriptors
     "high tech", "high-tech", "hi tech", "hi-tech",
+    "any compan", "most compan", "all compan", "many compan", "good compan",
+    "great compan", "top compan", "big compan", "known compan", "large compan",
+    "well known", "well-known",
+    # open / flexible / don't care
+    "open to", "im open", "am open", "im flexible", "am flexible",
+    "not picky", "dont care", "dont mind", "no preference", "up to you",
+    # unsure
     "dont know", "no clue", "no idea", "not sure", "not specific",
-    "nothing specific", "not a company", "looking for", "interested in",
-    "no preference", "doesnt matter", "not relevant", "not important",
-    "undecided", "not decided", "anywhere", "everywhere", "digital / branding",
-    "digital/branding", "entry-lev", "project manager role",
+    "no specific", "nothing specific", "not a company", "no particular",
+    "not decided", "still looking", "still deciding", "havent decided",
+    "doesnt matter", "not relevant", "not important",
+    # asking us to pick / browse
+    "you tell me", "you choose", "you decide", "you pick", "you recommend",
+    "recommend me", "suggest me", "you suggest", "surprise me", "help me choose",
+    "what do you have", "what companies", "which companies", "show me", "list of",
+    "any of them", "all of them", "one of them", "any is fine", "any will do",
+    "anything works", "whatever works", "whatever you",
+    # roles / other (belong in the role step, not the company step)
+    "looking for", "interested in", "any role", "any position", "any job",
+    "entry level", "entry-lev", "project manager role",
+    "digital / branding", "digital/branding", "anywhere", "everywhere",
 )
 
 
