@@ -655,10 +655,10 @@ body {
     color: var(--text-main);
 }
 .supplier-filter-btn.active {
-    background: var(--gold);
-    color: var(--text-main);
-    border-color: var(--gold);
-    box-shadow: 0 4px 8px rgba(236, 200, 115, 0.25);
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(96, 62, 53, 0.2);
 }
 .suppliers-grid {
     display: grid;
