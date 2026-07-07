@@ -1,8 +1,10 @@
 /* Bachelorette Page Styles - Premium & Dynamic */
 :root {
-    --primary-color: #720815;
-    --secondary-color: #845649;
-    --bg-color: #faf5e6;
+    --primary-color: #720815;       /* Burgundy */
+    --secondary-color: #603e35;     /* Medium Brown */
+    --tertiary-color: #845649;      /* Light Brown */
+    --gold: #ECC873;                /* Gold */
+    --bg-color: #faf5e6;            /* Warm Cream */
     --card-bg: #ffffff;
     --text-main: #362118;
     --text-muted: #636E72;
@@ -200,7 +202,7 @@ body {
 }
 
 .filter-btn.active {
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
     box-shadow: 0 4px 10px rgba(90, 58, 49, 0.3);
 }
@@ -579,11 +581,35 @@ body {
     color: var(--primary-color);
     transform: translateY(-2px);
 }
-.section-tab.active {
+.section-tab:nth-child(1).active {
+    background: var(--secondary-color);
+    color: white;
+    box-shadow: 0 8px 15px rgba(96, 62, 53, 0.25);
+    border-color: var(--secondary-color);
+}
+.section-tab:nth-child(2).active {
+    background: var(--gold);
+    color: var(--text-main);
+    box-shadow: 0 8px 15px rgba(236, 200, 115, 0.35);
+    border-color: var(--gold);
+}
+.section-tab:nth-child(3).active {
     background: var(--primary-color);
     color: white;
     box-shadow: 0 8px 15px rgba(114, 8, 21, 0.25);
     border-color: var(--primary-color);
+}
+.section-tab:nth-child(4).active {
+    background: var(--tertiary-color);
+    color: white;
+    box-shadow: 0 8px 15px rgba(132, 8, 21, 0.25);
+    border-color: var(--tertiary-color);
+}
+.section-tab:nth-child(5).active {
+    background: #E07A5F;
+    color: white;
+    box-shadow: 0 8px 15px rgba(224, 122, 95, 0.25);
+    border-color: #E07A5F;
 }
 
 /* ============ TAB CONTENT SWITCHING ============ */
@@ -629,10 +655,10 @@ body {
     color: var(--text-main);
 }
 .supplier-filter-btn.active {
-    background: var(--secondary-color);
-    color: white;
-    border-color: var(--secondary-color);
-    box-shadow: 0 4px 8px rgba(132, 86, 73, 0.2);
+    background: var(--gold);
+    color: var(--text-main);
+    border-color: var(--gold);
+    box-shadow: 0 4px 8px rgba(236, 200, 115, 0.25);
 }
 .suppliers-grid {
     display: grid;
@@ -662,7 +688,7 @@ body {
     right: 0;
     width: 4px;
     height: 100%;
-    background: var(--secondary-color);
+    background: var(--gold);
     border-top-right-radius: var(--radius-md);
     border-bottom-right-radius: var(--radius-md);
 }
@@ -808,11 +834,23 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.02);
     border-right: 5px solid var(--primary-color);
 }
+.game-card.elegant {
+    border-right: 5px solid var(--secondary-color);
+}
+.game-card.rowdy {
+    border-right: 5px solid var(--primary-color);
+}
 .game-title {
     font-size: 1.35rem;
     font-weight: 800;
     color: var(--primary-color);
     margin: 0 0 6px 0;
+}
+.game-card.elegant .game-title {
+    color: var(--secondary-color);
+}
+.game-card.rowdy .game-title {
+    color: var(--primary-color);
 }
 .game-subtitle {
     font-size: 0.95rem;
@@ -853,7 +891,7 @@ body {
 .branding-header h2 {
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--primary-color);
+    color: var(--secondary-color);
     margin: 0 0 8px 0;
 }
 .branding-header p {
@@ -877,7 +915,7 @@ body {
     flex-direction: column;
     align-items: center;
     transition: var(--transition);
-    border: 1px solid rgba(114, 8, 21, 0.05);
+    border: 1px solid rgba(132, 86, 73, 0.08);
 }
 .design-card:hover {
     transform: translateY(-5px);
@@ -887,8 +925,8 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #FFF0F2;
-    color: var(--primary-color);
+    background: #F0ECE4;
+    color: var(--secondary-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -915,18 +953,18 @@ body {
     gap: 8px;
     width: 100%;
     padding: 10px 16px;
-    background: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
     text-decoration: none;
     font-weight: 700;
     border-radius: 25px;
     font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(114, 8, 21, 0.15);
+    box-shadow: 0 4px 10px rgba(96, 62, 53, 0.15);
     transition: var(--transition);
 }
 .design-link-btn:hover {
-    background: #8e101f;
-    box-shadow: 0 6px 15px rgba(114, 8, 21, 0.25);
+    background: var(--tertiary-color);
+    box-shadow: 0 6px 15px rgba(132, 86, 73, 0.25);
     transform: scale(1.02);
 }
 
@@ -1017,8 +1055,8 @@ body {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: #FDF2F4;
-    color: var(--primary-color);
+    background: #FDF4F2;
+    color: #E07A5F;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1050,8 +1088,8 @@ body {
     gap: 6px;
     padding: 6px 14px;
     background: white;
-    color: var(--secondary-color);
-    border: 1.5px solid var(--secondary-color);
+    color: #E07A5F;
+    border: 1.5px solid #E07A5F;
     border-radius: 15px;
     text-decoration: none;
     font-weight: 700;
@@ -1059,7 +1097,7 @@ body {
     transition: var(--transition);
 }
 .gift-buy-btn:hover {
-    background: var(--secondary-color);
+    background: #E07A5F;
     color: white;
 }
 

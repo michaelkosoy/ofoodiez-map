@@ -93,9 +93,9 @@
                 <!-- Price Filter -->
                 <div class="price-filter">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <label for="priceRange" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">תקציב עד: <span id="priceValue" style="color: var(--primary-color); font-weight: 800;">ללא הגבלה</span></label>
+                        <label for="priceRange" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">תקציב עד: <span id="priceValue" style="color: var(--secondary-color); font-weight: 800;">ללא הגבלה</span></label>
                     </div>
-                    <input type="range" id="priceRange" min="100" max="1000" step="50" value="1000" style="width: 100%; accent-color: var(--primary-color);">
+                    <input type="range" id="priceRange" min="100" max="1000" step="50" value="1000" style="width: 100%; accent-color: var(--secondary-color);">
                 </div>
             </div>
 
@@ -114,7 +114,7 @@
                                 <a href="https://wa.me/{{ place.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
                                 {% endif %}
                                 {% if place.link and place.link != "#" %}
-                                <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--secondary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
                                 {% endif %}
                             </div>
                             <span class="category-badge">{{ place.category }}</span>
