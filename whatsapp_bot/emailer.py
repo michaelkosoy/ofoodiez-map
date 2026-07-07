@@ -227,8 +227,14 @@ def send_hitech_rejection_email(to_email):
     """Send a rejection email to a HiTech signup whose LinkedIn was invalid."""
     api_key = WaConfig.SENDGRID_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
-    if not api_key or not from_email or not to_email:
+    if not to_email:
         return False
+    if not api_key or not from_email:
+        print("\n" + "="*60)
+        print(" [REJECTION EMAIL MOCK / LOCAL DEV MODE]")
+        print(f" To: {to_email}")
+        print("="*60 + "\n")
+        return True
 
     text_body = (
         "Hi,\n\n"
@@ -260,6 +266,33 @@ def send_hitech_rejection_email(to_email):
         "content": [
             {"type": "text/plain", "value": text_body},
             {"type": "text/html", "value": html_body},
+        ],
+    }
+    return _post(payload)
+
+
+def send_custom_community_email(to_email, subject, body_html, body_text):
+    """Send a custom community email to a tech member using SendGrid."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    if not to_email:
+        return False
+    if not api_key or not from_email:
+        print("\n" + "="*60)
+        print(" [EMAIL MOCK / LOCAL DEV MODE]")
+        print(f" To: {to_email}")
+        print(f" Subject: {subject}")
+        print(f" Body (Plain Text):\n{body_text}")
+        print("="*60 + "\n")
+        return True
+
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez"},
+        "subject": subject,
+        "content": [
+            {"type": "text/plain", "value": body_text},
+            {"type": "text/html", "value": html.escape(body_html) if "<" not in body_html else body_html},
         ],
     }
     return _post(payload)

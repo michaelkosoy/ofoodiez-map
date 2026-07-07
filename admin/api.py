@@ -855,6 +855,102 @@ def delete_hitech_email(id):
     db.session.commit()
     return jsonify({'success': True})
 
+@admin_bp.route('/api/hitech-emails/send-email', methods=['POST'])
+@login_required
+def send_hitech_bulk_email():
+    data = request.json or {}
+    subject = (data.get('subject') or '').strip()
+    body_text = (data.get('body') or '').strip()
+    button_url = (data.get('button_url') or '').strip()
+    button_text = (data.get('button_text') or '').strip() or 'Register Now'
+    target = data.get('target', 'all')
+    list_name = (data.get('list_name') or '').strip()
+    specific_email = (data.get('specific_email') or '').strip()
+
+    if not subject or not body_text:
+        return jsonify({'success': False, 'message': 'Subject and Body are required.'}), 400
+
+    # Query recipients
+    if target == 'all':
+        recipients = HitechEmail.query.all()
+    elif target == 'verified':
+        recipients = HitechEmail.query.filter_by(verified=True).all()
+    elif target == 'unverified':
+        recipients = HitechEmail.query.filter_by(verified=False).all()
+    elif target == 'list':
+        if not list_name:
+            return jsonify({'success': False, 'message': 'List tag is required.'}), 400
+        recipients = HitechEmail.query.filter_by(list_name=list_name).all()
+    elif target == 'specific':
+        if not specific_email or '@' not in specific_email:
+            return jsonify({'success': False, 'message': 'Valid test email address is required.'}), 400
+        # Create a dummy container for the loop
+        class DummyRecipient:
+            def __init__(self, email):
+                self.email = email
+        recipients = [DummyRecipient(specific_email)]
+    else:
+        return jsonify({'success': False, 'message': 'Invalid target audience.'}), 400
+
+    if not recipients:
+        return jsonify({'success': True, 'sent_count': 0, 'message': 'No recipients found for this target.'})
+
+    # Prepare beautiful HTML email template wrapping the body text
+    button_html = ""
+    if button_url:
+        button_html = (
+            f'<div style="margin: 28px 0; text-align: center;">'
+            f'  <a href="{button_url}" target="_blank" style="'
+            f'    background-color: #720815; color: #ffffff;'
+            f'    text-decoration: none; padding: 12px 24px;'
+            f'    border-radius: 8px; font-weight: bold; font-family: sans-serif;'
+            f'    display: inline-block;'
+            f'  ">{button_text}</a>'
+            f'</div>'
+        )
+
+    formatted_body = body_text.replace('\n', '<br>')
+    
+    html_template = (
+        f'<div style="'
+        f'  font-family: sans-serif; font-size: 16px; color: #333333;'
+        f'  line-height: 1.6; max-width: 600px; margin: 0 auto;'
+        f'  direction: rtl; text-align: right; padding: 20px;'
+        f'  background-color: #fdfaf4; border-radius: 12px;'
+        f'  border: 1px solid #e9ecef;'
+        f'">'
+        f'  <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #720815;">'
+        f'    <span style="font-size: 20px; font-weight: bold; color: #720815;">Ofoodiez Tech Community</span>'
+        f'  </div>'
+        f'  <div style="font-size: 15px; color: #222;">'
+        f'    {formatted_body}'
+        f'  </div>'
+        f'  {button_html}'
+        f'  <div style="margin-top: 36px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 12px; color: #777; text-align: center;">'
+        f'    זהו דיוור שנשלח לחברי קהילת Ofoodiez Tech. <br>'
+        f'    Ofoodiez © 2026'
+        f'  </div>'
+        f'</div>'
+    )
+
+    plain_button_text = f"\n\n{button_text}: {button_url}" if button_url else ""
+    text_content = f"{body_text}{plain_button_text}\n\nOfoodiez Tech Community"
+
+    from whatsapp_bot.emailer import send_custom_community_email
+    
+    sent_count = 0
+    for r in recipients:
+        success = send_custom_community_email(
+            to_email=r.email,
+            subject=subject,
+            body_html=html_template,
+            body_text=text_content
+        )
+        if success:
+            sent_count += 1
+
+    return jsonify({'success': True, 'sent_count': sent_count})
+
 
 
 # --- Site Members API ---

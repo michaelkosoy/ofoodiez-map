@@ -7,6 +7,7 @@
     <h2>Tech Community Members <span id="email-count" style="font-size:1rem; font-weight:400; color:#888; margin-left:8px;"></span> <span id="verified-count" style="font-size:1rem; font-weight:400; color:#27ae60; margin-left:12px;"></span></h2>
     <div style="display:flex;gap:8px;">
         <button class="btn" onclick="openAddModal()"><i class="fas fa-plus"></i> Add Member</button>
+        <button class="btn" onclick="openEmailModal()"><i class="fas fa-envelope"></i> Send Email</button>
         <button class="btn" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
     </div>
 </div>
@@ -36,6 +37,77 @@
         </div>
     </div>
 </div>
+
+<!-- Send Email Modal -->
+<div id="send-email-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:32px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;direction:rtl;text-align:right;">
+        <h3 style="margin:0 0 20px;font-family:inherit;">שליחת מייל לחברי הקהילה</h3>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+            <!-- Email Title / Subject -->
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">נושא המייל *</label>
+                <input id="email-subject" type="text" placeholder="למשל: מפגש פודיז טק הבא!" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+            </div>
+
+            <!-- Email Body Description -->
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">תוכן המייל (תומך בטקסט חופשי או HTML) *</label>
+                <textarea id="email-body" rows="6" placeholder="כתבו את תוכן המייל כאן..." style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;resize:vertical;font-family:inherit;"></textarea>
+            </div>
+
+            <!-- Registration/Payment Link -->
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">קישור לכפתור הרשמה / תשלום (אופציונלי)</label>
+                <input id="email-button-url" type="url" placeholder="https://..." style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+            </div>
+            
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">טקסט לכפתור (אופציונלי)</label>
+                <input id="email-button-text" type="text" placeholder="למשל: להרשמה ותשלום" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+            </div>
+
+            <!-- Recipient Criteria -->
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">קהל יעד למשלוח *</label>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:0.95rem;color:#333;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="radio" name="email-target" value="all" checked onchange="toggleTargetFields()"> כל רשימת הקהילה
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="radio" name="email-target" value="verified" onchange="toggleTargetFields()"> רשומים מאושרים (Verified) בלבד
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="radio" name="email-target" value="unverified" onchange="toggleTargetFields()"> רשומים שטרם אושרו בלבד
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="radio" name="email-target" value="list" onchange="toggleTargetFields()"> תגית רשימה ספציפית
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="radio" name="email-target" value="specific" onchange="toggleTargetFields()"> מייל בדיקה ספציפי (למשל לצורך טסט)
+                      </label>
+                  </div>
+              </div>
+  
+              <!-- List Tag Input (Conditional) -->
+              <div id="target-list-group" style="display:none;flex-direction:column;gap:4px;">
+                  <label style="font-size:0.85rem;font-weight:600;color:#555;">שם תגית הרשימה *</label>
+                  <input id="email-target-list" type="text" placeholder="למשל: founders" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+              </div>
+  
+              <!-- Specific Email Input (Conditional) -->
+              <div id="target-specific-group" style="display:none;flex-direction:column;gap:4px;">
+                  <label style="font-size:0.85rem;font-weight:600;color:#555;">כתובת מייל לבדיקה *</label>
+                  <input id="email-target-specific" type="email" placeholder="test@example.com" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+              </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:28px;direction:ltr;">
+              <button onclick="closeEmailModal()" style="padding:10px 20px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;">ביטול</button>
+              <button id="btn-submit-email" onclick="submitSendEmail()" style="padding:10px 20px;background:#720815;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;font-family:inherit;">
+                  <i class="fas fa-paper-plane"></i> שליחת מייל
+              </button>
+          </div>
+      </div>
+  </div>
 
 <div id="hitech-table"></div>
 {% endblock %}
@@ -313,6 +385,91 @@
         a.download = 'tech_community_verified.csv';
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    function openEmailModal() {
+        document.getElementById('send-email-modal').style.display = 'flex';
+        document.getElementById('email-subject').focus();
+    }
+
+    function closeEmailModal() {
+        document.getElementById('send-email-modal').style.display = 'none';
+        document.getElementById('email-subject').value = '';
+        document.getElementById('email-body').value = '';
+        document.getElementById('email-button-url').value = '';
+        document.getElementById('email-button-text').value = '';
+        document.getElementById('email-target-list').value = '';
+        document.getElementById('email-target-specific').value = '';
+        
+        document.querySelector('input[name="email-target"][value="all"]').checked = true;
+        toggleTargetFields();
+    }
+
+    function toggleTargetFields() {
+        const selectedTarget = document.querySelector('input[name="email-target"]:checked').value;
+        document.getElementById('target-list-group').style.display = selectedTarget === 'list' ? 'flex' : 'none';
+        document.getElementById('target-specific-group').style.display = selectedTarget === 'specific' ? 'flex' : 'none';
+    }
+
+    function submitSendEmail() {
+        const subject = document.getElementById('email-subject').value.trim();
+        const body = document.getElementById('email-body').value.trim();
+        const buttonUrl = document.getElementById('email-button-url').value.trim();
+        const buttonText = document.getElementById('email-button-text').value.trim();
+        const target = document.querySelector('input[name="email-target"]:checked').value;
+        const listName = document.getElementById('email-target-list').value.trim();
+        const specificEmail = document.getElementById('email-target-specific').value.trim();
+
+        if (!subject || !body) {
+            Swal.fire('שגיאה', 'נושא המייל ותוכן המייל הינם שדות חובה.', 'error');
+            return;
+        }
+
+        if (target === 'list' && !listName) {
+            Swal.fire('שגיאה', 'יש להזין שם תגית רשימה.', 'error');
+            return;
+        }
+
+        if (target === 'specific' && !specificEmail) {
+            Swal.fire('שגיאה', 'יש להזין כתובת מייל תקינה לבדיקה.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btn-submit-email');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> שולח מיילים...';
+
+        fetch('/admin/api/hitech-emails/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject: subject,
+                body: body,
+                button_url: buttonUrl,
+                button_text: buttonText,
+                target: target,
+                list_name: listName,
+                specific_email: specificEmail
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+
+            if (data.success) {
+                Swal.fire('הצלחה!', `נשלחו בהצלחה ${data.sent_count} מיילים.`, 'success');
+                closeEmailModal();
+            } else {
+                Swal.fire('שגיאה', data.message || 'שליחת המיילים נכשלה.', 'error');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            Swal.fire('שגיאה', 'אירעה שגיאה בחיבור לשרת.', 'error');
+        });
     }
 </script>
 {% endblock %}
