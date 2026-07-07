@@ -25,27 +25,27 @@
         padding: 3px 0 4px;
     }
 
-    /* Brand: logo icon + wordmark (non-home) */
+    /* Brand: logo + wordmark — centered row between login strip and pills */
     .blog-nav-brand {
-        flex-shrink: 0;
         display: flex;
+        justify-content: center;
         align-items: center;
-        gap: 5px;
-        padding: 0 8px 0 12px;
+        gap: 7px;
+        padding: 2px 0 3px;
     }
     .blog-nav-brand img {
-        width: 24px;
+        width: 28px;
         border-radius: 50%;
     }
     .blog-nav-brand-text {
         font-family: 'Outfit', sans-serif;
         font-weight: 800;
-        font-size: 0.95rem;
+        font-size: 1.05rem;
         color: #362118;
         white-space: nowrap;
     }
 
-    /* Home page: account sits right of pills inside same row */
+    /* Home page / pills row: account sits right of pills inside same row */
     .blog-nav-left {
         flex: 1;
         min-width: 0;
@@ -152,9 +152,9 @@
     /* ── Mobile ── */
     @media (max-width: 600px) {
         .blog-nav-top { padding: 3px 10px 0; }
-        .blog-nav-brand { padding: 0 6px 0 10px; }
-        .blog-nav-brand img { width: 20px; }
-        .blog-nav-brand-text { font-size: 0.82rem; }
+        .blog-nav-brand { padding: 1px 0 2px; gap: 5px; }
+        .blog-nav-brand img { width: 22px; }
+        .blog-nav-brand-text { font-size: 0.88rem; }
         .category-scroll-container { gap: 5px; padding: 0 10px; }
         .category-pill { font-size: 10.5px; padding: 4px 9px; gap: 4px; }
         .category-pill i { font-size: 9px; }
@@ -180,15 +180,15 @@
     </div>
     {% endif %}
 
-    <div class="blog-nav-row">
-        {% if active_page != 'home' %}
-        <!-- Logo — below account button -->
-        <div class="blog-nav-brand">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
-            <span class="blog-nav-brand-text">Ofoodiez</span>
-        </div>
-        {% endif %}
+    {% if active_page != 'home' %}
+    <!-- Logo row — centered, between login strip and pills -->
+    <div class="blog-nav-brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
+        <span class="blog-nav-brand-text">Ofoodiez</span>
+    </div>
+    {% endif %}
 
+    <div class="blog-nav-row">
         <div class="blog-nav-left">
             <div class="category-scroll-container">
                 <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
