@@ -664,7 +664,7 @@ body {
     right: 0;
     width: 4px;
     height: 100%;
-    background: var(--gold);
+    background: var(--secondary-color);
     border-top-right-radius: var(--radius-md);
     border-bottom-right-radius: var(--radius-md);
 }
@@ -808,25 +808,13 @@ body {
     padding: 24px;
     box-shadow: var(--shadow-sm);
     border: 1px solid rgba(0, 0, 0, 0.02);
-    border-right: 5px solid var(--primary-color);
-}
-.game-card.elegant {
     border-right: 5px solid var(--secondary-color);
-}
-.game-card.rowdy {
-    border-right: 5px solid var(--primary-color);
 }
 .game-title {
     font-size: 1.35rem;
     font-weight: 800;
-    color: var(--primary-color);
-    margin: 0 0 6px 0;
-}
-.game-card.elegant .game-title {
     color: var(--secondary-color);
-}
-.game-card.rowdy .game-title {
-    color: var(--primary-color);
+    margin: 0 0 6px 0;
 }
 .game-subtitle {
     font-size: 0.95rem;
@@ -1031,8 +1019,8 @@ body {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: #FDF4F2;
-    color: #E07A5F;
+    background: #F0ECE4;
+    color: var(--secondary-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1064,8 +1052,8 @@ body {
     gap: 6px;
     padding: 6px 14px;
     background: white;
-    color: #E07A5F;
-    border: 1.5px solid #E07A5F;
+    color: var(--secondary-color);
+    border: 1.5px solid var(--secondary-color);
     border-radius: 15px;
     text-decoration: none;
     font-weight: 700;
@@ -1073,7 +1061,7 @@ body {
     transition: var(--transition);
 }
 .gift-buy-btn:hover {
-    background: #E07A5F;
+    background: var(--secondary-color);
     color: white;
 }
 
