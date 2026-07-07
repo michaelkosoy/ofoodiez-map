@@ -581,35 +581,11 @@ body {
     color: var(--primary-color);
     transform: translateY(-2px);
 }
-.section-tab:nth-child(1).active {
+.section-tab.active {
     background: var(--secondary-color);
     color: white;
     box-shadow: 0 8px 15px rgba(96, 62, 53, 0.25);
     border-color: var(--secondary-color);
-}
-.section-tab:nth-child(2).active {
-    background: var(--gold);
-    color: var(--text-main);
-    box-shadow: 0 8px 15px rgba(236, 200, 115, 0.35);
-    border-color: var(--gold);
-}
-.section-tab:nth-child(3).active {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: 0 8px 15px rgba(114, 8, 21, 0.25);
-    border-color: var(--primary-color);
-}
-.section-tab:nth-child(4).active {
-    background: var(--tertiary-color);
-    color: white;
-    box-shadow: 0 8px 15px rgba(132, 8, 21, 0.25);
-    border-color: var(--tertiary-color);
-}
-.section-tab:nth-child(5).active {
-    background: #E07A5F;
-    color: white;
-    box-shadow: 0 8px 15px rgba(224, 122, 95, 0.25);
-    border-color: #E07A5F;
 }
 
 /* ============ TAB CONTENT SWITCHING ============ */
