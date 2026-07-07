@@ -1,10 +1,111 @@
 <!-- Blog Category Menu -->
 <style>
-    .blog-pill-dropdown {
-        position: relative;
-        flex: 0 0 auto;
+    .blog-category-menu {
+        width: 100%;
+        background: #faf5e6;
+        border-bottom: 1px solid #ece1cb;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9000;
     }
 
+    .blog-nav-row {
+        display: flex;
+        align-items: center;
+        padding: 6px 0 4px;
+    }
+
+    .blog-nav-left {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .blog-category-label {
+        padding: 0 24px 2px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: #a98e6f;
+        display: block;
+    }
+
+    .category-scroll-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 9px;
+        padding: 4px 24px 4px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .category-scroll-container::-webkit-scrollbar { display: none; }
+
+    .blog-pill-dropdown { position: relative; flex: 0 0 auto; }
+
+    .category-pill {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 14px;
+        background: #fff;
+        color: #603e35;
+        border: 1px solid rgba(96,62,53,.18);
+        border-radius: 999px;
+        font-family: 'Outfit', 'Assistant', sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: all .2s ease;
+    }
+    .category-pill i { font-size: 11px; color: inherit; }
+    .category-pill:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .category-pill.active { background: #603e35; color: #f9f6eb; border-color: transparent; font-weight: 700; }
+
+    /* Account section — right side of the bar */
+    .blog-nav-account {
+        flex-shrink: 0;
+        padding: 0 14px 0 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .blog-nav-account .nav-account-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid rgba(96,62,53,.18);
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: #603e35;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all .2s;
+        cursor: pointer;
+    }
+    .blog-nav-account .nav-account-btn:hover { background: #603e35; color: #fff; }
+    .blog-nav-account .nav-account-chip {
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #362118;
+        white-space: nowrap;
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Japan dropdown */
     .pill-dropdown-menu {
         display: none;
         position: fixed;
@@ -17,7 +118,6 @@
         padding: 6px 0;
         overflow: hidden;
     }
-
     .pill-dropdown-menu a {
         display: block;
         padding: 9px 18px;
@@ -29,60 +129,60 @@
         white-space: nowrap;
         transition: background .15s;
     }
+    .pill-dropdown-menu a:hover { background: rgba(96, 62, 53, .1); color: #603e35; }
 
-    .pill-dropdown-menu a:hover {
-        background: rgba(96, 62, 53, .1);
-        color: #603e35;
+    /* Blog header (non-home pages only) */
+    .blog-menu-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px 2px;
     }
-    .account-widget { position: fixed; top: 10px; right: 12px; z-index: 10000; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; }
-    .account-widget a, .account-widget .account-chip { background: rgba(255, 255, 255, .85); padding: 5px 11px; border-radius: 999px; box-shadow: 0 2px 8px rgba(54, 33, 24, .10); white-space: nowrap; }
-    .account-widget .account-chip { color: #362118; font-weight: 600; max-width: 40vw; overflow: hidden; text-overflow: ellipsis; }
-    .account-widget a { color: #603e35; font-weight: 700; text-decoration: none; }
-    .account-widget a:hover { color: #362118; }
 </style>
-
-<!-- Account status (fixed top-right, all pages) -->
-<div class="account-widget" dir="ltr">
-    {% if current_user %}
-    <span class="account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
-    <a href="{{ url_for('accounts.logout') }}"><i class="fas fa-sign-out-alt"></i> Log out</a>
-    {% else %}
-    <a href="{{ url_for('accounts.login') }}"><i class="fas fa-user"></i> Log in</a>
-    {% endif %}
-</div>
 
 <div class="blog-category-menu" dir="ltr">
     {% if active_page != 'home' %}
-    <div class="blog-menu-header"
-        style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 0 20px; margin-bottom: 0;">
+    <div class="blog-menu-header">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo"
-            style="width: 54px; border-radius: 50%;">
-        <span
-            style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.7rem; color: var(--text-color, #362118);">Ofoodiez</span>
+            style="width: 36px; border-radius: 50%;">
+        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--text-color, #362118);">Ofoodiez</span>
     </div>
     {% endif %}
-    <span class="blog-category-label">Explore the blog</span>
-    <div class="category-scroll-container">
-        <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
-            <i class="fas fa-home"></i> Home
-        </a>
-        <a href="/blog/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
-            <i class="fas fa-glass-cheers"></i> Bachelorette Party
-        </a>
-        <div class="blog-pill-dropdown" id="japan-pill-wrap">
-            <a href="/blog/japan" id="japan-pill-btn"
-                class="category-pill {% if active_page == 'japan' %}active{% endif %}">
-                <i class="fas fa-plane"></i> Japan Guide <i class="fas fa-chevron-down"
-                    style="font-size:9px;opacity:.7;margin-right:2px;"></i>
-            </a>
+    <div class="blog-nav-row">
+        <div class="blog-nav-left">
+            <span class="blog-category-label">Explore the blog</span>
+            <div class="category-scroll-container">
+                <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="/blog/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
+                    <i class="fas fa-glass-cheers"></i> Bachelorette Party
+                </a>
+                <div class="blog-pill-dropdown" id="japan-pill-wrap">
+                    <a href="/blog/japan" id="japan-pill-btn"
+                        class="category-pill {% if active_page == 'japan' %}active{% endif %}">
+                        <i class="fas fa-plane"></i> Japan Guide <i class="fas fa-chevron-down"
+                            style="font-size:9px;opacity:.7;margin-right:2px;"></i>
+                    </a>
+                </div>
+                <a href="/blog/instagram" class="category-pill {% if active_page == 'instagram' %}active{% endif %}">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+            </div>
         </div>
-        <a href="/blog/instagram" class="category-pill {% if active_page == 'instagram' %}active{% endif %}">
-            <i class="fab fa-instagram"></i> Instagram
-        </a>
+        <div class="blog-nav-account" dir="ltr">
+            {% if current_user %}
+            <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
+            <a href="{{ url_for('accounts.logout') }}" class="nav-account-btn"><i class="fas fa-sign-out-alt"></i> Log out</a>
+            {% else %}
+            <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- Japan dropdown — rendered outside the scroll container so overflow doesn't clip it -->
+<!-- Japan dropdown — rendered outside bar so overflow doesn't clip it -->
 <div class="pill-dropdown-menu" id="japan-pill-menu">
     <a href="/blog/japan#intro">✍️ Intro</a>
     <a href="/blog/japan#map">🗺️ Map</a>
@@ -92,6 +192,24 @@
 </div>
 
 <script>
+    /* Push page content below the fixed nav bar on non-home pages */
+    (function () {
+        function applyNavPadding() {
+            var nav = document.querySelector('.blog-category-menu');
+            if (!nav) return;
+            var isHome = !!document.querySelector('.hero');
+            if (!isHome) {
+                document.body.style.paddingTop = nav.offsetHeight + 'px';
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyNavPadding);
+        } else {
+            applyNavPadding();
+        }
+        window.addEventListener('resize', applyNavPadding);
+    })();
+
     (function () {
         var wrap = document.getElementById('japan-pill-wrap');
         var menu = document.getElementById('japan-pill-menu');
@@ -107,7 +225,6 @@
 
         wrap.addEventListener('mouseenter', show);
         wrap.addEventListener('mouseleave', function (e) {
-            // keep open if cursor moves into the menu itself
             if (!menu.contains(e.relatedTarget)) hide();
         });
         menu.addEventListener('mouseleave', hide);

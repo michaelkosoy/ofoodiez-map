@@ -16,7 +16,7 @@ html {
     padding: 0;
     height: 100%;
     font-family: 'Outfit', sans-serif;
-    overflow: hidden;
+    overflow-x: clip;
     color: var(--text-main);
 }
 
