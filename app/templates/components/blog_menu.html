@@ -11,47 +11,54 @@
         z-index: 9000;
     }
 
-    /* Top strip — account button, right-aligned (non-home pages only) */
-    .blog-nav-top {
-        display: flex;
-        justify-content: flex-end;
-        padding: 4px 12px 0;
-    }
-
-    /* Logo + pills row */
-    .blog-nav-row {
+    /* ── Desktop header row: logo left, login right (non-home only) ── */
+    .blog-nav-header {
         display: flex;
         align-items: center;
-        padding: 3px 0 4px;
+        justify-content: space-between;
+        padding: 5px 14px 3px;
     }
-
-    /* Brand: logo + wordmark — centered row between login strip and pills */
     .blog-nav-brand {
         display: flex;
-        justify-content: center;
         align-items: center;
         gap: 7px;
-        padding: 2px 0 3px;
+        text-decoration: none;
     }
     .blog-nav-brand img {
-        width: 28px;
+        width: 30px;
         border-radius: 50%;
     }
     .blog-nav-brand-text {
         font-family: 'Outfit', sans-serif;
         font-weight: 800;
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         color: #362118;
         white-space: nowrap;
     }
 
-    /* Home page / pills row: account sits right of pills inside same row */
+    /* ── Pills row ── */
+    .blog-nav-pills-row {
+        display: flex;
+        align-items: center;
+        padding: 0 0 5px;
+    }
+    /* Mobile-only logo (just photo, no text) — hidden on desktop */
+    .blog-nav-brand-mobile {
+        display: none;
+        flex-shrink: 0;
+        padding: 0 6px 0 10px;
+    }
+    .blog-nav-brand-mobile img {
+        width: 26px;
+        border-radius: 50%;
+        display: block;
+    }
+
     .blog-nav-left {
         flex: 1;
         min-width: 0;
         overflow: hidden;
     }
-
     .category-scroll-container {
         display: flex;
         overflow-x: auto;
@@ -69,7 +76,7 @@
         flex: 0 0 auto;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         padding: 5px 12px;
         background: #fff;
         color: #603e35;
@@ -86,7 +93,11 @@
     .category-pill:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
     .category-pill.active { background: #603e35; color: #f9f6eb; border-color: transparent; font-weight: 700; }
 
-    /* Account button */
+    /* Pill label variants */
+    .pill-short { display: none; }
+    .pill-full  { display: inline; }
+
+    /* ── Account button ── */
     .blog-nav-account {
         flex-shrink: 0;
         padding: 0 12px 0 6px;
@@ -98,7 +109,7 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 4px 11px;
+        padding: 5px 12px;
         border-radius: 999px;
         background: #fff;
         border: 1px solid rgba(96,62,53,.18);
@@ -118,9 +129,18 @@
         font-weight: 600;
         color: #362118;
         white-space: nowrap;
-        max-width: 100px;
+        max-width: 110px;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    /* Mobile-only login in pills row — hidden on desktop, styled standalone */
+    .blog-nav-account-mobile {
+        display: none;
+        flex-shrink: 0;
+        padding: 0 8px 0 4px;
+        align-items: center;
+        gap: 5px;
     }
 
     /* Japan dropdown */
@@ -149,26 +169,38 @@
     }
     .pill-dropdown-menu a:hover { background: rgba(96,62,53,.1); color: #603e35; }
 
-    /* ── Mobile ── */
+    /* ── Mobile (≤600px) ── */
     @media (max-width: 600px) {
-        .blog-nav-top { padding: 3px 10px 0; }
-        .blog-nav-brand { padding: 1px 0 2px; gap: 5px; }
-        .blog-nav-brand img { width: 22px; }
-        .blog-nav-brand-text { font-size: 0.88rem; }
-        .category-scroll-container { gap: 5px; padding: 0 10px; }
-        .category-pill { font-size: 10.5px; padding: 4px 9px; gap: 4px; }
+        /* Hide the desktop header row entirely */
+        .blog-nav-header { display: none; }
+
+        /* Show logo photo and mobile login in pills row */
+        .blog-nav-brand-mobile { display: flex; align-items: center; }
+        .blog-nav-account-mobile { display: flex; }
+
+        /* Tighter pills row */
+        .blog-nav-pills-row { padding: 4px 0; }
+        .category-scroll-container { gap: 5px; padding: 0 6px; }
+        .category-pill { font-size: 10px; padding: 4px 9px; gap: 3px; }
         .category-pill i { font-size: 9px; }
-        .nav-account-btn { font-size: 10.5px; padding: 3px 9px; }
-        .blog-nav-account { padding: 0 10px 0 4px; }
-        .blog-nav-row { padding: 2px 0 3px; }
+        .blog-nav-account { padding: 0 8px 0 4px; }
+        .nav-account-btn { font-size: 10px; padding: 4px 9px; }
+
+        /* Pill text: show short label, hide full */
+        .pill-full  { display: none; }
+        .pill-short { display: inline; }
     }
 </style>
 
 <div class="blog-category-menu" dir="ltr">
 
     {% if active_page != 'home' %}
-    <!-- Account button — top strip, above logo -->
-    <div class="blog-nav-top">
+    <!-- Desktop: logo left + login right (hidden on mobile) -->
+    <div class="blog-nav-header">
+        <a href="/" class="blog-nav-brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
+            <span class="blog-nav-brand-text">Ofoodiez</span>
+        </a>
         <div class="blog-nav-account" dir="ltr">
             {% if current_user %}
             <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
@@ -180,38 +212,46 @@
     </div>
     {% endif %}
 
-    {% if active_page != 'home' %}
-    <!-- Logo row — centered, between login strip and pills -->
-    <div class="blog-nav-brand">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
-        <span class="blog-nav-brand-text">Ofoodiez</span>
-    </div>
-    {% endif %}
+    <!-- Pills row (always shown; on mobile also carries logo + login for non-home) -->
+    <div class="blog-nav-pills-row">
 
-    <div class="blog-nav-row">
+        {% if active_page != 'home' %}
+        <!-- Mobile-only: logo photo -->
+        <div class="blog-nav-brand-mobile">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
+        </div>
+        {% endif %}
+
         <div class="blog-nav-left">
             <div class="category-scroll-container">
                 <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
-                    <i class="fas fa-home"></i> Home
+                    <i class="fas fa-home"></i>
+                    <span class="pill-full">Home</span>
+                    <!-- Home = icon only on mobile, no pill-short needed -->
                 </a>
                 <a href="/blog/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
-                    <i class="fas fa-glass-cheers"></i> Bachelorette Party
+                    <i class="fas fa-glass-cheers"></i>
+                    <span class="pill-full">Bachelorette Party</span>
+                    <span class="pill-short">Bachelorette</span>
                 </a>
                 <div class="blog-pill-dropdown" id="japan-pill-wrap">
                     <a href="/blog/japan" id="japan-pill-btn"
                         class="category-pill {% if active_page == 'japan' %}active{% endif %}">
-                        <i class="fas fa-plane"></i> Japan Guide <i class="fas fa-chevron-down"
-                            style="font-size:8px;opacity:.7;margin-right:2px;"></i>
+                        <i class="fas fa-plane"></i>
+                        <span class="pill-full">Japan Guide <i class="fas fa-chevron-down" style="font-size:8px;opacity:.7;"></i></span>
+                        <span class="pill-short">Japan</span>
                     </a>
                 </div>
                 <a href="/blog/instagram" class="category-pill {% if active_page == 'instagram' %}active{% endif %}">
-                    <i class="fab fa-instagram"></i> Instagram
+                    <i class="fab fa-instagram"></i>
+                    <span class="pill-full">Instagram</span>
+                    <span class="pill-short">Instagram</span>
                 </a>
             </div>
         </div>
 
         {% if active_page == 'home' %}
-        <!-- Account button — right of pills on home page -->
+        <!-- Home page: login sits right of pills on all screen sizes -->
         <div class="blog-nav-account" dir="ltr">
             {% if current_user %}
             <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
@@ -220,7 +260,17 @@
             <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
             {% endif %}
         </div>
+        {% else %}
+        <!-- Non-home mobile: login sits right of pills (desktop version is in blog-nav-header) -->
+        <div class="blog-nav-account-mobile" dir="ltr">
+            {% if current_user %}
+            <a href="{{ url_for('accounts.logout') }}" class="nav-account-btn"><i class="fas fa-sign-out-alt"></i></a>
+            {% else %}
+            <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
+            {% endif %}
+        </div>
         {% endif %}
+
     </div>
 </div>
 
