@@ -11,34 +11,52 @@
         z-index: 9000;
     }
 
+    /* Top strip — account button, right-aligned (non-home pages only) */
+    .blog-nav-top {
+        display: flex;
+        justify-content: flex-end;
+        padding: 4px 12px 0;
+    }
+
+    /* Logo + pills row */
     .blog-nav-row {
         display: flex;
         align-items: center;
-        padding: 6px 0 4px;
+        padding: 3px 0 4px;
     }
 
+    /* Brand: logo icon + wordmark (non-home) */
+    .blog-nav-brand {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0 8px 0 12px;
+    }
+    .blog-nav-brand img {
+        width: 24px;
+        border-radius: 50%;
+    }
+    .blog-nav-brand-text {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #362118;
+        white-space: nowrap;
+    }
+
+    /* Home page: account sits right of pills inside same row */
     .blog-nav-left {
         flex: 1;
         min-width: 0;
         overflow: hidden;
     }
 
-    .blog-category-label {
-        padding: 0 24px 2px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 9px;
-        font-weight: 600;
-        letter-spacing: 2.5px;
-        text-transform: uppercase;
-        color: #a98e6f;
-        display: block;
-    }
-
     .category-scroll-container {
         display: flex;
         overflow-x: auto;
-        gap: 9px;
-        padding: 4px 24px 4px;
+        gap: 7px;
+        padding: 0 12px;
         -ms-overflow-style: none;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
@@ -51,41 +69,41 @@
         flex: 0 0 auto;
         display: flex;
         align-items: center;
-        gap: 7px;
-        padding: 7px 14px;
+        gap: 6px;
+        padding: 5px 12px;
         background: #fff;
         color: #603e35;
         border: 1px solid rgba(96,62,53,.18);
         border-radius: 999px;
         font-family: 'Outfit', 'Assistant', sans-serif;
         font-weight: 600;
-        font-size: 12px;
+        font-size: 11.5px;
         white-space: nowrap;
         text-decoration: none;
         transition: all .2s ease;
     }
-    .category-pill i { font-size: 11px; color: inherit; }
-    .category-pill:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .category-pill i { font-size: 10px; color: inherit; }
+    .category-pill:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
     .category-pill.active { background: #603e35; color: #f9f6eb; border-color: transparent; font-weight: 700; }
 
-    /* Account section — right side of the bar */
+    /* Account button */
     .blog-nav-account {
         flex-shrink: 0;
-        padding: 0 14px 0 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .blog-nav-account .nav-account-btn {
+        padding: 0 12px 0 6px;
         display: flex;
         align-items: center;
         gap: 5px;
-        padding: 6px 13px;
+    }
+    .nav-account-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 11px;
         border-radius: 999px;
         background: #fff;
         border: 1px solid rgba(96,62,53,.18);
         font-family: 'Outfit', sans-serif;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 700;
         color: #603e35;
         text-decoration: none;
@@ -93,14 +111,14 @@
         transition: all .2s;
         cursor: pointer;
     }
-    .blog-nav-account .nav-account-btn:hover { background: #603e35; color: #fff; }
-    .blog-nav-account .nav-account-chip {
+    .nav-account-btn:hover { background: #603e35; color: #fff; }
+    .nav-account-chip {
         font-family: 'Outfit', sans-serif;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         color: #362118;
         white-space: nowrap;
-        max-width: 110px;
+        max-width: 100px;
         overflow: hidden;
         text-overflow: ellipsis;
     }
@@ -112,46 +130,66 @@
         background: #faf5e6;
         border: 1px solid #ece1cb;
         border-radius: 14px;
-        box-shadow: 0 8px 24px rgba(54, 33, 24, .12);
-        min-width: 155px;
+        box-shadow: 0 8px 24px rgba(54,33,24,.12);
+        min-width: 145px;
         z-index: 9999;
-        padding: 6px 0;
+        padding: 5px 0;
         overflow: hidden;
     }
     .pill-dropdown-menu a {
         display: block;
-        padding: 9px 18px;
+        padding: 8px 16px;
         font-family: 'Outfit', 'Assistant', sans-serif;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: #362118;
         text-decoration: none;
         white-space: nowrap;
         transition: background .15s;
     }
-    .pill-dropdown-menu a:hover { background: rgba(96, 62, 53, .1); color: #603e35; }
+    .pill-dropdown-menu a:hover { background: rgba(96,62,53,.1); color: #603e35; }
 
-    /* Blog header (non-home pages only) */
-    .blog-menu-header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 20px 2px;
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+        .blog-nav-top { padding: 3px 10px 0; }
+        .blog-nav-brand { padding: 0 6px 0 10px; }
+        .blog-nav-brand img { width: 20px; }
+        .blog-nav-brand-text { font-size: 0.82rem; }
+        .category-scroll-container { gap: 5px; padding: 0 10px; }
+        .category-pill { font-size: 10.5px; padding: 4px 9px; gap: 4px; }
+        .category-pill i { font-size: 9px; }
+        .nav-account-btn { font-size: 10.5px; padding: 3px 9px; }
+        .blog-nav-account { padding: 0 10px 0 4px; }
+        .blog-nav-row { padding: 2px 0 3px; }
     }
 </style>
 
 <div class="blog-category-menu" dir="ltr">
+
     {% if active_page != 'home' %}
-    <div class="blog-menu-header">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez Logo"
-            style="width: 36px; border-radius: 50%;">
-        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--text-color, #362118);">Ofoodiez</span>
+    <!-- Account button — top strip, above logo -->
+    <div class="blog-nav-top">
+        <div class="blog-nav-account" dir="ltr">
+            {% if current_user %}
+            <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
+            <a href="{{ url_for('accounts.logout') }}" class="nav-account-btn"><i class="fas fa-sign-out-alt"></i> Log out</a>
+            {% else %}
+            <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
+
     <div class="blog-nav-row">
+        {% if active_page != 'home' %}
+        <!-- Logo — below account button -->
+        <div class="blog-nav-brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
+            <span class="blog-nav-brand-text">Ofoodiez</span>
+        </div>
+        {% endif %}
+
         <div class="blog-nav-left">
-            <span class="blog-category-label">Explore the blog</span>
             <div class="category-scroll-container">
                 <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
                     <i class="fas fa-home"></i> Home
@@ -163,7 +201,7 @@
                     <a href="/blog/japan" id="japan-pill-btn"
                         class="category-pill {% if active_page == 'japan' %}active{% endif %}">
                         <i class="fas fa-plane"></i> Japan Guide <i class="fas fa-chevron-down"
-                            style="font-size:9px;opacity:.7;margin-right:2px;"></i>
+                            style="font-size:8px;opacity:.7;margin-right:2px;"></i>
                     </a>
                 </div>
                 <a href="/blog/instagram" class="category-pill {% if active_page == 'instagram' %}active{% endif %}">
@@ -171,6 +209,9 @@
                 </a>
             </div>
         </div>
+
+        {% if active_page == 'home' %}
+        <!-- Account button — right of pills on home page -->
         <div class="blog-nav-account" dir="ltr">
             {% if current_user %}
             <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
@@ -179,10 +220,11 @@
             <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Japan dropdown — rendered outside bar so overflow doesn't clip it -->
+<!-- Japan dropdown — outside bar so overflow doesn't clip it -->
 <div class="pill-dropdown-menu" id="japan-pill-menu">
     <a href="/blog/japan#intro">✍️ Intro</a>
     <a href="/blog/japan#map">🗺️ Map</a>
