@@ -295,9 +295,11 @@ def _match_and_route(user, conv, data, role_query):
                     if a.referral_link and not (a.role_title or "").strip()), None)
     if generic:
         return _send_link(user, conv, data, generic)
+    # No match — but keep the search behind the scenes: ask for the job link like
+    # any other path (the CV still routes to the team / ops behind the scenes).
+    data.setdefault("advocate_name", "the team")
     conversation.set_state(conv, "candidate", "cand_job_link", data)
-    messaging.send_prompt(user.phone, copy.CAND_NO_MATCH_CV.format(
-        role=data["role_query"], company=data.get("company_name", "")))
+    messaging.send_prompt(user.phone, copy.CAND_JOB_LINK.format(company=data.get("company_name", "")))
     return "cand_no_title_match"
 
 
