@@ -31,6 +31,23 @@
     {% include 'components/blog_menu.html' %}
 
     <div class="container bach-container">
+        <!-- Intro Hero Section -->
+        {% if bachelorette_data.intro %}
+        <div class="bach-intro-card">
+            {% set intro_lines = bachelorette_data.intro.split('\n') %}
+            {% if intro_lines | length > 0 %}
+                <h1 class="bach-intro-title">{{ intro_lines[0] }}</h1>
+            {% endif %}
+            {% if intro_lines | length > 1 %}
+                <p class="bach-intro-text">
+                    {% for line in intro_lines[1:] %}
+                        {{ line }}{% if not loop.last %}<br>{% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <!-- Note -->
         <div class="info-note">
             <i class="fas fa-info-circle"></i> {{ bachelorette_data.note }}
@@ -71,6 +88,9 @@
                             <h2 style="margin: 0;">{{ place.name }}</h2>
                             {% if place.instagram and place.instagram != "https://instagram.com/" %}
                             <a href="{{ place.instagram }}" target="_blank" class="ig-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-instagram"></i></a>
+                            {% endif %}
+                            {% if place.whatsapp %}
+                            <a href="https://wa.me/{{ place.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
                             {% endif %}
                             {% if place.link and place.link != "#" %}
                             <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>

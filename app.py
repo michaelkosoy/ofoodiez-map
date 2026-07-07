@@ -11,7 +11,7 @@ from geopy.exc import GeocoderTimedOut
 from dotenv import load_dotenv
 import requests
 from io import StringIO
-from data import data as home_data, bachelorette_data
+from data import data as home_data
 from database.models import PopupEvent, HappyHourPlace, HitechEmail
 from instagram_automation.models import User
 from instagram_automation.config import Config
@@ -291,7 +291,7 @@ def map_page():
 
 @app.route('/blog/bachelorette')
 def bachelorette_page():
-    return render_template('bachelorette.html', bachelorette_data=bachelorette_data, data=home_data)
+    return render_template('bachelorette.html', bachelorette_data=_load_blog('bachelorette'), data=home_data)
 
 @app.route('/bachelorette')
 def bachelorette_redirect():

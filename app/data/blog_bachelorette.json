@@ -1,0 +1,368 @@
+{
+  "intro": "אם את כלה שמתחתנת בקרוב או מלווה - המדריך הזה בשבילך!\nיש פה את כל מה שאת צריכה לאירועים סביב החתונה- מסיבת רווקות, הפרשת חלה או מסיבת אירוסין\nמקומות לחגוג כולל מחירים, ספקים, משחקים אטרקציות ועוד!",
+  "note": "שימו לב: כל המחירים יכולים להשתנות, ונכונים לקיץ 26",
+  "places": [
+    {
+      "category": "חלל ושף",
+      "description": "",
+      "instagram": "https://www.instagram.com/josephine.upstairs/",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "ג׳וזפין בייקר",
+      "price": "280₪-320₪",
+      "whatsapp": ""
+    },
+    {
+      "category": "חלל ושף",
+      "description": "מינימום 25 בנות, 440 לראש עם יין חופשי.",
+      "instagram": "https://www.instagram.com/kenan_basel/",
+      "link": "https://kenanbasel.com/",
+      "link_text": "לינק לאתר",
+      "location": "פלורנטין",
+      "name": "קינן",
+      "price": "440₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "ארוחות פרטיות בלופט יפואי קסום, סביב שולחן מרהיב וג׳ונגל צמחים אורבני. מינימום 20 אורחים. ניתן להביא דיג'י. מחירים לא כוללים שירות (20%-15%) ומע\"מ.",
+      "instagram": "https://www.instagram.com/razieldinner/",
+      "link": "https://www.razieldinner.com",
+      "link_text": "לינק לאתר",
+      "location": "יפו",
+      "name": "רזיאל",
+      "price": "400₪ - 670₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "מינימום 20 בנות, ארוחת שף ויין ללא הגבלה. החלל הוא ל-4 שעות, הגבלת מוזיקה עד 12 בלילה. לא כולל שירות ומע״מ.",
+      "instagram": "https://www.instagram.com/studio_danlev/",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "דרום תל אביב",
+      "name": "סטודיו דן לב",
+      "price": "380₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "ארוחת שף פיצות/חלבי דגים ואופציה לסדנת קוקטיילים בוייב של מסיבה או רק השכרת המקום.",
+      "instagram": "https://www.instagram.com/bubu_tlv",
+      "link": "#",
+      "link_text": "",
+      "location": "דרום תל אביב",
+      "name": "בובו",
+      "price": "החל מ-350₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "חלל אירוח בשכונת נגה, בופה שמתאים לבין 18-35 סועדים עם תפריט מגוון ועונתי של ירקות, דגים ובשר עם יין וקוקטייל אחד לבחירה חופשי. יש מערכת במקום ואפשר לשים פלייליסטים (אין דיג'י).",
+      "instagram": "https://www.instagram.com/house_of_sgula",
+      "link": "#",
+      "link_text": "",
+      "location": "נגה, תל אביב",
+      "name": "האוס סגולה",
+      "price": "380₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "ערב קולינרי הכולל קוקטייל פתיחה, יין ללא הפסקה וצ׳יסרים, החלל כולל מטבח פתוח ומזמין, מוזיקת רקע. בין 20-28 סועדים (בלי אפשרות להביא דיג'י).",
+      "instagram": "https://www.instagram.com/exhib_eat",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "תערוכת ערב",
+      "price": "החל מ-450₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "תלוי יום, מינימום 16-24 בישיבה. לא כולל שירות. אירוע קוקטייל אפשר עד 32 בנות.",
+      "instagram": "https://www.instagram.com/studiocheftlv/",
+      "link": "#",
+      "link_text": "",
+      "location": "פלורנטין",
+      "name": "סטודיו שף בפלורנטין",
+      "price": "450₪ - 520₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "מינימום 12 סועדים, לא כולל יין או אלכוהול (יין מהבית ללא דמי חליצה). אפשר להביא דיג'י. החלל ל-4 שעות.",
+      "instagram": "https://www.instagram.com/lioz_malool/",
+      "link": "https://liozmalool.co.il/",
+      "link_text": "לינק לאתר",
+      "location": "פלורנטין",
+      "name": "ליעוז מלול - סטודיו שלוש נקודות",
+      "price": "350₪ - 400₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "מינימום 20 אנשים עד 120 אנשים. אירוע חלבי דגים ופיצות.",
+      "instagram": "https://www.instagram.com/labellevie__________",
+      "link": "#",
+      "link_text": "",
+      "location": "דרום תל אביב",
+      "name": "לה בל וי (קייטרינג השולחן)",
+      "price": "520₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "עד 20 בנות, תפריט חלבי דגים, ולבראנץ' פחות 50₪.",
+      "instagram": "https://www.instagram.com/hayerushalmit_pastry/",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "יפו",
+      "name": "הירושלמית",
+      "price": "400₪ - 450₪"
+    },
+    {
+      "category": "חלל ושף",
+      "description": "סדנת נרות וזימונים של שעה, יין וקוקטייל ללא הגבלה, שולחן נשנושים ופינגר פוד. השכרת החלל ל-3 שעות בלבד, אפשר להביא דיג'י עד 23:00. לא כולל מע\"מ.",
+      "instagram": "https://www.instagram.com/scent_jaffa_events/",
+      "link": "https://www.nodedet.com/",
+      "link_text": "לינק לאתר",
+      "location": "יפו",
+      "name": "סנט ג׳אפה",
+      "price": "350₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "יקב במרכז הארץ המציע שולחן למינימום 10 סועדים עבור יין ללא הגבלה, גבינות, מאפים, סלטים ומתוקים. לא כולל שירות.",
+      "instagram": "https://www.instagram.com/villawilhelma?igsh=dWpwNXNwYnRueHQ2",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "מושב בני עטרות",
+      "name": "וילה וילהלמה",
+      "price": "250₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "חלל אירוח של סתיו גרוסי מתאים לעד 40 אורחים, תפריט אישי, חלל מעוצב.",
+      "instagram": "https://www.instagram.com/stav_garousi/",
+      "link": "https://stavgarousi.co.il/",
+      "link_text": "לינק לאתר",
+      "location": "מושב ליד רחובות",
+      "name": "משק 39",
+      "price": "500₪ - 530₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "ישיבה בין הכרמים, תפריט חלבי ויין ללא הגבלה, יש רמקול למוזיקה. בערב עד 22:00 בתוספת 1000₪. לא כולל שירות.",
+      "instagram": "https://www.instagram.com/kerembarakwinery?igsh=MXgwczE5bnVqeXZjdA%3D%3D",
+      "link": "https://ontopo.co.il/kerembarak",
+      "link_text": "לינק לאתר",
+      "location": "מחוץ לתל אביב",
+      "name": "יקב כרם ברק (כשר)",
+      "price": "330₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "יקב במושב ביצרון, אירוח בחצר עם בריכה גדולה ויין חופשי. צריך להביא אוכל מבחוץ. עד 20 בנות (מעבר לזה בתוספת). אי אפשר להביא דיג'י, מוזיקה במערכת המקום.",
+      "instagram": "https://instagram.com/",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "מושב ביצרון",
+      "name": "יקב מראה מקום",
+      "price": "500₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "תפריט סגור לשולחן ביקב. אפשר להוסיף סדנת ציור/יצירה. במקום גם מתחם עם בריכה (שכוכית) וצימרים.",
+      "instagram": "https://www.instagram.com/mettler_winery?igsh=MW5kdDJxYXhyZHVlMQ%3D%3D",
+      "link": "#",
+      "link_text": "",
+      "location": "מחוץ לתל אביב",
+      "name": "יקב מטלר",
+      "price": "150₪ - 240₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "חדר פרטי בתוך יקב אורבני, פתוח גם בשבת. מתאים ל-20-24 סועדים, תפריטי אוכל ויין ללא הגבלה עם גבינות, נקניקים, מאפים, סלטים, פיצות וקינוחים. לא כולל שירות.",
+      "instagram": "https://www.instagram.com/lewinsohnwinery?igsh=eGFkcTk2cDdkMnVl",
+      "link": "https://lewinsohnwinery.com",
+      "link_text": "לינק לאתר",
+      "location": "פתח תקווה",
+      "name": "יקב לוינסון",
+      "price": "245₪ - 310₪"
+    },
+    {
+      "category": "יקבים",
+      "description": "חלל פרטי לבין 12-26 סועדים או שולחן ביקב. תפריט קלאסי של פלטות גבינות, פיצות, ראשונות, קינוחים ובקבוקי יין (יחס 1:3). בחדר הפרטי יש טלוויזיה ומערכת הגברה. לא כולל שירות.",
+      "instagram": "https://www.instagram.com/damti67___winery?igsh=MTJ5b2NxOTJsbXJyOA%3D%3D",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "מושב גבעת כח (ליד נתב״ג)",
+      "name": "יקב דמטי",
+      "price": "225₪"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "בחלל יש שולחן גדול, כוסות ושמפניירות, מקרן ומערכת סאונד.",
+      "instagram": "https://www.instagram.com/caos.tlv/?hl=en",
+      "link": "#",
+      "link_text": "",
+      "location": "פלורנטין",
+      "name": "כאוס",
+      "price": "220₪ לשעה"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "חלל וסדנה להכנת נרות, יין וגבינות ללא הגבלה, עד 15 בנות.",
+      "instagram": "https://www.instagram.com/hasiba__candles/",
+      "link": "#",
+      "link_text": "",
+      "location": "שכונת נגה",
+      "name": "חסיבה",
+      "price": "350₪",
+      "whatsapp": "+972 50-963-2008"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "עד 50 בנות, חלל גדול עם מרפסות, יש ציוד הגברה.",
+      "instagram": "https://www.instagram.com/balconsky_tlv",
+      "link": "#",
+      "link_text": "",
+      "location": "קיבוץ גלויות 23 תל אביב",
+      "name": "בלקונסקי",
+      "price": "350₪ לשעה"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "השכרת החלל, עד 30 סועדים.",
+      "instagram": "https://www.instagram.com/abra.tlv",
+      "link": "#",
+      "link_text": "",
+      "location": "רחוב הזרם 13",
+      "name": "אברא",
+      "price": ""
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "השכרת גג גדול של כ180 מטר למסיבות קוקטייל/מינגלינג עם אופציה ללינה בדירה עד 7 אנשים. מערכת הגברה וניתן להביא דיג'י.",
+      "instagram": "https://www.instagram.com/terasa_tlv",
+      "link": "#",
+      "link_text": "",
+      "location": "דרום תל אביב",
+      "name": "טרסה",
+      "price": "3500₪"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "חלל אירוח גדול שמתאים עד 100 אנשים עם גג גדול ומטבח מאובזר, ממוקם בבית פנורמה.",
+      "instagram": "https://www.instagram.com/gallery_601",
+      "link": "#",
+      "link_text": "",
+      "location": "בית פנורמה",
+      "name": "גלריה 601",
+      "price": "4000₪ עד 30 אנשים"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "אופציות של השכרת החלל או כולל שף ואלכוהול לא כולל מע\"מ.",
+      "instagram": "https://www.instagram.com/one_table_rango/",
+      "link": "#",
+      "link_text": "",
+      "location": "אלנבי",
+      "name": "ראנגו אלנבי",
+      "price": "350₪-950₪ לסועד"
+    },
+    {
+      "category": "חלל פרטי להשכרה",
+      "description": "",
+      "instagram": "https://www.instagram.com/fazza_tlv",
+      "link": "#",
+      "link_text": "",
+      "location": "גן החשמל",
+      "name": "פאזה גן החשמל",
+      "price": ""
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "כולל דיג'י בימי חמישי. מינימום 20 בנות מקסימום 30 לאירוע הגשה, אפשר גם אירוע בופה עם יין חופשי.",
+      "instagram": "https://www.instagram.com/malka.tlv?igsh=MTgzeHFjZDJ1a3Z2dw%3D%3D",
+      "link": "#",
+      "link_text": "פרטים בקובץ",
+      "location": "תל אביב",
+      "name": "מלכה (כשר)",
+      "price": "475₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "החל מ-20 סועדים, תפריט חלבי דגים וקינוחים ללא הגבלה, יין וקוקטיילים עם מלצר פרטי. יש מוזיקה, רקדניות בטן ודרבוקאים.",
+      "instagram": "https://www.instagram.com/olaola.tlv?igsh=eWVrZDRwdWVwZ210",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "אולה אולה (כשר)",
+      "price": "450₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "לא כולל אלכוהול.",
+      "instagram": "https://www.instagram.com/beitkandinof?igsh=ZDF4dmFvaHozczZ3",
+      "link": "#",
+      "link_text": "",
+      "location": "יפו",
+      "name": "בית קנדידוף",
+      "price": "החל מ-350₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "חדר טטאמי לבין 8-22 סועדים עם מערכת קריוקי ותפריט איזאקיה וסושי ללא הגבלה. החדר ל-4 שעות. מחירים לא כוללים שירות. תפריטי אלכוהול/דמי חליצה בתוספת.",
+      "instagram": "https://www.instagram.com/men_tententlv?igsh=eHJucnJnajBzMXEw",
+      "link": "#",
+      "link_text": "פרטים מלאים בקובץ",
+      "location": "תל אביב",
+      "name": "מןטןטן",
+      "price": "340₪ - 450₪ (אוכל בלבד)"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "בין 20 ל-30 אנשים. 320₪ לתפריט אוכל ללא שתייה, תוספת יין ללא הגבלה ב-500 לאדם כולל יין.",
+      "instagram": "https://www.instagram.com/thaihousetlv?igsh=MW81amY3aHU3bHZ1Ng%3D%3D",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "בית תאילנדי",
+      "price": "320₪ - 500₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "תפריט אוכל למרכז שולחן ויין ושתייה קלה ללא הגבלה בחדר פרטי עם ברמן פרטי. בין 15-30 סועדים. בחמישי ושבת המינימום 25 ו-460₪. אי אפשר להביא דיג'י, אפשר להתחבר לרמקולים.",
+      "instagram": "https://www.instagram.com/cafeeuropa?igsh=MW56cjZwaWE5d2R6NQ%3D%3D",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "קפה אירופה",
+      "price": "החל מ-400₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "כולל יין ושתייה קלה, אוכל למרכז שולחן (לא כולל טיפ 15%). אמצ\"ש מינימום 4500₪ לסגירה, סופ״ש 6000₪. מוזיקה מהמסעדה, עד 26 אורחים.",
+      "instagram": "https://www.instagram.com/abraxastlv/",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "צפון אברקסס",
+      "price": "360₪"
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "",
+      "instagram": "https://www.instagram.com/dallal_tlv/",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "וילה דלאל",
+      "price": ""
+    },
+    {
+      "category": "חדר פרטי במסעדה",
+      "description": "לא חדר פרטי אלא שולחן גדול במסעדה.",
+      "instagram": "https://instagram.com/joz_ve_loz?igsh=MWVkNjAyeTFmbzhwdw==",
+      "link": "#",
+      "link_text": "",
+      "location": "תל אביב",
+      "name": "גוז ולוז",
+      "price": ""
+    }
+  ]
+}

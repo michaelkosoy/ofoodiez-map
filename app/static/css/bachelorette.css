@@ -296,6 +296,25 @@ body {
     color: white;
 }
 
+.wa-link {
+    color: #25D366;
+    font-size: 1.1rem;
+    transition: var(--transition);
+    background: #E8F9EE;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.wa-link:hover {
+    transform: scale(1.1) rotate(-5deg);
+    background: #25D366;
+    color: white;
+}
+
 .card-body {
     flex-grow: 1;
 }
@@ -484,4 +503,42 @@ body {
         border-right: 1px solid var(--border-color);
         padding-right: 20px;
     }
+}
+
+/* Intro Card */
+.bach-intro-card {
+    background: linear-gradient(135deg, #ffffff, #fffdf8);
+    border-radius: var(--radius-lg);
+    padding: 24px 30px;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(114, 8, 21, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.bach-intro-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+}
+
+.bach-intro-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.bach-intro-text {
+    font-size: 1.05rem;
+    color: var(--text-main);
+    margin: 0;
+    line-height: 1.7;
+    opacity: 0.95;
 }

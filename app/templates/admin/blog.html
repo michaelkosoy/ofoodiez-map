@@ -3,7 +3,8 @@
 
 {% block extra_css %}
 <style>
-  .blog-editor { max-width: 860px; }
+  .blog-editor { max-width: 860px; transition: max-width 0.2s ease; }
+  .blog-editor.wide { max-width: 100%; }
   .blog-section-title {
     font-size: 1rem;
     font-weight: 700;
@@ -63,6 +64,7 @@
   <div style="display:flex;gap:8px;align-items:center">
     <select id="blog-slug" class="form-control" style="width:auto">
       <option value="japan">Japan Guide</option>
+      <option value="bachelorette">Bachelorette Directory</option>
     </select>
   </div>
 </div>
@@ -71,9 +73,9 @@
   <div style="color:#999;padding:40px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
 </div>
 
-<div class="save-bar">
+<div class="save-bar" id="save-bar-bottom">
   <button class="btn btn-success" onclick="saveBlog()"><i class="fas fa-save"></i> Save Changes</button>
-  <span class="save-msg" id="save-msg">Saved!</span>
+  <span class="save-msg" id="save-msg-bottom">Saved!</span>
 </div>
 {% endblock %}
 
@@ -81,6 +83,7 @@
 <script>
 var currentSlug = '';
 var blogData = {};
+var bacheloretteTable = null;
 
 function field(key, label, rows) {
   rows = rows || 3;
@@ -98,43 +101,151 @@ function cityField(cityKey, subKey, label, rows) {
 }
 
 function renderEditor() {
+  var editorEl = document.getElementById('blog-editor');
+  // Clean up existing Tabulator table if any
+  if (bacheloretteTable) {
+    bacheloretteTable.destroy();
+    bacheloretteTable = null;
+  }
+
   var html = '';
 
-  html += '<p class="blog-section-title">Page</p>';
-  html += field('page_title', 'Page Title', 1);
+  if (currentSlug === 'bachelorette') {
+    editorEl.classList.add('wide');
+    document.getElementById('save-bar-bottom').style.display = 'none';
+    html += '<p class="blog-section-title">Bachelorette Configuration</p>';
+    
+    html += '<div class="blog-field"><label>Intro Paragraph / Hero Text (Hebrew - Use newlines for line breaks)</label>';
+    var introVal = (blogData.intro || '').replace(/</g, '&lt;');
+    html += '<textarea data-key="intro" class="form-control" rows="4" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + introVal + '</textarea></div>';
 
-  html += '<p class="blog-section-title">Intro</p>';
-  html += field('intro_body', 'Intro Body (\\n = line break)', 5);
-  html += field('intro_route', 'Route Block (\\n = line break)', 5);
-
-  html += '<p class="blog-section-title">Cities Section</p>';
-  html += field('cities_lead', 'Cities Lead Text', 2);
-
-  var cities = [
-    ['tokyo',     'Tokyo'],
-    ['yamanashi', 'Yamanashi'],
-    ['kyoto',     'Kyoto'],
-    ['osaka',     'Osaka'],
-    ['okinawa',   'Okinawa'],
-  ];
-  cities.forEach(function(c) {
-    html += '<p class="blog-section-title" style="margin-top:20px">' + c[1] + '</p>';
-    html += '<div class="city-grid">';
-    html += cityField(c[0], 'intro', 'City Intro', 4);
-    html += cityField(c[0], 'accom', 'Where to Stay', 2);
+    html += '<div class="blog-field"><label>Warning / Header Note (Hebrew)</label>';
+    var val = (blogData.note || '').replace(/</g, '&lt;');
+    html += '<input type="text" data-key="note" class="form-control" value="' + val + '" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;"></div>';
+    
+    html += '<div style="display:flex;align-items:center;margin-top:30px;gap:12px;">';
+    html += '  <p class="blog-section-title" style="margin:0;border:none;">Places Directory</p>';
+    html += '  <button class="btn btn-success" onclick="addBacheloretteRow()" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add New Place</button>';
+    html += '  <button class="btn" onclick="saveBlog()" style="padding:6px 12px;font-size:13px;background-color:#5A3A31;"><i class="fas fa-save"></i> Save Changes</button>';
+    html += '  <span class="save-msg" id="save-msg-bach" style="margin-left: 8px;">Saved!</span>';
     html += '</div>';
-  });
+    html += '<div id="bachelorette-table" style="margin-top:15px;min-height:300px;"></div>';
+    
+    document.getElementById('blog-editor').innerHTML = html;
 
-  html += '<p class="blog-section-title">Calculator</p>';
-  html += field('calc_lead', 'Calculator Lead Text', 2);
+    // Wait a tick for the container to render in DOM before loading Tabulator
+    setTimeout(function() {
+      var places = blogData.places || [];
+      places.forEach(function(p, idx) {
+        p.id = idx + 1; // Assign ID for Tabulator tracking
+      });
 
-  html += '<p class="blog-section-title">Footer</p>';
-  html += field('footer', 'Footer Text', 2);
+      bacheloretteTable = new Tabulator("#bachelorette-table", {
+        data: places,
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 50,
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Name (Hebrew)", field: "name", editor: "input", headerFilter: "input", minWidth: 120 },
+          { title: "Category", field: "category", editor: "list", editorParams: { values: ["חלל ושף", "יקבים", "חלל פרטי להשכרה", "חדר פרטי במסעדה"] }, width: 140 },
+          { title: "Location", field: "location", editor: "input", headerFilter: "input", minWidth: 100 },
+          { title: "Price", field: "price", editor: "input", width: 100 },
+          { title: "Link", field: "link", editor: "input", width: 120 },
+          { title: "Link Text", field: "link_text", editor: "input", width: 90 },
+          { title: "Instagram", field: "instagram", editor: "input", width: 120 },
+          { title: "WhatsApp", field: "whatsapp", editor: "input", width: 120 },
+          { title: "Description", field: "description", editor: "input", minWidth: 200 },
+          {
+            formatter: function(cell) {
+              return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>";
+            },
+            width: 50,
+            hozAlign: "center",
+            headerSort: false,
+            cellClick: function(e, cell) {
+              cell.getRow().delete();
+            }
+          }
+        ]
+      });
+    }, 50);
 
-  document.getElementById('blog-editor').innerHTML = html;
+  } else {
+    editorEl.classList.remove('wide');
+    document.getElementById('save-bar-bottom').style.display = 'flex';
+    // Render standard Japan Guide editor
+    html += '<p class="blog-section-title">Page</p>';
+    html += field('page_title', 'Page Title', 1);
+
+    html += '<p class="blog-section-title">Intro</p>';
+    html += field('intro_body', 'Intro Body (\\n = line break)', 5);
+    html += field('intro_route', 'Route Block (\\n = line break)', 5);
+
+    html += '<p class="blog-section-title">Cities Section</p>';
+    html += field('cities_lead', 'Cities Lead Text', 2);
+
+    var cities = [
+      ['tokyo',     'Tokyo'],
+      ['yamanashi', 'Yamanashi'],
+      ['kyoto',     'Kyoto'],
+      ['osaka',     'Osaka'],
+      ['okinawa',   'Okinawa'],
+    ];
+    cities.forEach(function(c) {
+      html += '<p class="blog-section-title" style="margin-top:20px">' + c[1] + '</p>';
+      html += '<div class="city-grid">';
+      html += cityField(c[0], 'intro', 'City Intro', 4);
+      html += cityField(c[0], 'accom', 'Where to Stay', 2);
+      html += '</div>';
+    });
+
+    html += '<p class="blog-section-title">Calculator</p>';
+    html += field('calc_lead', 'Calculator Lead Text', 2);
+
+    html += '<p class="blog-section-title">Footer</p>';
+    html += field('footer', 'Footer Text', 2);
+
+    document.getElementById('blog-editor').innerHTML = html;
+  }
+}
+
+function addBacheloretteRow() {
+  if (bacheloretteTable) {
+    var maxId = 0;
+    bacheloretteTable.getData().forEach(function(r) {
+      if (r.id > maxId) maxId = r.id;
+    });
+    bacheloretteTable.addRow({
+      id: maxId + 1,
+      name: "שם המקום החדש",
+      category: "חלל ושף",
+      description: "",
+      location: "",
+      price: "",
+      link: "#",
+      link_text: "",
+      instagram: "https://instagram.com/",
+      whatsapp: ""
+    }, true);
+  }
 }
 
 function collectData() {
+  if (currentSlug === 'bachelorette') {
+    var rawData = bacheloretteTable ? bacheloretteTable.getData() : [];
+    // Deep clone and clean up temporary id field
+    var cleanPlaces = JSON.parse(JSON.stringify(rawData));
+    cleanPlaces.forEach(function(p) {
+      delete p.id;
+    });
+    return {
+      intro: document.querySelector('[data-key="intro"]').value,
+      note: document.querySelector('[data-key="note"]').value,
+      places: cleanPlaces
+    };
+  }
+
   var out = JSON.parse(JSON.stringify(blogData));
   document.querySelectorAll('[data-key]').forEach(function(el) {
     out[el.dataset.key] = el.value;
@@ -173,9 +284,12 @@ function saveBlog() {
   .then(function(r) { return r.json(); })
   .then(function(res) {
     if (res.ok) {
-      var msg = document.getElementById('save-msg');
-      msg.style.display = 'inline';
-      setTimeout(function() { msg.style.display = 'none'; }, 2500);
+      var msgId = currentSlug === 'bachelorette' ? 'save-msg-bach' : 'save-msg-bottom';
+      var msg = document.getElementById(msgId);
+      if (msg) {
+        msg.style.display = 'inline';
+        setTimeout(function() { msg.style.display = 'none'; }, 2500);
+      }
     } else {
       alert('Error: ' + (res.error || 'unknown'));
     }
