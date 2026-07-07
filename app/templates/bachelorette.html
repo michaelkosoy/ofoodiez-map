@@ -53,75 +53,297 @@
             <i class="fas fa-info-circle"></i> {{ bachelorette_data.note }}
         </div>
 
-        <!-- Filters & Search -->
-        <div class="filter-section">
-            <div class="search-bar">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" placeholder="חיפוש מקום, אזור או תיאור...">
-                <i class="fas fa-times clear-icon" id="clearSearch" style="display: none;"></i>
-            </div>
-            
-            <div class="filter-tabs">
-                <button class="filter-btn active" data-filter="all">הכל</button>
-                <button class="filter-btn" data-filter="חלל ושף">חלל ושף</button>
-                <button class="filter-btn" data-filter="יקבים">יקבים</button>
-                <button class="filter-btn" data-filter="חלל פרטי להשכרה">חלל פרטי להשכרה</button>
-                <button class="filter-btn" data-filter="חדר פרטי במסעדה">חדר פרטי במסעדה</button>
-            </div>
-
-            <!-- Price Filter -->
-            <div class="price-filter">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label for="priceRange" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">תקציב עד: <span id="priceValue" style="color: var(--primary-color); font-weight: 800;">ללא הגבלה</span></label>
-                </div>
-                <input type="range" id="priceRange" min="100" max="1000" step="50" value="1000" style="width: 100%; accent-color: var(--primary-color);">
-            </div>
+        <!-- Section Tabs -->
+        <div class="bach-section-tabs">
+            <button class="section-tab active" data-tab="venues">
+                <i class="fas fa-map-marker-alt"></i> מקומות וחללים
+            </button>
+            <button class="section-tab" data-tab="suppliers">
+                <i class="fas fa-handshake"></i> ספקים מומלצים
+            </button>
+            <button class="section-tab" data-tab="games">
+                <i class="fas fa-gamepad"></i> משחקי רווקות
+            </button>
+            <button class="section-tab" data-tab="designs">
+                <i class="fas fa-palette"></i> מיתוג ועיצובים
+            </button>
+            <button class="section-tab" data-tab="gifts">
+                <i class="fas fa-gift"></i> רעיונות למתנות
+            </button>
         </div>
 
-        <!-- Places Grid -->
-        <div class="places-grid" id="placesGrid">
-            {% for place in bachelorette_data.places %}
-            <div class="place-card" data-category="{{ place.category }}">
-                <div class="card-header">
-                    <div class="card-title-group">
-                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
-                            <h2 style="margin: 0;">{{ place.name }}</h2>
-                            {% if place.instagram and place.instagram != "https://instagram.com/" %}
-                            <a href="{{ place.instagram }}" target="_blank" class="ig-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-instagram"></i></a>
-                            {% endif %}
-                            {% if place.whatsapp %}
-                            <a href="https://wa.me/{{ place.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
-                            {% endif %}
-                            {% if place.link and place.link != "#" %}
-                            <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
-                            {% endif %}
-                        </div>
-                        <span class="category-badge">{{ place.category }}</span>
-                    </div>
+        <!-- Tab 1: Venues (Places) -->
+        <div id="tab-venues" class="tab-content active">
+            <!-- Filters & Search -->
+            <div class="filter-section">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="חיפוש מקום, אזור או תיאור...">
+                    <i class="fas fa-times clear-icon" id="clearSearch" style="display: none;"></i>
                 </div>
                 
-                <div class="card-body">
-                    <div class="info-row">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>{{ place.location }}</span>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">הכל</button>
+                    <button class="filter-btn" data-filter="חלל ושף">חלל ושף</button>
+                    <button class="filter-btn" data-filter="יקבים">יקבים</button>
+                    <button class="filter-btn" data-filter="חלל פרטי להשכרה">חלל פרטי להשכרה</button>
+                    <button class="filter-btn" data-filter="חדר פרטי במסעדה">חדר פרטי במסעדה</button>
+                </div>
+
+                <!-- Price Filter -->
+                <div class="price-filter">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <label for="priceRange" style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">תקציב עד: <span id="priceValue" style="color: var(--primary-color); font-weight: 800;">ללא הגבלה</span></label>
                     </div>
-                    <div class="info-row">
-                        <i class="fas fa-tag"></i>
-                        <span class="price-text">{{ place.price }}</span>
+                    <input type="range" id="priceRange" min="100" max="1000" step="50" value="1000" style="width: 100%; accent-color: var(--primary-color);">
+                </div>
+            </div>
+
+            <!-- Places Grid -->
+            <div class="places-grid" id="placesGrid">
+                {% for place in bachelorette_data.places %}
+                <div class="place-card" data-category="{{ place.category }}">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                                <h2 style="margin: 0;">{{ place.name }}</h2>
+                                {% if place.instagram and place.instagram != "https://instagram.com/" %}
+                                <a href="{{ place.instagram }}" target="_blank" class="ig-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-instagram"></i></a>
+                                {% endif %}
+                                {% if place.whatsapp %}
+                                <a href="https://wa.me/{{ place.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
+                                {% endif %}
+                                {% if place.link and place.link != "#" %}
+                                <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
+                                {% endif %}
+                            </div>
+                            <span class="category-badge">{{ place.category }}</span>
+                        </div>
                     </div>
                     
-                    <p class="description">{{ place.description }}</p>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ place.location }}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-tag"></i>
+                            <span class="price-text">{{ place.price }}</span>
+                        </div>
+                        
+                        <p class="description">{{ place.description }}</p>
+                    </div>
                 </div>
-                
+                {% endfor %}
             </div>
-            {% endfor %}
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-search-minus"></i>
+                <h3>לא נמצאו תוצאות</h3>
+                <p>נסו לחפש מילים אחרות</p>
+            </div>
         </div>
-        
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <i class="fas fa-search-minus"></i>
-            <h3>לא נמצאו תוצאות</h3>
-            <p>נסו לחפש מילים אחרות</p>
+
+        <!-- Tab 2: Suppliers -->
+        <div id="tab-suppliers" class="tab-content">
+            <div class="supplier-filters-container">
+                <button class="supplier-filter-btn active" data-filter="all">הכל</button>
+                <button class="supplier-filter-btn" data-filter="דיג׳יי">🎧 דיג׳יי</button>
+                <button class="supplier-filter-btn" data-filter="שף">🍳 שפים</button>
+                <button class="supplier-filter-btn" data-filter="אטרקציה">✨ אטרקציות</button>
+                <button class="supplier-filter-btn" data-filter="בר קוקטיילים">🍹 בר קוקטיילים</button>
+            </div>
+
+            <div class="suppliers-grid">
+                {% for supplier in bachelorette_data.suppliers %}
+                <div class="supplier-card" data-category="{{ supplier.category }}">
+                    <div class="supplier-header">
+                        <div class="supplier-title-group">
+                            <h2>{{ supplier.name }}</h2>
+                            <span class="supplier-badge">{{ supplier.category }}</span>
+                        </div>
+                        <div class="supplier-socials">
+                            {% if supplier.instagram and supplier.instagram != "https://instagram.com/" %}
+                            <a href="{{ supplier.instagram }}" target="_blank" class="ig-link"><i class="fab fa-instagram"></i></a>
+                            {% endif %}
+                            {% if supplier.whatsapp %}
+                            <a href="https://wa.me/{{ supplier.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link"><i class="fab fa-whatsapp"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="supplier-body">
+                        <div class="supplier-info-row">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ supplier.location or "כל הארץ" }}</span>
+                        </div>
+                        {% if supplier.price %}
+                        <div class="supplier-info-row">
+                            <i class="fas fa-tag"></i>
+                            <span class="price-text">{{ supplier.price }}</span>
+                        </div>
+                        {% endif %}
+                        <p class="supplier-description">{{ supplier.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab 3: Games -->
+        <div id="tab-games" class="tab-content">
+            {% if bachelorette_data.games_intro %}
+            <div class="games-intro">
+                <p>{{ bachelorette_data.games_intro }}</p>
+            </div>
+            {% endif %}
+
+            <div class="bride-style-selector">
+                <button class="bride-style-btn active" data-style="elegant">
+                    <i class="fas fa-sparkles"></i> רווקה קלאסית ואלגנטית
+                </button>
+                <button class="bride-style-btn" data-style="rowdy">
+                    <i class="fas fa-glass-cheers"></i> פרועה ומרימה
+                </button>
+            </div>
+
+            <div class="games-list-wrapper">
+                <!-- Elegant Games List -->
+                <div id="games-elegant-list" class="games-list-section active">
+                    {% for game in bachelorette_data.games.elegant %}
+                    <div class="game-card">
+                        <h3 class="game-title">{{ game.title }}</h3>
+                        {% if game.description %}
+                        <p class="game-subtitle">{{ game.description }}</p>
+                        {% endif %}
+                        
+                        {% if game.materials %}
+                        <div class="game-detail-item">
+                            <span class="game-detail-label"><i class="fas fa-clipboard-list"></i> חומרים דרושים:</span>
+                            <p class="game-detail-body">{{ game.materials }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if game.instructions %}
+                        <div class="game-detail-item">
+                            <span class="game-detail-label"><i class="fas fa-info-circle"></i> איך משחקים:</span>
+                            <p class="game-detail-body">{{ game.instructions | replace('\n', '<br>') | safe }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Rowdy Games List -->
+                <div id="games-rowdy-list" class="games-list-section">
+                    {% for game in bachelorette_data.games.rowdy %}
+                    <div class="game-card">
+                        <h3 class="game-title">{{ game.title }}</h3>
+                        {% if game.description %}
+                        <p class="game-subtitle">{{ game.description }}</p>
+                        {% endif %}
+                        
+                        {% if game.materials %}
+                        <div class="game-detail-item">
+                            <span class="game-detail-label"><i class="fas fa-clipboard-list"></i> חומרים דרושים:</span>
+                            <p class="game-detail-body">{{ game.materials }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if game.instructions %}
+                        <div class="game-detail-item">
+                            <span class="game-detail-label"><i class="fas fa-info-circle"></i> איך משחקים:</span>
+                            <p class="game-detail-body">{{ game.instructions | replace('\n', '<br>') | safe }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Designs -->
+        <div id="tab-designs" class="tab-content">
+            <div class="branding-header">
+                <h2>🎨 מיתוג ועיצובים מותאמים אישית</h2>
+                <p>הורידו תבניות קנבה מוכנות לעריכה עצמית בחינם ליצירת מיתוג מדהים לאירוע:</p>
+            </div>
+
+            <div class="designs-grid">
+                {% for design in bachelorette_data.designs.sets %}
+                <div class="design-card">
+                    <div class="design-icon-box"><i class="fas fa-palette"></i></div>
+                    <h3 class="design-title">{{ design.name }}</h3>
+                    <p class="design-desc">{{ design.description }}</p>
+                    {% if design.canva_link %}
+                    <a href="{{ design.canva_link }}" target="_blank" class="design-link-btn">
+                        <i class="fas fa-external-link-alt"></i> פתחי לעריכה ב-Canva
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="guide-boxes-container">
+                <!-- AliExpress links -->
+                {% if bachelorette_data.designs.aliexpress_links %}
+                <div class="guide-box">
+                    <h3><i class="fas fa-shopping-bag"></i> מוצרים מומלצים מאליאקספרס</h3>
+                    <p class="guide-box-intro">{{ bachelorette_data.designs.aliexpress_text }}</p>
+                    <ul class="guide-links">
+                        {% for item in bachelorette_data.designs.aliexpress_links %}
+                        <li>
+                            <a href="{{ item.url }}" target="_blank">
+                                <i class="fas fa-cart-arrow-down"></i> {{ item.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Print Shops -->
+                {% if bachelorette_data.designs.print_shops_links %}
+                <div class="guide-box">
+                    <h3><i class="fas fa-print"></i> בתי דפוס מומלצים בתל אביב</h3>
+                    <p class="guide-box-intro">{{ bachelorette_data.designs.print_shops_text }}</p>
+                    <ul class="guide-links">
+                        {% for shop in bachelorette_data.designs.print_shops_links %}
+                        <li>
+                            <a href="{{ shop.url }}" target="_blank">
+                                <i class="fas fa-map-marker-alt"></i> {{ shop.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab 5: Gifts -->
+        <div id="tab-gifts" class="tab-content">
+            <div class="branding-header">
+                <h2>{{ bachelorette_data.gifts_title or "🎁 רעיונות למתנות שוות לכלה" }}</h2>
+                <p>{{ bachelorette_data.gifts_desc or "אספנו לכן את המתנות הכי מיוחדות, מפנקות ומצטלמות טוב שיגרמו לכלה להרגיש הכי מיוחדת:" }}</p>
+            </div>
+
+            <div class="gifts-grid">
+                {% for gift in bachelorette_data.gifts %}
+                <div class="gift-card">
+                    <div class="gift-icon-box"><i class="fas fa-gift"></i></div>
+                    <div class="gift-details">
+                        <h3 class="gift-title">{{ gift.title }}</h3>
+                        <p class="gift-desc">{{ gift.description }}</p>
+                        {% if gift.buy_url %}
+                        <a href="{{ gift.buy_url }}" target="_blank" class="gift-buy-btn">
+                            <i class="fas fa-shopping-cart"></i> {{ gift.buy_text or "לרכישה" }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
         
         <div class="bottom-nav-spacer"></div>
@@ -132,6 +354,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Search & Venues Filters Elements
             const searchInput = document.getElementById('searchInput');
             const filterBtns = document.querySelectorAll('.filter-btn');
             const cards = document.querySelectorAll('.place-card');
@@ -144,18 +367,20 @@
             let currentSearch = '';
             let currentMaxPrice = 1000;
 
-            // Price Range Slide
-            priceRange.addEventListener('input', (e) => {
-                currentMaxPrice = parseInt(e.target.value);
-                if (currentMaxPrice >= 1000) {
-                    priceValue.textContent = 'ללא הגבלה';
-                } else {
-                    priceValue.textContent = currentMaxPrice + '₪';
-                }
-                applyFilters();
-            });
+            // Price Range Slider
+            if (priceRange) {
+                priceRange.addEventListener('input', (e) => {
+                    currentMaxPrice = parseInt(e.target.value);
+                    if (currentMaxPrice >= 1000) {
+                        priceValue.textContent = 'ללא הגבלה';
+                    } else {
+                        priceValue.textContent = currentMaxPrice + '₪';
+                    }
+                    applyFilters();
+                });
+            }
 
-            // Filter Buttons Click
+            // Venues Filter Tabs Click
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     filterBtns.forEach(b => b.classList.remove('active'));
@@ -166,27 +391,23 @@
             });
 
             // Search Input
-            searchInput.addEventListener('input', (e) => {
-                currentSearch = e.target.value.toLowerCase();
-                clearSearch.style.display = currentSearch.length > 0 ? 'block' : 'none';
-                applyFilters();
-            });
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearch = e.target.value.toLowerCase();
+                    clearSearch.style.display = currentSearch.length > 0 ? 'block' : 'none';
+                    applyFilters();
+                });
+            }
 
             // Clear Search
-            clearSearch.addEventListener('click', () => {
-                searchInput.value = '';
-                currentSearch = '';
-                clearSearch.style.display = 'none';
-                applyFilters();
-            });
-
-            // Expand Descriptions
-            const descriptions = document.querySelectorAll('.description');
-            descriptions.forEach(desc => {
-                desc.addEventListener('click', () => {
-                    desc.classList.toggle('expanded');
+            if (clearSearch) {
+                clearSearch.addEventListener('click', () => {
+                    searchInput.value = '';
+                    currentSearch = '';
+                    clearSearch.style.display = 'none';
+                    applyFilters();
                 });
-            });
+            }
 
             function applyFilters() {
                 let visibleCount = 0;
@@ -205,7 +426,6 @@
                     
                     const matchesFilter = currentFilter === 'all' || category === currentFilter;
                     const matchesSearch = textContent.includes(currentSearch);
-                    // Price is matched if max price is set to "unlimited", if there is no price, or if min price is <= current limit
                     const matchesPrice = currentMaxPrice >= 1000 || minPrice === 0 || minPrice <= currentMaxPrice;
 
                     if (matchesFilter && matchesSearch && matchesPrice) {
@@ -222,6 +442,73 @@
                     emptyState.style.display = 'none';
                 }
             }
+
+            // ============ TAB NAVIGATION SYSTEM ============
+            const sectionTabs = document.querySelectorAll('.section-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            sectionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    
+                    sectionTabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const targetEl = document.getElementById('tab-' + target);
+                    if (targetEl) targetEl.classList.add('active');
+                });
+            });
+
+            // ============ SUPPLIERS FILTER SYSTEM ============
+            const supplierFilterBtns = document.querySelectorAll('.supplier-filter-btn');
+            const supplierCards = document.querySelectorAll('.supplier-card');
+
+            supplierFilterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    supplierFilterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const filter = btn.getAttribute('data-filter');
+                    supplierCards.forEach(card => {
+                        const category = card.getAttribute('data-category');
+                        if (filter === 'all' || category === filter) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // ============ GAME STYLE TOGGLE SYSTEM ============
+            const brideStyleBtns = document.querySelectorAll('.bride-style-btn');
+            const elegantList = document.getElementById('games-elegant-list');
+            const rowdyList = document.getElementById('games-rowdy-list');
+
+            brideStyleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    brideStyleBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const style = btn.getAttribute('data-style');
+                    if (style === 'elegant') {
+                        elegantList.classList.add('active');
+                        rowdyList.classList.remove('active');
+                    } else {
+                        elegantList.classList.remove('active');
+                        rowdyList.classList.add('active');
+                    }
+                });
+            });
+
+            // ============ EXPANDABLE DESCRIPTION CARDS ============
+            const descriptions = document.querySelectorAll('.description, .supplier-description');
+            descriptions.forEach(desc => {
+                desc.addEventListener('click', () => {
+                    desc.classList.toggle('expanded');
+                });
+            });
         });
     </script>
 </body>

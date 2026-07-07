@@ -55,6 +55,46 @@
     z-index: 10;
   }
   .save-msg { font-size: 14px; color: var(--success-color); font-weight: 600; display: none; }
+  
+  /* Subtabs for Bachelorette editor */
+  .admin-subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 12px;
+    align-items: center;
+  }
+  .admin-subtab-btn {
+    padding: 8px 16px;
+    border: none;
+    background: #f1f3f5;
+    color: #495057;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .admin-subtab-btn:hover {
+    background: #e9ecef;
+  }
+  .admin-subtab-btn.active {
+    background: var(--sidebar-bg);
+    color: white;
+  }
+  .admin-tab-content {
+    display: none;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  .admin-tab-content.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 </style>
 {% endblock %}
 
@@ -83,7 +123,16 @@
 <script>
 var currentSlug = '';
 var blogData = {};
+
+// Bachelorette Tabulator variables
 var bacheloretteTable = null;
+var bacheloretteSuppliersTable = null;
+var bacheloretteGamesElegantTable = null;
+var bacheloretteGamesRowdyTable = null;
+var bacheloretteDesignsSetsTable = null;
+var bacheloretteAETable = null;
+var bachelorettePSTable = null;
+var bacheloretteGiftsTable = null;
 
 function field(key, label, rows) {
   rows = rows || 3;
@@ -100,46 +149,178 @@ function cityField(cityKey, subKey, label, rows) {
     '<textarea rows="' + rows + '" data-city="' + cityKey + '" data-sub="' + subKey + '">' + val + '</textarea></div>';
 }
 
+function switchAdminTab(tabName) {
+  document.querySelectorAll('.admin-subtab-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  document.querySelectorAll('.admin-tab-content').forEach(function(content) {
+    content.classList.remove('active');
+  });
+  
+  // Find button by its onclick target
+  var btn = Array.from(document.querySelectorAll('.admin-subtab-btn')).find(function(b) {
+    return b.getAttribute('onclick').includes("'" + tabName + "'");
+  });
+  if (btn) btn.classList.add('active');
+  
+  var content = document.getElementById('admin-tab-' + tabName);
+  if (content) content.classList.add('active');
+}
+
 function renderEditor() {
   var editorEl = document.getElementById('blog-editor');
-  // Clean up existing Tabulator table if any
-  if (bacheloretteTable) {
-    bacheloretteTable.destroy();
-    bacheloretteTable = null;
-  }
+  
+  // Clean up existing Tabulator tables
+  var tablesToDestroy = [
+    bacheloretteTable, 
+    bacheloretteSuppliersTable, 
+    bacheloretteGamesElegantTable, 
+    bacheloretteGamesRowdyTable, 
+    bacheloretteDesignsSetsTable, 
+    bacheloretteAETable,
+    bachelorettePSTable,
+    bacheloretteGiftsTable
+  ];
+  tablesToDestroy.forEach(function(t) {
+    if (t) {
+      try { t.destroy(); } catch(e) {}
+    }
+  });
+  bacheloretteTable = null;
+  bacheloretteSuppliersTable = null;
+  bacheloretteGamesElegantTable = null;
+  bacheloretteGamesRowdyTable = null;
+  bacheloretteDesignsSetsTable = null;
+  bacheloretteAETable = null;
+  bachelorettePSTable = null;
+  bacheloretteGiftsTable = null;
 
   var html = '';
 
   if (currentSlug === 'bachelorette') {
     editorEl.classList.add('wide');
     document.getElementById('save-bar-bottom').style.display = 'none';
-    html += '<p class="blog-section-title">Bachelorette Configuration</p>';
     
-    html += '<div class="blog-field"><label>Intro Paragraph / Hero Text (Hebrew - Use newlines for line breaks)</label>';
-    var introVal = (blogData.intro || '').replace(/</g, '&lt;');
-    html += '<textarea data-key="intro" class="form-control" rows="4" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + introVal + '</textarea></div>';
-
-    html += '<div class="blog-field"><label>Warning / Header Note (Hebrew)</label>';
-    var val = (blogData.note || '').replace(/</g, '&lt;');
-    html += '<input type="text" data-key="note" class="form-control" value="' + val + '" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;"></div>';
+    html += '<p class="blog-section-title">Bachelorette Guide Configuration</p>';
     
-    html += '<div style="display:flex;align-items:center;margin-top:30px;gap:12px;">';
-    html += '  <p class="blog-section-title" style="margin:0;border:none;">Places Directory</p>';
-    html += '  <button class="btn btn-success" onclick="addBacheloretteRow()" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add New Place</button>';
-    html += '  <button class="btn" onclick="saveBlog()" style="padding:6px 12px;font-size:13px;background-color:#5A3A31;"><i class="fas fa-save"></i> Save Changes</button>';
+    // Subtabs Menu
+    html += '<div class="admin-subtabs">';
+    html += '  <button class="admin-subtab-btn active" onclick="switchAdminTab(\'general\')">General Settings</button>';
+    html += '  <button class="admin-subtab-btn" onclick="switchAdminTab(\'venues\')">Venues (Places)</button>';
+    html += '  <button class="admin-subtab-btn" onclick="switchAdminTab(\'suppliers\')">Suppliers</button>';
+    html += '  <button class="admin-subtab-btn" onclick="switchAdminTab(\'games\')">Party Games</button>';
+    html += '  <button class="admin-subtab-btn" onclick="switchAdminTab(\'designs\')">Designs & Links</button>';
+    html += '  <button class="admin-subtab-btn" onclick="switchAdminTab(\'gifts\')">Gift Ideas</button>';
+    html += '  <button class="btn" onclick="saveBlog()" style="margin-right:auto;padding:6px 12px;font-size:13px;background-color:#5A3A31;color:#fff;"><i class="fas fa-save"></i> Save Changes</button>';
     html += '  <span class="save-msg" id="save-msg-bach" style="margin-left: 8px;">Saved!</span>';
     html += '</div>';
-    html += '<div id="bachelorette-table" style="margin-top:15px;min-height:300px;"></div>';
+
+    // Tab 1: General
+    html += '<div id="admin-tab-general" class="admin-tab-content active">';
+    html += '  <div class="blog-field"><label>Intro Paragraph / Hero Text (Hebrew - Use newlines for line breaks)</label>';
+    var introVal = (blogData.intro || '').replace(/</g, '&lt;');
+    html += '  <textarea data-key="intro" class="form-control" rows="4" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + introVal + '</textarea></div>';
+    html += '  <div class="blog-field"><label>Warning / Header Note (Hebrew)</label>';
+    var noteVal = (blogData.note || '').replace(/</g, '&lt;');
+    html += '  <input type="text" data-key="note" class="form-control" value="' + noteVal + '" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;"></div>';
+    html += '  <div class="blog-field"><label>Games Section Intro Text (Hebrew)</label>';
+    var gamesIntroVal = (blogData.games_intro || '').replace(/</g, '&lt;');
+    html += '  <textarea data-key="games_intro" class="form-control" rows="2" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + gamesIntroVal + '</textarea></div>';
+    html += '</div>';
+
+    // Tab 2: Venues (Places)
+    html += '<div id="admin-tab-venues" class="admin-tab-content">';
+    html += '  <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '    <h3 style="margin:0;font-size:16px;font-weight:700;">Places & Venues</h3>';
+    html += '    <button class="btn btn-success" onclick="addBacheloretteRow(\'venues\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add New Place</button>';
+    html += '  </div>';
+    html += '  <div id="bachelorette-table" style="min-height:300px;"></div>';
+    html += '</div>';
+
+    // Tab 3: Suppliers
+    html += '<div id="admin-tab-suppliers" class="admin-tab-content">';
+    html += '  <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '    <h3 style="margin:0;font-size:16px;font-weight:700;">Suppliers Directory</h3>';
+    html += '    <button class="btn btn-success" onclick="addBacheloretteRow(\'suppliers\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add New Supplier</button>';
+    html += '  </div>';
+    html += '  <div id="bachelorette-suppliers-table" style="min-height:300px;"></div>';
+    html += '</div>';
+
+    // Tab 4: Games
+    html += '<div id="admin-tab-games" class="admin-tab-content">';
+    html += '  <div style="margin-bottom:30px;">';
+    html += '    <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '      <h3 style="margin:0;font-size:16px;font-weight:700;">✨ Elegant Games (רווקה קלאסית ואלגנטית)</h3>';
+    html += '      <button class="btn btn-success" onclick="addBacheloretteRow(\'games_elegant\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add Elegant Game</button>';
+    html += '    </div>';
+    html += '    <div id="bachelorette-games-elegant-table" style="min-height:200px;"></div>';
+    html += '  </div>';
+    html += '  <div>';
+    html += '    <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '      <h3 style="margin:0;font-size:16px;font-weight:700;">🥂 Rowdy Games (פרועה ומרימה)</h3>';
+    html += '      <button class="btn btn-success" onclick="addBacheloretteRow(\'games_rowdy\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add Rowdy Game</button>';
+    html += '    </div>';
+    html += '    <div id="bachelorette-games-rowdy-table" style="min-height:200px;"></div>';
+    html += '  </div>';
+    html += '</div>';
+
+    // Tab 5: Designs
+    html += '<div id="admin-tab-designs" class="admin-tab-content">';
+    html += '  <div style="margin-bottom:30px;">';
+    html += '    <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '      <h3 style="margin:0;font-size:16px;font-weight:700;">🎨 Canva Design Sets</h3>';
+    html += '      <button class="btn btn-success" onclick="addBacheloretteRow(\'designs_sets\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add Canva Set</button>';
+    html += '    </div>';
+    html += '    <div id="bachelorette-designs-sets-table" style="min-height:200px;"></div>';
+    html += '  </div>';
     
-    document.getElementById('blog-editor').innerHTML = html;
+    // AliExpress Static texts & links
+    html += '  <hr style="margin:25px 0; border:none; border-top:1px solid #ddd;">';
+    html += '  <h3 style="margin-bottom:15px;font-size:16px;font-weight:700;">📦 AliExpress Recommendations</h3>';
+    html += '  <div class="blog-field"><label>AliExpress Section Intro Text (Hebrew)</label>';
+    var aeText = ((blogData.designs || {}).aliexpress_text || '').replace(/</g, '&lt;');
+    html += '  <textarea id="designs-ae-text" class="form-control" rows="2" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + aeText + '</textarea></div>';
+    html += '  <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '    <label style="margin:0;font-weight:600;font-size:13px;color:#555;">AliExpress Items Links Table</label>';
+    html += '    <button class="btn btn-success" onclick="addBacheloretteRow(\'ae_links\')" style="margin-left:auto;padding:4px 10px;font-size:12px;"><i class="fas fa-plus"></i> Add AliExpress Item</button>';
+    html += '  </div>';
+    html += '  <div id="bachelorette-ae-table" style="min-height:150px;margin-bottom:30px;"></div>';
+
+    // Print shops Static texts & links
+    html += '  <hr style="margin:25px 0; border:none; border-top:1px solid #ddd;">';
+    html += '  <h3 style="margin-bottom:15px;font-size:16px;font-weight:700;">🖨️ Tel Aviv Print Shops</h3>';
+    html += '  <div class="blog-field"><label>Print Shops Section Intro Text (Hebrew)</label>';
+    var psText = ((blogData.designs || {}).print_shops_text || '').replace(/</g, '&lt;');
+    html += '  <textarea id="designs-ps-text" class="form-control" rows="2" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;">' + psText + '</textarea></div>';
+    html += '  <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '    <label style="margin:0;font-weight:600;font-size:13px;color:#555;">Print Shops Links Table</label>';
+    html += '    <button class="btn btn-success" onclick="addBacheloretteRow(\'ps_links\')" style="margin-left:auto;padding:4px 10px;font-size:12px;"><i class="fas fa-plus"></i> Add Print Shop</button>';
+    html += '  </div>';
+    html += '  <div id="bachelorette-ps-table" style="min-height:150px;"></div>';
+    html += '</div>';
+
+    // Tab 6: Gifts
+    html += '<div id="admin-tab-gifts" class="admin-tab-content">';
+    html += '  <div class="blog-field"><label>Gifts Section Header (Hebrew)</label>';
+    var giftsTitleVal = (blogData.gifts_title || '').replace(/</g, '&lt;');
+    html += '  <input type="text" data-key="gifts_title" class="form-control" value="' + giftsTitleVal + '" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:10px;"></div>';
+    html += '  <div class="blog-field"><label>Gifts Section Description (Hebrew)</label>';
+    var giftsDescVal = (blogData.gifts_desc || '').replace(/</g, '&lt;');
+    html += '  <textarea data-key="gifts_desc" class="form-control" rows="2" style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;margin-bottom:15px;">' + giftsDescVal + '</textarea></div>';
+    html += '  <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
+    html += '    <h3 style="margin:0;font-size:16px;font-weight:700;">Gifts Directory</h3>';
+    html += '    <button class="btn btn-success" onclick="addBacheloretteRow(\'gifts\')" style="margin-left:auto;padding:6px 12px;font-size:13px;"><i class="fas fa-plus"></i> Add Gift Idea</button>';
+    html += '  </div>';
+    html += '  <div id="bachelorette-gifts-table" style="min-height:300px;"></div>';
+    html += '</div>';
+
+    editorEl.innerHTML = html;
 
     // Wait a tick for the container to render in DOM before loading Tabulator
     setTimeout(function() {
+      // 1. Places (Venues) Table
       var places = blogData.places || [];
-      places.forEach(function(p, idx) {
-        p.id = idx + 1; // Assign ID for Tabulator tracking
-      });
-
+      places.forEach(function(p, idx) { p.id = idx + 1; });
       bacheloretteTable = new Tabulator("#bachelorette-table", {
         data: places,
         layout: "fitColumns",
@@ -157,18 +338,155 @@ function renderEditor() {
           { title: "WhatsApp", field: "whatsapp", editor: "input", width: 120 },
           { title: "Description", field: "description", editor: "input", minWidth: 200 },
           {
-            formatter: function(cell) {
-              return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>";
-            },
-            width: 50,
-            hozAlign: "center",
-            headerSort: false,
-            cellClick: function(e, cell) {
-              cell.getRow().delete();
-            }
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
           }
         ]
       });
+
+      // 2. Suppliers Table
+      var suppliers = blogData.suppliers || [];
+      suppliers.forEach(function(s, idx) { s.id = idx + 1; });
+      bacheloretteSuppliersTable = new Tabulator("#bachelorette-suppliers-table", {
+        data: suppliers,
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 50,
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Name", field: "name", editor: "input", headerFilter: "input", minWidth: 120 },
+          { title: "Category", field: "category", editor: "list", editorParams: { values: ["דיג׳יי", "שף", "אטרקציה", "בר קוקטיילים"] }, width: 130 },
+          { title: "Location", field: "location", editor: "input", width: 100 },
+          { title: "Price", field: "price", editor: "input", width: 120 },
+          { title: "Instagram", field: "instagram", editor: "input", width: 120 },
+          { title: "WhatsApp", field: "whatsapp", editor: "input", width: 120 },
+          { title: "Description", field: "description", editor: "input", minWidth: 250 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 3. Games Elegant Table
+      var gamesElegant = (blogData.games || {}).elegant || [];
+      gamesElegant.forEach(function(g, idx) { g.id = idx + 1; });
+      bacheloretteGamesElegantTable = new Tabulator("#bachelorette-games-elegant-table", {
+        data: gamesElegant,
+        layout: "fitColumns",
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Title", field: "title", editor: "input", minWidth: 120 },
+          { title: "Description", field: "description", editor: "input", minWidth: 180 },
+          { title: "Materials", field: "materials", editor: "input", minWidth: 120 },
+          { title: "Instructions", field: "instructions", editor: "textarea", editorParams: { verticalNavigation: "editor" }, minWidth: 250 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 4. Games Rowdy Table
+      var gamesRowdy = (blogData.games || {}).rowdy || [];
+      gamesRowdy.forEach(function(g, idx) { g.id = idx + 1; });
+      bacheloretteGamesRowdyTable = new Tabulator("#bachelorette-games-rowdy-table", {
+        data: gamesRowdy,
+        layout: "fitColumns",
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Title", field: "title", editor: "input", minWidth: 120 },
+          { title: "Description", field: "description", editor: "input", minWidth: 180 },
+          { title: "Materials", field: "materials", editor: "input", minWidth: 120 },
+          { title: "Instructions", field: "instructions", editor: "textarea", editorParams: { verticalNavigation: "editor" }, minWidth: 250 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 5. Designs Sets Table
+      var designSets = ((blogData.designs || {}).sets || []);
+      designSets.forEach(function(ds, idx) { ds.id = idx + 1; });
+      bacheloretteDesignsSetsTable = new Tabulator("#bachelorette-designs-sets-table", {
+        data: designSets,
+        layout: "fitColumns",
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Set Name", field: "name", editor: "input", minWidth: 150 },
+          { title: "Description", field: "description", editor: "input", minWidth: 250 },
+          { title: "Canva Template Link", field: "canva_link", editor: "input", minWidth: 200 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 6. AliExpress links table
+      var aeLinks = ((blogData.designs || {}).aliexpress_links || []);
+      aeLinks.forEach(function(link, idx) { link.id = idx + 1; });
+      bacheloretteAETable = new Tabulator("#bachelorette-ae-table", {
+        data: aeLinks,
+        layout: "fitColumns",
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Item Name", field: "name", editor: "input", minWidth: 200 },
+          { title: "AliExpress URL", field: "url", editor: "input", minWidth: 300 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 7. Print shops links table
+      var psLinks = ((blogData.designs || {}).print_shops_links || []);
+      psLinks.forEach(function(link, idx) { link.id = idx + 1; });
+      bachelorettePSTable = new Tabulator("#bachelorette-ps-table", {
+        data: psLinks,
+        layout: "fitColumns",
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Shop Name", field: "name", editor: "input", minWidth: 200 },
+          { title: "Shop URL / Details", field: "url", editor: "input", minWidth: 300 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
+      // 8. Gifts Table
+      var gifts = blogData.gifts || [];
+      gifts.forEach(function(g, idx) { g.id = idx + 1; });
+      bacheloretteGiftsTable = new Tabulator("#bachelorette-gifts-table", {
+        data: gifts,
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 50,
+        columns: [
+          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+          { title: "Gift Title", field: "title", editor: "input", minWidth: 150 },
+          { title: "Description", field: "description", editor: "input", minWidth: 250 },
+          { title: "Where to Buy URL", field: "buy_url", editor: "input", minWidth: 200 },
+          { title: "Button Text", field: "buy_text", editor: "input", width: 120 },
+          {
+            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+            width: 50, hozAlign: "center", headerSort: false,
+            cellClick: function(e, cell) { cell.getRow().delete(); }
+          }
+        ]
+      });
+
     }, 50);
 
   } else {
@@ -206,43 +524,110 @@ function renderEditor() {
     html += '<p class="blog-section-title">Footer</p>';
     html += field('footer', 'Footer Text', 2);
 
-    document.getElementById('blog-editor').innerHTML = html;
+    editorEl.innerHTML = html;
   }
 }
 
-function addBacheloretteRow() {
-  if (bacheloretteTable) {
+function addBacheloretteRow(type) {
+  var table = null;
+  var defaultRow = {};
+  
+  if (type === 'venues' && bacheloretteTable) {
+    table = bacheloretteTable;
+    defaultRow = { name: "שם המקום החדש", category: "חלל ושף", description: "", location: "", price: "", link: "#", link_text: "", instagram: "https://instagram.com/", whatsapp: "" };
+  } else if (type === 'suppliers' && bacheloretteSuppliersTable) {
+    table = bacheloretteSuppliersTable;
+    defaultRow = { name: "שם הספק החדש", category: "דיג׳יי", location: "", price: "", instagram: "https://instagram.com/", whatsapp: "", description: "" };
+  } else if (type === 'games_elegant' && bacheloretteGamesElegantTable) {
+    table = bacheloretteGamesElegantTable;
+    defaultRow = { title: "משחק אלגנטי חדש", description: "", materials: "", instructions: "" };
+  } else if (type === 'games_rowdy' && bacheloretteGamesRowdyTable) {
+    table = bacheloretteGamesRowdyTable;
+    defaultRow = { title: "משחק פרוע חדש", description: "", materials: "", instructions: "" };
+  } else if (type === 'designs_sets' && bacheloretteDesignsSetsTable) {
+    table = bacheloretteDesignsSetsTable;
+    defaultRow = { name: "סט מיתוג חדש", description: "", canva_link: "https://www.canva.com/" };
+  } else if (type === 'ae_links' && bacheloretteAETable) {
+    table = bacheloretteAETable;
+    defaultRow = { name: "מוצר אליאקספרס חדש", url: "https://aliexpress.com/" };
+  } else if (type === 'ps_links' && bachelorettePSTable) {
+    table = bachelorettePSTable;
+    defaultRow = { name: "בית דפוס חדש", url: "https://google.com/" };
+  } else if (type === 'gifts' && bacheloretteGiftsTable) {
+    table = bacheloretteGiftsTable;
+    defaultRow = { title: "רעיון חדש למתנה", description: "", buy_url: "", buy_text: "לרכישה" };
+  }
+  
+  if (table) {
     var maxId = 0;
-    bacheloretteTable.getData().forEach(function(r) {
+    table.getData().forEach(function(r) {
       if (r.id > maxId) maxId = r.id;
     });
-    bacheloretteTable.addRow({
-      id: maxId + 1,
-      name: "שם המקום החדש",
-      category: "חלל ושף",
-      description: "",
-      location: "",
-      price: "",
-      link: "#",
-      link_text: "",
-      instagram: "https://instagram.com/",
-      whatsapp: ""
-    }, true);
+    defaultRow.id = maxId + 1;
+    table.addRow(defaultRow, true);
   }
 }
 
 function collectData() {
   if (currentSlug === 'bachelorette') {
-    var rawData = bacheloretteTable ? bacheloretteTable.getData() : [];
-    // Deep clone and clean up temporary id field
-    var cleanPlaces = JSON.parse(JSON.stringify(rawData));
-    cleanPlaces.forEach(function(p) {
-      delete p.id;
-    });
+    // 1. Clean places
+    var placesRaw = bacheloretteTable ? bacheloretteTable.getData() : [];
+    var cleanPlaces = JSON.parse(JSON.stringify(placesRaw));
+    cleanPlaces.forEach(function(p) { delete p.id; });
+
+    // 2. Clean suppliers
+    var suppliersRaw = bacheloretteSuppliersTable ? bacheloretteSuppliersTable.getData() : [];
+    var cleanSuppliers = JSON.parse(JSON.stringify(suppliersRaw));
+    cleanSuppliers.forEach(function(s) { delete s.id; });
+
+    // 3. Clean games
+    var elegantRaw = bacheloretteGamesElegantTable ? bacheloretteGamesElegantTable.getData() : [];
+    var cleanElegant = JSON.parse(JSON.stringify(elegantRaw));
+    cleanElegant.forEach(function(g) { delete g.id; });
+
+    var rowdyRaw = bacheloretteGamesRowdyTable ? bacheloretteGamesRowdyTable.getData() : [];
+    var cleanRowdy = JSON.parse(JSON.stringify(rowdyRaw));
+    cleanRowdy.forEach(function(g) { delete g.id; });
+
+    // 4. Clean design sets
+    var setsRaw = bacheloretteDesignsSetsTable ? bacheloretteDesignsSetsTable.getData() : [];
+    var cleanSets = JSON.parse(JSON.stringify(setsRaw));
+    cleanSets.forEach(function(ds) { delete ds.id; });
+
+    // 5. Clean AliExpress and print shops lists
+    var aeRaw = bacheloretteAETable ? bacheloretteAETable.getData() : [];
+    var cleanAE = JSON.parse(JSON.stringify(aeRaw));
+    cleanAE.forEach(function(link) { delete link.id; });
+
+    var psRaw = bachelorettePSTable ? bachelorettePSTable.getData() : [];
+    var cleanPS = JSON.parse(JSON.stringify(psRaw));
+    cleanPS.forEach(function(link) { delete link.id; });
+
+    // 6. Clean gifts
+    var giftsRaw = bacheloretteGiftsTable ? bacheloretteGiftsTable.getData() : [];
+    var cleanGifts = JSON.parse(JSON.stringify(giftsRaw));
+    cleanGifts.forEach(function(g) { delete g.id; });
+
     return {
       intro: document.querySelector('[data-key="intro"]').value,
       note: document.querySelector('[data-key="note"]').value,
-      places: cleanPlaces
+      games_intro: document.querySelector('[data-key="games_intro"]').value,
+      gifts_title: document.querySelector('[data-key="gifts_title"]').value,
+      gifts_desc: document.querySelector('[data-key="gifts_desc"]').value,
+      places: cleanPlaces,
+      suppliers: cleanSuppliers,
+      games: {
+        elegant: cleanElegant,
+        rowdy: cleanRowdy
+      },
+      designs: {
+        sets: cleanSets,
+        aliexpress_text: document.getElementById('designs-ae-text').value,
+        aliexpress_links: cleanAE,
+        print_shops_text: document.getElementById('designs-ps-text').value,
+        print_shops_links: cleanPS
+      },
+      gifts: cleanGifts
     };
   }
 
@@ -298,6 +683,6 @@ function saveBlog() {
 }
 
 document.getElementById('blog-slug').addEventListener('change', loadBlog);
-loadBlog();
+window.addEventListener('load', loadBlog);
 </script>
 {% endblock %}
