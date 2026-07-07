@@ -9,6 +9,7 @@
         left: 0;
         right: 0;
         z-index: 9000;
+        padding: 5px 0 5px;
     }
 
     /* ── Desktop header row: logo centered, login right (non-home only) ── */
@@ -16,7 +17,6 @@
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        padding: 8px 16px 5px;
     }
     .blog-nav-brand {
         display: flex;
@@ -201,8 +201,7 @@
 
 <div class="blog-category-menu" dir="ltr">
 
-    {% if active_page != 'home' %}
-    <!-- Desktop: logo left + login right (hidden on mobile) -->
+    <!-- Desktop: logo centered + login right (hidden on mobile) — all pages -->
     <div class="blog-nav-header">
         <a href="/" class="blog-nav-brand">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
@@ -217,24 +216,20 @@
             {% endif %}
         </div>
     </div>
-    {% endif %}
 
-    <!-- Pills row (always shown; on mobile also carries logo + login for non-home) -->
+    <!-- Pills row — all pages; on mobile also carries logo photo + login -->
     <div class="blog-nav-pills-row">
 
-        {% if active_page != 'home' %}
-        <!-- Mobile-only: logo photo -->
+        <!-- Mobile-only: logo photo — all pages -->
         <div class="blog-nav-brand-mobile">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Ofoodiez">
         </div>
-        {% endif %}
 
         <div class="blog-nav-left">
             <div class="category-scroll-container">
                 <a href="/" class="category-pill {% if active_page == 'home' %}active{% endif %}">
                     <i class="fas fa-home"></i>
                     <span class="pill-full">Home</span>
-                    <!-- Home = icon only on mobile, no pill-short needed -->
                 </a>
                 <a href="/blog/bachelorette" class="category-pill {% if active_page == 'bachelorette' %}active{% endif %}">
                     <i class="fas fa-glass-cheers"></i>
@@ -257,18 +252,7 @@
             </div>
         </div>
 
-        {% if active_page == 'home' %}
-        <!-- Home page: login sits right of pills on all screen sizes -->
-        <div class="blog-nav-account" dir="ltr">
-            {% if current_user %}
-            <span class="nav-account-chip"><i class="fas fa-user-circle"></i> {{ current_user.name or current_user.email }}</span>
-            <a href="{{ url_for('accounts.logout') }}" class="nav-account-btn"><i class="fas fa-sign-out-alt"></i> Log out</a>
-            {% else %}
-            <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
-            {% endif %}
-        </div>
-        {% else %}
-        <!-- Non-home mobile: login sits right of pills (desktop version is in blog-nav-header) -->
+        <!-- Mobile-only: login button — all pages -->
         <div class="blog-nav-account-mobile" dir="ltr">
             {% if current_user %}
             <a href="{{ url_for('accounts.logout') }}" class="nav-account-btn"><i class="fas fa-sign-out-alt"></i></a>
@@ -276,7 +260,6 @@
             <a href="{{ url_for('accounts.login') }}" class="nav-account-btn"><i class="fas fa-user"></i> Log in</a>
             {% endif %}
         </div>
-        {% endif %}
 
     </div>
 </div>
@@ -296,10 +279,7 @@
         function applyNavPadding() {
             var nav = document.querySelector('.blog-category-menu');
             if (!nav) return;
-            var isHome = !!document.querySelector('.hero');
-            if (!isHome) {
-                document.body.style.paddingTop = nav.offsetHeight + 'px';
-            }
+            document.body.style.paddingTop = nav.offsetHeight + 'px';
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', applyNavPadding);
