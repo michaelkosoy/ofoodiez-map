@@ -25,7 +25,9 @@ body {
     background: var(--bg);
     color: var(--butter);
     font-family: 'Outfit', sans-serif;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
 }
 
 /* ── Ambient glow ── */
