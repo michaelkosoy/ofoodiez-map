@@ -979,19 +979,33 @@ def send_hitech_bulk_email():
     text_content = f"{body_text}{plain_button_text}\n\nOfoodiez Tech Community"
 
     from whatsapp_bot.emailer import send_custom_community_email
-    
-    sent_count = 0
-    for r in recipients:
-        success = send_custom_community_email(
-            to_email=r.email,
-            subject=subject,
-            body_html=html_template,
-            body_text=text_content
-        )
-        if success:
-            sent_count += 1
+    from flask import current_app
+    import threading
 
-    return jsonify({'success': True, 'sent_count': sent_count})
+    app_instance = current_app._get_current_object()
+    recipient_emails = [r.email for r in recipients]
+
+    def bg_send():
+        with app_instance.app_context():
+            print(f"📧 Starting background bulk email dispatch to {len(recipient_emails)} recipients...")
+            sent_count = 0
+            for email in recipient_emails:
+                try:
+                    success = send_custom_community_email(
+                        to_email=email,
+                        subject=subject,
+                        body_html=html_template,
+                        body_text=text_content
+                    )
+                    if success:
+                        sent_count += 1
+                except Exception as e:
+                    print(f"❌ Error sending email to {email}: {e}")
+            print(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
+
+    threading.Thread(target=bg_send, daemon=True).start()
+
+    return jsonify({'success': True, 'message': f'Bulk sending started in the background for {len(recipient_emails)} recipients.'})
 
 
 
