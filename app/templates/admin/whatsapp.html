@@ -100,7 +100,10 @@
 <div class="tab-section" id="section-companies" style="display:none;">
     <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
         <span>Companies <small style="font-size:.8rem;color:#999;font-weight:400;">— click a row to view advocates</small></span>
-        <button class="btn btn-success" id="add-company-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add company</button>
+        <span style="display:flex;gap:8px;">
+            <button class="btn btn-danger" id="bulk-delete-companies-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;display:none;"><i class="fas fa-trash"></i> Delete selected (<span id="bulk-delete-count">0</span>)</button>
+            <button class="btn btn-success" id="add-company-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add company</button>
+        </span>
     </h3>
     <div id="t-companies"></div>
 </div>
@@ -194,6 +197,13 @@ function editNameBtn() { return '<button class="act">Edit name</button>'; }
 // ---- table definitions ----
 var COLS = {
     companies: [
+        {
+            formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center",
+            headerSort: false, width: 40, cellClick: function (e, cell) {
+                e.stopPropagation();
+                cell.getRow().toggleSelect();
+            }
+        },
         { title: "Company", field: "name", headerFilter: "input", minWidth: 180 },
         { title: "Advocates", field: "total_advocates", width: 100 },
         { title: "via Email", field: "email_advocates", width: 100 },
@@ -432,13 +442,18 @@ function showTab(name) {
         });
         if (name === 'companies') {
             TABLES[name].on("rowClick", function(e, row) {
-                if (e.target.closest('button')) return;
+                if (e.target.closest('button') || e.target.closest('input')) return;
                 openAdvocatesModal(row.getData());
             });
             TABLES[name].on("dataLoaded", function() {
                 TABLES['companies'].getRows().forEach(function(r) {
                     r.getElement().style.cursor = 'pointer';
                 });
+            });
+            TABLES[name].on("rowSelectionChanged", function(data, rows) {
+                var btn = document.getElementById('bulk-delete-companies-btn');
+                document.getElementById('bulk-delete-count').textContent = data.length;
+                btn.style.display = data.length ? 'inline-flex' : 'none';
             });
         }
     } else {
@@ -591,6 +606,31 @@ document.getElementById('add-company-btn').addEventListener('click', function() 
             if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
             if (TABLES['companies']) TABLES['companies'].replaceData();
             Swal.fire({ icon: 'success', title: 'Company added', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+// ---- Bulk delete companies (Companies tab) ----
+document.getElementById('bulk-delete-companies-btn').addEventListener('click', function() {
+    var table = TABLES['companies'];
+    if (!table) return;
+    var selected = table.getSelectedData();
+    if (!selected.length) return;
+    var names = selected.map(function(d) { return d.name; }).join(', ');
+    Swal.fire({
+        title: 'Delete ' + selected.length + ' compan' + (selected.length === 1 ? 'y' : 'ies') + '?',
+        html: 'Also removes their advocates &amp; applications.<br><b>' + names + '</b>',
+        icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete'
+    }).then(function(res) {
+        if (!res.isConfirmed) return;
+        fetch('/admin/api/whatsapp/companies/bulk-delete', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selected.map(function(d) { return d.id; }) })
+        }).then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
+            table.replaceData();
+            Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
         });
     });
 });

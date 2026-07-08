@@ -46,6 +46,12 @@ def _normalize(name):
     return " ".join((name or "").strip().lower().split())
 
 
+def get_company(name):
+    """Lookup only — never creates. Used while the advocate is still mid-flow so
+    an abandoned sign-up never leaves an orphan company with zero advocates."""
+    return WaCompany.query.filter_by(normalized_name=_normalize(name)).first()
+
+
 def get_or_create_company(name):
     norm = _normalize(name)
     company = WaCompany.query.filter_by(normalized_name=norm).first()
@@ -59,6 +65,18 @@ def get_or_create_company(name):
         db.session.rollback()
         company = WaCompany.query.filter_by(normalized_name=norm).first()
     return company
+
+
+def _ensure_company(data):
+    """Create the company row now, at the point an advocate is actually about to
+    be attached to it — not at emp_company. This is what prevents an abandoned
+    sign-up (name typed, then dropped off) from leaving a company with zero
+    advocates in the admin list."""
+    if not data.get("company_id"):
+        company = get_or_create_company(data.get("company_name") or "")
+        data["company_id"] = company.id
+        data["company_name"] = company.name
+    return data["company_id"]
 
 
 def start(user, conv):
@@ -83,11 +101,11 @@ def handle(user, conv, payload, text):
     data = dict(conv.data or {})
 
     if step == "emp_company":
-        company = get_or_create_company(text)
-        data["company_id"] = company.id
-        data["company_name"] = company.name
+        company = get_company(text)
+        data["company_id"] = company.id if company else None
+        data["company_name"] = company.name if company else text.strip()
         conversation.set_state(conv, "employee", "emp_details", data)
-        messaging.send_prompt(user.phone, copy.EMP_DETAILS.format(company=company.name))
+        messaging.send_prompt(user.phone, copy.EMP_DETAILS.format(company=data["company_name"]))
         return "emp_company"
 
     if step == "emp_details":
@@ -283,10 +301,11 @@ def _finalize_email_advocate(user, conv, data):
     company_name = data.get("company_name", "your company")
     email = (data.get("email") or "").strip().lower() or None
     try:
+        company_id = _ensure_company(data)
         advocate = WaAdvocate.query.filter_by(
-            user_id=user.id, company_id=data.get("company_id"), email=email).first()
+            user_id=user.id, company_id=company_id, email=email).first()
         if not advocate:
-            advocate = WaAdvocate(user_id=user.id, company_id=data.get("company_id"),
+            advocate = WaAdvocate(user_id=user.id, company_id=company_id,
                                   email=email, status="active")
             db.session.add(advocate)
         advocate.role_title = data.get("role_title") or advocate.role_title
@@ -315,6 +334,7 @@ def _save_link(user, conv, data, text):
         messaging.send_prompt(user.phone, copy.EMP_LINK_INVALID)
         return "emp_link_invalid"
     try:
+        _ensure_company(data)
         _create_link_advocate(user, data, link)
     except SQLAlchemyError:
         logger.exception("wa: failed to save referral link for user %s", user.id)
@@ -360,6 +380,7 @@ def _finalize(user, conv, data):
     company_name = data.get("company_name", "your company")
     emails = data.get("emails") or []
     try:
+        _ensure_company(data)
         saved = _create_advocates(user, data, emails)
     except SQLAlchemyError:
         logger.exception("wa: failed to save advocate(s) for user %s", user.id)

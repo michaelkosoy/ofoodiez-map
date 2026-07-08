@@ -622,6 +622,20 @@ def delete_whatsapp_company(id):
     return '', 204
 
 
+@admin_bp.route('/api/whatsapp/companies/bulk-delete', methods=['POST'])
+@login_required
+def bulk_delete_whatsapp_companies():
+    ids = (request.json or {}).get("ids") or []
+    ids = [int(i) for i in ids if str(i).lstrip("-").isdigit()]
+    if not ids:
+        return jsonify({"error": "No company ids provided"}), 400
+    companies = WaCompany.query.filter(WaCompany.id.in_(ids)).all()
+    for c in companies:
+        _delete_company_cascade(c)
+    db.session.commit()
+    return jsonify({"deleted": len(companies)})
+
+
 def _delete_company_cascade(company):
     """Delete a company plus everything that references it — advocates and
     applications (with their recipients) — and detach it from backfill requests,
