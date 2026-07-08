@@ -122,7 +122,16 @@
     <div id="t-candidates"></div>
 </div>
 <div class="tab-section" id="section-applications" style="display:none;"><h3>Applications &amp; referrals</h3><div id="t-applications"></div></div>
-<div class="tab-section" id="section-requests" style="display:none;"><h3>Backfill requests (companies we don't serve yet)</h3><div id="t-requests"></div></div>
+<div class="tab-section" id="section-requests" style="display:none;">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <span>Backfill requests (companies we don't serve yet)</span>
+        <span style="display:flex;gap:8px;">
+            <button class="btn btn-success" id="bulk-handle-requests-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;display:none;"><i class="fas fa-check"></i> Mark handled (<span id="bulk-handle-count">0</span>)</button>
+            <button class="btn btn-danger" id="bulk-delete-requests-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;display:none;"><i class="fas fa-trash"></i> Delete selected (<span id="bulk-delete-requests-count">0</span>)</button>
+        </span>
+    </h3>
+    <div id="t-requests"></div>
+</div>
 <!-- Advocates modal -->
 <div id="adv-modal-overlay">
     <div id="adv-modal">
@@ -384,6 +393,13 @@ var COLS = {
         }
     ],
     requests: [
+        {
+            formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center",
+            headerSort: false, width: 40, cellClick: function (e, cell) {
+                e.stopPropagation();
+                cell.getRow().toggleSelect();
+            }
+        },
         { title: "When", field: "created", width: 150 },
         { title: "Company searched", field: "company", headerFilter: "input", minWidth: 180 },
         { title: "Reason", field: "reason", headerFilter: "select", headerFilterParams: { values: true }, width: 150 },
@@ -454,6 +470,16 @@ function showTab(name) {
                 var btn = document.getElementById('bulk-delete-companies-btn');
                 document.getElementById('bulk-delete-count').textContent = data.length;
                 btn.style.display = data.length ? 'inline-flex' : 'none';
+            });
+        }
+        if (name === 'requests') {
+            TABLES[name].on("rowSelectionChanged", function(data, rows) {
+                var handleBtn = document.getElementById('bulk-handle-requests-btn');
+                var deleteBtn = document.getElementById('bulk-delete-requests-btn');
+                document.getElementById('bulk-handle-count').textContent = data.length;
+                document.getElementById('bulk-delete-requests-count').textContent = data.length;
+                handleBtn.style.display = data.length ? 'inline-flex' : 'none';
+                deleteBtn.style.display = data.length ? 'inline-flex' : 'none';
             });
         }
     } else {
@@ -631,6 +657,52 @@ document.getElementById('bulk-delete-companies-btn').addEventListener('click', f
             if (!res.ok) { Swal.fire('Error', res.body.error || 'Failed', 'error'); return; }
             table.replaceData();
             Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+// ---- Bulk actions (Backfill requests tab) ----
+document.getElementById('bulk-handle-requests-btn').addEventListener('click', function() {
+    var table = TABLES['requests'];
+    if (!table) return;
+    var selected = table.getSelectedData();
+    if (!selected.length) return;
+    Swal.fire({
+        title: 'Mark ' + selected.length + ' request' + (selected.length === 1 ? '' : 's') + ' as handled?',
+        icon: 'question', showCancelButton: true, confirmButtonText: 'Mark handled'
+    }).then(function(res) {
+        if (!res.isConfirmed) return;
+        Promise.all(selected.map(function(d) {
+            return fetch('/admin/api/whatsapp/requests/' + d.id, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'handled' })
+            });
+        })).then(function(results) {
+            table.replaceData();
+            var failed = results.filter(function(r) { return !r.ok; }).length;
+            if (failed) Swal.fire('Error', failed + ' request(s) failed to update', 'error');
+            else Swal.fire({ icon: 'success', title: 'Updated', timer: 1000, showConfirmButton: false });
+        });
+    });
+});
+
+document.getElementById('bulk-delete-requests-btn').addEventListener('click', function() {
+    var table = TABLES['requests'];
+    if (!table) return;
+    var selected = table.getSelectedData();
+    if (!selected.length) return;
+    Swal.fire({
+        title: 'Delete ' + selected.length + ' request' + (selected.length === 1 ? '' : 's') + '?',
+        icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete'
+    }).then(function(res) {
+        if (!res.isConfirmed) return;
+        Promise.all(selected.map(function(d) {
+            return fetch('/admin/api/whatsapp/requests/' + d.id, { method: 'DELETE' });
+        })).then(function(results) {
+            table.replaceData();
+            var failed = results.filter(function(r) { return !r.ok; }).length;
+            if (failed) Swal.fire('Error', failed + ' request(s) failed to delete', 'error');
+            else Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
         });
     });
 });
