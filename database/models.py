@@ -22,6 +22,7 @@ def _run_migrations():
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS company TEXT",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS gender TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS name TEXT",
     ]
     for stmt in migrations:
         try:
@@ -162,6 +163,7 @@ class HitechEmail(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(256), nullable=False, unique=True)
+    name = db.Column(db.Text)
     linkedin_url = db.Column(db.Text)
     job_title = db.Column(db.Text)
     company = db.Column(db.Text)

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Join the HiTech Community — Ofoodiez</title>
+    <meta name="description" content="Join the invite-only Ofoodiez HiTech community for tech professionals who love great food. Apply for the waitlist.">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .ht-community-page { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+        .ht-community-hero {
+            padding: 80px 24px 40px;
+            text-align: center;
+        }
+        .ht-eyebrow {
+            font-size: 0.68rem; font-weight: 600; letter-spacing: 0.32em;
+            text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 18px;
+        }
+        .ht-page-title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: clamp(2rem, 6vw, 3.8rem);
+            font-weight: 700; line-height: 1.1; color: var(--butter);
+            margin-bottom: 10px;
+        }
+        .ht-page-title em { font-style: italic; color: var(--burgundy-mid); }
+        .ht-page-rule {
+            width: 48px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--burgundy), transparent);
+            margin: 22px auto;
+        }
+        .ht-page-sub {
+            font-size: clamp(0.88rem, 2vw, 1rem);
+            font-weight: 300; color: var(--butter-dim);
+            max-width: 500px; margin: 0 auto; line-height: 1.7;
+        }
+
+        /* Perks */
+        .ht-perks {
+            display: flex; gap: 10px;
+            justify-content: center; flex-wrap: wrap;
+            padding: 0 24px 40px;
+            max-width: 700px; margin: 0 auto;
+        }
+        .ht-perk {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(114,8,21,0.1);
+            border: 1px solid rgba(114,8,21,0.2);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--butter-dim);
+        }
+        .ht-perk i { color: var(--burgundy-mid); font-size: 11px; }
+
+        /* Form */
+        .ht-form-wrap {
+            padding: 0 20px 40px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .ht-form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ht-form-card::before {
+            content: '';
+            position: absolute; inset: 0; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(114, 8, 21, 0.07) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        .ht-form-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--burgundy-mid); margin-bottom: 24px; text-align: center;
+        }
+        .ht-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .ht-input-wrap { position: relative; margin-bottom: 12px; }
+        .ht-input-wrap.full { grid-column: 1 / -1; }
+
+        .ht-input {
+            width: 100%;
+            background: rgba(249, 246, 235, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem; font-weight: 400;
+            color: var(--butter); outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            box-sizing: border-box;
+        }
+        .ht-input::placeholder { color: rgba(249, 246, 235, 0.28); }
+        .ht-input:focus {
+            border-color: var(--burgundy-mid);
+            box-shadow: 0 0 0 3px rgba(114, 8, 21, 0.18);
+        }
+        .ht-input.invalid { border-color: #e07070; box-shadow: 0 0 0 3px rgba(224, 112, 112, 0.15); }
+
+        .ht-warning {
+            font-size: 0.72rem; color: var(--butter-dim); text-align: center;
+            line-height: 1.5; margin: 4px 0 16px;
+            padding: 8px 12px;
+            border: 1px solid rgba(114, 8, 21, 0.22);
+            border-radius: 8px;
+            background: rgba(114, 8, 21, 0.07);
+        }
+        .ht-submit {
+            width: 100%;
+            background: var(--burgundy); color: var(--butter);
+            border: none; border-radius: 10px;
+            padding: 15px 24px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .ht-submit:hover { background: var(--burgundy-mid); box-shadow: 0 4px 24px rgba(114,8,21,0.45); }
+        .ht-submit:active { transform: scale(0.98); }
+        .ht-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .ht-feedback {
+            margin-top: 14px; font-size: 0.82rem;
+            min-height: 20px; text-align: center; transition: opacity 0.3s;
+        }
+        .ht-feedback.success { color: #d4a0a8; }
+        .ht-feedback.error   { color: #e07070; }
+
+        @media (max-width: 480px) {
+            .ht-form-card { padding: 28px 20px; }
+            .ht-input-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    {% set active_hitech_page = 'community' %}
+    {% include 'components/hitech_menu.html' %}
+
+    <div class="ht-community-page">
+
+        <section class="ht-community-hero">
+            <p class="ht-eyebrow">{{ c.eyebrow | default('Invite Only') | safe }}</p>
+            <h1 class="ht-page-title">{{ c.headline | default('For people<br>with good <em>taste.</em>') | safe }}</h1>
+            <div class="ht-page-rule"></div>
+            <p class="ht-page-sub">
+                {{ c.hero_sub | default('An exclusive community for tech people who take food as seriously as their work. We host unique culinary experiences you won\'t find on any menu, built around great food and the right people.') | safe }}
+            </p>
+        </section>
+
+        <div class="ht-form-wrap">
+            <div class="ht-form-card">
+                <p class="ht-form-title">{{ c.form_title | default('Apply for the waitlist') | safe }}</p>
+
+                <div class="ht-input-row">
+                    <div class="ht-input-wrap">
+                        <input id="ht-name" class="ht-input" type="text" placeholder="Full name" autocomplete="name" spellcheck="false">
+                    </div>
+                    <div class="ht-input-wrap">
+                        <input id="ht-email" class="ht-input" type="email" placeholder="Email address" autocomplete="email" spellcheck="false">
+                    </div>
+                </div>
+                <div class="ht-input-row">
+                    <div class="ht-input-wrap">
+                        <input id="ht-job-title" class="ht-input" type="text" placeholder="Job title" autocomplete="organization-title" spellcheck="false">
+                    </div>
+                    <div class="ht-input-wrap">
+                        <input id="ht-company" class="ht-input" type="text" placeholder="Company" autocomplete="organization" spellcheck="false">
+                    </div>
+                </div>
+                <div class="ht-input-wrap">
+                    <input id="ht-linkedin" class="ht-input" type="url" placeholder="LinkedIn profile URL" autocomplete="off" spellcheck="false">
+                </div>
+
+                <p class="ht-warning">{{ c.warning_text | default('⚠️ Only verified LinkedIn profiles will be approved. An incorrect or missing link will result in removal from the list.') | safe }}</p>
+
+                <button class="ht-submit" id="ht-submit-btn" onclick="submitCommunity()">
+                    {{ c.submit_btn | default('Join the waitlist') | safe }}
+                </button>
+                <p class="ht-feedback" id="ht-feedback"></p>
+            </div>
+        </div>
+
+        <div class="bottom-nav-spacer"></div>
+    </div>
+
+    <script>
+        function isValidEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+        function isValidLinkedIn(url) {
+            if (!url) return false;
+            try {
+                const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+                return u.hostname.includes('linkedin.com') && u.pathname.length > 1;
+            } catch { return false; }
+        }
+
+        async function submitCommunity() {
+            const nameInput    = document.getElementById('ht-name');
+            const emailInput   = document.getElementById('ht-email');
+            const titleInput   = document.getElementById('ht-job-title');
+            const companyInput = document.getElementById('ht-company');
+            const linkedinInput= document.getElementById('ht-linkedin');
+            const submitBtn    = document.getElementById('ht-submit-btn');
+            const feedback     = document.getElementById('ht-feedback');
+
+            const name        = nameInput.value.trim();
+            const email       = emailInput.value.trim();
+            const job_title   = titleInput.value.trim();
+            const company     = companyInput.value.trim();
+            const linkedin_url= linkedinInput.value.trim();
+
+            feedback.className = 'ht-feedback';
+            feedback.textContent = '';
+            [nameInput, emailInput, titleInput, companyInput, linkedinInput].forEach(el => el.classList.remove('invalid'));
+
+            if (!name) {
+                feedback.className = 'ht-feedback error';
+                feedback.textContent = 'Please enter your full name.';
+                nameInput.classList.add('invalid'); nameInput.focus(); return;
+            }
+            if (!isValidEmail(email)) {
+                feedback.className = 'ht-feedback error';
+                feedback.textContent = 'Please enter a valid email address.';
+                emailInput.classList.add('invalid'); emailInput.focus(); return;
+            }
+            if (!isValidLinkedIn(linkedin_url)) {
+                feedback.className = 'ht-feedback error';
+                feedback.textContent = 'Please enter a valid LinkedIn profile URL (e.g. linkedin.com/in/yourname).';
+                linkedinInput.classList.add('invalid'); linkedinInput.focus(); return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            try {
+                const res  = await fetch('/api/hitech/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, job_title, company, linkedin_url })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.message === 'already_registered') {
+                        feedback.className = 'ht-feedback success';
+                        feedback.textContent = "You're already on the list — we'll be in touch.";
+                    } else {
+                        feedback.className = 'ht-feedback success';
+                        feedback.textContent = "Received. We'll be in touch 🍽️";
+                        [nameInput, emailInput, titleInput, companyInput, linkedinInput].forEach(el => el.value = '');
+                    }
+                    submitBtn.textContent = 'Done ✓';
+                } else {
+                    throw new Error(data.message || 'Something went wrong.');
+                }
+            } catch (err) {
+                feedback.className = 'ht-feedback error';
+                feedback.textContent = err.message || 'Something went wrong. Please try again.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Join the waitlist';
+            }
+        }
+
+        document.getElementById('ht-email').addEventListener('keydown', function(e){ if(e.key==='Enter') submitCommunity(); });
+        ['ht-name','ht-email','ht-job-title','ht-company','ht-linkedin'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', function(){ this.classList.remove('invalid'); });
+        });
+    </script>
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+</html>

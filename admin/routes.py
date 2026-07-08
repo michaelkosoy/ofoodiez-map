@@ -28,6 +28,11 @@ def whatsapp():
 def hitech_emails():
     return render_template('admin/hitech.html')
 
+@admin_bp.route('/hitech/content')
+@login_required
+def hitech_content():
+    return render_template('admin/hitech_content.html')
+
 @admin_bp.route('/members')
 @login_required
 def members():

@@ -1,0 +1,13 @@
+[
+  { "name": "Appcharge", "logo_url": "", "careers_url": "https://www.appcharge.com/careers", "featured": true },
+  { "name": "Google", "logo_url": "", "careers_url": "https://careers.google.com", "featured": true },
+  { "name": "Meta", "logo_url": "", "careers_url": "https://www.metacareers.com", "featured": true },
+  { "name": "Microsoft", "logo_url": "", "careers_url": "https://careers.microsoft.com", "featured": true },
+  { "name": "Amazon", "logo_url": "", "careers_url": "https://www.amazon.jobs", "featured": true },
+  { "name": "Apple", "logo_url": "", "careers_url": "https://www.apple.com/careers", "featured": true },
+  { "name": "Wix", "logo_url": "", "careers_url": "https://www.wix.com/jobs", "featured": false },
+  { "name": "Monday.com", "logo_url": "", "careers_url": "https://monday.com/jobs", "featured": false },
+  { "name": "Fiverr", "logo_url": "", "careers_url": "https://www.fiverr.com/careers", "featured": false },
+  { "name": "Checkout.com", "logo_url": "", "careers_url": "https://www.checkout.com/careers", "featured": false },
+  { "name": "Taboola", "logo_url": "", "careers_url": "https://www.taboola.com/careers", "featured": false }
+]

@@ -4,8 +4,8 @@
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ofoodiez - tech foodiez community</title>
-    <meta name="description" content="An exclusive community for food-loving entrepreneurs, business leaders, and builders.">
+    <title>Ofoodiez HiTech — For People With Good Taste</title>
+    <meta name="description" content="The HiTech community for food-loving tech professionals. Referral bot, CV guide, exclusive events and companies that care about people.">
 
     <!-- PWA & Icons -->
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
@@ -15,176 +15,495 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* ── Hub layout ── */
+        .ht-hub { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+        /* ── Hero ── */
+        .ht-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 48px;
+            position: relative;
+        }
+        .ht-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--burgundy-mid);
+            margin-bottom: 20px;
+        }
+        .ht-headline {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: clamp(2.4rem, 7vw, 4.6rem);
+            font-weight: 700;
+            line-height: 1.08;
+            color: var(--butter);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+        .ht-headline em {
+            font-style: italic;
+            color: var(--burgundy-mid);
+            text-shadow: 0 0 40px rgba(114, 8, 21, 0.6);
+        }
+        .ht-hero-rule {
+            width: 48px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--burgundy), transparent);
+            margin: 24px auto;
+        }
+        .ht-hero-sub {
+            font-size: clamp(0.9rem, 2vw, 1.05rem);
+            font-weight: 300;
+            color: var(--butter-dim);
+            max-width: 460px;
+            line-height: 1.7;
+        }
+
+        /* ── Feature cards ── */
+        .ht-cards-section {
+            padding: 0 20px 48px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .ht-section-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--burgundy-mid);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .ht-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .ht-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px 24px;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .ht-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(114, 8, 21, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .ht-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(114, 8, 21, 0.25);
+            border-color: rgba(114, 8, 21, 0.4);
+        }
+        .ht-card:hover::before { opacity: 1.5; }
+        .ht-card-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: rgba(114, 8, 21, 0.18);
+            border: 1px solid rgba(114, 8, 21, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            color: var(--burgundy-mid);
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .ht-card:hover .ht-card-icon { background: rgba(114, 8, 21, 0.3); }
+        .ht-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--butter);
+            line-height: 1.2;
+        }
+        .ht-card-desc {
+            font-size: 0.82rem;
+            font-weight: 300;
+            color: var(--butter-dim);
+            line-height: 1.6;
+            flex: 1;
+        }
+        .ht-card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--burgundy-mid);
+            margin-top: 4px;
+            transition: color 0.2s, gap 0.2s;
+        }
+        .ht-card-cta i { font-size: 10px; transition: transform 0.2s; }
+        .ht-card:hover .ht-card-cta { color: #c0374a; gap: 8px; }
+        .ht-card:hover .ht-card-cta i { transform: translateX(3px); }
+
+        /* ── Companies Carousel Section ── */
+        .ht-companies-section {
+            padding: 0 0 40px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .ht-companies-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px 16px;
+        }
+        .ht-companies-title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--butter);
+        }
+        .ht-carousel-nav {
+            display: flex;
+            gap: 8px;
+        }
+        .ht-carousel-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(249,246,235,0.07);
+            border: 1px solid rgba(114,8,21,0.25);
+            color: var(--butter-dim);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .ht-carousel-btn:hover { background: rgba(114,8,21,0.3); color: var(--butter); }
+
+        .ht-carousel-track-wrap {
+            overflow: hidden;
+            position: relative;
+        }
+        .ht-carousel-track {
+            display: flex;
+            gap: 14px;
+            padding: 0 20px 12px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        .ht-company-card {
+            flex: 0 0 280px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+        .ht-company-video-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: #000;
+            overflow: hidden;
+        }
+        .ht-company-video-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .ht-company-video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(114,8,21,0.15) 0%, rgba(8,6,10,1) 100%);
+            color: var(--butter-dim);
+            font-size: 0.8rem;
+            gap: 12px;
+        }
+        .ht-company-video-placeholder i { font-size: 36px; color: var(--burgundy); opacity: 0.5; }
+        /* Video overlay buttons */
+        .ht-video-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(0deg, rgba(8,6,10,0.92) 0%, transparent 100%);
+            padding: 40px 14px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ht-company-name-overlay {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--butter);
+            margin-bottom: 4px;
+        }
+        .ht-video-action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .ht-video-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-align: center;
+            text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .ht-video-btn.careers {
+            background: var(--burgundy);
+            color: var(--butter);
+        }
+        .ht-video-btn.careers:hover { background: var(--burgundy-mid); }
+        .ht-video-btn.email {
+            background: rgba(249,246,235,0.1);
+            border: 1px solid rgba(249,246,235,0.15);
+            color: var(--butter);
+        }
+        .ht-video-btn.email:hover { background: rgba(249,246,235,0.18); }
+
+        /* Empty state */
+        .ht-companies-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--butter-dim);
+            font-size: 0.85rem;
+        }
+        .ht-companies-empty i { font-size: 32px; margin-bottom: 12px; color: var(--burgundy); opacity: 0.4; display: block; }
+
+        /* ── Divider ── */
+        .ht-section-divider {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+        .ht-section-divider hr {
+            border: none;
+            border-top: 1px solid rgba(114,8,21,0.18);
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 540px) {
+            .ht-hero { padding: 70px 18px 36px; }
+            .ht-cards-grid { grid-template-columns: 1fr; gap: 10px; }
+            .ht-card { padding: 22px 18px 20px; }
+            .ht-company-card { flex: 0 0 240px; }
+        }
+    </style>
 </head>
 
 <body>
-    {% set active_page = 'hitech' %}
-    <div class="hitech-page">
+    {% set active_hitech_page = 'home' %}
+    {% include 'components/hitech_menu.html' %}
 
-        <!-- Top bar -->
-        <header class="hitech-topbar">
-            <a href="/" onclick="if(document.referrer && document.referrer.includes(window.location.host)){history.back();return false;}" class="hitech-topbar-back">← Back</a>
-            <span class="hitech-wordmark">Ofoodiez</span>
-        </header>
+    <div class="ht-hub">
 
         <!-- Hero -->
-        <main class="hitech-hero">
-
-            <p class="hitech-eyebrow">Invite Only</p>
-
-            <h1 class="hitech-headline">
-                For people<br>
-                with good <em>taste.</em>
+        <section class="ht-hero">
+            <p class="ht-eyebrow">{{ c.eyebrow | default('Ofoodiez × HiTech') | safe }}</p>
+            <h1 class="ht-headline">
+                {{ c.headline | default('Tech. Careers.<br><em>Community.</em>') | safe }}
             </h1>
+            <div class="ht-hero-rule"></div>
+            <p class="ht-hero-sub">
+                {{ c.hero_sub | default('The home base for tech people who take food seriously. Exclusive events, real referrals inside top companies, a CV guide that actually works — and the right people around the table.') | safe }}
+            </p>
+        </section>
 
-            <div class="hitech-rule"></div>
+        <!-- Feature Cards -->
+        <section class="ht-cards-section">
+            <p class="ht-section-label">{{ c.cards_label | default('Explore') | safe }}</p>
+            <div class="ht-cards-grid">
+                {% for card in c.cards | default([]) %}
+                <a href="{{ card.url }}" class="ht-card" {% if card.url.startswith('http') %}target="_blank" rel="noopener"{% endif %}>
+                    <div class="ht-card-icon"><i class="{{ card.icon }}"></i></div>
+                    <div class="ht-card-title">{{ card.title }}</div>
+                    <div class="ht-card-desc">{{ card.desc }}</div>
+                    <span class="ht-card-cta">{{ card.cta }} <i class="fas fa-arrow-right"></i></span>
+                </a>
+                {% else %}
+                <!-- Fallback to static cards if c.cards is empty -->
+                <a href="/hitech/community" class="ht-card">
+                    <div class="ht-card-icon"><i class="fas fa-users"></i></div>
+                    <div class="ht-card-title">The Community</div>
+                    <div class="ht-card-desc">Join an invite-only network of food-loving tech professionals. Exclusive events, dinners, and the right people around the table.</div>
+                    <span class="ht-card-cta">Join the waitlist <i class="fas fa-arrow-right"></i></span>
+                </a>
 
-            <p class="hitech-subtext typing" id="hitech-subtext"></p>
+                <a href="/hitech/referrals-bot" class="ht-card">
+                    <div class="ht-card-icon"><i class="fas fa-robot"></i></div>
+                    <div class="ht-card-title">Referrals Bot</div>
+                    <div class="ht-card-desc">My WhatsApp bot connects you directly with advocates inside top tech companies. One message, real introductions.</div>
+                    <span class="ht-card-cta">Meet the bot <i class="fas fa-arrow-right"></i></span>
+                </a>
 
-            <!-- Form card -->
-            <div class="hitech-form-card">
-                <div class="hitech-input-wrap">
-                    <input
-                        id="hitech-email"
-                        class="hitech-input"
-                        type="email"
-                        placeholder="Email address"
-                        autocomplete="email"
-                        spellcheck="false"
-                    >
+                <a href="/hitech/cv-guide" class="ht-card">
+                    <div class="ht-card-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="ht-card-title">CV Guide</div>
+                    <div class="ht-card-desc">The Ofoodiez guide to writing a CV that actually opens doors — with an interactive walkthrough of every section that matters.</div>
+                    <span class="ht-card-cta">Read the guide <i class="fas fa-arrow-right"></i></span>
+                </a>
+
+                <a href="https://api.whatsapp.com/send?phone=972559218943" target="_blank" rel="noopener" class="ht-card">
+                    <div class="ht-card-icon"><i class="fab fa-whatsapp"></i></div>
+                    <div class="ht-card-title">Chat with Me</div>
+                    <div class="ht-card-desc">Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.</div>
+                    <span class="ht-card-cta">Open WhatsApp <i class="fas fa-arrow-right"></i></span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Companies Carousel -->
+        {% if companies %}
+        <div class="ht-section-divider"><hr></div>
+
+        <section class="ht-companies-section">
+            <div class="ht-companies-header">
+                <h2 class="ht-companies-title">{{ c.companies_title | default('Companies I work with') | safe }}</h2>
+                <div class="ht-carousel-nav">
+                    <button class="ht-carousel-btn" id="ht-carousel-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                    <button class="ht-carousel-btn" id="ht-carousel-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <div class="hitech-input-wrap">
-                    <input
-                        id="hitech-linkedin"
-                        class="hitech-input"
-                        type="url"
-                        placeholder="LinkedIn profile URL"
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
-                </div>
-                <p class="hitech-warning">⚠️ Only verified LinkedIn profiles will be approved. An incorrect or missing LinkedIn link will result in removal from the list.</p>
-                <button class="hitech-submit" id="hitech-submit-btn" onclick="submitHitech()">
-                    Join the waiting list
-                </button>
-                <p class="hitech-feedback" id="hitech-feedback"></p>
             </div>
 
+            <div class="ht-carousel-track-wrap" id="ht-carousel-wrap">
+                <div class="ht-carousel-track" id="ht-carousel-track">
+                    {% for co in companies %}
+                    <div class="ht-company-card">
+                        <div class="ht-company-video-wrap">
+                            {% if co.instagram_reel_url %}
+                            <iframe
+                                src="{{ co.instagram_reel_url.split('?')[0] }}embed/"
+                                allowtransparency="true"
+                                allow="encrypted-media"
+                                frameborder="0"
+                                scrolling="no"
+                                style="width:100%; height:100%; border:none; display:block;"
+                                title="{{ co.name }} video"
+                            ></iframe>
+                            {% elif co.youtube_video_id %}
+                            <iframe
+                                src="https://www.youtube.com/embed/{{ co.youtube_video_id }}?rel=0&modestbranding=1&controls=1"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                loading="lazy"
+                                title="{{ co.name }} video"
+                            ></iframe>
+                            {% else %}
+                            <div class="ht-company-video-placeholder">
+                                <i class="fab fa-youtube"></i>
+                                <span>Video coming soon</span>
+                            </div>
+                            {% endif %}
+                            <div class="ht-video-overlay">
+                                <div class="ht-company-name-overlay">{{ co.name }}</div>
+                                <div class="ht-video-action-btns">
+                                    {% if co.careers_url %}
+                                    <a href="{{ co.careers_url }}" target="_blank" rel="noopener" class="ht-video-btn careers">
+                                        <i class="fas fa-briefcase"></i> Careers
+                                    </a>
+                                    {% endif %}
+                                    <a href="mailto:referrals@ofoodiez.com?subject={{ co.email_subject | urlencode }}&body={{ co.email_body | urlencode }}"
+                                       class="ht-video-btn email">
+                                        <i class="fas fa-envelope"></i> Refer me
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% else %}
+        <div class="ht-section-divider"><hr></div>
+        <section class="ht-companies-section">
+            <div class="ht-companies-header">
+                <h2 class="ht-companies-title">{{ c.companies_title | default('Companies I work with') | safe }}</h2>
+            </div>
+            <div class="ht-companies-empty">
+                <i class="fas fa-building"></i>
+                <p>{{ c.companies_empty | default('More partner companies coming soon.') | safe }}</p>
+            </div>
+        </section>
+        {% endif %}
 
-        </main>
         <div class="bottom-nav-spacer"></div>
     </div>
 
     <script>
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function isValidLinkedIn(url) {
-            if (!url) return false;
-            try {
-                const u = new URL(url.startsWith('http') ? url : 'https://' + url);
-                return u.hostname.includes('linkedin.com') && u.pathname.length > 1;
-            } catch { return false; }
-        }
-
-        async function submitHitech() {
-            const emailInput    = document.getElementById('hitech-email');
-            const linkedinInput = document.getElementById('hitech-linkedin');
-            const submitBtn     = document.getElementById('hitech-submit-btn');
-            const feedback      = document.getElementById('hitech-feedback');
-            const email         = emailInput.value.trim();
-            const linkedin_url  = linkedinInput.value.trim();
-
-            feedback.className = 'hitech-feedback';
-            feedback.textContent = '';
-
-            emailInput.classList.remove('invalid');
-            linkedinInput.classList.remove('invalid');
-
-            if (!isValidEmail(email)) {
-                feedback.className = 'hitech-feedback error';
-                feedback.textContent = 'Please enter a valid email address.';
-                emailInput.classList.add('invalid');
-                emailInput.focus();
-                return;
-            }
-
-            if (!isValidLinkedIn(linkedin_url)) {
-                feedback.className = 'hitech-feedback error';
-                feedback.textContent = 'Please enter a valid LinkedIn profile URL (e.g. linkedin.com/in/yourname).';
-                linkedinInput.classList.add('invalid');
-                linkedinInput.focus();
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
-
-            try {
-                const res  = await fetch('/api/hitech/subscribe', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, linkedin_url })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    if (data.message === 'already_registered') {
-                        feedback.className = 'hitech-feedback success';
-                        feedback.textContent = "You're already on the list — we'll be in touch.";
-                    } else {
-                        feedback.className = 'hitech-feedback success';
-                        feedback.textContent = "Received. We'll be in touch.";
-                        emailInput.value  = '';
-                        linkedinInput.value = '';
-                    }
-                    submitBtn.textContent = 'Done ✓';
-                } else {
-                    throw new Error(data.message || 'Something went wrong.');
-                }
-            } catch (err) {
-                feedback.className = 'hitech-feedback error';
-                feedback.textContent = err.message || 'Something went wrong. Please try again.';
-                submitBtn.disabled  = false;
-                submitBtn.textContent = 'Request Access';
-            }
-        }
-
-        document.getElementById('hitech-email').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') submitHitech();
-        });
-        document.getElementById('hitech-email').addEventListener('input', function () {
-            this.classList.remove('invalid');
-        });
-        document.getElementById('hitech-linkedin').addEventListener('input', function () {
-            this.classList.remove('invalid');
-        });
-
-        // Typing animation for subtext
+        // Carousel
         (function () {
-            const el   = document.getElementById('hitech-subtext');
-            const full = 'An exclusive community for tech people who take food as seriously as their work.\nWe host unique culinary experiences you won\'t find on any menu, built around great food and the right people.';
-            let i = 0;
+            var track = document.getElementById('ht-carousel-track');
+            var wrap  = document.getElementById('ht-carousel-wrap');
+            var prev  = document.getElementById('ht-carousel-prev');
+            var next  = document.getElementById('ht-carousel-next');
+            if (!track || !prev || !next) return;
 
-            function type() {
-                if (i < full.length) {
-                    el.textContent += full[i++];
-                    setTimeout(type, i < 30 ? 38 : 22); // slightly slower at start
-                } else {
-                    // keep cursor blinking for a beat, then fade it out
-                    setTimeout(() => el.classList.remove('typing'), 1400);
-                }
+            var cardWidth = 280 + 14; // card width + gap
+            var offset = 0;
+
+            function maxOffset() {
+                return Math.max(0, track.scrollWidth - wrap.offsetWidth);
             }
 
-            setTimeout(type, 600); // short pause before typing starts
+            next.addEventListener('click', function () {
+                offset = Math.min(offset + cardWidth, maxOffset());
+                track.style.transform = 'translateX(-' + offset + 'px)';
+            });
+            prev.addEventListener('click', function () {
+                offset = Math.max(0, offset - cardWidth);
+                track.style.transform = 'translateX(-' + offset + 'px)';
+            });
+
+            // Touch swipe
+            var touchStartX = 0;
+            track.addEventListener('touchstart', function(e){ touchStartX = e.touches[0].clientX; }, {passive: true});
+            track.addEventListener('touchend', function(e){
+                var dx = touchStartX - e.changedTouches[0].clientX;
+                if (Math.abs(dx) > 40) {
+                    if (dx > 0) { offset = Math.min(offset + cardWidth, maxOffset()); }
+                    else        { offset = Math.max(0, offset - cardWidth); }
+                    track.style.transform = 'translateX(-' + offset + 'px)';
+                }
+            }, {passive: true});
         })();
     </script>
+
     {% include 'components/bottom_nav.html' %}
 </body>
 </html>

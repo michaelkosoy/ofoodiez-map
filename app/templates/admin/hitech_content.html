@@ -1,0 +1,381 @@
+{% extends "admin/base.html" %}
+{% block title %}HiTech Content Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+  .content-editor { max-width: 860px; margin-bottom: 40px; }
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent-color);
+  }
+  .editor-field { margin-bottom: 18px; }
+  .editor-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .editor-field textarea, .editor-field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: .2s;
+    resize: vertical;
+  }
+  .editor-field textarea:focus, .editor-field input[type="text"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(211,167,138,.2);
+  }
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--primary-bg);
+    padding: 14px 0 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 10;
+    border-top: 1px solid #eee;
+  }
+  .save-msg { font-size: 14px; color: var(--success-color); font-weight: 600; display: none; }
+  .sub-card {
+    background: #fdfcf7;
+    border: 1px dashed rgba(90, 58, 49, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+  <h2><i class="fas fa-edit"></i> HiTech Content Editor</h2>
+  <div style="display:flex;gap:8px;align-items:center">
+    <select id="section-select" class="form-control" style="width:auto">
+      <option value="hitech">HiTech Home Page</option>
+      <option value="community">Community Page</option>
+      <option value="bot">Referrals Bot Page</option>
+      <option value="cv">CV Guide Page</option>
+    </select>
+  </div>
+</div>
+
+<div class="content-editor" id="content-editor">
+  <div style="color:#999;padding:40px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-success" onclick="saveContent()"><i class="fas fa-save"></i> Save Changes</button>
+  <span class="save-msg" id="save-msg">Saved!</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var hitechContent = {};
+var currentSection = 'hitech';
+
+function loadContent() {
+  fetch('/admin/api/hitech/content')
+    .then(r => r.json())
+    .then(data => {
+      hitechContent = data;
+      renderEditor();
+    })
+    .catch(() => {
+      document.getElementById('content-editor').innerHTML = '<p style="color:red">Failed to load content data.</p>';
+    });
+}
+
+function renderEditor() {
+  currentSection = document.getElementById('section-select').value;
+  var editorEl = document.getElementById('content-editor');
+  var sectionData = hitechContent[currentSection] || {};
+  var html = '';
+
+  if (currentSection === 'hitech') {
+    html += '<p class="section-title">Home Hero & Setup</p>';
+    html += inputField('page_title', 'Meta/Browser Page Title', sectionData.page_title);
+    html += inputField('meta_description', 'Meta Description', sectionData.meta_description);
+    html += inputField('eyebrow', 'Hero Eyebrow Text', sectionData.eyebrow);
+    html += inputField('headline', 'Hero Main Headline (HTML allowed)', sectionData.headline);
+    html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
+
+    html += '<p class="section-title">Feature Navigation Cards</p>';
+    var cards = sectionData.cards || [];
+    cards.forEach((card, idx) => {
+      html += `<div class="sub-card" data-card-idx="${idx}">`;
+      html += `<h4 style="margin:0 0 12px; color:var(--sidebar-bg)">Feature Card #${idx + 1}</h4>`;
+      html += inputField(`card_title_${idx}`, 'Title', card.title);
+      html += inputField(`card_url_${idx}`, 'Link Destination (e.g. /hitech/community)', card.url);
+      html += inputField(`card_icon_${idx}`, 'FontAwesome Icon Class (e.g. fas fa-users)', card.icon);
+      html += textareaField(`card_desc_${idx}`, 'Description text', card.desc);
+      html += inputField(`card_cta_${idx}`, 'CTA Text (e.g. Meet the bot)', card.cta);
+      html += `</div>`;
+    });
+
+    html += '<p class="section-title">Carousel & Partners</p>';
+    html += inputField('companies_title', 'Partners Section Headline', sectionData.companies_title);
+    html += inputField('companies_empty', 'Partners Fallback Empty Message', sectionData.companies_empty);
+
+  } else if (currentSection === 'community') {
+    html += '<p class="section-title">Waitlist Page Settings</p>';
+    html += inputField('page_title', 'Meta/Browser Page Title', sectionData.page_title);
+    html += inputField('meta_description', 'Meta Description', sectionData.meta_description);
+    html += inputField('eyebrow', 'Hero Eyebrow Text', sectionData.eyebrow);
+    html += inputField('headline', 'Hero Main Headline (HTML allowed)', sectionData.headline);
+    html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
+    html += inputField('form_title', 'Form Block Title', sectionData.form_title);
+    html += textareaField('warning_text', 'LinkedIn Warning Banner Description', sectionData.warning_text);
+    html += inputField('submit_btn', 'Submit Button Label', sectionData.submit_btn);
+
+  } else if (currentSection === 'bot') {
+    html += '<p class="section-title">Bot Page Hero</p>';
+    html += inputField('page_title', 'Meta/Browser Page Title', sectionData.page_title);
+    html += inputField('meta_description', 'Meta Description', sectionData.meta_description);
+    html += inputField('eyebrow', 'Hero Eyebrow Text', sectionData.eyebrow);
+    html += inputField('headline', 'Hero Main Headline (HTML allowed)', sectionData.headline);
+    html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
+
+    html += '<p class="section-title">How It Works Steps</p>';
+    var steps = sectionData.steps || [];
+    steps.forEach((step, idx) => {
+      html += `<div class="sub-card" data-step-idx="${idx}">`;
+      html += `<h4 style="margin:0 0 10px; color:var(--sidebar-bg)">Step #${idx + 1}</h4>`;
+      html += inputField(`step_num_${idx}`, 'Badge Number', step.num);
+      html += inputField(`step_text_${idx}`, 'Description Text', step.text);
+      html += `</div>`;
+    });
+
+    html += '<p class="section-title">Call To Action & Directory</p>';
+    html += inputField('whatsapp_btn_text', 'WhatsApp Button Title', sectionData.whatsapp_btn_text);
+    html += inputField('whatsapp_btn_sub', 'WhatsApp Button Footer Note', sectionData.whatsapp_btn_sub);
+    html += inputField('directory_title', 'Directory Section Header', sectionData.directory_title);
+    html += textareaField('directory_desc', 'Directory Section Description', sectionData.directory_desc);
+    html += inputField('search_placeholder', 'Search Box Placeholder Text', sectionData.search_placeholder);
+
+  } else if (currentSection === 'cv') {
+    html += '<p class="section-title">CV Page Settings</p>';
+    html += inputField('page_title', 'Meta/Browser Page Title', sectionData.page_title);
+    html += inputField('meta_description', 'Meta Description', sectionData.meta_description);
+    html += inputField('eyebrow', 'Hero Eyebrow Text', sectionData.eyebrow);
+    html += inputField('headline', 'Hero Main Headline (HTML allowed)', sectionData.headline);
+    html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
+
+    html += '<p class="section-title">Introductory Badges</p>';
+    var badges = sectionData.intro_cards || [];
+    badges.forEach((card, idx) => {
+      html += `<div class="sub-card" data-badge-idx="${idx}">`;
+      html += `<h4 style="margin:0 0 10px; color:var(--sidebar-bg)">Badge #${idx + 1}</h4>`;
+      html += inputField(`badge_icon_${idx}`, 'Icon FontAwesome Class', card.icon);
+      html += inputField(`badge_title_${idx}`, 'Title', card.title);
+      html += inputField(`badge_desc_${idx}`, 'Description Text', card.desc);
+      html += `</div>`;
+    });
+
+    html += '<p class="section-title">Annotated Layout Header</p>';
+    html += inputField('anatomy_title', 'Annotated Section Title', sectionData.anatomy_title);
+    html += inputField('anatomy_subtitle', 'Annotated Subtitle', sectionData.anatomy_subtitle);
+    html += inputField('deep_dive_title', 'Section Detailed List Header', sectionData.deep_dive_title);
+    html += inputField('more_tools_title', 'Footer Coming Soon Header', sectionData.more_tools_title);
+
+    html += '<p class="section-title">Anatomy Sections & Tips</p>';
+    var sections = sectionData.sections || [];
+    sections.forEach((sec, idx) => {
+      html += `<div class="sub-card" data-section-idx="${idx}">`;
+      html += `<h4 style="margin:0 0 10px; color:var(--sidebar-bg)">Section Tip #${idx + 1} (${sec.tooltip_title})</h4>`;
+      html += inputField(`sec_num_${idx}`, 'Number Dot', sec.num);
+      html += inputField(`sec_top_${idx}`, 'Position Dot Top % (e.g. 8%)', sec.dot_top);
+      html += inputField(`sec_left_${idx}`, 'Position Dot Left % (e.g. 30%)', sec.dot_left);
+      html += inputField(`sec_class_${idx}`, 'Position Class modifier (e.g. tip-left or leave blank)', sec.tip_class);
+      html += inputField(`sec_tt_title_${idx}`, 'Tooltip Preview Title', sec.tooltip_title);
+      html += inputField(`sec_tt_text_${idx}`, 'Tooltip Preview description text', sec.tooltip_text);
+      html += inputField(`sec_name_${idx}`, 'Detailed List Item Title', sec.name);
+      html += textareaField(`sec_body_${idx}`, 'Detailed List Description Text', sec.body);
+      html += inputField(`sec_good_${idx}`, 'Good Example Case Text', sec.good_example);
+      html += inputField(`sec_bad_${idx}`, 'Bad Example Case Text', sec.bad_example);
+      html += `</div>`;
+    });
+
+    html += '<p class="section-title">Coming Soon Cards</p>';
+    var coming = sectionData.coming_soon || [];
+    coming.forEach((cs, idx) => {
+      html += `<div class="sub-card" data-coming-idx="${idx}">`;
+      html += `<h4 style="margin:0 0 10px; color:var(--sidebar-bg)">Coming Soon Card #${idx + 1}</h4>`;
+      html += inputField(`cs_icon_${idx}`, 'Icon FontAwesome Class', cs.icon);
+      html += inputField(`cs_title_${idx}`, 'Card Title', cs.title);
+      html += textareaField(`cs_desc_${idx}`, 'Description Text', cs.desc);
+      html += `</div>`;
+    });
+  }
+
+  editorEl.innerHTML = html;
+}
+
+function inputField(key, label, val) {
+  val = (val || '').replace(/"/g, '&quot;');
+  return `<div class="editor-field"><label>${label}</label><input type="text" data-key="${key}" value="${val}"></div>`;
+}
+
+function textareaField(key, label, val) {
+  val = (val || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<div class="editor-field"><label>${label}</label><textarea rows="3" data-key="${key}">${val}</textarea></div>`;
+}
+
+function collectData() {
+  var sectionData = {};
+
+  if (currentSection === 'hitech') {
+    sectionData = {
+      page_title: document.querySelector('[data-key="page_title"]').value,
+      meta_description: document.querySelector('[data-key="meta_description"]').value,
+      eyebrow: document.querySelector('[data-key="eyebrow"]').value,
+      headline: document.querySelector('[data-key="headline"]').value,
+      hero_sub: document.querySelector('[data-key="hero_sub"]').value,
+      cards_label: document.querySelector('[data-key="cards_label"]').value,
+      companies_title: document.querySelector('[data-key="companies_title"]').value,
+      companies_empty: document.querySelector('[data-key="companies_empty"]').value,
+      cards: []
+    };
+    // Reconstruct Feature cards
+    var cardDivs = document.querySelectorAll('[data-card-idx]');
+    cardDivs.forEach(div => {
+      var idx = div.getAttribute('data-card-idx');
+      sectionData.cards.push({
+        title: document.querySelector(`[data-key="card_title_${idx}"]`).value,
+        url: document.querySelector(`[data-key="card_url_${idx}"]`).value,
+        icon: document.querySelector(`[data-key="card_icon_${idx}"]`).value,
+        desc: document.querySelector(`[data-key="card_desc_${idx}"]`).value,
+        cta: document.querySelector(`[data-key="card_cta_${idx}"]`).value
+      });
+    });
+
+  } else if (currentSection === 'community') {
+    sectionData = {
+      page_title: document.querySelector('[data-key="page_title"]').value,
+      meta_description: document.querySelector('[data-key="meta_description"]').value,
+      eyebrow: document.querySelector('[data-key="eyebrow"]').value,
+      headline: document.querySelector('[data-key="headline"]').value,
+      hero_sub: document.querySelector('[data-key="hero_sub"]').value,
+      form_title: document.querySelector('[data-key="form_title"]').value,
+      warning_text: document.querySelector('[data-key="warning_text"]').value,
+      submit_btn: document.querySelector('[data-key="submit_btn"]').value
+    };
+
+  } else if (currentSection === 'bot') {
+    sectionData = {
+      page_title: document.querySelector('[data-key="page_title"]').value,
+      meta_description: document.querySelector('[data-key="meta_description"]').value,
+      eyebrow: document.querySelector('[data-key="eyebrow"]').value,
+      headline: document.querySelector('[data-key="headline"]').value,
+      hero_sub: document.querySelector('[data-key="hero_sub"]').value,
+      whatsapp_btn_text: document.querySelector('[data-key="whatsapp_btn_text"]').value,
+      whatsapp_btn_sub: document.querySelector('[data-key="whatsapp_btn_sub"]').value,
+      directory_title: document.querySelector('[data-key="directory_title"]').value,
+      directory_desc: document.querySelector('[data-key="directory_desc"]').value,
+      search_placeholder: document.querySelector('[data-key="search_placeholder"]').value,
+      steps: []
+    };
+    var stepDivs = document.querySelectorAll('[data-step-idx]');
+    stepDivs.forEach(div => {
+      var idx = div.getAttribute('data-step-idx');
+      sectionData.steps.push({
+        num: document.querySelector(`[data-key="step_num_${idx}"]`).value,
+        text: document.querySelector(`[data-key="step_text_${idx}"]`).value
+      });
+    });
+
+  } else if (currentSection === 'cv') {
+    sectionData = {
+      page_title: document.querySelector('[data-key="page_title"]').value,
+      meta_description: document.querySelector('[data-key="meta_description"]').value,
+      eyebrow: document.querySelector('[data-key="eyebrow"]').value,
+      headline: document.querySelector('[data-key="headline"]').value,
+      hero_sub: document.querySelector('[data-key="hero_sub"]').value,
+      anatomy_title: document.querySelector('[data-key="anatomy_title"]').value,
+      anatomy_subtitle: document.querySelector('[data-key="anatomy_subtitle"]').value,
+      deep_dive_title: document.querySelector('[data-key="deep_dive_title"]').value,
+      more_tools_title: document.querySelector('[data-key="more_tools_title"]').value,
+      intro_cards: [],
+      sections: [],
+      coming_soon: []
+    };
+
+    var badgeDivs = document.querySelectorAll('[data-badge-idx]');
+    badgeDivs.forEach(div => {
+      var idx = div.getAttribute('data-badge-idx');
+      sectionData.intro_cards.push({
+        icon: document.querySelector(`[data-key="badge_icon_${idx}"]`).value,
+        title: document.querySelector(`[data-key="badge_title_${idx}"]`).value,
+        desc: document.querySelector(`[data-key="badge_desc_${idx}"]`).value
+      });
+    });
+
+    var secDivs = document.querySelectorAll('[data-section-idx]');
+    secDivs.forEach(div => {
+      var idx = div.getAttribute('data-section-idx');
+      sectionData.sections.push({
+        num: document.querySelector(`[data-key="sec_num_${idx}"]`).value,
+        dot_top: document.querySelector(`[data-key="sec_top_${idx}"]`).value,
+        dot_left: document.querySelector(`[data-key="sec_left_${idx}"]`).value,
+        tip_class: document.querySelector(`[data-key="sec_class_${idx}"]`).value,
+        tooltip_title: document.querySelector(`[data-key="sec_tt_title_${idx}"]`).value,
+        tooltip_text: document.querySelector(`[data-key="sec_tt_text_${idx}"]`).value,
+        name: document.querySelector(`[data-key="sec_name_${idx}"]`).value,
+        body: document.querySelector(`[data-key="sec_body_${idx}"]`).value,
+        good_example: document.querySelector(`[data-key="sec_good_${idx}"]`).value,
+        bad_example: document.querySelector(`[data-key="sec_bad_${idx}"]`).value
+      });
+    });
+
+    var comingDivs = document.querySelectorAll('[data-coming-idx]');
+    comingDivs.forEach(div => {
+      var idx = div.getAttribute('data-coming-idx');
+      sectionData.coming_soon.push({
+        icon: document.querySelector(`[data-key="cs_icon_${idx}"]`).value,
+        title: document.querySelector(`[data-key="cs_title_${idx}"]`).value,
+        desc: document.querySelector(`[data-key="cs_desc_${idx}"]`).value
+      });
+    });
+  }
+
+  hitechContent[currentSection] = sectionData;
+  return hitechContent;
+}
+
+function saveContent() {
+  var data = collectData();
+  fetch('/admin/api/hitech/content', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.ok) {
+      var msg = document.getElementById('save-msg');
+      msg.style.display = 'inline';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    } else {
+      alert('Error: ' + (res.error || 'unknown'));
+    }
+  })
+  .catch(() => { alert('Save failed.'); });
+}
+
+document.getElementById('section-select').addEventListener('change', renderEditor);
+window.addEventListener('load', loadContent);
+</script>
+{% endblock %}

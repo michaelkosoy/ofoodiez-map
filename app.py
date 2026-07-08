@@ -302,17 +302,98 @@ def about_page():
     """About Me page."""
     return render_template('about.html', data=home_data)
 
+def _load_hitech_data(filename):
+    """Load a JSON data file from app/data/ for HiTech pages."""
+    path = os.path.join(os.path.dirname(__file__), 'app', 'data', filename)
+    try:
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def _load_hitech_content():
+    """Load the full static content translations and copy from hitech_content.json."""
+    path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'hitech_content.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 @app.route('/hitech')
 def hitech_page():
-    """HiTech exclusive community waitlist page."""
-    return render_template('hitech.html', active_page='hitech')
+    """HiTech hub home page — hero + feature cards + companies carousel."""
+    companies = _load_hitech_data('hitech_companies.json')
+    content = _load_hitech_content()
+    return render_template('hitech.html', active_hitech_page='home', active_page='hitech', companies=companies, c=content.get('hitech', {}))
+
+
+@app.route('/hitech/community')
+def hitech_community():
+    """HiTech community waitlist page."""
+    content = _load_hitech_content()
+    return render_template('hitech_community.html', active_hitech_page='community', active_page='hitech', c=content.get('community', {}))
+
+
+@app.route('/hitech/referrals-bot')
+def hitech_bot():
+    """HiTech referrals bot info + advocates directory.
+    Queries the database dynamically for companies with active advocates.
+    """
+    from whatsapp_bot.models import WaCompany, WaAdvocate
+    
+    companies_with_advocates = []
+    try:
+        # Get all companies that have at least one active advocate
+        db_companies = (WaCompany.query
+                        .join(WaAdvocate, WaCompany.id == WaAdvocate.company_id)
+                        .filter(WaAdvocate.status == 'active')
+                        .distinct()
+                        .order_by(WaCompany.name.asc())
+                        .all())
+        
+        for co in db_companies:
+            # We check if there's any active advocate with a referral_link or if it's email-based
+            advocate = WaAdvocate.query.filter_by(company_id=co.id, status='active').first()
+            # If the advocate has a self-serve link, we can link there, or default to a career page search
+            careers_url = advocate.referral_link if (advocate and advocate.referral_link) else "https://api.whatsapp.com/send?phone=972559218943"
+            
+            # Check if this company should be featured (e.g. popular ones like Google, Meta, Monday, Wix, Checkout, Taboola, Microsoft, Amazon, Apple, Fiverr)
+            featured_names = {'google', 'meta', 'microsoft', 'amazon', 'apple', 'wix', 'monday.com', 'fiverr', 'checkout.com', 'taboola'}
+            is_featured = co.name.lower() in featured_names
+            
+            companies_with_advocates.append({
+                "name": co.name,
+                "careers_url": careers_url,
+                "featured": is_featured
+            })
+    except Exception as e:
+        print(f"⚠️ Error fetching companies with advocates: {e}")
+        # Fallback to empty list or basic static template data
+        companies_with_advocates = []
+
+    content = _load_hitech_content()
+    return render_template('hitech_bot.html', active_hitech_page='referrals-bot', active_page='hitech', companies=companies_with_advocates, c=content.get('bot', {}))
+
+
+@app.route('/hitech/cv-guide')
+def hitech_cv():
+    """HiTech interactive CV guide."""
+    content = _load_hitech_content()
+    return render_template('hitech_cv.html', active_hitech_page='cv-guide', active_page='hitech', c=content.get('cv', {}))
+
 
 @app.route('/api/hitech/subscribe', methods=['POST'])
 def hitech_subscribe():
-    """Collect email for the HiTech waitlist."""
+    """Collect registration for the HiTech community waitlist."""
     data = request.get_json(silent=True) or {}
-    email = (data.get('email') or '').strip().lower()
-    linkedin_url = (data.get('linkedin_url') or '').strip()
+    email       = (data.get('email') or '').strip().lower()
+    name        = (data.get('name') or '').strip()
+    linkedin_url= (data.get('linkedin_url') or '').strip()
+    job_title   = (data.get('job_title') or '').strip() or None
+    company     = (data.get('company') or '').strip() or None
 
     if not email or '@' not in email:
         return jsonify({'success': False, 'message': 'Invalid email address.'}), 400
@@ -322,9 +403,8 @@ def hitech_subscribe():
     if existing:
         return jsonify({'success': True, 'message': 'already_registered'})
 
-    # Best-effort: scrape the LinkedIn job title from the public profile page
-    job_title = None
-    if linkedin_url:
+    # Best-effort: scrape the LinkedIn job title if not provided by user
+    if not job_title and linkedin_url:
         try:
             import re as _re
             headers = {
@@ -337,17 +417,21 @@ def hitech_subscribe():
             _url = linkedin_url if linkedin_url.startswith('http') else 'https://' + linkedin_url
             resp = requests.get(_url, headers=headers, timeout=6, allow_redirects=True)
             if resp.status_code == 200:
-                # LinkedIn embeds the title in <title>: "First Last - Title - Company | LinkedIn"
                 m = _re.search(r'<title[^>]*>([^<]+)</title>', resp.text, _re.IGNORECASE)
                 if m:
                     parts = [p.strip() for p in m.group(1).split(' - ')]
-                    # parts[0] = name, parts[1] = title (if present)
                     if len(parts) >= 2 and 'linkedin' not in parts[1].lower():
                         job_title = parts[1]
         except Exception:
             pass  # scraping is best-effort; never block signup
 
-    entry = HitechEmail(email=email, linkedin_url=linkedin_url or None, job_title=job_title)
+    entry = HitechEmail(
+        email=email,
+        name=name or None,
+        linkedin_url=linkedin_url or None,
+        job_title=job_title,
+        company=company,
+    )
     _db.session.add(entry)
     _db.session.commit()
 
