@@ -970,6 +970,7 @@ def send_hitech_bulk_email():
         f'  {button_html}'
         f'  <div style="margin-top: 36px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 12px; color: #777; text-align: center;">'
         f'    זהו דיוור שנשלח לחברי קהילת Ofoodiez Tech. <br>'
+        f'    <a href="UNSUBSCRIBE_LINK" style="color: #777; text-decoration: underline;">הסרה מהרשימה</a> | '
         f'    Ofoodiez © 2026'
         f'  </div>'
         f'</div>'
@@ -992,11 +993,14 @@ def send_hitech_bulk_email():
             failed_emails = []
             for email in recipient_emails:
                 try:
+                    unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={email}"
+                    personal_html = html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
+                    personal_text = f"{text_content}\n\nלהסרה מהרשימה: {unsub_link}"
                     success = send_custom_community_email(
                         to_email=email,
                         subject=subject,
-                        body_html=html_template,
-                        body_text=text_content
+                        body_html=personal_html,
+                        body_text=personal_text
                     )
                     if success:
                         sent_count += 1

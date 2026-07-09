@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unsubscribed — Ofoodiez</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .ht-unsubscribed-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            box-sizing: border-box;
+            background-color: #08060a;
+            color: #f9f6eb;
+        }
+        .unsub-card {
+            background: var(--bg-card, #120e16);
+            border: 1px solid var(--border, rgba(249, 246, 235, 0.08));
+            border-radius: 24px;
+            padding: 48px 32px;
+            text-align: center;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .unsub-card::before {
+            content: '';
+            position: absolute; inset: 0; border-radius: 24px;
+            background: linear-gradient(135deg, rgba(114, 8, 21, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .unsub-icon {
+            font-size: 48px;
+            color: var(--burgundy-mid, #720815);
+            margin-bottom: 24px;
+        }
+        .unsub-title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--butter, #f9f6eb);
+            margin-bottom: 12px;
+        }
+        .unsub-message {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            color: var(--butter-dim, rgba(249, 246, 235, 0.7));
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .back-btn {
+            display: inline-block;
+            background: var(--burgundy, #720815);
+            color: var(--butter, #f9f6eb);
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover {
+            background: var(--burgundy-mid, #960c1d);
+            box-shadow: 0 4px 20px rgba(114, 8, 21, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="ht-unsubscribed-page">
+        <div class="unsub-card">
+            <div class="unsub-icon">
+                <i class="fa-regular fa-circle-check"></i>
+            </div>
+            <h1 class="unsub-title">הסרתך בוצעה</h1>
+            <p class="unsub-message">
+                כתובת המייל <strong>{{ email }}</strong> הוסרה בהצלחה מרשימת התפוצה של קהילת Ofoodiez Tech. לא יישלחו אליך הודעות נוספות.
+            </p>
+            <a href="/" class="back-btn">חזרה לאתר</a>
+        </div>
+    </div>
+</body>
+</html>
