@@ -21,11 +21,15 @@ Grow (Meshulam) Light API — one-time purchase of the Japan guide:
     - POSTs the payment event to /webhooks/grow (notifyUrl) -> is_paid=True, and
     - redirects the buyer to GET /paid/japan (successUrl) -> back to the guide.
   GROW_API_KEY, GROW_USER_ID, GROW_PAGE_CODE   (from the Grow integration)
-  GROW_API_BASE     = Light API base (default: Grow sandbox; set prod base to go live)
-  GROW_GUIDE_PRICE  = price in ILS (default 1 — matches the sandbox catalog item)
+  GROW_API_BASE      = Light API base (default: Grow sandbox; set prod base to go live)
+  GROW_JAPAN_PAY_LINK = the guide's public payment-page URL. Doubles as the price
+                        source: the item price set in the Grow dashboard is read from
+                        this page (the Light API has no catalog-read endpoint), so
+                        prices are managed in Grow only — never here.
 """
 import os
 import json
+import time
 import hmac
 import hashlib
 import base64
@@ -151,6 +155,13 @@ def payplus_callback():
 
 # --- Grow (Meshulam) Light API: per-buyer payment link for the Japan guide ---
 
+# Public checkout page for the guide (also the fallback buy link in manual mode).
+GROW_JAPAN_PAY_LINK = os.environ.get(
+    'GROW_JAPAN_PAY_LINK',
+    'https://pay.grow.link/MTAyNjQ5~f7e8a4d50c74bd0636c6bff059e2e951-MzY0NTc2Ng'
+)
+
+
 def _grow_cfg():
     return {
         'api_key': os.environ.get('GROW_API_KEY'),
@@ -158,7 +169,6 @@ def _grow_cfg():
         'page_code': os.environ.get('GROW_PAGE_CODE'),
         'base': os.environ.get('GROW_API_BASE',
                                'https://sandboxapi.grow.link/api/light/server/1.0'),
-        'price': int(os.environ.get('GROW_GUIDE_PRICE', '1')),
     }
 
 
@@ -168,8 +178,37 @@ def grow_light_ready():
     return bool(c['api_key'] and c['user_id'] and c['page_code'])
 
 
+_PRICE_CACHE = {}   # page url -> (fetched_at, price); stale value served if a refresh fails
+
+
+def grow_page_price(url):
+    """Current item price as set in the Grow dashboard, read from the public payment
+    page's embedded __NEXT_DATA__ JSON (the Light API has no catalog-read endpoint).
+    Cached 5 minutes; on fetch/parse failure serves the last-known price, else None.
+    ponytail: single-product pages only — sums nothing; extend if a page ever bundles items.
+    """
+    hit = _PRICE_CACHE.get(url)
+    if hit and time.time() - hit[0] < 300:
+        return hit[1]
+    try:
+        html = requests.get(url, timeout=10).text
+        blob = html.split('id="__NEXT_DATA__"', 1)[1].split('>', 1)[1].split('</script>', 1)[0]
+        prods = (json.loads(blob)['props']['pageProps']['initialState']
+                 ['pageData']['paymentForm']['products'])
+        # live pages serialize products as {"0": {...}} rather than a list
+        first = prods[0] if isinstance(prods, list) else next(iter(prods.values()))
+        price = first['price']
+        if not (isinstance(price, (int, float)) and price > 0):
+            raise ValueError(f'bad price {price!r}')
+        _PRICE_CACHE[url] = (time.time(), price)
+        return price
+    except Exception as e:
+        current_app.logger.error('GROW: could not read price from %s: %s', url, e)
+        return hit[1] if hit else None
+
+
 def grow_guide_price():
-    return _grow_cfg()['price']
+    return grow_page_price(GROW_JAPAN_PAY_LINK)
 
 
 @billing_bp.route('/pay/japan', methods=['POST'])
@@ -181,8 +220,9 @@ def pay_japan():
     user = current_user()
     if user is None:
         return redirect(url_for('accounts.login'))
-    if not grow_light_ready():
-        flash('Payments are not configured yet.', 'error')
+    price = grow_guide_price()
+    if not grow_light_ready() or price is None:
+        flash('Could not start checkout. Please try again.', 'error')
         return redirect('/blog/japan')
 
     name = (user.name or '').strip()
@@ -205,7 +245,7 @@ def pay_japan():
         'pageFieldSettings[email][value]': user.email,
         'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
         'products[data][0][name]': 'מדריך יפן',
-        'products[data][0][price]': cfg['price'],
+        'products[data][0][price]': price,        # live from the Grow dashboard item
         'products[data][0][quantity]': 1,
         'products[data][0][vatType]': 3,          # VAT-exempt business (פטור ממע"מ)
     }

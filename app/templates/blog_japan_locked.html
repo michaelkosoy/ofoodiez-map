@@ -58,8 +58,8 @@
                 <div class="lock-icon"><i class="fas fa-lock"></i></div>
                 <h2>Unlock the Japan Guide 🇯🇵</h2>
                 <p>The full travel &amp; food guide — where to eat, drink, and explore.</p>
-                <div class="price">₪{{ price }}</div>
                 {% if auto %}
+                <div class="price">₪{{ price }}</div>
                 <form method="POST" action="{{ url_for('billing.pay_japan') }}">
                     <button type="submit" class="buy-btn"><i class="fas fa-credit-card"></i> Buy the guide</button>
                 </form>

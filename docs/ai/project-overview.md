@@ -34,7 +34,7 @@ A Flask web app and food blog. Main features:
 - Any email/SMTP credentials for notifications
 - `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE` — Grow (Meshulam) Light API; enables automatic per-user payment links + auto-unlock for the Japan guide (`billing.py`). Without them the guide falls back to the static link + manual activation.
 - `GROW_API_BASE` — Light API base URL (default: Grow sandbox; set the production base to go live)
-- `GROW_GUIDE_PRICE` — guide price in ILS (default 1, matching the sandbox catalog item)
+- `GROW_JAPAN_PAY_LINK` — the guide's public Grow payment-page URL (has a default in `billing.py`). Item prices are managed **in the Grow dashboard only**: the site reads the current price from this page (`grow_page_price()`), shows it on the locked page, and charges it via the API. Never hardcode prices.
 
 ## Do not do
 - Do not push large images (>500KB) directly to the git repo — it can break the production deployment

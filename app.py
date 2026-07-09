@@ -256,13 +256,6 @@ def _load_blog(slug):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
-# Grow one-time payment link for the Japan guide (public checkout link; env overrides the default).
-GROW_JAPAN_PAY_LINK = os.environ.get(
-    'GROW_JAPAN_PAY_LINK',
-    'https://pay.grow.link/MTAyNjQ5~f7e8a4d50c74bd0636c6bff059e2e951-MzY0NTc2Ng'
-)
-
-
 @app.route('/blog/japan')
 def blog_japan():
     """Japan travel & food guide — gated: registered + paid only."""
@@ -271,11 +264,14 @@ def blog_japan():
         session['next_after_auth'] = '/blog/japan'          # come back here after login/register
         return redirect(url_for('accounts.login'))
     if not user.has_access():
-        from billing import grow_light_ready, grow_guide_price
-        auto = grow_light_ready()   # Grow Light API configured -> per-user link + auto-unlock
-        return render_template('blog_japan_locked.html', user=user, auto=auto,
-                               pay_link=GROW_JAPAN_PAY_LINK,
-                               price=grow_guide_price() if auto else 80)
+        from billing import grow_light_ready, grow_guide_price, GROW_JAPAN_PAY_LINK
+        # Price lives in the Grow dashboard (read off the public payment page).
+        # API configured + price readable -> per-user link + auto-unlock;
+        # otherwise fall back to the static link (its page shows the real price anyway).
+        price = grow_guide_price() if grow_light_ready() else None
+        return render_template('blog_japan_locked.html', user=user,
+                               auto=price is not None, price=price,
+                               pay_link=GROW_JAPAN_PAY_LINK)
     return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
 
 @app.route('/blog/instagram')
