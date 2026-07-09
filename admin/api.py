@@ -1019,9 +1019,11 @@ def send_hitech_bulk_email():
     def bg_send():
         with app_instance.app_context():
             logger.info(f"📧 Starting background bulk email dispatch to {len(recipient_emails)} recipients...")
+            from concurrent.futures import ThreadPoolExecutor, as_completed
             sent_count = 0
             failed_emails = []
-            for email in recipient_emails:
+
+            def send_single(email):
                 try:
                     unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={email}"
                     personal_html = html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
@@ -1033,12 +1035,22 @@ def send_hitech_bulk_email():
                         body_text=personal_text
                     )
                     if success:
+                        return email, True, None
+                    else:
+                        return email, False, "SendGrid returned False"
+                except Exception as e:
+                    return email, False, str(e)
+
+            # Use 15 concurrent threads for faster, more reliable batch sending
+            with ThreadPoolExecutor(max_workers=15) as executor:
+                futures = {executor.submit(send_single, email): email for email in recipient_emails}
+                for future in as_completed(futures):
+                    email, success, error_msg = future.result()
+                    if success:
                         sent_count += 1
                     else:
-                        failed_emails.append((email, "SendGrid returned False"))
-                except Exception as e:
-                    failed_emails.append((email, str(e)))
-            
+                        failed_emails.append((email, error_msg))
+
             logger.info(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
             
             # Send status email to administrator/ops
