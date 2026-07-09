@@ -13,6 +13,16 @@ Config (env vars, set by the operator — never hardcoded, never in git):
   PAYPLUS_API_KEY, PAYPLUS_SECRET_KEY, PAYPLUS_PAYMENT_PAGE_UID
   PAYPLUS_ENV     = "dev" (sandbox, default) | "prod"
   PAYPLUS_AMOUNT  = price in ILS (optional, default 19)
+
+Grow (Meshulam) Light API — one-time purchase of the Japan guide:
+  POST /pay/japan -> CreatePaymentLink (a single-use link tied to the buyer via
+                     cField1=user id) and redirect the buyer to it.
+  Grow then:
+    - POSTs the payment event to /webhooks/grow (notifyUrl) -> is_paid=True, and
+    - redirects the buyer to GET /paid/japan (successUrl) -> back to the guide.
+  GROW_API_KEY, GROW_USER_ID, GROW_PAGE_CODE   (from the Grow integration)
+  GROW_API_BASE     = Light API base (default: Grow sandbox; set prod base to go live)
+  GROW_GUIDE_PRICE  = price in ILS (default 1 — matches the sandbox catalog item)
 """
 import os
 import json
@@ -139,6 +149,87 @@ def payplus_callback():
     return ('', 200)
 
 
+# --- Grow (Meshulam) Light API: per-buyer payment link for the Japan guide ---
+
+def _grow_cfg():
+    return {
+        'api_key': os.environ.get('GROW_API_KEY'),
+        'user_id': os.environ.get('GROW_USER_ID'),
+        'page_code': os.environ.get('GROW_PAGE_CODE'),
+        'base': os.environ.get('GROW_API_BASE',
+                               'https://sandboxapi.grow.link/api/light/server/1.0'),
+        'price': int(os.environ.get('GROW_GUIDE_PRICE', '1')),
+    }
+
+
+def grow_light_ready():
+    """True once the Grow Light API env vars are set (switches the guide to auto-unlock)."""
+    c = _grow_cfg()
+    return bool(c['api_key'] and c['user_id'] and c['page_code'])
+
+
+def grow_guide_price():
+    return _grow_cfg()['price']
+
+
+@billing_bp.route('/pay/japan', methods=['POST'])
+@login_required
+def pay_japan():
+    """Create a single-use Grow payment link tied to this account (cField1=user id)
+    and send the buyer there. The /webhooks/grow callback unlocks automatically."""
+    cfg = _grow_cfg()
+    user = current_user()
+    if user is None:
+        return redirect(url_for('accounts.login'))
+    if not grow_light_ready():
+        flash('Payments are not configured yet.', 'error')
+        return redirect('/blog/japan')
+
+    name = (user.name or '').strip()
+    payload = {
+        'userId': cfg['user_id'],
+        'pageCode': cfg['page_code'],
+        'paymentLinkType': 1,                     # single-payment link
+        'isActive': 1,
+        'chargeType': 1,                          # regular charge
+        'title': 'Ofoodiez Japan Guide',
+        'successUrl': url_for('billing.paid_japan_return', _external=True),
+        'notifyUrl': url_for('billing.grow_callback', _external=True),
+        'cField1': str(user.id),                  # echoed back -> webhook matches the account
+        'cField2': 'japan',
+        'paymentTypes[0][type]': 'payments',
+        'paymentTypes[0][payments][paymentsPaymentNum]': 1,
+        # Grow requires prefill values; the buyer can edit them on the payment page.
+        'pageFieldSettings[fullName][value]': name if len(name.split()) >= 2 else 'Ofoodiez Customer',
+        'pageFieldSettings[phone][value]': '0500000000',   # ponytail: we don't collect phones
+        'pageFieldSettings[email][value]': user.email,
+        'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
+        'products[data][0][name]': 'מדריך יפן',
+        'products[data][0][price]': cfg['price'],
+        'products[data][0][quantity]': 1,
+        'products[data][0][vatType]': 3,          # VAT-exempt business (פטור ממע"מ)
+    }
+    r, link = None, None
+    try:
+        r = requests.post(cfg['base'] + '/CreatePaymentLink', data=payload,
+                          headers={'x-api-key': cfg['api_key']}, timeout=20)
+        flat = _flatten(r.json())
+        link = _first(flat, 'paymentLinkUrl', 'paymentLink', 'lightLink', 'url', 'link')
+        if not (isinstance(link, str) and link.startswith('http')):
+            ours = {payload['successUrl'], payload['notifyUrl']}
+            link = next((v for v in flat.values()
+                         if isinstance(v, str) and v.startswith('http') and v not in ours), None)
+    except Exception:
+        link = None
+    if not link:
+        current_app.logger.error('GROW CreatePaymentLink failed: %s',
+                                 getattr(r, 'text', '?')[:2000])
+        flash('Could not start checkout. Please try again.', 'error')
+        return redirect('/blog/japan')
+    current_app.logger.info('GROW payment link created for user %s', user.id)
+    return redirect(link)
+
+
 # Last few Grow webhook payloads, kept in memory (single Render worker) for debugging.
 _LAST_GROW_EVENTS = []
 
@@ -195,12 +286,18 @@ def grow_callback():
 
 @billing_bp.route('/paid/japan')
 def paid_japan_return():
-    """Landing after payment. Access is granted MANUALLY — the admin ticks 'Paid' for
-    the buyer in /admin/members after confirming the payment in Grow. So this only logs
-    the return and sends the buyer back to the guide (which stays locked until approved).
+    """Landing after Grow checkout. The webhook (matched via cField1=user id) unlocks
+    the account automatically — usually before the buyer even lands here. Paid users
+    fall straight through to the open guide; if the webhook hasn't arrived yet, show
+    a "confirming" note on the locked page. (Static-link buyers without a webhook
+    match are still activated manually in /admin/members.)
     """
     if request.args:
         current_app.logger.info('GROW return params: %s', dict(request.args))
+    u = current_user()
+    if u and not u.has_access():
+        flash('Payment received! Confirming your access — refresh this page in a moment.',
+              'success')
     return redirect('/blog/japan')
 
 

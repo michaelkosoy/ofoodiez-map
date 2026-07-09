@@ -32,6 +32,9 @@ A Flask web app and food blog. Main features:
 - `GOOGLE_MAPS_API_KEY`
 - `DATABASE_URL` (PostgreSQL)
 - Any email/SMTP credentials for notifications
+- `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE` — Grow (Meshulam) Light API; enables automatic per-user payment links + auto-unlock for the Japan guide (`billing.py`). Without them the guide falls back to the static link + manual activation.
+- `GROW_API_BASE` — Light API base URL (default: Grow sandbox; set the production base to go live)
+- `GROW_GUIDE_PRICE` — guide price in ILS (default 1, matching the sandbox catalog item)
 
 ## Do not do
 - Do not push large images (>500KB) directly to the git repo — it can break the production deployment

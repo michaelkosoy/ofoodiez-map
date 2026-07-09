@@ -33,6 +33,9 @@
         .buy-btn:hover { opacity:0.92; transform:scale(1.03); }
         .hint { font-size:0.9rem; color:#8a7a70; margin-top:16px; }
         .hint a { color:#5A3A31; font-weight:600; }
+        .flash-messages { margin:0 0 16px; }
+        .flash-messages div { background:var(--card-bg,#fff); border-radius:12px; padding:12px 16px; margin-bottom:8px; font-weight:600; color:#2e7d32; box-shadow:var(--shadow,0 4px 15px rgba(0,0,0,0.06)); }
+        .flash-messages div.error { color:#b3261e; }
         @media (min-width:768px) { .service-card { padding:44px 40px; } }
     </style>
 </head>
@@ -44,14 +47,28 @@
 
     <div class="services-page">
         <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}<div class="{{ category }}">{{ message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <div class="service-card">
                 <div class="lock-icon"><i class="fas fa-lock"></i></div>
                 <h2>Unlock the Japan Guide 🇯🇵</h2>
                 <p>The full travel &amp; food guide — where to eat, drink, and explore.</p>
                 <div class="price">₪{{ price }}</div>
+                {% if auto %}
+                <form method="POST" action="{{ url_for('billing.pay_japan') }}">
+                    <button type="submit" class="buy-btn"><i class="fas fa-credit-card"></i> Buy the guide</button>
+                </form>
+                <p class="hint">Secure checkout by Grow. Your access unlocks automatically right after payment.</p>
+                {% else %}
                 <a class="buy-btn" href="{{ pay_link }}" target="_blank" rel="noopener"><i class="fas fa-credit-card"></i> Buy the guide</a>
                 <p class="hint">After payment we activate your access manually — usually within a few hours.<br>
                     Tip: pay with <strong>{{ user.email }}</strong> so we can match it to your account.</p>
+                {% endif %}
             </div>
         </div>
     </div>
