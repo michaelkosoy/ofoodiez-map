@@ -183,16 +183,17 @@ def grow_light_ready():
     return bool(c['make_url'] or (c['api_key'] and c['user_id'] and c['page_code']))
 
 
-_PRICE_CACHE = {}   # page url -> (fetched_at, price); stale value served if a refresh fails
+_ITEM_CACHE = {}   # page url -> (fetched_at, {'price','name'}); stale served if refresh fails
 
 
-def grow_page_price(url):
-    """Current item price as set in the Grow dashboard, read from the public payment
-    page's embedded __NEXT_DATA__ JSON (the Light API has no catalog-read endpoint).
-    Cached 5 minutes; on fetch/parse failure serves the last-known price, else None.
+def grow_page_item(url):
+    """The item as currently set in the Grow dashboard — {'price', 'name'} — read from
+    the public payment page's embedded __NEXT_DATA__ JSON (there is no catalog-read
+    endpoint). Cached 5 minutes; on fetch/parse failure serves the last-known item,
+    else None. Prices/names are managed in Grow ONLY — never here.
     ponytail: single-product pages only — sums nothing; extend if a page ever bundles items.
     """
-    hit = _PRICE_CACHE.get(url)
+    hit = _ITEM_CACHE.get(url)
     if hit and time.time() - hit[0] < 300:
         return hit[1]
     try:
@@ -205,15 +206,17 @@ def grow_page_price(url):
         price = first['price']
         if not (isinstance(price, (int, float)) and price > 0):
             raise ValueError(f'bad price {price!r}')
-        _PRICE_CACHE[url] = (time.time(), price)
-        return price
+        item = {'price': price, 'name': first.get('name') or 'מדריך יפן'}
+        _ITEM_CACHE[url] = (time.time(), item)
+        return item
     except Exception as e:
-        current_app.logger.error('GROW: could not read price from %s: %s', url, e)
+        current_app.logger.error('GROW: could not read item from %s: %s', url, e)
         return hit[1] if hit else None
 
 
 def grow_guide_price():
-    return grow_page_price(GROW_JAPAN_PAY_LINK)
+    item = grow_page_item(GROW_JAPAN_PAY_LINK)
+    return item['price'] if item else None
 
 
 @billing_bp.route('/pay/japan', methods=['POST'])
@@ -225,10 +228,11 @@ def pay_japan():
     user = current_user()
     if user is None:
         return redirect(url_for('accounts.login'))
-    price = grow_guide_price()
-    if not grow_light_ready() or price is None:
+    item = grow_page_item(GROW_JAPAN_PAY_LINK)
+    if not grow_light_ready() or item is None:
         flash('Could not start checkout. Please try again.', 'error')
         return redirect('/blog/japan')
+    price, product_name = item['price'], item['name']
 
     name = (user.name or '').strip()
     full_name = name if len(name.split()) >= 2 else 'Ofoodiez Customer'
@@ -244,6 +248,7 @@ def pay_japan():
                 'email': user.email,
                 'full_name': full_name,
                 'price': price,                   # live from the Grow dashboard item
+                'product_name': product_name,     # ditto
                 'success_url': success_url,
                 'notify_url': notify_url,
             }, timeout=30)
@@ -266,8 +271,8 @@ def pay_japan():
                 'pageFieldSettings[phone][value]': '0500000000',   # ponytail: we don't collect phones
                 'pageFieldSettings[email][value]': user.email,
                 'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
-                'products[data][0][name]': 'מדריך יפן',
-                'products[data][0][price]': price,        # live from the Grow dashboard item
+                'products[data][0][name]': product_name,  # live from the Grow dashboard item
+                'products[data][0][price]': price,        # ditto
                 'products[data][0][quantity]': 1,
                 'products[data][0][vatType]': 3,          # VAT-exempt business (פטור ממע"מ)
             }
