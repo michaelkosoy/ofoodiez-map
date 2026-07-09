@@ -900,7 +900,7 @@ def delete_hitech_email(id):
 @admin_bp.route('/api/email-images', methods=['GET'])
 @login_required
 def get_email_images():
-    folder = os.path.join(current_app.root_path, 'static', 'img', 'emails')
+    folder = os.path.join(current_app.static_folder, 'img', 'emails')
     if not os.path.exists(folder):
         return jsonify([])
     try:
