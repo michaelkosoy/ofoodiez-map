@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Japan Guide — Ofoodiez</title>
+    <meta name="description" content="The complete Ofoodiez Japan guide — a 25-night route with day-by-day plans, where to eat and drink, stays, and a budget calculator.">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#5A3A31">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playpen+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=1">
+    <style>
+        .landing-page { min-height:100vh; background-color:var(--bg-color,#f9f6eb); padding:20px 20px 120px; }
+        .landing-page .container { max-width:640px; margin:0 auto; }
+        .landing-card { background:var(--card-bg,#fff); border-radius:var(--radius,16px); padding:36px 30px; box-shadow:var(--shadow,0 4px 15px rgba(0,0,0,0.06)); text-align:center; }
+        .landing-card h1 { color:var(--text-color,#362118); margin:0 0 10px; font-size:2rem; }
+        .landing-card .tagline { font-size:1.1rem; line-height:1.7; color:var(--text-color,#362118); margin:0 0 22px; }
+        .whats-inside { text-align:right; direction:rtl; margin:0 auto 24px; max-width:480px; padding:0; list-style:none; }
+        .whats-inside li { padding:10px 0; border-bottom:1px dashed #e8ddd2; font-size:1.02rem; line-height:1.6; color:var(--text-color,#362118); }
+        .whats-inside li:last-child { border-bottom:none; }
+        .price { font-size:2.2rem; font-weight:800; color:#5A3A31; margin:6px 0 14px; }
+        .buy-btn { display:inline-block; margin-top:4px; padding:15px 38px; background:#5A3A31; color:#fff; border:none; border-radius:50px; font-weight:600; font-size:1.1rem; font-family:inherit; text-decoration:none; cursor:pointer; transition:0.3s; }
+        .buy-btn:hover { opacity:0.92; transform:scale(1.03); }
+        .hint { font-size:0.9rem; color:#8a7a70; margin-top:16px; line-height:1.6; }
+        .flash-messages { margin:0 0 16px; }
+        .flash-messages div { background:var(--card-bg,#fff); border-radius:12px; padding:12px 16px; margin-bottom:8px; font-weight:600; color:#2e7d32; box-shadow:var(--shadow,0 4px 15px rgba(0,0,0,0.06)); }
+        .flash-messages div.error { color:#b3261e; }
+        @media (min-width:768px) { .landing-card { padding:44px 40px; } }
+    </style>
+</head>
+
+<body>
+    <br>
+    {% set active_page = 'japan' %}
+    {% include 'components/blog_menu.html' %}
+
+    <div class="landing-page">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}<div class="{{ category }}">{{ message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <div class="landing-card">
+                <h1>The Japan Guide 🇯🇵</h1>
+                <p class="tagline">Our complete 25-night Japan trip, turned into a guide — everything we ate, drank, and explored, ready to copy.</p>
+
+                <ul class="whats-inside">
+                    <li>🗾 מסלול מלא של 25 לילות — טוקיו, ימאנאשי, קיוטו, אוסקה ואוקינאווה</li>
+                    <li>📍 ימים מוצעים לפי אזורים — אטרקציות ואוכל ביחד, בלי לרוץ בין קצוות העיר</li>
+                    <li>🍜 איפה לאכול ולשתות בכל עיר — כל קישור פותח ישר את גוגל מפות</li>
+                    <li>🏨 איפה ישנּו — המלצות לינה אמיתיות לכל אזור</li>
+                    <li>💴 מחשבון תקציב להערכת עלות הטיול שלכם</li>
+                </ul>
+
+                {% if price is not none %}<div class="price">₪{{ price }}</div>{% endif %}
+                {% if auto %}
+                <a class="buy-btn" href="{{ url_for('billing.pay_item', item='japan') }}"><i class="fas fa-credit-card"></i> Get the guide</a>
+                <p class="hint">One-time purchase · Instant access · Secure checkout by Grow
+                    {% if not user %}<br>You'll create a free account first (takes a minute), then pay and you're in.{% endif %}</p>
+                {% else %}
+                <a class="buy-btn" href="{{ pay_link }}" target="_blank" rel="noopener"><i class="fas fa-credit-card"></i> Get the guide</a>
+                <p class="hint">After payment we activate your access manually — usually within a few hours.
+                    {% if user %}<br>Tip: pay with <strong>{{ user.email }}</strong> so we can match it to your account.{% endif %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+
+</html>

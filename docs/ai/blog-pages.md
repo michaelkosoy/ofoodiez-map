@@ -33,6 +33,12 @@ Everything else is automatic: price/name are read live from the Grow item, check
 per-user payment link, and the `/webhooks/grow` callback grants the purchase (row in
 `site_purchases`). Admin can view/edit per-user items in the Members grid ("Items" column).
 
+Alternatively, give the item a public **landing/sales page** instead of the plain locked
+page (what `/blog/japan` does with `blog_japan_landing.html`): the route renders the guide
+for owners and the landing for everyone else; the landing CTA is a plain link to
+`GET /pay/<slug>` — anonymous clickers are sent to sign up first and the purchase resumes
+automatically after auth (`next_after_auth`).
+
 ## Page structure
 Every blog page must include:
 ```html

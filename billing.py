@@ -261,19 +261,26 @@ def grow_page_item(url):
         return hit[1] if hit else None
 
 
-@billing_bp.route('/pay/<item>', methods=['POST'])
-@login_required
+@billing_bp.route('/pay/<item>', methods=['GET', 'POST'])
 def pay_item(item):
     """Create a single-use Grow payment link tied to this account (cField1=user id,
     cField2=item slug) and send the buyer there. The /webhooks/grow callback then
-    grants the item automatically."""
+    grants the item automatically.
+
+    GET so a landing-page CTA can start checkout: anonymous visitors are sent to
+    sign up / log in first (next_after_auth resumes the purchase right after)."""
     it = GROW_ITEMS.get(item)
     if it is None:
         return ('unknown item', 404)
     cfg = _grow_cfg()
     user = current_user()
     if user is None:
+        session['next_after_auth'] = request.path       # resume checkout after signup/login
+        flash('Create a free account (or log in) to complete your purchase — takes a minute.',
+              'success')
         return redirect(url_for('accounts.login'))
+    if has_item(user, item):
+        return redirect(it['path'])                     # already owns it — nothing to buy
     live = grow_page_item(it['page_url'])
     if not grow_light_ready() or live is None:
         flash('Could not start checkout. Please try again.', 'error')

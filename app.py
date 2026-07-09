@@ -258,13 +258,20 @@ def _load_blog(slug):
 
 @app.route('/blog/japan')
 def blog_japan():
-    """Japan travel & food guide — gated: buyers of the 'japan' Grow item."""
-    from billing import item_gate
-    gate = item_gate('japan', title='Unlock the Japan Guide 🇯🇵',
-                     desc='The full travel & food guide — where to eat, drink, and explore.')
-    if gate:
-        return gate
-    return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
+    """Japan travel & food guide. Buyers of the 'japan' Grow item get the guide;
+    everyone else (incl. anonymous visitors) gets the public landing/sales page —
+    its CTA walks them through signup -> payment -> access."""
+    from billing import has_item, GROW_ITEMS, grow_page_item, grow_light_ready
+    user = current_user()
+    if user and has_item(user, 'japan'):
+        return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY,
+                               c=_load_blog('japan'))
+    it = GROW_ITEMS['japan']
+    live = grow_page_item(it['page_url'])
+    return render_template('blog_japan_landing.html', user=user,
+                           price=live['price'] if live else None,
+                           auto=grow_light_ready() and live is not None,
+                           pay_link=it['page_url'])
 
 @app.route('/blog/instagram')
 def blog_instagram():
