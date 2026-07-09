@@ -987,8 +987,9 @@ def send_hitech_bulk_email():
 
     def bg_send():
         with app_instance.app_context():
-            print(f"📧 Starting background bulk email dispatch to {len(recipient_emails)} recipients...")
+            logger.info(f"📧 Starting background bulk email dispatch to {len(recipient_emails)} recipients...")
             sent_count = 0
+            failed_emails = []
             for email in recipient_emails:
                 try:
                     success = send_custom_community_email(
@@ -999,9 +1000,15 @@ def send_hitech_bulk_email():
                     )
                     if success:
                         sent_count += 1
+                    else:
+                        failed_emails.append((email, "SendGrid returned False"))
                 except Exception as e:
-                    print(f"❌ Error sending email to {email}: {e}")
-            print(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
+                    failed_emails.append((email, str(e)))
+            
+            logger.info(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
+            if failed_emails:
+                failed_details = "\n".join([f" - {email}: {reason}" for email, reason in failed_emails])
+                logger.error(f"❌ Failed to send to {len(failed_emails)} recipients:\n{failed_details}")
 
     threading.Thread(target=bg_send, daemon=True).start()
 
