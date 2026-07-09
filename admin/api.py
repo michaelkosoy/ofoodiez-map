@@ -1040,9 +1040,65 @@ def send_hitech_bulk_email():
                     failed_emails.append((email, str(e)))
             
             logger.info(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
+            
+            # Send status email to administrator/ops
+            from whatsapp_bot.config import WaConfig
+            admin_email = WaConfig.WA_OPS_EMAIL or "info@ofoodiez.com"
+            
             if failed_emails:
                 failed_details = "\n".join([f" - {email}: {reason}" for email, reason in failed_emails])
                 logger.error(f"❌ Failed to send to {len(failed_emails)} recipients:\n{failed_details}")
+                
+                status_subject = f"Bulk Email Status: FAILED ({len(failed_emails)} failures)"
+                status_body_text = (
+                    f"Bulk email sending completed with failures.\n\n"
+                    f"Subject: {subject}\n"
+                    f"Total recipients attempted: {len(recipient_emails)}\n"
+                    f"Successfully sent: {sent_count}\n"
+                    f"Failed count: {len(failed_emails)}\n\n"
+                    f"Failed recipients:\n{failed_details}"
+                )
+                status_body_html = (
+                    f"<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: ltr; text-align: left;'>"
+                    f"<h3>Bulk Email Sending completed with failures</h3>"
+                    f"<p><b>Subject:</b> {subject}</p>"
+                    f"<p><b>Total Attempted:</b> {len(recipient_emails)}</p>"
+                    f"<p><b>Successfully Sent:</b> {sent_count}</p>"
+                    f"<p><b>Failed Count:</b> {len(failed_emails)}</p>"
+                    f"<h4>Failed Recipients:</h4>"
+                    f"<pre style='background: #f8f9fa; padding: 12px; border: 1px solid #ddd; border-radius: 4px;'>"
+                    f"{failed_details}"
+                    f"</pre>"
+                    f"</div>"
+                )
+            else:
+                status_subject = "Bulk Email Status: SUCCESS"
+                status_body_text = (
+                    f"Bulk email sending completed successfully.\n\n"
+                    f"Subject: {subject}\n"
+                    f"Total recipients attempted: {len(recipient_emails)}\n"
+                    f"Successfully sent: {sent_count}\n"
+                    f"Failed count: 0\n"
+                )
+                status_body_html = (
+                    f"<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: ltr; text-align: left;'>"
+                    f"<h3>Bulk Email Sending Completed Successfully</h3>"
+                    f"<p><b>Subject:</b> {subject}</p>"
+                    f"<p><b>Total Attempted:</b> {len(recipient_emails)}</p>"
+                    f"<p><b>Successfully Sent:</b> {sent_count}</p>"
+                    f"<p><b>Failed Count:</b> 0</p>"
+                    f"</div>"
+                )
+            
+            try:
+                send_custom_community_email(
+                    to_email=admin_email,
+                    subject=status_subject,
+                    body_html=status_body_html,
+                    body_text=status_body_text
+                )
+            except Exception as mail_err:
+                logger.error(f"❌ Failed to send status notification email to admin: {mail_err}")
 
     threading.Thread(target=bg_send, daemon=True).start()
 
