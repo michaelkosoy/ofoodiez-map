@@ -377,11 +377,17 @@ def paid_japan_return():
 
 @billing_bp.route('/webhooks/grow/debug')
 def grow_debug():
-    """Temporary: view the last few raw Grow payloads to finalize field mapping."""
+    """Temporary rollout tooling: auto-mode status + the last few raw Grow payloads."""
     expected = os.environ.get('GROW_WEBHOOK_KEY') or os.environ.get('ADMIN_SECRET')
     if not expected or request.args.get('key') != expected:
         return ('forbidden', 403)
-    return (json.dumps(_LAST_GROW_EVENTS, ensure_ascii=False, indent=2),
+    status = {
+        'transport': 'make' if _grow_cfg()['make_url'] else
+                     ('direct' if grow_light_ready() else 'NONE — env var missing'),
+        'item': grow_page_item(GROW_JAPAN_PAY_LINK),
+        'events': _LAST_GROW_EVENTS,
+    }
+    return (json.dumps(status, ensure_ascii=False, indent=2),
             200, {'Content-Type': 'application/json; charset=utf-8'})
 
 
