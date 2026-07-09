@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 import requests
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, current_app
 from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User, Purchase
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
@@ -897,6 +897,18 @@ def delete_hitech_email(id):
     db.session.commit()
     return jsonify({'success': True})
 
+@admin_bp.route('/api/email-images', methods=['GET'])
+@login_required
+def get_email_images():
+    folder = os.path.join(current_app.root_path, 'static', 'img', 'emails')
+    if not os.path.exists(folder):
+        return jsonify([])
+    try:
+        files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f)) and not f.startswith('.')]
+        return jsonify(files)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @admin_bp.route('/api/hitech-emails/send-email', methods=['POST'])
 @login_required
 def send_hitech_bulk_email():
@@ -906,6 +918,13 @@ def send_hitech_bulk_email():
     button_url = (data.get('button_url') or '').strip()
     button_text = (data.get('button_text') or '').strip() or 'Register Now'
     image_url = (data.get('image_url') or '').strip()
+    
+    # If image URL starts with relative /static path or static path, make it absolute
+    if image_url:
+        if image_url.startswith('/') or image_url.startswith('static/'):
+            url_path = image_url if image_url.startswith('/') else '/' + image_url
+            image_url = request.url_root.rstrip('/') + url_path
+            
     target = data.get('target', 'all')
     list_name = (data.get('list_name') or '').strip()
     specific_email = (data.get('specific_email') or '').strip()

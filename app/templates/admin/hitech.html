@@ -66,9 +66,18 @@
                 <input id="email-button-text" type="text" placeholder="למשל: להרשמה ותשלום" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
             </div>
 
-            <!-- Email Image URL -->
+            <!-- Email Image Select -->
             <div style="display:flex;flex-direction:column;gap:4px;">
-                <label style="font-size:0.85rem;font-weight:600;color:#555;">כתובת URL לתמונה (אופציונלי)</label>
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">תמונת מייל (אופציונלי)</label>
+                <select id="email-image-select" onchange="toggleImageInput()" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;color:#333;background:#fff;">
+                    <option value="">— ללא תמונה —</option>
+                    <option value="manual">— הזנת קישור תמונה ידני —</option>
+                </select>
+            </div>
+
+            <!-- Email Image URL -->
+            <div id="email-image-url-group" style="display:none;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">קישור לתמונה</label>
                 <input id="email-image-url" type="url" placeholder="https://..." style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
             </div>
 
@@ -396,6 +405,35 @@
     function openEmailModal() {
         document.getElementById('send-email-modal').style.display = 'flex';
         document.getElementById('email-subject').focus();
+
+        // Load image list
+        fetch('/admin/api/email-images')
+            .then(res => res.json())
+            .then(images => {
+                const select = document.getElementById('email-image-select');
+                select.innerHTML = `
+                    <option value="">— ללא תמונה —</option>
+                    <option value="manual">— הזנת קישור תמונה ידני —</option>
+                `;
+                images.forEach(img => {
+                    const opt = document.createElement('option');
+                    opt.value = `/static/img/emails/${img}`;
+                    opt.textContent = img;
+                    select.appendChild(opt);
+                });
+            })
+            .catch(err => console.error('Failed to load email images:', err));
+    }
+
+    function toggleImageInput() {
+        const selectVal = document.getElementById('email-image-select').value;
+        const inputGroup = document.getElementById('email-image-url-group');
+        if (selectVal === 'manual') {
+            inputGroup.style.display = 'flex';
+        } else {
+            inputGroup.style.display = 'none';
+            document.getElementById('email-image-url').value = '';
+        }
     }
 
     function closeEmailModal() {
@@ -404,7 +442,9 @@
         document.getElementById('email-body').value = '';
         document.getElementById('email-button-url').value = '';
         document.getElementById('email-button-text').value = '';
+        document.getElementById('email-image-select').value = '';
         document.getElementById('email-image-url').value = '';
+        document.getElementById('email-image-url-group').style.display = 'none';
         document.getElementById('email-target-list').value = '';
         document.getElementById('email-target-specific').value = '';
         
@@ -423,7 +463,12 @@
         const body = document.getElementById('email-body').value.trim();
         const buttonUrl = document.getElementById('email-button-url').value.trim();
         const buttonText = document.getElementById('email-button-text').value.trim();
-        const imageUrl = document.getElementById('email-image-url').value.trim();
+        
+        let imageUrl = document.getElementById('email-image-select').value;
+        if (imageUrl === 'manual') {
+            imageUrl = document.getElementById('email-image-url').value.trim();
+        }
+        
         const target = document.querySelector('input[name="email-target"]:checked').value;
         const listName = document.getElementById('email-target-list').value.trim();
         const specificEmail = document.getElementById('email-target-specific').value.trim();
