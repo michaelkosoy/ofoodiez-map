@@ -14,18 +14,22 @@ Config (env vars, set by the operator — never hardcoded, never in git):
   PAYPLUS_ENV     = "dev" (sandbox, default) | "prod"
   PAYPLUS_AMOUNT  = price in ILS (optional, default 19)
 
-Grow (Meshulam) Light API — one-time purchase of the Japan guide:
+Grow (Meshulam) — one-time purchase of the Japan guide:
   POST /pay/japan -> CreatePaymentLink (a single-use link tied to the buyer via
                      cField1=user id) and redirect the buyer to it.
   Grow then:
     - POSTs the payment event to /webhooks/grow (notifyUrl) -> is_paid=True, and
     - redirects the buyer to GET /paid/japan (successUrl) -> back to the guide.
-  GROW_API_KEY, GROW_USER_ID, GROW_PAGE_CODE   (from the Grow integration)
-  GROW_API_BASE      = Light API base (default: Grow sandbox; set prod base to go live)
+  Two transports (either one enables auto mode; Make wins if both are set):
+    GROW_MAKE_WEBHOOK_URL = a Make "Custom webhook" scenario that runs Grow's
+        Create Payment Link module (the Grow<->Make connection is phone-verified;
+        merchants get no x-api-key of their own) and replies with the payment URL.
+    GROW_API_KEY + GROW_USER_ID + GROW_PAGE_CODE = direct Light API access, if
+        Grow support ever issues credentials. GROW_API_BASE = Light API base
+        (default: Grow sandbox; production is https://api.grow.link/api/light/server/1.0).
   GROW_JAPAN_PAY_LINK = the guide's public payment-page URL. Doubles as the price
-                        source: the item price set in the Grow dashboard is read from
-                        this page (the Light API has no catalog-read endpoint), so
-                        prices are managed in Grow only — never here.
+        source: the item price set in the Grow dashboard is read from this page
+        (there is no catalog-read endpoint), so prices are managed in Grow only.
 """
 import os
 import json
@@ -164,6 +168,7 @@ GROW_JAPAN_PAY_LINK = os.environ.get(
 
 def _grow_cfg():
     return {
+        'make_url': os.environ.get('GROW_MAKE_WEBHOOK_URL'),
         'api_key': os.environ.get('GROW_API_KEY'),
         'user_id': os.environ.get('GROW_USER_ID'),
         'page_code': os.environ.get('GROW_PAGE_CODE'),
@@ -173,9 +178,9 @@ def _grow_cfg():
 
 
 def grow_light_ready():
-    """True once the Grow Light API env vars are set (switches the guide to auto-unlock)."""
+    """True once a link-creation transport is configured (switches the guide to auto-unlock)."""
     c = _grow_cfg()
-    return bool(c['api_key'] and c['user_id'] and c['page_code'])
+    return bool(c['make_url'] or (c['api_key'] and c['user_id'] and c['page_code']))
 
 
 _PRICE_CACHE = {}   # page url -> (fetched_at, price); stale value served if a refresh fails
@@ -226,39 +231,49 @@ def pay_japan():
         return redirect('/blog/japan')
 
     name = (user.name or '').strip()
-    payload = {
-        'userId': cfg['user_id'],
-        'pageCode': cfg['page_code'],
-        'paymentLinkType': 1,                     # single-payment link
-        'isActive': 1,
-        'chargeType': 1,                          # regular charge
-        'title': 'Ofoodiez Japan Guide',
-        'successUrl': url_for('billing.paid_japan_return', _external=True),
-        'notifyUrl': url_for('billing.grow_callback', _external=True),
-        'cField1': str(user.id),                  # echoed back -> webhook matches the account
-        'cField2': 'japan',
-        'paymentTypes[0][type]': 'payments',
-        'paymentTypes[0][payments][paymentsPaymentNum]': 1,
-        # Grow requires prefill values; the buyer can edit them on the payment page.
-        'pageFieldSettings[fullName][value]': name if len(name.split()) >= 2 else 'Ofoodiez Customer',
-        'pageFieldSettings[phone][value]': '0500000000',   # ponytail: we don't collect phones
-        'pageFieldSettings[email][value]': user.email,
-        'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
-        'products[data][0][name]': 'מדריך יפן',
-        'products[data][0][price]': price,        # live from the Grow dashboard item
-        'products[data][0][quantity]': 1,
-        'products[data][0][vatType]': 3,          # VAT-exempt business (פטור ממע"מ)
-    }
+    full_name = name if len(name.split()) >= 2 else 'Ofoodiez Customer'
+    success_url = url_for('billing.paid_japan_return', _external=True)
+    notify_url = url_for('billing.grow_callback', _external=True)
     r, link = None, None
     try:
-        r = requests.post(cfg['base'] + '/CreatePaymentLink', data=payload,
-                          headers={'x-api-key': cfg['api_key']}, timeout=20)
-        flat = _flatten(r.json())
-        link = _first(flat, 'paymentLinkUrl', 'paymentLink', 'lightLink', 'url', 'link')
-        if not (isinstance(link, str) and link.startswith('http')):
-            ours = {payload['successUrl'], payload['notifyUrl']}
-            link = next((v for v in flat.values()
-                         if isinstance(v, str) and v.startswith('http') and v not in ours), None)
+        if cfg['make_url']:
+            # Make bridge: the scenario runs Grow's Create Payment Link module with
+            # its phone-verified connection and replies with the payment URL.
+            r = requests.post(cfg['make_url'], json={
+                'user_id': str(user.id),          # map to cField1 in the Grow module
+                'email': user.email,
+                'full_name': full_name,
+                'price': price,                   # live from the Grow dashboard item
+                'success_url': success_url,
+                'notify_url': notify_url,
+            }, timeout=30)
+        else:
+            payload = {
+                'userId': cfg['user_id'],
+                'pageCode': cfg['page_code'],
+                'paymentLinkType': 1,                     # single-payment link
+                'isActive': 1,
+                'chargeType': 1,                          # regular charge
+                'title': 'Ofoodiez Japan Guide',
+                'successUrl': success_url,
+                'notifyUrl': notify_url,
+                'cField1': str(user.id),                  # echoed back -> webhook matches the account
+                'cField2': 'japan',
+                'paymentTypes[0][type]': 'payments',
+                'paymentTypes[0][payments][paymentsPaymentNum]': 1,
+                # Grow requires prefill values; the buyer can edit them on the payment page.
+                'pageFieldSettings[fullName][value]': full_name,
+                'pageFieldSettings[phone][value]': '0500000000',   # ponytail: we don't collect phones
+                'pageFieldSettings[email][value]': user.email,
+                'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
+                'products[data][0][name]': 'מדריך יפן',
+                'products[data][0][price]': price,        # live from the Grow dashboard item
+                'products[data][0][quantity]': 1,
+                'products[data][0][vatType]': 3,          # VAT-exempt business (פטור ממע"מ)
+            }
+            r = requests.post(cfg['base'] + '/CreatePaymentLink', data=payload,
+                              headers={'x-api-key': cfg['api_key']}, timeout=20)
+        link = _extract_link(r, exclude={success_url, notify_url})
     except Exception:
         link = None
     if not link:
@@ -268,6 +283,20 @@ def pay_japan():
         return redirect('/blog/japan')
     current_app.logger.info('GROW payment link created for user %s', user.id)
     return redirect(link)
+
+
+def _extract_link(r, exclude):
+    """Payment URL from a CreatePaymentLink-style response: a bare-URL body (Make's
+    Webhook Response) or a URL anywhere in a JSON envelope (direct API)."""
+    text = (r.text or '').strip()
+    if text.startswith('http') and ' ' not in text:
+        return text
+    flat = _flatten(r.json())
+    link = _first(flat, 'paymentLinkUrl', 'paymentLink', 'lightLink', 'url', 'link')
+    if isinstance(link, str) and link.startswith('http'):
+        return link
+    return next((v for v in flat.values()
+                 if isinstance(v, str) and v.startswith('http') and v not in exclude), None)
 
 
 # Last few Grow webhook payloads, kept in memory (single Render worker) for debugging.

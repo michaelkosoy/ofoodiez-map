@@ -32,8 +32,8 @@ A Flask web app and food blog. Main features:
 - `GOOGLE_MAPS_API_KEY`
 - `DATABASE_URL` (PostgreSQL)
 - Any email/SMTP credentials for notifications
-- `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE` — Grow (Meshulam) Light API; enables automatic per-user payment links + auto-unlock for the Japan guide (`billing.py`). Without them the guide falls back to the static link + manual activation.
-- `GROW_API_BASE` — Light API base URL (default: Grow sandbox; set the production base to go live)
+- `GROW_MAKE_WEBHOOK_URL` — Make scenario webhook that runs Grow's Create Payment Link module and replies with the payment URL; enables automatic per-user payment links + auto-unlock for the Japan guide (`billing.py`). The Grow↔Make connection is phone-verified — merchants get no API key of their own, so Make is the normal transport.
+- `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE`, `GROW_API_BASE` — direct Grow Light API access (same effect as the Make webhook; only if Grow support issues credentials). Without either transport the guide falls back to the static link + manual activation.
 - `GROW_JAPAN_PAY_LINK` — the guide's public Grow payment-page URL (has a default in `billing.py`). Item prices are managed **in the Grow dashboard only**: the site reads the current price from this page (`grow_page_price()`), shows it on the locked page, and charges it via the API. Never hardcode prices.
 
 ## Do not do
