@@ -66,6 +66,12 @@
                 <input id="email-button-text" type="text" placeholder="למשל: להרשמה ותשלום" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
             </div>
 
+            <!-- Email Image URL -->
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <label style="font-size:0.85rem;font-weight:600;color:#555;">כתובת URL לתמונה (אופציונלי)</label>
+                <input id="email-image-url" type="url" placeholder="https://..." style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+            </div>
+
             <!-- Recipient Criteria -->
             <div style="display:flex;flex-direction:column;gap:6px;">
                 <label style="font-size:0.85rem;font-weight:600;color:#555;">קהל יעד למשלוח *</label>
@@ -398,6 +404,7 @@
         document.getElementById('email-body').value = '';
         document.getElementById('email-button-url').value = '';
         document.getElementById('email-button-text').value = '';
+        document.getElementById('email-image-url').value = '';
         document.getElementById('email-target-list').value = '';
         document.getElementById('email-target-specific').value = '';
         
@@ -416,6 +423,7 @@
         const body = document.getElementById('email-body').value.trim();
         const buttonUrl = document.getElementById('email-button-url').value.trim();
         const buttonText = document.getElementById('email-button-text').value.trim();
+        const imageUrl = document.getElementById('email-image-url').value.trim();
         const target = document.querySelector('input[name="email-target"]:checked').value;
         const listName = document.getElementById('email-target-list').value.trim();
         const specificEmail = document.getElementById('email-target-specific').value.trim();
@@ -448,6 +456,7 @@
                 body: body,
                 button_url: buttonUrl,
                 button_text: buttonText,
+                image_url: imageUrl,
                 target: target,
                 list_name: listName,
                 specific_email: specificEmail

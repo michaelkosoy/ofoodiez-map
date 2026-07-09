@@ -905,6 +905,7 @@ def send_hitech_bulk_email():
     body_text = (data.get('body') or '').strip()
     button_url = (data.get('button_url') or '').strip()
     button_text = (data.get('button_text') or '').strip() or 'Register Now'
+    image_url = (data.get('image_url') or '').strip()
     target = data.get('target', 'all')
     list_name = (data.get('list_name') or '').strip()
     specific_email = (data.get('specific_email') or '').strip()
@@ -951,6 +952,14 @@ def send_hitech_bulk_email():
             f'</div>'
         )
 
+    image_html = ""
+    if image_url:
+        image_html = (
+            f'<div style="margin-bottom: 24px; text-align: center;">'
+            f'  <img src="{image_url}" alt="Ofoodiez Tech Event" style="max-width: 100%; border-radius: 8px; height: auto; display: block; margin: 0 auto;" />'
+            f'</div>'
+        )
+
     formatted_body = body_text.replace('\n', '<br>')
     
     html_template = (
@@ -965,6 +974,7 @@ def send_hitech_bulk_email():
         f'    <span style="font-size: 20px; font-weight: bold; color: #720815;">Ofoodiez Tech Community</span>'
         f'  </div>'
         f'  <div style="font-size: 15px; color: #222;">'
+        f'    {image_html}'
         f'    {formatted_body}'
         f'  </div>'
         f'  {button_html}'
@@ -976,8 +986,9 @@ def send_hitech_bulk_email():
         f'</div>'
     )
 
+    plain_image_text = f"\n\n[Image: {image_url}]" if image_url else ""
     plain_button_text = f"\n\n{button_text}: {button_url}" if button_url else ""
-    text_content = f"{body_text}{plain_button_text}\n\nOfoodiez Tech Community"
+    text_content = f"{body_text}{plain_image_text}{plain_button_text}\n\nOfoodiez Tech Community"
 
     from whatsapp_bot.emailer import send_custom_community_email
     from flask import current_app
