@@ -9,7 +9,7 @@ Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 import logging
 from datetime import datetime, timedelta, timezone
 
-from . import candidate, conversation, copy, employee, messaging, registration
+from . import candidate, conversation, copy, employee, messaging, profile, registration
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
@@ -22,6 +22,13 @@ _PATHS = {
     "PATH_CANDIDATE": "candidate",
     "PATH_EMPLOYEE": "employee",
     "PATH_CONTACT": "contact",
+}
+
+# Registered users can jump to their profile editor by keyword (the Welcome
+# "Contact" button routes there too); multi-word so it won't eat a company name.
+PROFILE_WORDS = {
+    "my details", "my info", "my profile", "edit profile", "edit my details",
+    "edit my info", "edit info", "update my details", "update my info",
 }
 
 
@@ -53,6 +60,10 @@ def handle(inbound):
     if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
         return _entry(user, conv)
 
+    # Registered users can jump straight to editing their own details.
+    if user.is_registered and text.lower() in PROFILE_WORDS:
+        return profile.start(user, conv)
+
     # Path selection from the Welcome menu.
     if payload in _PATHS:
         return _enter_path(user, conv, _PATHS[payload])
@@ -62,6 +73,8 @@ def handle(inbound):
         return candidate.handle(user, conv, inbound)
     if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
         return employee.handle(user, conv, payload, text)
+    if conv.flow == "profile" and conv.step and conv.step.startswith("prof_"):
+        return profile.handle(user, conv, payload, text)
 
     # No active flow / anything unrecognized → sign-up (if needed) or Welcome.
     return _entry(user, conv)
@@ -74,8 +87,10 @@ def _entry(user, conv):
 
 
 def _enter_path(user, conv, flow):
-    # Contact info needs no account.
+    # Contact option: signed-in users edit their own details; others get contact info.
     if flow == "contact":
+        if user.is_registered:
+            return profile.start(user, conv)
         messaging.send_prompt(user.phone, copy.CONTACT_INFO)
         conversation.reset_state(conv)
         return "enter_contact"

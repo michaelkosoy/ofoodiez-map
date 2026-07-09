@@ -72,6 +72,19 @@ CONTACT_INFO = (
     "Reach us at *info@ofoodiez.com* or DM us on Instagram *@ofoodiez* 🧡\n"
     "Type *menu* anytime to start over."
 )
+# ---- Signed-in user: edit your own details ----
+PROFILE_MENU = (
+    "Your details 👤\n"
+    "• Name: {name}\n"
+    "• Email: {email}\n\n"
+    "Reply *name* or *email* to update one · *menu* to go back."
+)
+PROFILE_NAME_PROMPT = "What should I set your *name* to? (first + last)"
+PROFILE_EMAIL_PROMPT = "What's your *email*?"
+PROFILE_EMAIL_INVALID = (
+    "Hmm, that doesn't look like an email 🤔\n"
+    "Try again — e.g. *you@example.com*."
+)
 
 # ---- Employee / advocate registration ----
 EMP_FIRST_NAME = "Awesome — let's set you up as an advocate! 🙌\nWhat's your *first name*?"
