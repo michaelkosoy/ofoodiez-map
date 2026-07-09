@@ -258,20 +258,12 @@ def _load_blog(slug):
 
 @app.route('/blog/japan')
 def blog_japan():
-    """Japan travel & food guide — gated: registered + paid only."""
-    user = current_user()
-    if user is None:
-        session['next_after_auth'] = '/blog/japan'          # come back here after login/register
-        return redirect(url_for('accounts.login'))
-    if not user.has_access():
-        from billing import grow_light_ready, grow_guide_price, GROW_JAPAN_PAY_LINK
-        # Price lives in the Grow dashboard (read off the public payment page).
-        # API configured + price readable -> per-user link + auto-unlock;
-        # otherwise fall back to the static link (its page shows the real price anyway).
-        price = grow_guide_price() if grow_light_ready() else None
-        return render_template('blog_japan_locked.html', user=user,
-                               auto=price is not None, price=price,
-                               pay_link=GROW_JAPAN_PAY_LINK)
+    """Japan travel & food guide — gated: buyers of the 'japan' Grow item."""
+    from billing import item_gate
+    gate = item_gate('japan', title='Unlock the Japan Guide 🇯🇵',
+                     desc='The full travel & food guide — where to eat, drink, and explore.')
+    if gate:
+        return gate
     return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY, c=_load_blog('japan'))
 
 @app.route('/blog/instagram')

@@ -207,3 +207,17 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.email}>'
+
+
+class Purchase(db.Model):
+    """A one-time Grow item purchase (per-item access: guides etc.).
+    `item` is a slug registered in billing.GROW_ITEMS. Granted by the Grow webhook
+    (cField2 / catalog-number match) or manually via the admin Members grid."""
+    __tablename__ = 'site_purchases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('site_users.id'), nullable=False, index=True)
+    item = db.Column(db.String(64), nullable=False)
+    paid_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'item', name='uq_purchase_user_item'),)

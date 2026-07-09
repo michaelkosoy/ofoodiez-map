@@ -5,8 +5,8 @@
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Japan Guide — Ofoodiez</title>
-    <meta name="description" content="Unlock the Ofoodiez Japan travel & food guide.">
+    <title>{{ title }} — Ofoodiez</title>
+    <meta name="description" content="Unlock this Ofoodiez content.">
 
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
@@ -42,7 +42,7 @@
 
 <body>
     <br>
-    {% set active_page = 'japan' %}
+    {% set active_page = slug %}
     {% include 'components/blog_menu.html' %}
 
     <div class="services-page">
@@ -56,16 +56,16 @@
             {% endwith %}
             <div class="service-card">
                 <div class="lock-icon"><i class="fas fa-lock"></i></div>
-                <h2>Unlock the Japan Guide 🇯🇵</h2>
-                <p>The full travel &amp; food guide — where to eat, drink, and explore.</p>
+                <h2>{{ title }}</h2>
+                <p>{{ desc }}</p>
                 {% if auto %}
                 <div class="price">₪{{ price }}</div>
-                <form method="POST" action="{{ url_for('billing.pay_japan') }}">
-                    <button type="submit" class="buy-btn"><i class="fas fa-credit-card"></i> Buy the guide</button>
+                <form method="POST" action="{{ url_for('billing.pay_item', item=slug) }}">
+                    <button type="submit" class="buy-btn"><i class="fas fa-credit-card"></i> Buy now</button>
                 </form>
                 <p class="hint">Secure checkout by Grow. Your access unlocks automatically right after payment.</p>
                 {% else %}
-                <a class="buy-btn" href="{{ pay_link }}" target="_blank" rel="noopener"><i class="fas fa-credit-card"></i> Buy the guide</a>
+                <a class="buy-btn" href="{{ pay_link }}" target="_blank" rel="noopener"><i class="fas fa-credit-card"></i> Buy now</a>
                 <p class="hint">After payment we activate your access manually — usually within a few hours.<br>
                     Tip: pay with <strong>{{ user.email }}</strong> so we can match it to your account.</p>
                 {% endif %}

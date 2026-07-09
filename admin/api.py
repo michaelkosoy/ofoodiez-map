@@ -5,7 +5,7 @@ from datetime import datetime
 
 import requests
 from flask import jsonify, request, Response
-from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User
+from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User, Purchase
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
     WaApplication, WaApplicationRecipient, WaCompanyRequest,
@@ -1025,6 +1025,8 @@ def _user_dict(u):
         'name': u.name or '',
         'method': _user_method(u),
         'is_paid': bool(u.is_paid),                                   # raw manual flag (editable)
+        # ponytail: per-user query; fine at this member count
+        'items': ', '.join(sorted(p.item for p in Purchase.query.filter_by(user_id=u.id))),
         'paid_until': u.paid_until.strftime('%Y-%m-%d') if u.paid_until else '',
         'payplus_sub_uid': u.payplus_sub_uid or '',
         'created_at': u.created_at.strftime('%Y-%m-%d') if u.created_at else '',
@@ -1045,6 +1047,13 @@ def update_user(id):
         user.name = (data.get('name') or '').strip() or None
     if 'is_paid' in data:
         user.is_paid = bool(data.get('is_paid'))
+    if 'items' in data:
+        # Comma-separated Grow item slugs; replaces the user's purchases.
+        # ponytail: re-created rows lose the original paid_at — acceptable for admin overrides.
+        want = {s.strip() for s in str(data.get('items') or '').split(',') if s.strip()}
+        Purchase.query.filter_by(user_id=user.id).delete()
+        for slug in want:
+            db.session.add(Purchase(user_id=user.id, item=slug))
     if 'paid_until' in data:
         raw = (data.get('paid_until') or '').strip()
         if not raw:

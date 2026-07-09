@@ -34,7 +34,7 @@ A Flask web app and food blog. Main features:
 - Any email/SMTP credentials for notifications
 - `GROW_MAKE_WEBHOOK_URL` — Make scenario webhook that runs Grow's Create Payment Link module and replies with the payment URL; enables automatic per-user payment links + auto-unlock for the Japan guide (`billing.py`). The Grow↔Make connection is phone-verified — merchants get no API key of their own, so Make is the normal transport.
 - `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE`, `GROW_API_BASE` — direct Grow Light API access (same effect as the Make webhook; only if Grow support issues credentials). Without either transport the guide falls back to the static link + manual activation.
-- `GROW_JAPAN_PAY_LINK` — the guide's public Grow payment-page URL (has a default in `billing.py`). Item price **and name** are managed **in the Grow dashboard only**: the site reads them live from this page (`grow_page_item()`), shows the price on the locked page, and charges it at checkout. Never hardcode prices.
+- `GROW_JAPAN_PAY_LINK` — the Japan guide's public Grow payment-page URL (has a default in `billing.py`). Item price **and name** are managed **in the Grow dashboard only**: the site reads them live from each item's page (`grow_page_item()`), shows the price on the locked page, and charges it at checkout. Never hardcode prices. All sellable items live in `billing.GROW_ITEMS` (slug → page_url/catalog/path); per-user purchases in the `site_purchases` table. See docs/ai/blog-pages.md § Paid (gated) pages.
 
 ## Do not do
 - Do not push large images (>500KB) directly to the git repo — it can break the production deployment

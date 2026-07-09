@@ -20,6 +20,19 @@ All blog pages live under `/blog/<slug>`. Never create a blog page at a top-leve
 4. If the old URL exists at a top-level (e.g. `/<slug>`), add a 301 redirect to `/blog/<slug>`
 5. Update this file
 
+## Paid (gated) pages — sold as Grow items
+A page sold as a one-time Grow purchase (like `/blog/japan`) additionally needs ONE
+registry entry in `billing.GROW_ITEMS` (slug → the item's public pay.grow.link page URL,
+its Grow catalog number, and the page path), and its route starts with:
+```python
+gate = item_gate('<slug>', title='...', desc='...')   # from billing
+if gate:
+    return gate
+```
+Everything else is automatic: price/name are read live from the Grow item, checkout is a
+per-user payment link, and the `/webhooks/grow` callback grants the purchase (row in
+`site_purchases`). Admin can view/edit per-user items in the Members grid ("Items" column).
+
 ## Page structure
 Every blog page must include:
 ```html

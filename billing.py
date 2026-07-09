@@ -40,9 +40,10 @@ import base64
 from datetime import datetime, timedelta
 
 import requests
-from flask import Blueprint, request, redirect, url_for, flash, current_app
+from flask import (Blueprint, request, redirect, url_for, flash, current_app,
+                   render_template, session)
 
-from database.models import db, User
+from database.models import db, User, Purchase
 from accounts import login_required, current_user
 
 billing_bp = Blueprint('billing', __name__)
@@ -157,13 +158,59 @@ def payplus_callback():
     return ('', 200)
 
 
-# --- Grow (Meshulam) Light API: per-buyer payment link for the Japan guide ---
+# --- Grow (Meshulam): per-buyer payment links for one-time items --------------
 
 # Public checkout page for the guide (also the fallback buy link in manual mode).
 GROW_JAPAN_PAY_LINK = os.environ.get(
     'GROW_JAPAN_PAY_LINK',
     'https://pay.grow.link/MTAyNjQ5~f7e8a4d50c74bd0636c6bff059e2e951-MzY0NTc2Ng'
 )
+
+# Everything sellable, keyed by slug. Adding an item you created in Grow =
+# one entry here + a gated page calling item_gate(slug). Price and name are
+# always read live from the item's public payment page — never written here.
+#   page_url = the item's public Grow payment-page link (price/name source +
+#              static fallback checkout), catalog = its Grow catalog number,
+#   path     = the gated page a buyer returns to after payment.
+GROW_ITEMS = {
+    'japan': {'page_url': GROW_JAPAN_PAY_LINK, 'catalog': 10, 'path': '/blog/japan'},
+}
+
+
+def has_item(user, slug):
+    """May this member open the item's gated content?"""
+    if Purchase.query.filter_by(user_id=user.id, item=slug).first():
+        return True
+    # Legacy: the global paid flag (pre-registry Japan buys, /services subscription)
+    # keeps opening the Japan guide only.
+    return slug == 'japan' and user.has_access()
+
+
+def _grant(user, slug):
+    """Record a paid item for the member. Idempotent."""
+    if not Purchase.query.filter_by(user_id=user.id, item=slug).first():
+        db.session.add(Purchase(user_id=user.id, item=slug))
+        db.session.commit()
+
+
+def item_gate(slug, title=None, desc=None):
+    """Gate a page behind a Grow item. Returns None when the visitor may enter,
+    otherwise the response to return (login redirect or the locked/buy page)."""
+    user = current_user()
+    if user is None:
+        session['next_after_auth'] = request.path      # come back here after login/register
+        return redirect(url_for('accounts.login'))
+    if has_item(user, slug):
+        return None
+    it = GROW_ITEMS[slug]
+    live = grow_page_item(it['page_url'])
+    price = live['price'] if live else None
+    return render_template(
+        'item_locked.html', user=user, slug=slug,
+        title=title or ('Unlock: ' + live['name'] if live else 'Unlock this content'),
+        desc=desc or 'One-time purchase — instant, permanent access.',
+        auto=grow_light_ready() and price is not None,
+        price=price, pay_link=it['page_url'])
 
 
 def _grow_cfg():
@@ -214,29 +261,28 @@ def grow_page_item(url):
         return hit[1] if hit else None
 
 
-def grow_guide_price():
-    item = grow_page_item(GROW_JAPAN_PAY_LINK)
-    return item['price'] if item else None
-
-
-@billing_bp.route('/pay/japan', methods=['POST'])
+@billing_bp.route('/pay/<item>', methods=['POST'])
 @login_required
-def pay_japan():
-    """Create a single-use Grow payment link tied to this account (cField1=user id)
-    and send the buyer there. The /webhooks/grow callback unlocks automatically."""
+def pay_item(item):
+    """Create a single-use Grow payment link tied to this account (cField1=user id,
+    cField2=item slug) and send the buyer there. The /webhooks/grow callback then
+    grants the item automatically."""
+    it = GROW_ITEMS.get(item)
+    if it is None:
+        return ('unknown item', 404)
     cfg = _grow_cfg()
     user = current_user()
     if user is None:
         return redirect(url_for('accounts.login'))
-    item = grow_page_item(GROW_JAPAN_PAY_LINK)
-    if not grow_light_ready() or item is None:
+    live = grow_page_item(it['page_url'])
+    if not grow_light_ready() or live is None:
         flash('Could not start checkout. Please try again.', 'error')
-        return redirect('/blog/japan')
-    price, product_name = item['price'], item['name']
+        return redirect(it['path'])
+    price, product_name = live['price'], live['name']
 
     name = (user.name or '').strip()
     full_name = name if len(name.split()) >= 2 else 'Ofoodiez Customer'
-    success_url = url_for('billing.paid_japan_return', _external=True)
+    success_url = url_for('billing.paid_item', item=item, _external=True)
     notify_url = url_for('billing.grow_callback', _external=True)
     r, link = None, None
     try:
@@ -245,10 +291,12 @@ def pay_japan():
             # its phone-verified connection and replies with the payment URL.
             r = requests.post(cfg['make_url'], json={
                 'user_id': str(user.id),          # map to cField1 in the Grow module
+                'item': item,                     # map to cField2 (Custom Field 2)
                 'email': user.email,
                 'full_name': full_name,
                 'price': price,                   # live from the Grow dashboard item
                 'product_name': product_name,     # ditto
+                'catalog_number': it['catalog'],
                 'success_url': success_url,
                 'notify_url': notify_url,
             }, timeout=30)
@@ -259,18 +307,18 @@ def pay_japan():
                 'paymentLinkType': 1,                     # single-payment link
                 'isActive': 1,
                 'chargeType': 1,                          # regular charge
-                'title': 'Ofoodiez Japan Guide',
+                'title': product_name,
                 'successUrl': success_url,
                 'notifyUrl': notify_url,
                 'cField1': str(user.id),                  # echoed back -> webhook matches the account
-                'cField2': 'japan',
+                'cField2': item,                          # echoed back -> webhook grants this item
                 'paymentTypes[0][type]': 'payments',
                 'paymentTypes[0][payments][paymentsPaymentNum]': 1,
                 # Grow requires prefill values; the buyer can edit them on the payment page.
                 'pageFieldSettings[fullName][value]': full_name,
                 'pageFieldSettings[phone][value]': '0500000000',   # ponytail: we don't collect phones
                 'pageFieldSettings[email][value]': user.email,
-                'products[data][0][catalogNumber]': 10,   # Grow catalog item "מדריך יפן"
+                'products[data][0][catalogNumber]': it['catalog'],
                 'products[data][0][name]': product_name,  # live from the Grow dashboard item
                 'products[data][0][price]': price,        # ditto
                 'products[data][0][quantity]': 1,
@@ -282,11 +330,11 @@ def pay_japan():
     except Exception:
         link = None
     if not link:
-        current_app.logger.error('GROW CreatePaymentLink failed: %s',
-                                 getattr(r, 'text', '?')[:2000])
+        current_app.logger.error('GROW CreatePaymentLink failed (%s): %s',
+                                 item, getattr(r, 'text', '?')[:2000])
         flash('Could not start checkout. Please try again.', 'error')
-        return redirect('/blog/japan')
-    current_app.logger.info('GROW payment link created for user %s', user.id)
+        return redirect(it['path'])
+    current_app.logger.info('GROW payment link created for user %s item %s', user.id, item)
     return redirect(link)
 
 
@@ -350,29 +398,39 @@ def grow_callback():
         if uid and str(uid).isdigit():
             u = User.query.get(int(uid))
     if u:
-        if not u.is_paid:
-            _mark_paid(u)
-        current_app.logger.info('GROW: unlocked user %s (email=%s)', u.id, email)
+        # Which item was bought: the slug we echoed in cField2, else the catalog number.
+        slug = str(_first(flat, 'cField2', 'customField2', 'item') or '').strip()
+        if slug not in GROW_ITEMS:
+            cat = _safe_int(_first(flat, 'catalogNumber', 'catalog_number'))
+            slug = next((s for s, it in GROW_ITEMS.items() if it['catalog'] == cat), None)
+        if slug:
+            _grant(u, slug)
+        else:
+            _mark_paid(u)   # legacy static-link buy — item unknown, old global unlock
+        current_app.logger.info('GROW: unlocked user %s item=%s (email=%s)', u.id, slug, email)
     else:
         current_app.logger.warning('GROW: no match; payload keys=%s', list(flat.keys()))
     return ('', 200)
 
 
-@billing_bp.route('/paid/japan')
-def paid_japan_return():
-    """Landing after Grow checkout. The webhook (matched via cField1=user id) unlocks
-    the account automatically — usually before the buyer even lands here. Paid users
-    fall straight through to the open guide; if the webhook hasn't arrived yet, show
+@billing_bp.route('/paid/<item>')
+def paid_item(item):
+    """Landing after Grow checkout. The webhook (matched via cField1=user id) grants
+    the item automatically — usually before the buyer even lands here. Paid buyers
+    fall straight through to the open page; if the webhook hasn't arrived yet, show
     a "confirming" note on the locked page. (Static-link buyers without a webhook
     match are still activated manually in /admin/members.)
     """
     if request.args:
-        current_app.logger.info('GROW return params: %s', dict(request.args))
+        current_app.logger.info('GROW return params (%s): %s', item, dict(request.args))
+    it = GROW_ITEMS.get(item)
+    if it is None:
+        return redirect('/')
     u = current_user()
-    if u and not u.has_access():
+    if u and not has_item(u, item):
         flash('Payment received! Confirming your access — refresh this page in a moment.',
               'success')
-    return redirect('/blog/japan')
+    return redirect(it['path'])
 
 
 @billing_bp.route('/webhooks/grow/debug')
@@ -384,7 +442,7 @@ def grow_debug():
     status = {
         'transport': 'make' if _grow_cfg()['make_url'] else
                      ('direct' if grow_light_ready() else 'NONE — env var missing'),
-        'item': grow_page_item(GROW_JAPAN_PAY_LINK),
+        'items': {slug: grow_page_item(it['page_url']) for slug, it in GROW_ITEMS.items()},
         'events': _LAST_GROW_EVENTS,
     }
     return (json.dumps(status, ensure_ascii=False, indent=2),
