@@ -377,6 +377,10 @@ def grow_callback():
     current_app.logger.info('GROW webhook: %s', json.dumps(data, ensure_ascii=False)[:3000])
 
     flat = _flatten(data)
+    # Real notifies arrive form-encoded with bracketed names ('data[customFields][cField1]');
+    # expose each key's last segment too so cField1/cField2/payerEmail match by plain name.
+    for k, v in list(flat.items()):
+        flat.setdefault(k.rsplit('[', 1)[-1].rstrip(']'), v)
 
     # Key check is advisory during rollout (Grow regenerates the key; env may lag) — log, don't drop.
     key = os.environ.get('GROW_WEBHOOK_KEY')
