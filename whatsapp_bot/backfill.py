@@ -43,13 +43,17 @@ def _resolve_company(req_row, company=None):
 
 def _notify(req_row, company=None):
     """Email the candidate that their requested company is now available.
-    Returns 'sent' | 'no_email' | 'failed'."""
+    Returns 'sent' | 'no_email' | 'no_advocate' | 'failed'. Gated on an active
+    advocate — we only tell a candidate 'available' once someone can actually
+    refer them there."""
     cand = WaUser.query.get(req_row.candidate_user_id)
     if not cand or not cand.email:
         return "no_email"
     company = _resolve_company(req_row, company)
-    company_name = company.name if company else (req_row.company_name_raw or "the company")
-    ok = emailer.send_company_available_email(cand.email, cand.first_name or "there", company_name)
+    if company is None or WaAdvocate.query.filter_by(
+            company_id=company.id, status="active").first() is None:
+        return "no_advocate"
+    ok = emailer.send_company_available_email(cand.email, cand.first_name or "there", company.name)
     return "sent" if ok else "failed"
 
 

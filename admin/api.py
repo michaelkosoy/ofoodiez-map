@@ -367,23 +367,43 @@ def get_whatsapp_applications():
     return jsonify(out)
 
 
+def _req_key(req):
+    """Group key for a backfill request: its normalized company name (falls back
+    to a normalized raw name for any legacy row without one). Used to collapse the
+    per-candidate request rows into one row per company."""
+    return (req.normalized_name or (req.company_name_raw or "").strip().lower()) or "?"
+
+
 @admin_bp.route('/api/whatsapp/requests', methods=['GET'])
 @login_required
 def get_whatsapp_requests():
     results = db.session.query(WaCompanyRequest, WaUser).join(
         WaUser, WaCompanyRequest.candidate_user_id == WaUser.id).order_by(
         WaCompanyRequest.created_at.desc()).all()
-    out = []
+    # One row per company; each candidate who asked for it accumulates into a list.
+    # Rows are indexed by the normalized company key so the by-company actions can
+    # target the whole group (mark handled → notify everyone / delete all).
+    groups = {}
     for req, usr in results:
-        out.append({
-            "id": req.id,
-            "company": req.company_name_raw,
-            "reason": req.reason,
-            "candidate": _name(usr),
-            "number": usr.phone,
-            "status": req.status,
-            "created": _fmt(req.created_at),
-        })
+        key = _req_key(req)
+        g = groups.get(key)
+        if g is None:
+            g = groups[key] = {"id": key, "company": req.company_name_raw,
+                               "created": _fmt(req.created_at),  # newest (query is desc)
+                               "_seen": set(), "_names": [], "_open": 0}
+        if req.status == "open":
+            g["_open"] += 1
+        if usr.id not in g["_seen"]:            # one entry per candidate, not per request
+            g["_seen"].add(usr.id)
+            g["_names"].append(f"{_name(usr)} ({usr.phone})" if usr.phone else _name(usr))
+    out = [{
+        "id": g["id"],
+        "company": g["company"],
+        "candidates": ", ".join(g["_names"]),
+        "count": len(g["_names"]),
+        "status": "open" if g["_open"] else "handled",  # open if any candidate is still open
+        "created": g["created"],
+    } for g in groups.values()]
     return jsonify(out)
 
 
@@ -697,6 +717,74 @@ def delete_whatsapp_application(id):
 def delete_whatsapp_request(id):
     r = WaCompanyRequest.query.get_or_404(id)
     db.session.delete(r)
+    db.session.commit()
+    return '', 204
+
+
+def _requests_for_key(key):
+    """All backfill requests that belong to one company group (see _req_key). The
+    requests table is a small ops queue, so filtering in Python keeps the grouping
+    logic identical on read and write with no SQL edge cases."""
+    key = (key or "").strip().lower()
+    return key, [r for r in WaCompanyRequest.query.all() if _req_key(r) == key]
+
+
+def _group_company(rows, key=None):
+    """The WaCompany a request group maps to, if it exists yet (None while the
+    company is still unknown)."""
+    for r in rows:
+        if r.resolved_company_id:
+            c = WaCompany.query.get(r.resolved_company_id)
+            if c:
+                return c
+    key = key or (_req_key(rows[0]) if rows else None)
+    return WaCompany.query.filter_by(normalized_name=key).first() if key else None
+
+
+@admin_bp.route('/api/whatsapp/requests/by-company', methods=['PUT'])
+@login_required
+def update_whatsapp_requests_by_company():
+    """Mark every request for a company handled/open in one go. On 'handled', email
+    EACH candidate (once) that their company is now available — but only once the
+    company actually has an active advocate, so nobody is told 'available' too early."""
+    body = request.json or {}
+    status = body.get("status")
+    if status not in ("open", "handled"):
+        return jsonify({"error": "invalid status"}), 400
+    key, rows = _requests_for_key(body.get("key"))
+    if not rows:
+        return jsonify({"error": "not found"}), 404
+    if status == "handled":
+        company = _group_company(rows, key)
+        if not (company and WaAdvocate.query.filter_by(
+                company_id=company.id, status="active").first()):
+            # Nobody can refer them yet → don't mark handled or email; leave it open
+            # so the backfill cron notifies everyone automatically once an advocate exists.
+            return jsonify({"blocked": "no_advocate",
+                            "company": company.name if company else rows[0].company_name_raw})
+    newly = [r for r in rows if status == "handled" and r.status != "handled"]
+    for r in rows:
+        r.status = status
+    db.session.commit()
+    # Notify each unique candidate once. ponytail: one bot call per candidate —
+    # fine for a handful; add a batch bot endpoint if a company backfills to many.
+    emailed, seen = 0, set()
+    for r in newly:
+        if r.candidate_user_id in seen:
+            continue
+        seen.add(r.candidate_user_id)
+        if _notify_via_bot(r.id):
+            emailed += 1
+    return jsonify({"updated": len(rows), "candidates": len(seen), "emailed": emailed, "status": status})
+
+
+@admin_bp.route('/api/whatsapp/requests/by-company', methods=['DELETE'])
+@login_required
+def delete_whatsapp_requests_by_company():
+    """Delete every request for one company group."""
+    key, rows = _requests_for_key(request.args.get("key"))
+    for r in rows:
+        db.session.delete(r)
     db.session.commit()
     return '', 204
 

@@ -403,10 +403,9 @@ var COLS = {
                 cell.getRow().toggleSelect();
             }
         },
-        { title: "When", field: "created", width: 150 },
+        { title: "Last requested", field: "created", width: 140 },
         { title: "Company searched", field: "company", headerFilter: "input", minWidth: 180 },
-        { title: "Candidate", field: "candidate", headerFilter: "input", minWidth: 140 },
-        { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
+        { title: "Candidates", field: "candidates", headerFilter: "input", minWidth: 260, formatter: function (c) { var d = c.getRow().getData(); return '<b>' + (d.count || 0) + '</b> · ' + (d.candidates || ''); } },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
         {
             title: "Actions", headerSort: false, width: 220, hozAlign: "center",
@@ -420,15 +419,32 @@ var COLS = {
             cellClick: function (e, c) {
                 var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
+                var table = c.getTable();
                 if (btn.dataset.a === 'toggle') {
-                    act('/admin/api/whatsapp/requests/' + d.id, { status: d.status === 'open' ? 'handled' : 'open' }, 'Updated', c.getTable());
+                    var toHandled = d.status === 'open';
+                    Swal.fire({
+                        title: toHandled ? 'Mark handled?' : 'Reopen?',
+                        text: toHandled ? ('Notify ' + d.count + ' candidate' + (d.count === 1 ? '' : 's') + ' for ' + d.company + '?') : d.company,
+                        icon: 'question', showCancelButton: true, confirmButtonText: 'Yes'
+                    }).then(function (res) {
+                        if (!res.isConfirmed) return;
+                        fetch('/admin/api/whatsapp/requests/by-company', {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ key: d.id, status: toHandled ? 'handled' : 'open' })
+                        }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+                            .then(function (j) {
+                                if (j.blocked === 'no_advocate') { Swal.fire({ icon: 'info', title: 'No advocate yet', text: 'Add an advocate for ' + (j.company || d.company) + ' first — candidates are notified automatically once you do.' }); return; }
+                                table.replaceData();
+                                Swal.fire({ icon: 'success', title: toHandled ? ('Handled · emailed ' + (j.emailed || 0) + '/' + (j.candidates || d.count)) : 'Reopened', timer: 1500, showConfirmButton: false });
+                            }).catch(function () { Swal.fire({ icon: 'error', title: 'Failed' }); });
+                    });
                 } else if (btn.dataset.a === 'delete') {
-                    Swal.fire({ title: 'Delete request?', text: d.company, icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                    Swal.fire({ title: 'Delete all requests?', text: d.count + ' request(s) · ' + d.company, icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
                         .then(function (res) {
                             if (!res.isConfirmed) return;
-                            fetch('/admin/api/whatsapp/requests/' + d.id, { method: 'DELETE' })
+                            fetch('/admin/api/whatsapp/requests/by-company?key=' + encodeURIComponent(d.id), { method: 'DELETE' })
                                 .then(function (r) {
-                                    if (r.ok) { c.getTable().replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    if (r.ok) { table.replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
                                     else Swal.fire('Error', 'Could not delete', 'error');
                                 });
                         });
@@ -673,21 +689,26 @@ document.getElementById('bulk-handle-requests-btn').addEventListener('click', fu
     if (!table) return;
     var selected = table.getSelectedData();
     if (!selected.length) return;
+    var cand = selected.reduce(function(n, d) { return n + (d.count || 0); }, 0);
     Swal.fire({
-        title: 'Mark ' + selected.length + ' request' + (selected.length === 1 ? '' : 's') + ' as handled?',
+        title: 'Mark ' + selected.length + ' compan' + (selected.length === 1 ? 'y' : 'ies') + ' handled?',
+        text: 'Notifies ' + cand + ' candidate' + (cand === 1 ? '' : 's') + '.',
         icon: 'question', showCancelButton: true, confirmButtonText: 'Mark handled'
     }).then(function(res) {
         if (!res.isConfirmed) return;
         Promise.all(selected.map(function(d) {
-            return fetch('/admin/api/whatsapp/requests/' + d.id, {
+            return fetch('/admin/api/whatsapp/requests/by-company', {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'handled' })
-            });
+                body: JSON.stringify({ key: d.id, status: 'handled' })
+            }).then(function(r) { return r.ok ? r.json() : null; });
         })).then(function(results) {
             table.replaceData();
-            var failed = results.filter(function(r) { return !r.ok; }).length;
-            if (failed) Swal.fire('Error', failed + ' request(s) failed to update', 'error');
-            else Swal.fire({ icon: 'success', title: 'Updated', timer: 1000, showConfirmButton: false });
+            var failed = results.filter(function(j) { return !j; }).length;
+            var blocked = results.filter(function(j) { return j && j.blocked; }).length;
+            var emailed = results.reduce(function(n, j) { return n + ((j && j.emailed) || 0); }, 0);
+            if (blocked) Swal.fire({ icon: 'info', title: blocked + ' skipped — no advocate', text: 'Emailed ' + emailed + '/' + cand + '. Companies without an advocate were left open.' });
+            else if (failed) Swal.fire('Error', failed + ' compan(ies) failed to update', 'error');
+            else Swal.fire({ icon: 'success', title: 'Handled · emailed ' + emailed + '/' + cand, timer: 1400, showConfirmButton: false });
         });
     });
 });
@@ -698,16 +719,17 @@ document.getElementById('bulk-delete-requests-btn').addEventListener('click', fu
     var selected = table.getSelectedData();
     if (!selected.length) return;
     Swal.fire({
-        title: 'Delete ' + selected.length + ' request' + (selected.length === 1 ? '' : 's') + '?',
+        title: 'Delete ' + selected.length + ' compan' + (selected.length === 1 ? 'y' : 'ies') + '?',
+        text: 'Removes all their backfill requests.',
         icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete'
     }).then(function(res) {
         if (!res.isConfirmed) return;
         Promise.all(selected.map(function(d) {
-            return fetch('/admin/api/whatsapp/requests/' + d.id, { method: 'DELETE' });
+            return fetch('/admin/api/whatsapp/requests/by-company?key=' + encodeURIComponent(d.id), { method: 'DELETE' });
         })).then(function(results) {
             table.replaceData();
             var failed = results.filter(function(r) { return !r.ok; }).length;
-            if (failed) Swal.fire('Error', failed + ' request(s) failed to delete', 'error');
+            if (failed) Swal.fire('Error', failed + ' compan(ies) failed to delete', 'error');
             else Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
         });
     });
