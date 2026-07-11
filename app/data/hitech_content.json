@@ -75,9 +75,7 @@
       {
         "icon": "fas fa-robot",
         "title": "בדיקת קורות חיים עם AI",
-        "desc": "מעלים קורות חיים ומקבלים ציון ותיקונים קונקרטיים — על בסיס המדריך המלא.",
-        "href": "/hitech/cv-review",
-        "badge": "New"
+        "desc": "מעלים קורות חיים ומקבלים ציון ותיקונים קונקרטיים — על בסיס המדריך המלא."
       },
       {
         "icon": "fas fa-star",
@@ -123,13 +121,25 @@
         "tooltip_title": "כותרת ופרטי קשר"
       },
       {
+        "num": "2",
+        "tip_class": "",
+        "dot_top": "17%",
+        "dot_left": "55%",
+        "name": "טייטל מקצועי",
+        "tooltip_title": "טייטל מתחת לשם",
+        "tooltip_text": "הוסיפו שורה אחת שאומרת מי אתם מקצועית — למשל Software Engineer. אל תשאירו את הקורא לנחש.",
+        "body": "שורה אחת ממורכזת מתחת לשם שממסגרת אתכם מקצועית: Software Engineer, Backend Developer, Computer Science Student.",
+        "good_example": "✅ Software Engineer",
+        "bad_example": "❌ שם ומיד פרטי קשר — בלי להגיד מי אתם"
+      },
+      {
         "bad_example": "❌ \"Motivated and results-oriented professional seeking a challenging opportunity.\"",
         "body": "את זה קוראים ראשון. כתבו 2–3 משפטים: מי אתם, מה אתם מביאים (כולל הטכנולוגיות המרכזיות, מודגשות), ומה אתם מחפשים. התאימו את הפסקה לכל משרה — תקציר גנרי הוא הזדמנות מבוזבזת, ו\"motivated fast learner\" לא אומר כלום.",
         "dot_left": "20%",
         "dot_top": "23%",
         "good_example": "✅ \"Backend engineer with 5 years building high-scale systems. Specialise in distributed architectures and led a 4× performance improvement at Company X.\"",
         "name": "פסקת פתיחה",
-        "num": "2",
+        "num": "3",
         "tip_class": "",
         "tooltip_text": "2–3 שורות, מותאמות למשרה. זה הפיץ' של 6 השניות שלכם.",
         "tooltip_title": "פסקת פתיחה"
@@ -141,7 +151,7 @@
         "dot_top": "40%",
         "good_example": "✅ \"Reduced API response time by 40% through caching layer redesign, serving 2M daily users.\"",
         "name": "ניסיון תעסוקתי",
-        "num": "3",
+        "num": "4",
         "tip_class": "tip-left",
         "tooltip_text": "בולטים עם מספרים וטכנולוגיות מודגשות. \"Led team of 6\" מנצח \"responsible for\".",
         "tooltip_title": "ניסיון תעסוקתי"
@@ -153,7 +163,7 @@
         "dot_top": "62%",
         "good_example": "✅ \"B.Sc. Computer Science — Tel Aviv University, 2019\"",
         "name": "השכלה",
-        "num": "4",
+        "num": "5",
         "tip_class": "",
         "tooltip_text": "קצר, אלא אם אתם בוגרים טריים. תואר, מוסד, שנה. בלי תיכון.",
         "tooltip_title": "השכלה"
@@ -165,13 +175,13 @@
         "dot_top": "80%",
         "good_example": "✅ Python, TypeScript, React, Node.js, PostgreSQL, AWS, Docker, Kubernetes",
         "name": "כישורים (Skills)",
-        "num": "5",
+        "num": "6",
         "tip_class": "tip-left",
         "tooltip_text": "רק כישורים רלוונטיים, במילים של המשרה, מודגשים. כל מילה בדף היא שאלה בראיון.",
         "tooltip_title": "כישורים"
       }
     ],
-    "essentials_sub": "שבעה כללים שעושים את רוב ההבדל. לכל השאר — יש את המדריך המלא.",
+    "essentials_sub": "שמונה כללים שעושים את רוב ההבדל. לכל השאר — יש את המדריך המלא.",
     "essentials": [
       {
         "title": "הפניה של חבר לפני הכול",
@@ -180,6 +190,10 @@
       {
         "title": "עמוד אחד, באנגלית, PDF",
         "body": "בלי תמונה, בלי גיל, בלי תעודת זהות ובלי כתובת מלאה. משעמם זה מקצועי."
+      },
+      {
+        "title": "טייטל מתחת לשם",
+        "body": "שורה אחת ממורכזת שאומרת מי אתם מקצועית — Software Engineer, Backend Developer, Computer Science Student. זה הדבר הראשון שהעין מחפשת אחרי השם; אל תשאירו את הקורא לנחש."
       },
       {
         "title": "פסקת פתיחה של 2–4 שורות",

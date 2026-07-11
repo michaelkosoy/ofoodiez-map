@@ -16,7 +16,7 @@ import json
 import os
 
 import requests
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, session
 
 cv_review_bp = Blueprint('cv_review', __name__)
 
@@ -39,29 +39,34 @@ _guide_text = None
 REVIEW_INSTRUCTIONS = """You are a strict but encouraging CV reviewer for junior developers and students trying to break into the Israeli high-tech industry.
 
 You will receive two things:
-1. THE GUIDE — the Ofoodiez job-search & CV guide, written in Hebrew. The guide is your ONLY rubric: grade the CV exclusively against the guide's rules. These include (non-exhaustively):
-   - Exactly one page.
-   - Written in English.
-   - No photo, and no personal details such as ID number, age / date of birth, marital status or full home address.
-   - Opens with a short "who I am & what I'm looking for" paragraph.
-   - Technologies highlighted in bold.
-   - Bullets built from strong action verbs with quantified impact, following the X-Y-Z formula ("Accomplished X, as measured by Y, by doing Z").
-   - An honest skills list without self-ratings (no stars, percentages or "8/10").
-   - For juniors without work experience: meaningful projects and a GitHub link.
-   - AI shown integrated into real projects, not sprinkled as buzzwords.
+1. THE GUIDE — the Ofoodiez job-search & CV guide, written in Hebrew. The guide is your ONLY rubric: grade the CV exclusively against the guide's rules.
 2. THE CV to review — either a PDF file or plain text.
+
+THE CHECKLIST — verify the CV against it rule by rule. EVERY rule below MUST appear exactly once in the "checklist" array of your answer with a status of "pass", "partial" or "fail". Do not skip or merge rules:
+1. "עמוד אחד" — the CV fits one page.
+2. "באנגלית" — the CV is written in English.
+3. "בלי תמונה ופרטים מיותרים" — no photo, age / birth date, ID number, marital status or full home address.
+4. "טייטל מתחת לשם" — a short professional title under the name (e.g. Software Engineer, Computer Science Student).
+5. "פסקת פתיחה" — a 2–4 line opening paragraph: who they are, what they bring (key technologies), what they look for.
+6. "טכנולוגיות מודגשות" — technologies / keywords highlighted in bold throughout the document.
+7. "פעלים חזקים ומספרים" — bullets start with strong action verbs and quantify impact (X-Y-Z formula: "Accomplished X, as measured by Y, by doing Z").
+8. "רשימת כישורים כנה" — honest skills list: no self-ratings (stars, "8/10"), no office-suite filler, nothing they couldn't defend in an interview.
+9. "פרויקטים ו-GitHub" — meaningful projects with working links (critical for juniors without work experience).
+10. "AI משולב נכון" — AI appears integrated in real projects / work, not sprinkled as empty buzzwords.
 
 Review rules:
 - Be strict about the guide's rules but encouraging in tone — the reader is a junior or a student.
 - Quote specific lines from the CV, in their original language, as evidence wherever relevant.
-- Every guide rule the CV violates must appear in "improvements"; things it does well per the guide belong in "strengths".
-- ALL feedback text (verdict, strengths, improvements) MUST be written in Hebrew. Quoted CV lines stay in their original language.
+- Every "fail" or "partial" checklist rule must have a matching entry in "improvements"; things done well per the guide belong in "strengths".
+- Each improvement MUST include a "rewrite": a concrete, ready-to-paste replacement written in English, built ONLY from details that actually appear in the CV — rephrase and restructure what exists, never invent experience, numbers or technologies. Where a real number is missing, put a placeholder like [X users] so the candidate fills it in.
+- "action_items" is the candidate's to-do list: 4–7 short, imperative Hebrew steps ordered by impact (e.g. "מחקו את הגיל ואת שורת הממליצים", "הוסיפו שורת טייטל מתחת לשם").
+- ALL feedback text (verdict, strengths, improvement issues/fixes, action items, checklist notes) MUST be written in Hebrew. Quoted CV lines and every "rewrite" stay in English.
 - "score" is an integer from 0 to 100 reflecting overall compliance with the guide.
 - Give 3-5 strengths and 4-8 improvements, with improvements ordered from highest to lowest impact.
 - If the uploaded document is not actually a CV, give a low score and say so in the verdict (in Hebrew).
 
 Respond with STRICT JSON only — no markdown, no code fences, no commentary before or after. Exactly this shape:
-{"score": <int 0-100>, "verdict": "<one-line Hebrew summary>", "strengths": ["<Hebrew>", ...], "improvements": [{"area": "<Hebrew section name>", "issue": "<Hebrew, quoting the CV where relevant>", "fix": "<concrete Hebrew suggestion>"}, ...]}
+{"score": <int 0-100>, "verdict": "<one-line Hebrew summary>", "strengths": ["<Hebrew>", ...], "improvements": [{"area": "<Hebrew section name>", "issue": "<Hebrew, quoting the CV where relevant>", "fix": "<concrete Hebrew suggestion>", "rewrite": "<ready-to-paste English replacement based only on the CV's own content>"}, ...], "action_items": ["<Hebrew imperative step>", ...], "checklist": [{"rule": "<exact Hebrew rule name from the checklist>", "status": "pass|partial|fail", "note": "<short Hebrew note>"}, ...]}
 """
 
 
@@ -96,14 +101,22 @@ def _strip_code_fences(text):
 
 @cv_review_bp.route('/hitech/cv-review')
 def cv_review_page():
-    """The 'Review my CV with AI' page."""
+    """The 'Review my CV with AI' page.
+
+    ponytail: admin-session gate (same login as /admin) until public launch —
+    visitors see a Coming soon card.
+    """
     return render_template('hitech_cv_review.html',
-                           active_hitech_page='cv-review', active_page='hitech')
+                           active_hitech_page='cv-review', active_page='hitech',
+                           locked=not session.get('admin_logged_in'))
 
 
 @cv_review_bp.route('/api/hitech/cv-review', methods=['POST'])
 def cv_review_api():
     """Grade an uploaded CV against the guide and return JSON feedback."""
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'The AI reviewer is not open yet — coming soon.'}), 403
+
     file = request.files.get('cv')
     if file is None or not file.filename:
         return jsonify({'error': 'No CV file received. Please attach a .pdf or .txt file.'}), 400

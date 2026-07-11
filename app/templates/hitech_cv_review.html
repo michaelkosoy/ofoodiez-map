@@ -118,6 +118,44 @@
             border-radius: 6px; padding: 8px 12px;
         }
         .ht-cvr-imp-fix i { color: var(--burgundy-mid); font-size: 11px; margin-left: 6px; }
+        .ht-cvr-imp-rewrite {
+            margin-top: 8px; padding: 9px 12px;
+            background: rgba(249,246,235,0.05); border: 1px dashed rgba(249,246,235,0.2);
+            border-radius: 6px; font-size: 0.78rem; color: var(--butter);
+            line-height: 1.6; direction: ltr; text-align: left;
+        }
+        .ht-cvr-imp-rewrite .cvr-rw-label {
+            display: block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em;
+            text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 4px;
+        }
+
+        /* Action items */
+        .ht-cvr-actions { display: flex; flex-direction: column; gap: 8px; }
+        .ht-cvr-action {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 14px; font-size: 0.84rem; color: var(--butter); line-height: 1.6;
+        }
+        .ht-cvr-action-num {
+            width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+            background: var(--burgundy); color: var(--butter);
+            font-family: 'Outfit', sans-serif; font-size: 0.7rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Guide checklist */
+        .ht-cvr-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .ht-cvr-check {
+            display: flex; gap: 9px; align-items: flex-start;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 10px 12px; font-size: 0.78rem; line-height: 1.5;
+        }
+        .ht-cvr-check i { margin-top: 2px; font-size: 12px; }
+        .ht-cvr-check.pass i { color: #5fc97a; }
+        .ht-cvr-check.partial i { color: #e0b070; }
+        .ht-cvr-check.fail i { color: #e07070; }
+        .ht-cvr-check-rule { font-weight: 700; color: var(--butter); }
+        .ht-cvr-check-note { font-weight: 300; color: var(--butter-dim); }
 
         .ht-cvr-guide-note { margin-top: 24px; text-align: center; font-size: 0.76rem; color: var(--butter-dim); }
         .ht-cvr-guide-note a { color: var(--burgundy-mid); font-weight: 600; text-decoration: none; }
@@ -128,6 +166,7 @@
             .ht-cvr-card { padding: 20px 16px; }
             .ht-cvr-dropzone { padding: 26px 14px; }
             .ht-cvr-improvement { padding: 15px 14px; }
+            .ht-cvr-checklist { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -149,6 +188,17 @@
             </p>
         </section>
 
+        {% if locked %}
+        <!-- Coming soon (public view; unlocks with the admin session) -->
+        <section class="ht-cvr-section">
+            <div class="ht-cvr-card" style="text-align:center; padding: 38px 22px;">
+                <i class="fas fa-robot" style="font-size:30px; color:var(--burgundy-mid); margin-bottom:14px;"></i>
+                <div class="ht-cvr-drop-title">Coming soon</div>
+                <div class="ht-cvr-drop-sub" style="margin-top:6px;">The AI CV reviewer is getting its final polish. Meanwhile, the full guide is ready:</div>
+                <p class="ht-cvr-guide-note" style="margin-top:16px;"><a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a></p>
+            </div>
+        </section>
+        {% else %}
         <!-- Upload card -->
         <section class="ht-cvr-section">
             <div class="ht-cvr-card">
@@ -180,6 +230,16 @@
                 <p class="ht-cvr-verdict" id="cvr-verdict" dir="rtl"></p>
             </div>
 
+            <div id="cvr-actions-block" style="display:none;">
+                <p class="ht-cvr-block-title">Do this now</p>
+                <div class="ht-cvr-actions" id="cvr-actions" dir="rtl"></div>
+            </div>
+
+            <div id="cvr-checklist-block" style="display:none;">
+                <p class="ht-cvr-block-title">The guide checklist</p>
+                <div class="ht-cvr-checklist" id="cvr-checklist" dir="rtl"></div>
+            </div>
+
             <div id="cvr-strengths-block" style="display:none;">
                 <p class="ht-cvr-block-title">What's working</p>
                 <div class="ht-cvr-strengths" id="cvr-strengths" dir="rtl"></div>
@@ -194,10 +254,12 @@
                 Based on the complete <a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a>
             </p>
         </section>
+        {% endif %}
 
         <div class="bottom-nav-spacer"></div>
     </div>
 
+    {% if not locked %}
     <script>
         (function () {
             var MAX_BYTES = 5 * 1024 * 1024;
@@ -224,6 +286,10 @@
             var strengthsEl = document.getElementById('cvr-strengths');
             var improvementsBlock = document.getElementById('cvr-improvements-block');
             var improvementsEl = document.getElementById('cvr-improvements');
+            var actionsBlock = document.getElementById('cvr-actions-block');
+            var actionsEl = document.getElementById('cvr-actions');
+            var checklistBlock = document.getElementById('cvr-checklist-block');
+            var checklistEl = document.getElementById('cvr-checklist');
 
             var selectedFile = null;
             var statusTimer = null;
@@ -321,6 +387,48 @@
                 scoreEl.style.color = score >= 80 ? '#5fc97a' : (score >= 60 ? 'var(--butter)' : '#e07070');
                 verdictEl.textContent = data.verdict || '';
 
+                actionsEl.innerHTML = '';
+                var actions = Array.isArray(data.action_items) ? data.action_items : [];
+                actions.forEach(function (a, idx) {
+                    if (!a) return;
+                    var row = document.createElement('div');
+                    row.className = 'ht-cvr-action';
+                    var num = document.createElement('span');
+                    num.className = 'ht-cvr-action-num';
+                    num.textContent = idx + 1;
+                    row.appendChild(num);
+                    row.appendChild(document.createTextNode(String(a)));
+                    actionsEl.appendChild(row);
+                });
+                actionsBlock.style.display = actionsEl.children.length ? 'block' : 'none';
+
+                checklistEl.innerHTML = '';
+                var checks = Array.isArray(data.checklist) ? data.checklist : [];
+                checks.forEach(function (c) {
+                    if (!c || !c.rule) return;
+                    var status = c.status === 'pass' ? 'pass' : (c.status === 'partial' ? 'partial' : 'fail');
+                    var item = document.createElement('div');
+                    item.className = 'ht-cvr-check ' + status;
+                    var icon = document.createElement('i');
+                    icon.className = status === 'pass' ? 'fas fa-circle-check'
+                        : (status === 'partial' ? 'fas fa-circle-half-stroke' : 'fas fa-circle-xmark');
+                    item.appendChild(icon);
+                    var text = document.createElement('div');
+                    var rule = document.createElement('span');
+                    rule.className = 'ht-cvr-check-rule';
+                    rule.textContent = String(c.rule);
+                    text.appendChild(rule);
+                    if (c.note) {
+                        var note = document.createElement('div');
+                        note.className = 'ht-cvr-check-note';
+                        note.textContent = String(c.note);
+                        text.appendChild(note);
+                    }
+                    item.appendChild(text);
+                    checklistEl.appendChild(item);
+                });
+                checklistBlock.style.display = checklistEl.children.length ? 'block' : 'none';
+
                 strengthsEl.innerHTML = '';
                 var strengths = Array.isArray(data.strengths) ? data.strengths : [];
                 strengths.forEach(function (s) {
@@ -358,6 +466,16 @@
                         fix.appendChild(bulb);
                         fix.appendChild(document.createTextNode(String(imp.fix)));
                         card.appendChild(fix);
+                    }
+                    if (imp.rewrite) {
+                        var rw = document.createElement('div');
+                        rw.className = 'ht-cvr-imp-rewrite';
+                        var label = document.createElement('span');
+                        label.className = 'cvr-rw-label';
+                        label.textContent = 'Write it like this';
+                        rw.appendChild(label);
+                        rw.appendChild(document.createTextNode(String(imp.rewrite)));
+                        card.appendChild(rw);
                     }
                     if (card.children.length) improvementsEl.appendChild(card);
                 });
@@ -398,6 +516,7 @@
             });
         })();
     </script>
+    {% endif %}
 
     {% include 'components/bottom_nav.html' %}
 </body>
