@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session, Response
 import pandas as pd
 import os
 import json
@@ -539,6 +539,41 @@ def data_deletion():
 @app.route('/health')
 def health_check():
     return "OK", 200
+
+# ============ SEO ============
+SITE_URL = 'https://ofoodiez.com'
+SITEMAP_PAGES = ['/', '/map', '/about', '/blog/japan', '/blog/bachelorette',
+                 '/blog/instagram', '/hitech', '/hitech/community',
+                 '/hitech/referrals-bot', '/hitech/cv-guide']
+
+@app.route('/robots.txt')
+def robots_txt():
+    # HTML pages we don't want indexed carry <meta name="robots" content="noindex">
+    # instead of a Disallow here, so crawlers can actually see the noindex.
+    lines = ['User-agent: *',
+             'Disallow: /admin/',
+             # Googlebot renders JS: it must fetch the endpoints that feed the
+             # map and Instagram pages, so those two stay crawlable.
+             'Allow: /api/places',
+             'Allow: /api/instagram/',
+             'Disallow: /api/',
+             'Disallow: /pay/',
+             'Disallow: /paid/',
+             'Disallow: /billing/',
+             'Disallow: /webhooks/',
+             'Disallow: /auth/',
+             'Allow: /',
+             '',
+             f'Sitemap: {SITE_URL}/sitemap.xml']
+    return Response('\n'.join(lines) + '\n', mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    urls = '\n'.join(f'  <url><loc>{SITE_URL}{p}</loc></url>' for p in SITEMAP_PAGES)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           f'{urls}\n</urlset>\n')
+    return Response(xml, mimetype='application/xml')
 
 # ============ INSTAGRAM FEED API ============
 IG_POSTS_CACHE_FILE = os.path.join(CACHE_DIR, 'ig_posts_cache.json')

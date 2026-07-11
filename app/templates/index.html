@@ -5,11 +5,11 @@
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ofoodiez Map - מפת האפי האוור תל אביב</title>
+    <title>מפת האפי האוור של תל אביב | Ofoodiez Map — Happy Hour Tel Aviv</title>
     <meta name="description"
-        content="Discover the best Happy Hours, great deals, and top food spots in Tel Aviv. מפת ההאפי האוור של תל אביב - מצאו את המבצעים הכי שווים, שעות שמחות ומסעדות מומלצות.">
+        content="מפת ההאפי האוור של תל אביב — כל הבארים והמסעדות עם האפי האוור, מבצעים ושעות שמחות במקום אחד. Discover the best Happy Hours, great deals, and top food spots in Tel Aviv.">
     <meta name="keywords"
-        content="happy hour tel aviv, מפת האפי האוור, תל אביב, מבצעים במסעדות, שעה שמחה, happy hour, ofoodiez, אוכל">
+        content="האפי האוור, האפי אוור, הפי אוור, הפי האוור, האפי האוור תל אביב, מפת האפי האוור, שעה שמחה, שעות שמחות, מבצעים במסעדות, בארים תל אביב, happy hour tel aviv, happy hour, ofoodiez, אוכל, תל אביב">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
@@ -23,19 +23,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=67">
 
+    <link rel="canonical" href="https://ofoodiez.com/map">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ofoodiez.com/">
-    <meta property="og:title" content="Ofoodiez">
-    <meta property="og:description" content="Happy Hours. Great Deals. Best Spots.">
+    <meta property="og:site_name" content="Ofoodiez">
+    <meta property="og:url" content="https://ofoodiez.com/map">
+    <meta property="og:title" content="מפת האפי האוור של תל אביב | Ofoodiez Map">
+    <meta property="og:description" content="כל הבארים והמסעדות עם האפי האוור בתל אביב במקום אחד. Happy Hours. Great Deals. Best Spots.">
     <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://ofoodiez.com/">
-    <meta property="twitter:title" content="Ofoodiez">
-    <meta property="twitter:description" content="Happy Hours. Great Deals. Best Spots.">
+    <meta property="twitter:url" content="https://ofoodiez.com/map">
+    <meta property="twitter:title" content="מפת האפי האוור של תל אביב | Ofoodiez Map">
+    <meta property="twitter:description" content="כל הבארים והמסעדות עם האפי האוור בתל אביב במקום אחד. Happy Hours. Great Deals. Best Spots.">
     <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "מפת האפי האוור של תל אביב — Ofoodiez Map",
+      "url": "https://ofoodiez.com/map",
+      "description": "מפה אינטראקטיבית של כל ההאפי האוור בתל אביב — בארים, מסעדות, מבצעים ושעות שמחות.",
+      "inLanguage": "he",
+      "isPartOf": { "@id": "https://ofoodiez.com/#website" }
+    }
+    </script>
 </head>
 
 <body>

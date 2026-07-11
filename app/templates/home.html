@@ -26,7 +26,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=4">
 
     <!-- Open Graph -->
+    <link rel="canonical" href="https://ofoodiez.com/">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ofoodiez">
     <meta property="og:url" content="https://ofoodiez.com/">
     <meta property="og:title" content="Ofoodiez - Best Happy Hours & Food Guides">
     <meta property="og:description" content="{{ data.slogan }} | הבלוג של אופיר: המלצות אוכל, מפות שוות, האפי האוור בתל אביב, ומדריכי קולינריה בארץ ובעולם.">
@@ -38,6 +40,35 @@
     <meta property="twitter:title" content="Ofoodiez - Best Happy Hours & Food Guides">
     <meta property="twitter:description" content="{{ data.slogan }} | הבלוג של אופיר: המלצות אוכל, מפות שוות, האפי האוור בתל אביב, ומדריכי קולינריה בארץ ובעולם.">
     <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://ofoodiez.com/#org",
+          "name": "Ofoodiez",
+          "alternateName": "אופודיז",
+          "url": "https://ofoodiez.com/",
+          "logo": "https://ofoodiez.com/static/img/logo.png",
+          "sameAs": [
+            "https://instagram.com/ofoodiez",
+            "https://tiktok.com/@ofoodiez"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://ofoodiez.com/#website",
+          "name": "Ofoodiez",
+          "url": "https://ofoodiez.com/",
+          "inLanguage": ["he", "en"],
+          "publisher": { "@id": "https://ofoodiez.com/#org" }
+        }
+      ]
+    }
+    </script>
 </head>
 
 <body>
