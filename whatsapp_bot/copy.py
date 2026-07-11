@@ -191,7 +191,8 @@ ADVOCATE_DONE = (
 # Appended wherever we ask for a company name — the live list of companies
 # with advocates, for candidates who don't have a specific one in mind.
 _COMPANIES_LIST_LINE = (
-    "👀 Not sure which? Browse the companies we have advocates in:\n"
+    "Not sure which?\n"
+    "Browse the companies we have advocates in:\n"
     "https://ofoodiez.com/hitech/referrals-bot"
 )
 CAND_COMPANY = (
