@@ -19,6 +19,8 @@ def _run_migrations():
         "ALTER TABLE site_users ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP",
         "ALTER TABLE site_users ALTER COLUMN password_hash DROP NOT NULL",
         "ALTER TABLE ig_happy_hours ADD COLUMN IF NOT EXISTS google_maps_link TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS last_campaign TEXT",
+        "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS last_sent_at TIMESTAMP",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS company TEXT",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS gender TEXT",
@@ -170,6 +172,12 @@ class HitechEmail(db.Model):
     verified = db.Column(db.Boolean, default=False)
     gender = db.Column(db.String(16))
     list_name = db.Column(db.Text)       # admin-assigned email list tag (e.g. "founders", "cto")
+    # Bulk-campaign bookkeeping: campaign identity = the email subject. Marked per
+    # recipient right after a successful send, so a re-trigger with the SAME subject
+    # resumes (skips those already sent) instead of duplicating — survives restarts
+    # and SendGrid daily-quota cutoffs.
+    last_campaign = db.Column(db.Text)
+    last_sent_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

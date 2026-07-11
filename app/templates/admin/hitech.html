@@ -38,6 +38,9 @@
     </div>
 </div>
 
+<!-- Live progress of an in-flight bulk send (polled from /send-status) -->
+<div id="email-send-status" style="display:none;position:fixed;bottom:20px;left:20px;z-index:9998;background:#fff;border-radius:10px;padding:12px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-weight:600;direction:rtl;"></div>
+
 <!-- Send Email Modal -->
 <div id="send-email-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:12px;padding:32px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;direction:rtl;text-align:right;">
@@ -513,8 +516,9 @@
             btn.innerHTML = originalHTML;
 
             if (data.success) {
-                Swal.fire('הצלחה!', `נשלחו בהצלחה ${data.sent_count} מיילים.`, 'success');
+                Swal.fire('הצלחה!', data.message || 'השליחה החלה ברקע.', 'success');
                 closeEmailModal();
+                pollSendStatus();
             } else {
                 Swal.fire('שגיאה', data.message || 'שליחת המיילים נכשלה.', 'error');
             }
@@ -524,6 +528,26 @@
             btn.innerHTML = originalHTML;
             Swal.fire('שגיאה', 'אירעה שגיאה בחיבור לשרת.', 'error');
         });
+    }
+
+    // Poll the in-flight campaign progress and show it in the corner badge.
+    function pollSendStatus() {
+        const el = document.getElementById('email-send-status');
+        const timer = setInterval(() => {
+            fetch('/admin/api/hitech-emails/send-status')
+                .then(r => r.json())
+                .then(s => {
+                    if (!s.total) { clearInterval(timer); el.style.display = 'none'; return; }
+                    el.style.display = 'block';
+                    el.textContent = s.done
+                        ? `דיוור הסתיים: נשלחו ${s.sent}/${s.total}` +
+                          (s.failed ? ` · נכשלו ${s.failed}` : '') +
+                          (s.aborted ? ` · ${s.aborted}` : '')
+                        : `שולח מיילים... ${s.sent}/${s.total}`;
+                    if (s.done) clearInterval(timer);
+                })
+                .catch(() => { clearInterval(timer); el.style.display = 'none'; });
+        }, 3000);
     }
 </script>
 {% endblock %}

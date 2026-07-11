@@ -1014,16 +1014,31 @@ def send_hitech_bulk_email():
     import threading
 
     app_instance = current_app._get_current_object()
-    recipient_emails = [r.email for r in recipients]
+
+    # Campaign identity = the subject. Recipients already marked with it are skipped,
+    # so re-triggering the same campaign RESUMES (after a restart or a SendGrid
+    # daily-quota cutoff) instead of double-sending. New subject = new campaign.
+    pending = [(getattr(r, 'id', None), r.email) for r in recipients
+               if getattr(r, 'last_campaign', None) != subject]
+    skipped = len(recipients) - len(pending)
+
+    if not pending:
+        return jsonify({'success': True,
+                        'message': f'Nothing to send — all {skipped} recipients already '
+                                   f'received this campaign (same subject = resume; '
+                                   f'change the subject for a new campaign).'})
+
+    _BULK_EMAIL_STATUS.clear()
+    _BULK_EMAIL_STATUS.update({'campaign': subject, 'total': len(pending),
+                               'sent': 0, 'failed': 0, 'done': False, 'aborted': ''})
 
     def bg_send():
         with app_instance.app_context():
-            logger.info(f"📧 Starting background bulk email dispatch to {len(recipient_emails)} recipients...")
-            from concurrent.futures import ThreadPoolExecutor, as_completed
-            sent_count = 0
+            logger.info(f"📧 Bulk email '{subject}': dispatching to {len(pending)} recipients "
+                        f"({skipped} already had it)...")
             failed_emails = []
-
-            def send_single(email):
+            consecutive_failures = 0
+            for row_id, email in pending:
                 try:
                     unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={email}"
                     personal_html = html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
@@ -1034,29 +1049,43 @@ def send_hitech_bulk_email():
                         body_html=personal_html,
                         body_text=personal_text
                     )
-                    if success:
-                        return email, True, None
-                    else:
-                        return email, False, "SendGrid returned False"
                 except Exception as e:
-                    return email, False, str(e)
+                    success, e_reason = False, str(e)
+                else:
+                    e_reason = "SendGrid returned False"
+                if success:
+                    consecutive_failures = 0
+                    _BULK_EMAIL_STATUS['sent'] += 1
+                    if row_id is not None:   # persist immediately -> restart-safe resume
+                        row = HitechEmail.query.get(row_id)
+                        if row:
+                            row.last_campaign = subject
+                            row.last_sent_at = datetime.utcnow()
+                            db.session.commit()
+                else:
+                    failed_emails.append((email, e_reason))
+                    _BULK_EMAIL_STATUS['failed'] += 1
+                    consecutive_failures += 1
+                    if consecutive_failures >= 8:
+                        # Almost certainly the SendGrid daily quota (100/day on free) —
+                        # stop burning the list; re-trigger with the same subject after
+                        # the quota resets and it resumes from here.
+                        _BULK_EMAIL_STATUS['aborted'] = ('stopped after 8 consecutive failures '
+                                                         '(SendGrid quota?) — re-send the same '
+                                                         'subject later to resume')
+                        logger.error(f"📧 Bulk email '{subject}': aborting — 8 consecutive "
+                                     f"failures (SendGrid daily quota?).")
+                        break
 
-            # Use 15 concurrent threads for faster, more reliable batch sending
-            with ThreadPoolExecutor(max_workers=15) as executor:
-                futures = {executor.submit(send_single, email): email for email in recipient_emails}
-                for future in as_completed(futures):
-                    email, success, error_msg = future.result()
-                    if success:
-                        sent_count += 1
-                    else:
-                        failed_emails.append((email, error_msg))
+            _BULK_EMAIL_STATUS['done'] = True
+            sent_count = _BULK_EMAIL_STATUS['sent']
+            logger.info(f"📧 Bulk email '{subject}' finished: sent {sent_count}"
+                        f"/{len(pending)}, failed {len(failed_emails)}.")
 
-            logger.info(f"📧 Background bulk email dispatch complete. Successfully sent: {sent_count}/{len(recipient_emails)}")
-            
-            # Send status email to administrator/ops
+            # Summary email to ops (kept from the parallel-send revision).
             from whatsapp_bot.config import WaConfig
             admin_email = WaConfig.WA_OPS_EMAIL or "info@ofoodiez.com"
-            
+            recipient_emails = [e for _, e in pending]
             if failed_emails:
                 failed_details = "\n".join([f" - {email}: {reason}" for email, reason in failed_emails])
                 logger.error(f"❌ Failed to send to {len(failed_emails)} recipients:\n{failed_details}")
@@ -1114,7 +1143,22 @@ def send_hitech_bulk_email():
 
     threading.Thread(target=bg_send, daemon=True).start()
 
-    return jsonify({'success': True, 'message': f'Bulk sending started in the background for {len(recipient_emails)} recipients.'})
+    return jsonify({'success': True,
+                    'message': f'Sending to {len(pending)} recipients in the background'
+                               + (f' ({skipped} already received this campaign — skipped).'
+                                  if skipped else '.')})
+
+
+# Progress of the (single) in-flight bulk email campaign. In-memory: one Render
+# worker, and a restart both kills the thread and clears this — the DB markers
+# (last_campaign) are the durable record.
+_BULK_EMAIL_STATUS = {}
+
+
+@admin_bp.route('/api/hitech-emails/send-status')
+@login_required
+def hitech_send_status():
+    return jsonify(_BULK_EMAIL_STATUS)
 
 
 
