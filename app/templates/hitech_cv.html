@@ -213,6 +213,18 @@
             border-radius: 999px; padding: 3px 9px;
         }
 
+        /* Guide essentials (Hebrew, RTL) */
+        .ht-essentials { padding: 0 20px 40px; max-width: 760px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .ht-essentials .ht-tip-item { text-align: right; }
+        .ht-essentials-cta {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 18px; background: var(--burgundy); color: var(--butter);
+            border-radius: 999px; padding: 14px 22px; text-decoration: none;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem;
+            transition: filter 0.2s;
+        }
+        .ht-essentials-cta:hover { filter: brightness(1.2); }
+
         @media (max-width: 540px) {
             .ht-intro-cards { grid-template-columns: 1fr; }
             .ht-coming-grid { grid-template-columns: 1fr; }
@@ -326,6 +338,27 @@
                 </div>
             </div>
             {% endfor %}
+        </section>
+
+        <hr class="ht-divider">
+
+        <!-- Guide essentials (Hebrew) -->
+        <section class="ht-essentials" dir="rtl">
+            <p class="ht-section-title">{{ c.essentials_title | default('כל המדריך בדקה אחת') | safe }}</p>
+            <p class="ht-section-subtitle">{{ c.essentials_sub | default('') | safe }}</p>
+            {% for es in c.essentials | default([]) %}
+            <div class="ht-tip-item">
+                <div class="ht-tip-num">{{ loop.index }}</div>
+                <div class="ht-tip-content">
+                    <div class="ht-tip-name">{{ es.title }}</div>
+                    <div class="ht-tip-body">{{ es.body }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            <a class="ht-essentials-cta" href="{{ url_for('hitech_cv_full') }}">
+                <i class="fas fa-book-open"></i>
+                <span>{{ c.essentials_cta | default('רוצים להעמיק? למדריך המלא') }}</span>
+            </a>
         </section>
 
         <hr class="ht-divider">

@@ -79,21 +79,23 @@
         .ht-guide hr { border: none; border-top: 1px solid rgba(114,8,21,0.25); margin: 42px 0; }
         .ht-guide code { background: rgba(114,8,21,0.16); border-radius: 6px; padding: 1px 7px; font-size: 0.85em; color: var(--butter); direction: ltr; unicode-bidi: embed; }
 
-        /* Example-CV "page" (single-cell table in the markdown) */
+        /* Example-CV "page" (single-cell table in the markdown) — white, like a printed page */
         .ht-guide table {
             width: 100%; border-collapse: separate; border-spacing: 0;
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            background: #fdfcf8; border: 1px solid rgba(114,8,21,0.35); border-radius: 16px;
             box-shadow: 0 18px 50px rgba(0,0,0,0.5); margin: 6px 0 22px;
         }
-        .ht-guide table td { padding: 26px 28px; }
-        .ht-guide table h2 { margin: 4px 0 6px; font-size: 1.35rem; }
+        .ht-guide table td { padding: 26px 28px; color: #33302b; }
+        .ht-guide table h2 { margin: 4px 0 6px; font-size: 1.35rem; color: #17120f; }
         .ht-guide table h4 {
             margin: 22px 0 8px; padding-bottom: 5px;
-            border-bottom: 1px solid rgba(114,8,21,0.28);
+            border-bottom: 1px solid rgba(114,8,21,0.3);
             text-transform: uppercase; letter-spacing: 0.09em;
-            font-size: 0.74rem; color: var(--burgundy-mid);
+            font-size: 0.74rem; color: var(--burgundy);
         }
-        .ht-guide table hr { margin: 14px 0; }
+        .ht-guide table strong { color: #17120f; }
+        .ht-guide table a { color: var(--burgundy); }
+        .ht-guide table hr { margin: 14px 0; border-top: 1px solid rgba(23,18,15,0.18); }
         .ht-guide table p, .ht-guide table li { font-size: 0.87rem; }
 
         @media (max-width: 540px) {
