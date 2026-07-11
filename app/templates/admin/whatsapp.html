@@ -476,6 +476,10 @@ function showTab(name) {
             });
         }
         if (name === 'requests') {
+            // Default view: open requests only (pick another status in the column filter to see handled ones).
+            TABLES[name].on("tableBuilt", function() {
+                TABLES['requests'].setHeaderFilterValue('status', 'open');
+            });
             TABLES[name].on("rowSelectionChanged", function(data, rows) {
                 var handleBtn = document.getElementById('bulk-handle-requests-btn');
                 var deleteBtn = document.getElementById('bulk-delete-requests-btn');
