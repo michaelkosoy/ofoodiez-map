@@ -160,10 +160,21 @@ def debug_messages():
         "at": str(r.created_at), "from": r.from_phone, "body": (r.body or "")[:100],
         "command": r.parsed_command, "ms": r.processing_ms, "error": r.error,
     } for r in WaInboundMessage.query.order_by(WaInboundMessage.id.desc()).limit(8)]
-    outbound = [{
-        "at": str(r.created_at), "to": r.to_phone, "sid": r.twilio_sid, "status": r.status,
-        "error": r.error, "body": (r.body or r.content_sid or "")[:100],
-    } for r in WaOutboundMessage.query.order_by(WaOutboundMessage.id.desc()).limit(8)]
+    outbound = []
+    client = None
+    for r in WaOutboundMessage.query.order_by(WaOutboundMessage.id.desc()).limit(8):
+        o = {"at": str(r.created_at), "to": r.to_phone, "sid": r.twilio_sid,
+             "status": r.status, "error": r.error,
+             "body": (r.body or r.content_sid or "")[:100]}
+        if r.twilio_sid:  # final delivery verdict from Twilio (queued != delivered)
+            try:
+                client = client or messaging._client()
+                m = client.messages(r.twilio_sid).fetch()
+                o["live_status"] = m.status
+                o["error_code"] = m.error_code
+            except Exception as exc:
+                o["live_status"] = f"fetch failed: {exc}"
+        outbound.append(o)
     return Response(json.dumps({"inbound": inbound, "outbound": outbound},
                                ensure_ascii=False, indent=1),
                     mimetype="application/json")
