@@ -26,10 +26,12 @@ ALLOWED_EXTENSIONS = ('.pdf', '.txt')
 GUIDE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           'app', 'data', 'cv_guide_full.md')
 
-# Plain REST call: the google-generativeai SDK's grpc stack killed the single
-# gunicorn worker on Render at first use, so we talk to the HTTP API directly.
+# Plain REST call to the Gemini HTTP API (no SDK).
+# Model is env-overridable; default is the price/performance pick for a
+# rubric-grading task (~0.5 cent per review as of 2026-07).
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-3.1-flash-lite')
 GEMINI_URL = ('https://generativelanguage.googleapis.com/v1beta/'
-              'models/gemini-2.5-flash:generateContent')
+              f'models/{GEMINI_MODEL}:generateContent')
 
 # Module-level cache, filled lazily on the first API request.
 _guide_text = None
