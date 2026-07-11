@@ -16,7 +16,7 @@ import json
 import os
 
 import requests
-from flask import Blueprint, jsonify, render_template, request, session
+from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
 cv_review_bp = Blueprint('cv_review', __name__)
 
@@ -99,22 +99,32 @@ def _strip_code_fences(text):
     return text
 
 
-@cv_review_bp.route('/hitech/cv-review')
+def _review_unlocked():
+    return bool(session.get('cv_review_unlocked') or session.get('admin_logged_in'))
+
+
+@cv_review_bp.route('/hitech/cv-review', methods=['GET', 'POST'])
 def cv_review_page():
     """The 'Review my CV with AI' page.
 
-    ponytail: admin-session gate (same login as /admin) until public launch —
-    visitors see a Coming soon card.
+    ponytail: shared password gate (CV_REVIEW_PASSWORD, default 123456) until
+    public launch — visitors see a Coming soon card with an unlock field.
     """
+    error = False
+    if request.method == 'POST':
+        if request.form.get('password', '').strip() == os.environ.get('CV_REVIEW_PASSWORD', '123456'):
+            session['cv_review_unlocked'] = True
+            return redirect(url_for('cv_review.cv_review_page'))
+        error = True
     return render_template('hitech_cv_review.html',
                            active_hitech_page='cv-review', active_page='hitech',
-                           locked=not session.get('admin_logged_in'))
+                           locked=not _review_unlocked(), error=error)
 
 
 @cv_review_bp.route('/api/hitech/cv-review', methods=['POST'])
 def cv_review_api():
     """Grade an uploaded CV against the guide and return JSON feedback."""
-    if not session.get('admin_logged_in'):
+    if not _review_unlocked():
         return jsonify({'error': 'The AI reviewer is not open yet — coming soon.'}), 403
 
     file = request.files.get('cv')

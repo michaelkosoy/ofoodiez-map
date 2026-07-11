@@ -195,6 +195,12 @@
                 <i class="fas fa-robot" style="font-size:30px; color:var(--burgundy-mid); margin-bottom:14px;"></i>
                 <div class="ht-cvr-drop-title">Coming soon</div>
                 <div class="ht-cvr-drop-sub" style="margin-top:6px;">The AI CV reviewer is getting its final polish. Meanwhile, the full guide is ready:</div>
+                <form method="POST" style="margin:18px auto 0; max-width:300px; display:flex; gap:8px;">
+                    <input type="password" name="password" placeholder="Access password" autocomplete="off"
+                           style="flex:1; min-width:0; background:#100810; border:1px solid var(--border); border-radius:999px; color:var(--butter); padding:10px 16px; font-family:'Outfit',sans-serif; font-size:0.85rem; text-align:center; outline:none;">
+                    <button type="submit" class="ht-cvr-btn" style="width:auto; margin-top:0; padding:10px 20px;">Unlock</button>
+                </form>
+                {% if error %}<div class="ht-cvr-error visible" style="margin-top:12px;">Wrong password — try again.</div>{% endif %}
                 <p class="ht-cvr-guide-note" style="margin-top:16px;"><a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a></p>
             </div>
         </section>
