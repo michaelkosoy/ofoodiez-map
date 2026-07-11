@@ -289,11 +289,13 @@ CAND_RESUME_SOON = (
     "The final step (sending your résumé to the advocates) is landing very soon. 🔜"
 )
 CAND_RESUME_PROMPT = (
-    "Last step! 📄 Send your *CV as a PDF or Word doc* and I'll forward it to the advocate.\n"
-    "Make it shine — tailor it to the role if you can. ✨"
+    "Last step! 📄 Send your *CV as a PDF* and I'll forward it to the advocate.\n"
+    "Make it shine — tailor it to the role if you can. ✨\n"
+    "Not sure about your CV? We've got a guide for you:\n"
+    "https://ofoodiez.com/hitech/cv-guide"
 )
 CAND_RESUME_BAD_TYPE = (
-    "I need your CV as a *PDF or Word* file (.pdf, .doc, .docx) 🙏 — attach it and send again."
+    "I need your CV as a *PDF* file 🙏 — attach it and send again."
 )
 CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending it again."
 CAND_SUBMITTED = (

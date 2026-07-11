@@ -27,11 +27,9 @@ from .models import (
 logger = logging.getLogger("whatsapp_bot")
 
 
-# Accepted CV file types (Twilio MediaContentType0 -> file extension).
+# Accepted CV file types (Twilio MediaContentType0 -> file extension). PDF only.
 _RESUME_TYPES = {
     "application/pdf": ".pdf",
-    "application/msword": ".doc",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
 }
 
 # "Did you mean X?" confirmation words; and words that skip the optional job link.
