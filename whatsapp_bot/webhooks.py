@@ -178,3 +178,37 @@ def debug_messages():
     return Response(json.dumps({"inbound": inbound, "outbound": outbound},
                                ensure_ascii=False, indent=1),
                     mimetype="application/json")
+
+
+@wa_bp.route("/debug/templates", methods=["GET"])
+def debug_templates():
+    """Diagnostics: every configured content template + its LIVE WhatsApp approval
+    status from Twilio's Content API. An unapproved template fails sends with a
+    silent async 63013, so this shows exactly which env var points at a bad SID."""
+    from .backfill import _secret
+    if request.args.get("key") != _secret():
+        return Response("forbidden", status=403)
+    import requests as _rq
+    auth = (WaConfig.TWILIO_ACCOUNT_SID, WaConfig.TWILIO_AUTH_TOKEN)
+    out = {}
+    for name in ("WA_CT_WELCOME", "WA_CT_WELCOME_BACK", "WA_CT_BACK_TO_MENU",
+                 "WA_CT_REGISTER_REVIEW", "WA_CT_PROMPT", "WA_CT_EMPLOYEE_CONFIRM",
+                 "WA_CT_EMP_METHOD", "WA_CT_EXPLORE_MORE", "WA_CT_ADVOCATE_PING"):
+        sid = getattr(WaConfig, name, None)
+        if not sid:
+            out[name] = None
+            continue
+        info = {"sid": sid}
+        try:
+            r = _rq.get(f"https://content.twilio.com/v1/Content/{sid}/ApprovalRequests",
+                        auth=auth, timeout=10)
+            wa = (r.json() or {}).get("whatsapp") or {}
+            info["template_name"] = wa.get("name")
+            info["approval_status"] = wa.get("status")
+            if wa.get("rejection_reason"):
+                info["rejection_reason"] = wa.get("rejection_reason")
+        except Exception as exc:
+            info["approval_status"] = f"fetch failed: {exc}"
+        out[name] = info
+    return Response(json.dumps(out, ensure_ascii=False, indent=1),
+                    mimetype="application/json")
