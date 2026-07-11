@@ -18,6 +18,7 @@ idempotency claim is cheap insurance rather than the main reliability
 mechanism — but it makes the "handler finished, Twilio timed out, user retries"
 case safe.
 """
+import json
 import logging
 import time
 
@@ -31,7 +32,7 @@ from database.models import db
 from . import messaging, router, wa_bp
 from .config import WaConfig
 from .copy import ERROR
-from .models import WaInboundMessage
+from .models import WaInboundMessage, WaOutboundMessage
 
 logger = logging.getLogger("whatsapp_bot")
 
@@ -145,3 +146,24 @@ def webhook():
             logger.exception("wa webhook: failed to update audit row for sid %s", message_sid)
 
     return _twiml("")  # empty 200 ack; the reply already went out via REST
+
+
+@wa_bp.route("/debug/messages", methods=["GET"])
+def debug_messages():
+    """Diagnostics: the last few inbound/outbound audit rows. Send failures ack
+    with a silent 200, so this is the fastest way to see WHY a reply didn't go
+    out, without direct DB access. Keyed like the backfill endpoints."""
+    from .backfill import _secret
+    if request.args.get("key") != _secret():
+        return Response("forbidden", status=403)
+    inbound = [{
+        "at": str(r.created_at), "from": r.from_phone, "body": (r.body or "")[:100],
+        "command": r.parsed_command, "ms": r.processing_ms, "error": r.error,
+    } for r in WaInboundMessage.query.order_by(WaInboundMessage.id.desc()).limit(8)]
+    outbound = [{
+        "at": str(r.created_at), "to": r.to_phone, "sid": r.twilio_sid, "status": r.status,
+        "error": r.error, "body": (r.body or r.content_sid or "")[:100],
+    } for r in WaOutboundMessage.query.order_by(WaOutboundMessage.id.desc()).limit(8)]
+    return Response(json.dumps({"inbound": inbound, "outbound": outbound},
+                               ensure_ascii=False, indent=1),
+                    mimetype="application/json")
