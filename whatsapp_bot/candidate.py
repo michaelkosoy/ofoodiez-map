@@ -404,8 +404,19 @@ def _advocate_name(advocate):
     return _advocate_first_name(advocate) or "one of our advocates"
 
 
+# Backfill alerts exist so ops can ADD a company we don't have. If the company is
+# already in the DB there's nothing to add, so skip the email (the request is still
+# logged). cv_no_email_advocate is a CV-routing alert, not a backfill, so it always
+# sends.
+_BACKFILL_REASONS = {"unknown_company", "no_advocates"}
+
+
 def _notify_ops(user, company_name, reason):
-    """Best-effort heads-up to ops about a company we can't serve yet."""
+    """Best-effort heads-up to ops about a company we can't serve yet. For backfill
+    requests, skips the email when the company already exists (ops already knows)."""
+    if reason in _BACKFILL_REASONS and \
+            WaCompany.query.filter_by(normalized_name=_normalize(company_name)).first():
+        return
     name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "A candidate"
     try:
         emailer.send_company_request_email(company_name, name, user.phone, user.email, reason)
