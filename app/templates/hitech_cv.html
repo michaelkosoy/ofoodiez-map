@@ -287,7 +287,7 @@
             <p class="ht-section-subtitle">{{ c.anatomy_subtitle | default('Hover or tap each number to see the tip for that section') | safe }}</p>
 
             <div class="ht-resume-container" id="ht-resume-container">
-                <img src="{{ url_for('static', filename='img/cv_mockup.png') }}" alt="Example CV mockup" class="ht-resume-img" id="ht-resume-img">
+                <img src="{{ url_for('static', filename='img/cv_mockup.jpg') }}" alt="Example CV mockup" class="ht-resume-img" id="ht-resume-img">
 
                 <!-- Annotations: positions are % of image width/height -->
                 {% for sec in c.sections | default([]) %}

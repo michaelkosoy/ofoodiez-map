@@ -14,6 +14,7 @@ Register in app.py with:
 import base64
 import json
 import os
+import time
 
 import requests
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
@@ -35,6 +36,32 @@ GEMINI_URL = ('https://generativelanguage.googleapis.com/v1beta/'
 
 # Module-level cache, filled lazily on the first API request.
 _guide_text = None
+
+# ── Per-IP rate limit ────────────────────────────────────────────────────────
+# ponytail: in-memory dict — correct for the single gunicorn worker in the
+# Procfile; move to flask-limiter/redis if --workers ever grows past 1.
+RATE_LIMIT = 5        # reviews…
+RATE_WINDOW = 3600    # …per hour, per client IP
+_recent_reviews = {}  # ip -> [monotonic timestamps]
+
+
+def _client_ip():
+    return (request.headers.get('CF-Connecting-IP')
+            or request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+            or request.remote_addr or 'unknown')
+
+
+def _rate_limited(ip):
+    now = time.time()
+    hits = [t for t in _recent_reviews.get(ip, []) if now - t < RATE_WINDOW]
+    if len(hits) >= RATE_LIMIT:
+        _recent_reviews[ip] = hits
+        return True
+    hits.append(now)
+    _recent_reviews[ip] = hits
+    if len(_recent_reviews) > 10000:  # ponytail: crude memory guard
+        _recent_reviews.clear()
+    return False
 
 REVIEW_INSTRUCTIONS = """You are a strict but encouraging CV reviewer for junior developers and students trying to break into the Israeli high-tech industry.
 
@@ -141,6 +168,9 @@ def cv_review_api():
         return jsonify({'error': 'This file is over 5 MB. Please upload a smaller one.'}), 413
     if not file_bytes:
         return jsonify({'error': 'The uploaded file is empty.'}), 400
+
+    if _rate_limited(_client_ip()):
+        return jsonify({'error': f'Rate limit reached — up to {RATE_LIMIT} reviews per hour. Take the time to apply the fixes, then come back :)'}), 429
 
     key = _api_key()
     if key is None:
