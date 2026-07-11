@@ -1,12 +1,13 @@
 """Candidate path: company search → role → job link → résumé → submit.
 
-On résumé (a PDF), the application is recorded and emailed to the company's
-active advocates at their company email (best-effort: Supabase Storage + SendGrid
-are config-gated, so the flow still completes and the application is recorded
-even if they're unset).
+On résumé (a PDF), the application is recorded and emailed to ONE chosen active
+advocate of the company — the closest role-title match, else a random active one
+(best-effort: Supabase Storage + SendGrid are config-gated, so the flow still
+completes and the application is recorded even if they're unset).
 """
 import difflib
 import logging
+import random
 import re
 import secrets
 from datetime import datetime
@@ -486,39 +487,78 @@ def _create_application(user, data, resume_path, resume_filename):
     return application
 
 
+# Filler words that appear in most titles — a shared "engineer" says far less
+# about fit than a shared "qa"/"data"/"frontend", so they score half.
+_GENERIC_TITLE_TOKENS = {
+    "engineer", "engineering", "developer", "dev", "senior", "sr", "junior", "jr",
+    "lead", "leader", "team", "manager", "head", "specialist", "expert",
+    "architect", "analyst", "of", "the", "and",
+}
+
+
+def _pick_advocate(advocates, role_query):
+    """ONE advocate to receive the CV: the closest role-title match to what the
+    candidate is looking for — shared domain words count double vs generic title
+    words, sequence similarity breaks ties — or a random advocate when no title
+    comes meaningfully close (at least one shared word required). The advocates
+    list is pre-filtered to active + emailable, so any pick is a valid recipient.
+    One email per application — blasting every advocate annoyed people."""
+    q = _normalize(role_query)
+    q_tokens = set(q.split())
+    best_score, best = 0.0, None
+    for a in advocates:
+        t = _normalize(a.role_title)
+        if not (q_tokens and t):
+            continue
+        shared = q_tokens & set(t.split())
+        domain = shared - _GENERIC_TITLE_TOKENS
+        generic = shared & _GENERIC_TITLE_TOKENS
+        score = (2 * len(domain) + len(generic)
+                 + difflib.SequenceMatcher(None, q, t).ratio())
+        if score > best_score:
+            best_score, best = score, a
+    if best is not None and best_score >= 1.0:
+        return best
+    return random.choice(advocates)
+
+
 def _notify_advocates(application, candidate_user, data, resume_bytes,
                       resume_content_type, resume_filename):
+    """Email the application (CV attached) to ONE chosen advocate of the company.
+    Returns the number of advocates notified (1, or 0 when none are emailable)."""
     advocates = (WaAdvocate.query
                  .filter_by(company_id=data.get("company_id"), status="active")
                  .filter(WaAdvocate.email.isnot(None)).all())
+    if not advocates:
+        return 0
     name = f"{candidate_user.first_name or ''} {candidate_user.last_name or ''}".strip() or "A candidate"
-    for advocate in advocates:
-        to_email = advocate.email
-        adv_user = WaUser.query.get(advocate.user_id)
-        adv_first = (adv_user.first_name if adv_user else None) or ""
-        token = secrets.token_urlsafe(24)
-        approval_url = f"{WaConfig.WA_PUBLIC_BASE_URL}/wa/referral/approve?t={token}"
-        ok = emailer.send_application_email(
-            to_email, adv_first, name, candidate_user.email or "",
-            data.get("role_query", ""), data.get("company_name", ""),
-            data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
-            approval_url=approval_url, resume_bytes=resume_bytes,
-            resume_filename=resume_filename, resume_content_type=resume_content_type,
-        )
-        db.session.add(WaApplicationRecipient(
-            application_id=application.id,
-            advocate_id=advocate.id,
-            email=to_email,
-            emailed_at=datetime.utcnow() if ok else None,
-            email_status="sent" if ok else "pending",
-            approval_token=token,
-        ))
-        if adv_user and adv_user.phone:
-            _ping_advocate_whatsapp(adv_user.phone, adv_first, name,
-                                    data.get("role_query", ""),
-                                    data.get("company_name", ""), to_email)
+    advocate = _pick_advocate(advocates, data.get("role_query", ""))
+    to_email = advocate.email
+    adv_user = WaUser.query.get(advocate.user_id)
+    adv_first = (adv_user.first_name if adv_user else None) or ""
+    token = secrets.token_urlsafe(24)
+    approval_url = f"{WaConfig.WA_PUBLIC_BASE_URL}/wa/referral/approve?t={token}"
+    ok = emailer.send_application_email(
+        to_email, adv_first, name, candidate_user.email or "",
+        data.get("role_query", ""), data.get("company_name", ""),
+        data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
+        approval_url=approval_url, resume_bytes=resume_bytes,
+        resume_filename=resume_filename, resume_content_type=resume_content_type,
+    )
+    db.session.add(WaApplicationRecipient(
+        application_id=application.id,
+        advocate_id=advocate.id,
+        email=to_email,
+        emailed_at=datetime.utcnow() if ok else None,
+        email_status="sent" if ok else "pending",
+        approval_token=token,
+    ))
+    if adv_user and adv_user.phone:
+        _ping_advocate_whatsapp(adv_user.phone, adv_first, name,
+                                data.get("role_query", ""),
+                                data.get("company_name", ""), to_email)
     db.session.commit()
-    return len(advocates)
+    return 1
 
 
 def _ping_advocate_whatsapp(phone, adv_first, candidate_name, role, company, email):
