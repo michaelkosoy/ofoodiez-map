@@ -41,6 +41,10 @@ WELCOME_BACK = (
     "Welcome back{name}! 🧡\n"
     "What would you like to do? (type *menu* anytime) 👇"
 )
+# Short by-name hello sent right before the shared WA_CT_WELCOME template (which
+# says welcome again itself — intentional, per Ofir). Unused once the
+# WA_CT_WELCOME_BACK template (name inside the template) is configured.
+WELCOME_HI = "Welcome back, {name}! 🧡"
 
 # ---- Phase B: registration (English v1; young & upbeat) ----
 REG_FIRST_NAME = (

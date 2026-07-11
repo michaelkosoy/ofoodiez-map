@@ -54,6 +54,13 @@ class _WaConfig:
         return os.environ.get("WA_CT_WELCOME")
 
     @property
+    def WA_CT_WELCOME_BACK(self):
+        # Registered-user variant of the Welcome menu: greets by name (body {{1}})
+        # and swaps the Contact button for "Edit my details" (payload PATH_PROFILE).
+        # Falls back to WA_CT_WELCOME (with a separate hello text) when unset.
+        return os.environ.get("WA_CT_WELCOME_BACK")
+
+    @property
     def WA_CT_BACK_TO_MENU(self):
         return os.environ.get("WA_CT_BACK_TO_MENU")
 

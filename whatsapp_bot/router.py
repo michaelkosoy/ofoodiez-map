@@ -22,6 +22,7 @@ _PATHS = {
     "PATH_CANDIDATE": "candidate",
     "PATH_EMPLOYEE": "employee",
     "PATH_CONTACT": "contact",
+    "PATH_PROFILE": "profile",  # "Edit my details" button on WA_CT_WELCOME_BACK
 }
 
 # Registered users can jump to their profile editor by keyword (the Welcome
@@ -87,6 +88,11 @@ def _entry(user, conv):
 
 
 def _enter_path(user, conv, flow):
+    # "Edit my details" button (registered-user Welcome menu).
+    if flow == "profile":
+        if user.is_registered:
+            return profile.start(user, conv)
+        return _entry(user, conv)  # stale button from before they were removed
     # Contact option: signed-in users edit their own details; others get contact info.
     if flow == "contact":
         if user.is_registered:
@@ -106,13 +112,18 @@ def _enter_path(user, conv, flow):
 
 def _welcome(user, conv):
     conversation.reset_state(conv)
-    # The WA_CT_WELCOME template already carries the welcome + explainer + buttons,
-    # so we don't send a separate greeting (that produced two stacked "welcome"
-    # messages). Fall back to a text greeting only if the template isn't set.
-    if WaConfig.WA_CT_WELCOME:
+    name = _display_name(user)
+    # Registered users get their own menu template when configured: greets by
+    # name ({{1}}) and carries the "Edit my details" button (PATH_PROFILE).
+    if user.is_registered and WaConfig.WA_CT_WELCOME_BACK:
+        messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME_BACK, {"1": name or "there"})
+    elif WaConfig.WA_CT_WELCOME:
+        # Shared template — greet returning users by name first (a second
+        # "welcome" on top of the template's is fine; requested).
+        if user.is_registered and name:
+            messaging.send_text(user.phone, copy.WELCOME_HI.format(name=name))
         messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
     elif user.is_registered:
-        name = _display_name(user)
         messaging.send_text(user.phone, copy.WELCOME_BACK.format(name=f", {name}" if name else ""))
     else:
         messaging.send_text(user.phone, copy.WELCOME_INTRO)
