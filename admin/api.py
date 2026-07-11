@@ -263,6 +263,7 @@ def get_whatsapp_companies():
         a = agg.get(c.id, {"email": 0, "link": 0, "total": 0})
         out.append({
             "id": c.id, "name": c.name,
+            "careers_url": c.careers_url or "",
             "total_advocates": a["total"],
             "email_advocates": a["email"],
             "link_advocates": a["link"],
@@ -515,7 +516,8 @@ def delete_whatsapp_advocate(id):
 @login_required
 def update_whatsapp_company(id):
     c = WaCompany.query.get_or_404(id)
-    name = ((request.json or {}).get("name") or "").strip()
+    data = request.json or {}
+    name = (data.get("name") or "").strip()
     if name:
         norm = " ".join(name.lower().split())
         clash = WaCompany.query.filter(WaCompany.normalized_name == norm, WaCompany.id != c.id).first()
@@ -523,8 +525,14 @@ def update_whatsapp_company(id):
             return jsonify({"error": "another company already uses that name"}), 400
         c.name = name
         c.normalized_name = norm
-        db.session.commit()
-    return jsonify({"id": c.id, "name": c.name})
+    if "careers_url" in data:
+        url = (data.get("careers_url") or "").strip()
+        # rendered as an href on the public referrals page — allow http(s) only
+        if url and not url.startswith(("http://", "https://")):
+            return jsonify({"error": "careers URL must start with http:// or https://"}), 400
+        c.careers_url = url or None
+    db.session.commit()
+    return jsonify({"id": c.id, "name": c.name, "careers_url": c.careers_url or ""})
 
 
 @admin_bp.route('/api/whatsapp/companies', methods=['POST'])

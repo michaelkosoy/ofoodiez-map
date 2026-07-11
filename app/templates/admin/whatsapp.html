@@ -214,6 +214,7 @@ var COLS = {
             }
         },
         { title: "Company", field: "name", headerFilter: "input", minWidth: 180 },
+        { title: "Careers", field: "careers_url", formatter: linkCell, width: 90 },
         { title: "Advocates", field: "total_advocates", width: 100 },
         { title: "via Email", field: "email_advocates", width: 100 },
         { title: "via Link", field: "link_advocates", width: 100 },
@@ -222,15 +223,17 @@ var COLS = {
         {
             title: "Actions", headerSort: false, width: 180, hozAlign: "center",
             formatter: function () {
-                return '<button class="act" data-a="edit">Edit name</button>' +
+                return '<button class="act" data-a="edit">Edit</button>' +
                     ' <button class="act danger" data-a="delete">Delete</button>';
             },
             cellClick: function (e, c) {
                 var btn = e.target.closest('button'); if (!btn) return;
                 var d = c.getRow().getData();
                 if (btn.dataset.a === 'edit') {
-                    editModal('Rename company', [{ key: 'name', label: 'Company name', value: d.name }],
-                        function (v) { putSave('/admin/api/whatsapp/companies/' + d.id, v, c.getTable()); });
+                    editModal('Edit company', [
+                        { key: 'name', label: 'Company name', value: d.name },
+                        { key: 'careers_url', label: 'Careers page URL', value: d.careers_url }
+                    ], function (v) { putSave('/admin/api/whatsapp/companies/' + d.id, v, c.getTable()); });
                 } else if (btn.dataset.a === 'delete') {
                     Swal.fire({ title: 'Delete company?', icon: 'warning',
                         html: 'Also removes its advocates &amp; applications.<br><b>' + (d.name || '') + '</b>',

@@ -352,20 +352,13 @@ def hitech_bot():
                         .order_by(WaCompany.name.asc())
                         .all())
         
+        featured_names = {'google', 'meta', 'microsoft', 'amazon', 'apple', 'wix', 'monday.com', 'fiverr', 'checkout.com', 'taboola'}
         for co in db_companies:
-            # We check if there's any active advocate with a referral_link or if it's email-based
-            advocate = WaAdvocate.query.filter_by(company_id=co.id, status='active').first()
-            # If the advocate has a self-serve link, we can link there, or default to a career page search
-            careers_url = advocate.referral_link if (advocate and advocate.referral_link) else "https://api.whatsapp.com/send?phone=972559218943"
-            
-            # Check if this company should be featured (e.g. popular ones like Google, Meta, Monday, Wix, Checkout, Taboola, Microsoft, Amazon, Apple, Fiverr)
-            featured_names = {'google', 'meta', 'microsoft', 'amazon', 'apple', 'wix', 'monday.com', 'fiverr', 'checkout.com', 'taboola'}
-            is_featured = co.name.lower() in featured_names
-            
             companies_with_advocates.append({
                 "name": co.name,
-                "careers_url": careers_url,
-                "featured": is_featured
+                # Set in admin (WhatsApp → Companies → Edit); None renders a non-clickable card.
+                "careers_url": co.careers_url,
+                "featured": co.name.lower() in featured_names
             })
     except Exception as e:
         print(f"⚠️ Error fetching companies with advocates: {e}")

@@ -116,6 +116,7 @@ _STATEMENTS = [
         created_at     timestamptz not null default now()
     )""",
     # ---- heal older tables that predate later columns ----
+    "alter table public.wa_companies add column if not exists careers_url text",
     "alter table public.wa_advocates add column if not exists email text",
     "alter table public.wa_advocates add column if not exists referral_link text",
     "alter table public.wa_advocates add column if not exists role_title text",
@@ -126,6 +127,22 @@ _STATEMENTS = [
     "alter table public.wa_application_recipients add column if not exists approval_token text",
     "alter table public.wa_application_recipients add column if not exists approved_at timestamptz",
     "alter table public.wa_applications add column if not exists job_description text",
+    # ---- seed careers pages for the featured companies (fills NULL only, so
+    # admin edits via /admin → WhatsApp → Companies are never overwritten) ----
+    """update public.wa_companies c set careers_url = v.url
+        from (values
+            ('google',       'https://careers.google.com/'),
+            ('meta',         'https://www.metacareers.com/'),
+            ('microsoft',    'https://careers.microsoft.com/'),
+            ('amazon',       'https://www.amazon.jobs/'),
+            ('apple',        'https://jobs.apple.com/'),
+            ('wix',          'https://www.wix.com/jobs'),
+            ('monday.com',   'https://monday.com/careers'),
+            ('fiverr',       'https://www.fiverr.com/jobs'),
+            ('checkout.com', 'https://www.checkout.com/careers'),
+            ('taboola',      'https://www.taboola.com/careers')
+        ) as v(norm, url)
+        where c.normalized_name = v.norm and c.careers_url is null""",
     # ---- indexes ----
     """create index if not exists ix_wa_inbound_from_created
         on public.wa_inbound_messages (from_phone, created_at)""",

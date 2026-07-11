@@ -250,13 +250,17 @@
 
             <div class="ht-advocates-grid" id="ht-advocates-grid">
                 {% for co in companies %}
-                <div class="ht-advocate-card" data-name="{{ co.name | lower }}">
+                {% if co.careers_url %}<a class="ht-advocate-card" data-name="{{ co.name | lower }}" href="{{ co.careers_url }}" target="_blank" rel="noopener">{% else %}<div class="ht-advocate-card" data-name="{{ co.name | lower }}">{% endif %}
                     <div class="ht-advocate-icon"><i class="fas fa-building"></i></div>
                     <div>
                         <div class="ht-advocate-name">{{ co.name }}</div>
+                        {% if co.careers_url %}
+                        <div class="ht-advocate-link">Careers Page ↗</div>
+                        {% else %}
                         <div class="ht-advocate-link" style="opacity: 0.7;">Advocate Active</div>
+                        {% endif %}
                     </div>
-                </div>
+                {% if co.careers_url %}</a>{% else %}</div>{% endif %}
                 {% else %}
                 <p style="color:var(--butter-dim);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:20px 0;">
                     Company list coming soon.

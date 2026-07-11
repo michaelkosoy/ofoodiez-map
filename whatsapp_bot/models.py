@@ -29,6 +29,7 @@ class WaCompany(db.Model):
     id = _pk()
     name = db.Column(db.Text, nullable=False)
     normalized_name = db.Column(db.Text, nullable=False, unique=True)  # lower(trim(name))
+    careers_url = db.Column(db.Text)  # company jobs page, shown on /hitech/referrals-bot
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
