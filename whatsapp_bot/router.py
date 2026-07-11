@@ -106,13 +106,16 @@ def _enter_path(user, conv, flow):
 
 def _welcome(user, conv):
     conversation.reset_state(conv)
-    if user.is_registered:
+    # The WA_CT_WELCOME template already carries the welcome + explainer + buttons,
+    # so we don't send a separate greeting (that produced two stacked "welcome"
+    # messages). Fall back to a text greeting only if the template isn't set.
+    if WaConfig.WA_CT_WELCOME:
+        messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
+    elif user.is_registered:
         name = _display_name(user)
-        messaging.send_text(user.phone, copy.WELCOME_BACK.format(
-            name=f", {name}" if name else ""))
+        messaging.send_text(user.phone, copy.WELCOME_BACK.format(name=f", {name}" if name else ""))
     else:
         messaging.send_text(user.phone, copy.WELCOME_INTRO)
-    messaging.send_buttons(user.phone, WaConfig.WA_CT_WELCOME)
     return "welcome"
 
 
