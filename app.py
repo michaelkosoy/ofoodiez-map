@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 import pandas as pd
 import os
 import json
+import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -335,38 +336,69 @@ def hitech_community():
     return render_template('hitech_community.html', active_hitech_page='community', active_page='hitech', c=content.get('community', {}))
 
 
-@app.route('/hitech/referrals-bot')
-def hitech_bot():
-    """HiTech referrals bot info + advocates directory.
-    Queries the database dynamically for companies with active advocates.
-    """
+# ── /hitech/referrals-bot companies list ─────────────────────────────────────
+# The live wa_companies⋈wa_advocates query runs ~8s in prod (deterministic — a
+# DB-side issue) and the list changes only on rare admin edits, so we serve it
+# from an in-process cache. Stale reads refresh in the background, so a page view
+# never waits on the slow query; the cache is warmed at startup below.
+# ponytail: TTL + serve-stale. If admin edits must show instantly, bust the cache
+# from the advocate/company write endpoints instead of shortening the TTL.
+_FEATURED_NAMES = {'google', 'meta', 'microsoft', 'amazon', 'apple', 'wix',
+                   'monday.com', 'fiverr', 'checkout.com', 'taboola'}
+_BOT_COMPANIES = {"data": None, "ts": 0.0, "refreshing": False}
+_BOT_COMPANIES_TTL = 600  # seconds
+
+
+def _refresh_bot_companies():
+    """Query companies that have an active advocate and repopulate the cache."""
     from whatsapp_bot.models import WaCompany, WaAdvocate
-    
-    companies_with_advocates = []
     try:
-        # Get all companies that have at least one active advocate
-        db_companies = (WaCompany.query
-                        .join(WaAdvocate, WaCompany.id == WaAdvocate.company_id)
-                        .filter(WaAdvocate.status == 'active')
-                        .distinct()
-                        .order_by(WaCompany.name.asc())
-                        .all())
-        
-        featured_names = {'google', 'meta', 'microsoft', 'amazon', 'apple', 'wix', 'monday.com', 'fiverr', 'checkout.com', 'taboola'}
-        for co in db_companies:
-            companies_with_advocates.append({
-                "name": co.name,
-                # Set in admin (WhatsApp → Companies → Edit); None renders a non-clickable card.
-                "careers_url": co.careers_url,
-                "featured": co.name.lower() in featured_names
-            })
+        with app.app_context():
+            t0 = time.monotonic()
+            rows = (WaCompany.query
+                    .join(WaAdvocate, WaCompany.id == WaAdvocate.company_id)
+                    .filter(WaAdvocate.status == 'active')
+                    .distinct()
+                    .order_by(WaCompany.name.asc())
+                    .all())
+            data = [{"name": co.name,
+                     # careers_url set in admin (WhatsApp → Companies → Edit); None → non-clickable card.
+                     "careers_url": co.careers_url,
+                     "featured": co.name.lower() in _FEATURED_NAMES} for co in rows]
+        print(f"⏱️  referrals-bot companies query: {time.monotonic() - t0:.2f}s ({len(data)} companies)")
+        _BOT_COMPANIES["data"] = data
+        _BOT_COMPANIES["ts"] = time.monotonic()
     except Exception as e:
         print(f"⚠️ Error fetching companies with advocates: {e}")
-        # Fallback to empty list or basic static template data
-        companies_with_advocates = []
+    finally:
+        _BOT_COMPANIES["refreshing"] = False
 
+
+def _companies_with_advocates():
+    """Cached companies list for the bot page — instant read, background refresh."""
+    fresh = (_BOT_COMPANIES["data"] is not None
+             and time.monotonic() - _BOT_COMPANIES["ts"] < _BOT_COMPANIES_TTL)
+    if not fresh and not _BOT_COMPANIES["refreshing"]:
+        _BOT_COMPANIES["refreshing"] = True
+        if _BOT_COMPANIES["data"] is None:
+            _refresh_bot_companies()                                              # first load: block once
+        else:
+            threading.Thread(target=_refresh_bot_companies, daemon=True).start()  # serve stale, refresh async
+    return _BOT_COMPANIES["data"] or []
+
+
+# Warm the cache off the request path so the first visitor doesn't eat the query.
+threading.Thread(target=_refresh_bot_companies, daemon=True).start()
+
+
+@app.route('/hitech/referrals-bot')
+def hitech_bot():
+    """HiTech referrals bot info + advocates directory. The companies list is
+    cached and refreshed in the background — see _companies_with_advocates()."""
     content = _load_hitech_content()
-    return render_template('hitech_bot.html', active_hitech_page='referrals-bot', active_page='hitech', companies=companies_with_advocates, c=content.get('bot', {}))
+    return render_template('hitech_bot.html', active_hitech_page='referrals-bot',
+                           active_page='hitech', companies=_companies_with_advocates(),
+                           c=content.get('bot', {}))
 
 
 @app.route('/hitech/cv-guide')
