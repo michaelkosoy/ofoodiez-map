@@ -40,14 +40,23 @@
     "anatomy_title": "Anatomy of a great CV",
     "coming_soon": [
       {
-        "desc": "Upload your CV and a job description or link. Get AI-generated recommendations tailored to that specific role.",
-        "icon": "fas fa-robot",
-        "title": "AI CV Reviewer"
+        "icon": "fas fa-book-open",
+        "title": "Complete Job Search & CV Guide",
+        "desc": "The full Hebrew guide for juniors & students — the whole search process, annotated example CVs, and how to use AI right.",
+        "href": "/hitech/cv-guide/full",
+        "badge": "Members"
       },
       {
-        "desc": "Get a 1-on-1 CV review from me directly. Specific feedback, real talk, no fluff.",
+        "icon": "fas fa-robot",
+        "title": "AI CV Reviewer",
+        "desc": "Upload your CV and get a score plus concrete fixes, based on the complete Ofoodiez guide.",
+        "href": "/hitech/cv-review",
+        "badge": "New"
+      },
+      {
         "icon": "fas fa-star",
-        "title": "Personal Review by Michael"
+        "title": "Personal Review by Michael",
+        "desc": "Get a 1-on-1 CV review from me directly. Specific feedback, real talk, no fluff."
       }
     ],
     "deep_dive_title": "Deep dive on each section",
@@ -72,7 +81,7 @@
       }
     ],
     "meta_description": "The Ofoodiez guide to writing a CV that opens doors in the tech industry. Interactive annotated resume with tips on every section.",
-    "more_tools_title": "More tools on the way",
+    "more_tools_title": "More tools",
     "page_title": "CV Guide — Ofoodiez HiTech",
     "sections": [
       {

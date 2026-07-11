@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Job Search &amp; CV Guide — Ofoodiez HiTech</title>
+    <meta name="description" content="The complete Ofoodiez job search and CV guide for juniors and students in Israeli high-tech.">
+    <meta name="robots" content="noindex">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .ht-cv-page { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+        /* ── Locked view ─────────────────────────────────────────────── */
+        .ht-lock-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 120px 22px 80px; }
+        .ht-lock-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 44px 34px; max-width: 430px; width: 100%; text-align: center;
+        }
+        .ht-lock-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: rgba(114,8,21,0.18); border: 1px solid rgba(114,8,21,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px; color: var(--burgundy-mid); font-size: 20px;
+        }
+        .ht-lock-eyebrow { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 12px; }
+        .ht-lock-title { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--butter); margin-bottom: 10px; line-height: 1.2; }
+        .ht-lock-sub { font-size: 0.83rem; font-weight: 300; color: var(--butter-dim); line-height: 1.65; margin-bottom: 22px; }
+        .ht-lock-input {
+            width: 100%; box-sizing: border-box; background: #100810; border: 1px solid var(--border);
+            border-radius: 10px; color: var(--butter); padding: 12px 14px;
+            font-family: 'Outfit', sans-serif; font-size: 0.95rem; text-align: center;
+            letter-spacing: 0.22em; margin-bottom: 12px; outline: none;
+        }
+        .ht-lock-input:focus { border-color: var(--burgundy-mid); }
+        .ht-lock-btn {
+            width: 100%; background: var(--burgundy); color: var(--butter);
+            border: none; border-radius: 999px; padding: 13px;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem;
+            letter-spacing: 0.04em; cursor: pointer; transition: filter 0.2s;
+        }
+        .ht-lock-btn:hover { filter: brightness(1.2); }
+        .ht-lock-error { color: #e07070; font-size: 0.8rem; margin-top: 12px; }
+
+        /* ── Guide content ───────────────────────────────────────────── */
+        .ht-guide-wrap { max-width: 800px; margin: 0 auto; padding: 92px 22px 60px; width: 100%; box-sizing: border-box; }
+        .ht-guide { color: var(--butter-dim); font-weight: 300; line-height: 1.78; font-size: 0.95rem; }
+        .ht-guide h1 { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.7rem, 4.5vw, 2.5rem); font-weight: 700; line-height: 1.15; color: var(--butter); margin: 0 0 16px; }
+        .ht-guide h2 { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--butter); margin: 46px 0 14px; line-height: 1.25; }
+        .ht-guide h3 { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--butter); margin: 32px 0 10px; }
+        .ht-guide h4 { font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--butter); margin: 22px 0 8px; }
+        .ht-guide p { margin: 0 0 14px; }
+        .ht-guide a { color: var(--burgundy-mid); text-decoration: underline; text-underline-offset: 3px; }
+        .ht-guide a:hover { color: var(--butter); }
+        .ht-guide strong { color: var(--butter); font-weight: 600; }
+        .ht-guide em { color: var(--butter-dim); }
+        .ht-guide ul, .ht-guide ol { padding-inline-start: 24px; margin: 0 0 16px; }
+        .ht-guide li { margin-bottom: 8px; }
+        .ht-guide input[type="checkbox"] { accent-color: var(--burgundy); margin-inline-end: 7px; }
+        .ht-guide blockquote {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-inline-start: 2px solid var(--burgundy);
+            border-radius: 10px; padding: 14px 18px; margin: 0 0 14px;
+        }
+        .ht-guide blockquote p { margin: 0 0 6px; }
+        .ht-guide blockquote p:last-child { margin-bottom: 0; }
+        .ht-guide hr { border: none; border-top: 1px solid rgba(114,8,21,0.25); margin: 42px 0; }
+        .ht-guide code { background: rgba(114,8,21,0.16); border-radius: 6px; padding: 1px 7px; font-size: 0.85em; color: var(--butter); direction: ltr; unicode-bidi: embed; }
+
+        /* Example-CV "page" (single-cell table in the markdown) */
+        .ht-guide table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.5); margin: 6px 0 22px;
+        }
+        .ht-guide table td { padding: 26px 28px; }
+        .ht-guide table h2 { margin: 4px 0 6px; font-size: 1.35rem; }
+        .ht-guide table h4 {
+            margin: 22px 0 8px; padding-bottom: 5px;
+            border-bottom: 1px solid rgba(114,8,21,0.28);
+            text-transform: uppercase; letter-spacing: 0.09em;
+            font-size: 0.74rem; color: var(--burgundy-mid);
+        }
+        .ht-guide table hr { margin: 14px 0; }
+        .ht-guide table p, .ht-guide table li { font-size: 0.87rem; }
+
+        @media (max-width: 540px) {
+            .ht-guide-wrap { padding: 84px 16px 50px; }
+            .ht-guide table td { padding: 16px 14px; }
+        }
+    </style>
+</head>
+<body>
+    {% set active_hitech_page = 'cv-guide' %}
+    {% include 'components/hitech_menu.html' %}
+
+    <div class="ht-cv-page">
+        {% if guide_md %}
+        <div class="ht-guide-wrap">
+            <div class="ht-guide" id="ht-guide"></div>
+        </div>
+        {% else %}
+        <div class="ht-lock-wrap">
+            <form class="ht-lock-card" method="POST" action="{{ url_for('hitech_cv_full') }}">
+                <div class="ht-lock-icon"><i class="fas fa-lock"></i></div>
+                <p class="ht-lock-eyebrow">Members Only</p>
+                <h1 class="ht-lock-title">The Complete Job Search<br>&amp; CV Guide</h1>
+                <p class="ht-lock-sub">The full Hebrew guide for juniors &amp; students — the whole search process, annotated example CVs, and how to use AI right. Enter the access password to read it.</p>
+                <input class="ht-lock-input" type="password" name="password" placeholder="Password" autocomplete="off" required autofocus>
+                <button class="ht-lock-btn" type="submit">Unlock the guide</button>
+                {% if error %}<p class="ht-lock-error">Wrong password — try again.</p>{% endif %}
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="bottom-nav-spacer"></div>
+    </div>
+
+    {% if guide_md %}
+    <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+    <script>
+        (function () {
+            var md = {{ guide_md | tojson }};
+            document.getElementById('ht-guide').innerHTML = marked.parse(md);
+        })();
+    </script>
+    {% endif %}
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+</html>

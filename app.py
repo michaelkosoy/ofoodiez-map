@@ -73,6 +73,10 @@ def _inject_current_user():
 from billing import billing_bp
 app.register_blueprint(billing_bp)
 
+# Register the AI CV reviewer (/hitech/cv-review, graded against app/data/cv_guide_full.md)
+from cv_review import cv_review_bp
+app.register_blueprint(cv_review_bp)
+
 # Start Telegram bot in a background thread
 import threading
 from telegram_bot.bot import run_bot
@@ -406,6 +410,28 @@ def hitech_cv():
     """HiTech interactive CV guide."""
     content = _load_hitech_content()
     return render_template('hitech_cv.html', active_hitech_page='cv-guide', active_page='hitech', c=content.get('cv', {}))
+
+
+@app.route('/hitech/cv-guide/full', methods=['GET', 'POST'])
+def hitech_cv_full():
+    """Full Job Search & CV guide (Hebrew), served from app/data/cv_guide_full.md.
+
+    ponytail: shared password gate until this moves behind the Grow paywall
+    (swap for billing.item_gate like /blog/japan).
+    """
+    error = False
+    if request.method == 'POST':
+        if request.form.get('password', '').strip() == os.environ.get('CV_GUIDE_PASSWORD', '123456'):
+            session['cv_guide_unlocked'] = True
+            return redirect(url_for('hitech_cv_full'))
+        error = True
+    guide_md = None
+    if session.get('cv_guide_unlocked'):
+        path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'cv_guide_full.md')
+        with open(path, encoding='utf-8') as f:
+            guide_md = f.read()
+    return render_template('hitech_cv_full.html', active_hitech_page='cv-guide',
+                           active_page='hitech', guide_md=guide_md, error=error)
 
 
 @app.route('/hitech/unsubscribe')

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Review my CV with AI — Ofoodiez HiTech</title>
+    <meta name="description" content="Upload your CV and get an instant AI review — a score out of 100 and concrete fixes, graded against the Ofoodiez job-search & CV guide.">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .ht-cvr-page { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+        /* Hero */
+        .ht-cvr-hero { padding: 80px 24px 40px; text-align: center; max-width: 700px; margin: 0 auto; }
+        .ht-eyebrow { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 18px; }
+        .ht-page-title { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.8rem, 5vw, 3.2rem); font-weight: 700; line-height: 1.1; color: var(--butter); margin-bottom: 10px; }
+        .ht-page-title em { font-style: italic; color: var(--burgundy-mid); }
+        .ht-page-rule { width: 48px; height: 1px; background: linear-gradient(90deg, transparent, var(--burgundy), transparent); margin: 22px auto; }
+        .ht-page-sub { font-size: clamp(0.88rem, 2vw, 1rem); font-weight: 300; color: var(--butter-dim); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+        /* Upload card */
+        .ht-cvr-section { padding: 0 20px 40px; max-width: 640px; margin: 0 auto; width: 100%; }
+        .ht-cvr-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 26px 22px;
+        }
+        .ht-cvr-dropzone {
+            border: 1.5px dashed rgba(114,8,21,0.5); border-radius: 14px;
+            padding: 34px 20px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .ht-cvr-dropzone:hover, .ht-cvr-dropzone.dragging {
+            border-color: var(--burgundy-mid); background: rgba(114,8,21,0.08);
+        }
+        .ht-cvr-dropzone i { font-size: 26px; color: var(--burgundy-mid); margin-bottom: 12px; }
+        .ht-cvr-drop-title { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--butter); margin-bottom: 6px; }
+        .ht-cvr-drop-sub { font-size: 0.78rem; color: var(--butter-dim); }
+        .ht-cvr-filename {
+            display: none; margin-top: 14px;
+            font-size: 0.78rem; font-weight: 600; color: var(--butter);
+            background: rgba(249,246,235,0.07); border: 1px solid var(--border);
+            border-radius: 999px; padding: 5px 14px;
+            max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .ht-cvr-filename.visible { display: inline-block; }
+        .ht-cvr-filename i { font-size: 11px; color: var(--burgundy-mid); margin-right: 6px; }
+
+        /* Primary button — filled burgundy pill */
+        .ht-cvr-btn {
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            width: 100%; margin-top: 16px; padding: 13px 26px;
+            background: var(--burgundy); color: var(--butter);
+            border: none; border-radius: 999px; cursor: pointer;
+            font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.02em;
+            box-shadow: 0 2px 14px rgba(114,8,21,0.4);
+            transition: all 0.2s;
+        }
+        .ht-cvr-btn:hover:not(:disabled) { background: var(--burgundy-mid); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(114,8,21,0.55); }
+        .ht-cvr-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ht-cvr-spinner {
+            width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid rgba(249,246,235,0.3); border-top-color: var(--butter);
+            animation: cvr-spin 0.8s linear infinite;
+        }
+        @keyframes cvr-spin { to { transform: rotate(360deg); } }
+
+        /* Inline error */
+        .ht-cvr-error {
+            display: none; margin-top: 14px; padding: 9px 12px;
+            font-size: 0.8rem; font-weight: 500; line-height: 1.55;
+            background: rgba(224,112,112,0.08); color: #e07070;
+            border-left: 2px solid #c0374a; border-radius: 6px;
+        }
+        .ht-cvr-error.visible { display: block; }
+
+        /* Results */
+        .ht-cvr-results { display: none; padding: 0 20px 40px; max-width: 640px; margin: 0 auto; width: 100%; }
+        .ht-cvr-results.visible { display: block; }
+        .ht-cvr-score-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 30px 22px 26px; text-align: center; margin-bottom: 8px;
+        }
+        .ht-cvr-score { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(3rem, 10vw, 4.2rem); font-weight: 700; line-height: 1; color: var(--butter); }
+        .ht-cvr-score-of { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--butter-dim); margin-top: 8px; }
+        .ht-cvr-verdict { margin: 16px 0 0; font-size: 0.92rem; color: var(--butter); line-height: 1.7; text-align: right; }
+
+        .ht-cvr-block-title { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.15rem; font-style: italic; color: var(--butter); margin: 24px 0 12px; text-align: center; }
+        .ht-cvr-strengths { display: flex; flex-direction: column; gap: 8px; }
+        .ht-cvr-strength {
+            font-size: 0.84rem; font-weight: 500; line-height: 1.6;
+            background: rgba(37,211,102,0.08); color: #5fc97a;
+            border-left: 2px solid #25d366; border-radius: 6px;
+            padding: 9px 12px; text-align: right;
+        }
+        .ht-cvr-improvements { display: flex; flex-direction: column; gap: 12px; }
+        .ht-cvr-improvement {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 18px; text-align: right; transition: border-color 0.2s;
+        }
+        .ht-cvr-improvement:hover { border-color: rgba(114,8,21,0.35); }
+        .ht-cvr-imp-area { font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--butter); margin-bottom: 8px; }
+        .ht-cvr-imp-issue { font-size: 0.82rem; font-weight: 300; color: var(--butter-dim); line-height: 1.65; margin-bottom: 10px; }
+        .ht-cvr-imp-fix {
+            font-size: 0.8rem; color: var(--butter); line-height: 1.6;
+            background: rgba(114,8,21,0.14); border-right: 2px solid var(--burgundy-mid);
+            border-radius: 6px; padding: 8px 12px;
+        }
+        .ht-cvr-imp-fix i { color: var(--burgundy-mid); font-size: 11px; margin-left: 6px; }
+
+        .ht-cvr-guide-note { margin-top: 24px; text-align: center; font-size: 0.76rem; color: var(--butter-dim); }
+        .ht-cvr-guide-note a { color: var(--burgundy-mid); font-weight: 600; text-decoration: none; }
+        .ht-cvr-guide-note a:hover { text-decoration: underline; }
+
+        @media (max-width: 540px) {
+            .ht-cvr-hero { padding: 64px 20px 32px; }
+            .ht-cvr-card { padding: 20px 16px; }
+            .ht-cvr-dropzone { padding: 26px 14px; }
+            .ht-cvr-improvement { padding: 15px 14px; }
+        }
+    </style>
+</head>
+<body>
+    {% set active_hitech_page = 'cv-review' %}
+    {% include 'components/hitech_menu.html' %}
+
+    <div class="ht-cvr-page">
+
+        <!-- Hero -->
+        <section class="ht-cvr-hero">
+            <p class="ht-eyebrow">Career Tools</p>
+            <h1 class="ht-page-title">Review my CV<br>with <em>AI</em></h1>
+            <div class="ht-page-rule"></div>
+            <p class="ht-page-sub">
+                Upload your CV and get an instant score plus concrete fixes —
+                graded against the Ofoodiez job-search &amp; CV guide for juniors
+                and students in Israeli high-tech.
+            </p>
+        </section>
+
+        <!-- Upload card -->
+        <section class="ht-cvr-section">
+            <div class="ht-cvr-card">
+                <div class="ht-cvr-dropzone" id="cvr-dropzone" role="button" tabindex="0" aria-label="Upload your CV">
+                    <i class="fas fa-file-arrow-up"></i>
+                    <div class="ht-cvr-drop-title">Drag &amp; drop your CV here</div>
+                    <div class="ht-cvr-drop-sub">or tap to browse — PDF or TXT, up to 5 MB</div>
+                    <span class="ht-cvr-filename" id="cvr-filename"></span>
+                </div>
+                <input type="file" id="cvr-file" accept=".pdf,.txt" style="display:none">
+
+                <div class="ht-cvr-error" id="cvr-error"></div>
+
+                <button class="ht-cvr-btn" id="cvr-submit" disabled>
+                    <span id="cvr-btn-idle">Review my CV</span>
+                    <span id="cvr-btn-busy" style="display:none;align-items:center;gap:9px;">
+                        <span class="ht-cvr-spinner"></span>
+                        <span id="cvr-status">Reading your CV…</span>
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Results -->
+        <section class="ht-cvr-results" id="cvr-results">
+            <div class="ht-cvr-score-card">
+                <div class="ht-cvr-score" id="cvr-score">–</div>
+                <div class="ht-cvr-score-of">out of 100</div>
+                <p class="ht-cvr-verdict" id="cvr-verdict" dir="rtl"></p>
+            </div>
+
+            <div id="cvr-strengths-block" style="display:none;">
+                <p class="ht-cvr-block-title">What's working</p>
+                <div class="ht-cvr-strengths" id="cvr-strengths" dir="rtl"></div>
+            </div>
+
+            <div id="cvr-improvements-block" style="display:none;">
+                <p class="ht-cvr-block-title">What to improve</p>
+                <div class="ht-cvr-improvements" id="cvr-improvements" dir="rtl"></div>
+            </div>
+
+            <p class="ht-cvr-guide-note">
+                Based on the complete <a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a>
+            </p>
+        </section>
+
+        <div class="bottom-nav-spacer"></div>
+    </div>
+
+    <script>
+        (function () {
+            var MAX_BYTES = 5 * 1024 * 1024;
+            var GENERIC_ERROR = 'Something went wrong while reviewing your CV. Please try again.';
+            var STATUS_MESSAGES = [
+                'Reading your CV…',
+                'Checking it against the guide…',
+                'Scoring each section…',
+                'Writing concrete fixes…'
+            ];
+
+            var dropzone = document.getElementById('cvr-dropzone');
+            var fileInput = document.getElementById('cvr-file');
+            var filenameEl = document.getElementById('cvr-filename');
+            var errorEl = document.getElementById('cvr-error');
+            var submitBtn = document.getElementById('cvr-submit');
+            var btnIdle = document.getElementById('cvr-btn-idle');
+            var btnBusy = document.getElementById('cvr-btn-busy');
+            var statusEl = document.getElementById('cvr-status');
+            var resultsEl = document.getElementById('cvr-results');
+            var scoreEl = document.getElementById('cvr-score');
+            var verdictEl = document.getElementById('cvr-verdict');
+            var strengthsBlock = document.getElementById('cvr-strengths-block');
+            var strengthsEl = document.getElementById('cvr-strengths');
+            var improvementsBlock = document.getElementById('cvr-improvements-block');
+            var improvementsEl = document.getElementById('cvr-improvements');
+
+            var selectedFile = null;
+            var statusTimer = null;
+            var loading = false;
+
+            function showError(msg) { errorEl.textContent = msg || GENERIC_ERROR; errorEl.classList.add('visible'); }
+            function clearError() { errorEl.textContent = ''; errorEl.classList.remove('visible'); }
+
+            function validateFile(file) {
+                var name = (file.name || '').toLowerCase();
+                if (name.lastIndexOf('.pdf') !== name.length - 4 && name.lastIndexOf('.txt') !== name.length - 4) {
+                    showError('Only .pdf or .txt files are supported.');
+                    return false;
+                }
+                if (file.size > MAX_BYTES) {
+                    showError('This file is over 5 MB. Please upload a smaller one.');
+                    return false;
+                }
+                return true;
+            }
+
+            function setFile(file) {
+                if (loading || !file) return;
+                clearError();
+                if (!validateFile(file)) {
+                    selectedFile = null;
+                    filenameEl.classList.remove('visible');
+                    submitBtn.disabled = true;
+                    return;
+                }
+                selectedFile = file;
+                filenameEl.innerHTML = '';
+                var icon = document.createElement('i');
+                icon.className = 'fas fa-paperclip';
+                filenameEl.appendChild(icon);
+                filenameEl.appendChild(document.createTextNode(file.name));
+                filenameEl.classList.add('visible');
+                submitBtn.disabled = false;
+            }
+
+            /* Dropzone: click / keyboard / drag & drop */
+            dropzone.addEventListener('click', function () { if (!loading) fileInput.click(); });
+            dropzone.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!loading) fileInput.click(); }
+            });
+            fileInput.addEventListener('change', function () { setFile(fileInput.files[0]); });
+            ['dragenter', 'dragover'].forEach(function (evt) {
+                dropzone.addEventListener(evt, function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('dragging');
+                });
+            });
+            ['dragleave', 'drop'].forEach(function (evt) {
+                dropzone.addEventListener(evt, function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('dragging');
+                });
+            });
+            dropzone.addEventListener('drop', function (e) {
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                    setFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            /* Loading state */
+            function startLoading() {
+                loading = true;
+                submitBtn.disabled = true;
+                btnIdle.style.display = 'none';
+                btnBusy.style.display = 'inline-flex';
+                var i = 0;
+                statusEl.textContent = STATUS_MESSAGES[0];
+                statusTimer = setInterval(function () {
+                    i = (i + 1) % STATUS_MESSAGES.length;
+                    statusEl.textContent = STATUS_MESSAGES[i];
+                }, 2400);
+            }
+            function stopLoading() {
+                loading = false;
+                clearInterval(statusTimer);
+                statusTimer = null;
+                btnBusy.style.display = 'none';
+                btnIdle.style.display = 'inline';
+                submitBtn.disabled = !selectedFile;
+            }
+
+            /* Render the review (all values inserted as text — never HTML) */
+            function renderResults(data) {
+                var score = parseInt(data.score, 10);
+                if (isNaN(score)) score = 0;
+                score = Math.max(0, Math.min(100, score));
+                scoreEl.textContent = score;
+                scoreEl.style.color = score >= 80 ? '#5fc97a' : (score >= 60 ? 'var(--butter)' : '#e07070');
+                verdictEl.textContent = data.verdict || '';
+
+                strengthsEl.innerHTML = '';
+                var strengths = Array.isArray(data.strengths) ? data.strengths : [];
+                strengths.forEach(function (s) {
+                    if (!s) return;
+                    var item = document.createElement('div');
+                    item.className = 'ht-cvr-strength';
+                    item.textContent = String(s);
+                    strengthsEl.appendChild(item);
+                });
+                strengthsBlock.style.display = strengthsEl.children.length ? 'block' : 'none';
+
+                improvementsEl.innerHTML = '';
+                var improvements = Array.isArray(data.improvements) ? data.improvements : [];
+                improvements.forEach(function (imp) {
+                    if (!imp) return;
+                    var card = document.createElement('div');
+                    card.className = 'ht-cvr-improvement';
+                    if (imp.area) {
+                        var area = document.createElement('div');
+                        area.className = 'ht-cvr-imp-area';
+                        area.textContent = String(imp.area);
+                        card.appendChild(area);
+                    }
+                    if (imp.issue) {
+                        var issue = document.createElement('div');
+                        issue.className = 'ht-cvr-imp-issue';
+                        issue.textContent = String(imp.issue);
+                        card.appendChild(issue);
+                    }
+                    if (imp.fix) {
+                        var fix = document.createElement('div');
+                        fix.className = 'ht-cvr-imp-fix';
+                        var bulb = document.createElement('i');
+                        bulb.className = 'fas fa-lightbulb';
+                        fix.appendChild(bulb);
+                        fix.appendChild(document.createTextNode(String(imp.fix)));
+                        card.appendChild(fix);
+                    }
+                    if (card.children.length) improvementsEl.appendChild(card);
+                });
+                improvementsBlock.style.display = improvementsEl.children.length ? 'block' : 'none';
+
+                resultsEl.classList.add('visible');
+                resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            /* Submit */
+            submitBtn.addEventListener('click', function () {
+                if (!selectedFile || loading) return;
+                if (!validateFile(selectedFile)) return;
+                clearError();
+                resultsEl.classList.remove('visible');
+                startLoading();
+
+                var formData = new FormData();
+                formData.append('cv', selectedFile);
+
+                fetch('/api/hitech/cv-review', { method: 'POST', body: formData })
+                    .then(function (res) {
+                        return res.json()
+                            .catch(function () { return {}; })
+                            .then(function (data) {
+                                if (!res.ok) throw new Error((data && data.error) || GENERIC_ERROR);
+                                return data;
+                            });
+                    })
+                    .then(function (data) {
+                        stopLoading();
+                        renderResults(data);
+                    })
+                    .catch(function (err) {
+                        stopLoading();
+                        showError(err && err.message ? err.message : GENERIC_ERROR);
+                    });
+            });
+        })();
+    </script>
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+</html>

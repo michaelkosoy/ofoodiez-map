@@ -183,6 +183,20 @@
         .ht-coming-title { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--butter); margin-bottom: 8px; }
         .ht-coming-desc { font-size: 0.78rem; color: var(--butter-dim); line-height: 1.55; }
 
+        /* Live (clickable) cards in the more-tools grid */
+        a.ht-coming-card { text-decoration: none; display: block; }
+        .ht-coming-card.is-live { border-color: rgba(114,8,21,0.4); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        .ht-coming-card.is-live::before { content: none; }
+        .ht-coming-card.is-live .ht-coming-icon { opacity: 1; }
+        .ht-coming-card.is-live:hover { transform: translateY(-3px); border-color: var(--burgundy-mid); box-shadow: 0 10px 30px rgba(114,8,21,0.25); }
+        .ht-live-badge {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--burgundy); color: var(--butter);
+            border-radius: 999px; padding: 3px 9px;
+        }
+
         @media (max-width: 540px) {
             .ht-intro-cards { grid-template-columns: 1fr; }
             .ht-coming-grid { grid-template-columns: 1fr; }
@@ -305,11 +319,20 @@
             <p class="ht-section-title" style="margin-bottom:20px;">{{ c.more_tools_title | default('More tools on the way') | safe }}</p>
             <div class="ht-coming-grid">
                 {% for cs in c.coming_soon | default([]) %}
+                {% if cs.href %}
+                <a href="{{ cs.href }}" class="ht-coming-card is-live">
+                    <span class="ht-live-badge">{{ cs.badge | default('New') }}</span>
+                    <div class="ht-coming-icon"><i class="{{ cs.icon }}"></i></div>
+                    <div class="ht-coming-title">{{ cs.title }}</div>
+                    <div class="ht-coming-desc">{{ cs.desc }}</div>
+                </a>
+                {% else %}
                 <div class="ht-coming-card">
                     <div class="ht-coming-icon"><i class="{{ cs.icon }}"></i></div>
                     <div class="ht-coming-title">{{ cs.title }}</div>
                     <div class="ht-coming-desc">{{ cs.desc }}</div>
                 </div>
+                {% endif %}
                 {% else %}
                 <div class="ht-coming-card">
                     <div class="ht-coming-icon"><i class="fas fa-robot"></i></div>
