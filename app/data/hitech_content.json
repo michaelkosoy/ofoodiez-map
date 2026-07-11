@@ -36,113 +36,113 @@
     "warning_text": "⚠️ Only verified LinkedIn profiles will be approved. An incorrect or missing link will result in removal from the list."
   },
   "cv": {
-    "anatomy_subtitle": "Hover or tap each number to see the tip for that section",
-    "anatomy_title": "Anatomy of a great CV",
+    "anatomy_subtitle": "עברו עם העכבר או הקליקו על כל מספר כדי לראות את הטיפ לאותו חלק (הדוגמאות — באנגלית, כמו קורות החיים שלכם)",
+    "anatomy_title": "האנטומיה של קורות חיים מעולים",
     "coming_soon": [
       {
         "icon": "fas fa-book-open",
-        "title": "Complete Job Search & CV Guide",
-        "desc": "The full Hebrew guide for juniors & students — the whole search process, annotated example CVs, and how to use AI right.",
+        "title": "המדריך המלא לחיפוש עבודה וקורות חיים",
+        "desc": "המדריך המלא בעברית לג'וניורים ולסטודנטים — כל תהליך החיפוש, דוגמאות קורות חיים מלאות ושימוש נכון ב-AI.",
         "href": "/hitech/cv-guide/full",
         "badge": "Members"
       },
       {
         "icon": "fas fa-robot",
-        "title": "AI CV Reviewer",
-        "desc": "Upload your CV and get a score plus concrete fixes, based on the complete Ofoodiez guide.",
+        "title": "בדיקת קורות חיים עם AI",
+        "desc": "מעלים קורות חיים ומקבלים ציון ותיקונים קונקרטיים — על בסיס המדריך המלא.",
         "href": "/hitech/cv-review",
         "badge": "New"
       },
       {
         "icon": "fas fa-star",
-        "title": "Personal Review by Michael",
-        "desc": "Get a 1-on-1 CV review from me directly. Specific feedback, real talk, no fluff."
+        "title": "ביקורת אישית ממיכאל",
+        "desc": "פידבק אחד-על-אחד על קורות החיים שלכם. ישיר, ספציפי, בלי קשקושים."
       }
     ],
-    "deep_dive_title": "Deep dive on each section",
-    "eyebrow": "Career Tools",
-    "headline": "The Ofoodiez guide for a CV<br>that will <em>open doors</em> for you",
-    "hero_sub": "Most CVs are invisible. Not because the person isn't good — but because the CV doesn't communicate their value. Here's how to fix that.",
+    "deep_dive_title": "צלילה לעומק — חלק אחרי חלק",
+    "eyebrow": "כלים לקריירה",
+    "headline": "המדריך לקורות חיים<br>ש<em>פותחים דלתות</em> בהייטק",
+    "hero_sub": "רוב קורות החיים בלתי-נראים. לא כי המועמד לא טוב — אלא כי הדף לא מעביר את הערך שלו. ככה מתקנים את זה.",
     "intro_cards": [
       {
-        "desc": "That's how long a recruiter spends on a CV at first glance.",
         "icon": "fas fa-clock",
-        "title": "6 seconds"
+        "title": "6 שניות",
+        "desc": "זה הזמן שמגייס מקדיש לקורות חיים במבט ראשון."
       },
       {
-        "desc": "Most CVs are filtered out by software before a human even sees them.",
         "icon": "fas fa-filter",
-        "title": "ATS First"
+        "title": "ATS קודם",
+        "desc": "את רוב קורות החיים מסננת תוכנה לפי מילות מפתח — עוד לפני שבן אדם רואה אותם."
       },
       {
-        "desc": "Numbers, outcomes, and specific results beat vague descriptions every time.",
         "icon": "fas fa-trophy",
-        "title": "Impact Wins"
+        "title": "אימפקט מנצח",
+        "desc": "מספרים, תוצאות והישגים קונקרטיים מנצחים תיאורים כלליים. תמיד."
       }
     ],
     "meta_description": "The Ofoodiez guide to writing a CV that opens doors in the tech industry. Interactive annotated resume with tips on every section.",
-    "more_tools_title": "More tools",
+    "more_tools_title": "עוד כלים",
     "page_title": "CV Guide — Ofoodiez HiTech",
     "sections": [
       {
         "bad_example": "❌ Full address, passport photo, marital status",
-        "body": "Your name should be the largest text on the page. Below it: a professional email, your city (not full address), phone, and LinkedIn URL. That's it. No headshot unless the local norm demands it — in tech, it's usually a minus.",
+        "body": "השם שלכם הוא הטקסט הגדול בדף. מתחתיו: מייל מקצועי, עיר (לא כתובת מלאה), טלפון וקישור ללינקדאין — קליקביליים. זהו. בלי תמונה: בהייטק זה כמעט תמיד מינוס, ובחברות בינלאומיות זה עלול להוביל לפסילה אוטומטית. בלי גיל, ת\"ז או מצב משפחתי.",
         "dot_left": "30%",
         "dot_top": "8%",
         "good_example": "✅ First Last | tel-aviv@gmail.com | linkedin.com/in/firstlast | Tel Aviv",
-        "name": "Header & Contact Information",
+        "name": "כותרת ופרטי קשר",
         "num": "1",
         "tip_class": "",
-        "tooltip_text": "Your name, email, LinkedIn and city. That's all. No photo, no full address.",
-        "tooltip_title": "Header & Contact"
+        "tooltip_text": "שם, מייל, לינקדאין ועיר. זה הכול. בלי תמונה ובלי כתובת מלאה.",
+        "tooltip_title": "כותרת ופרטי קשר"
       },
       {
         "bad_example": "❌ \"Motivated and results-oriented professional seeking a challenging opportunity.\"",
-        "body": "This is your cold open. Recruiters read this first. Write 2–3 sentences that capture your role, years of experience, and your biggest strength. Change this for every job you apply to — a generic summary is a wasted opportunity.",
+        "body": "את זה קוראים ראשון. כתבו 2–3 משפטים: מי אתם, מה אתם מביאים (כולל הטכנולוגיות המרכזיות, מודגשות), ומה אתם מחפשים. התאימו את הפסקה לכל משרה — תקציר גנרי הוא הזדמנות מבוזבזת, ו\"motivated fast learner\" לא אומר כלום.",
         "dot_left": "20%",
         "dot_top": "23%",
         "good_example": "✅ \"Backend engineer with 5 years building high-scale systems. Specialise in distributed architectures and led a 4× performance improvement at Company X.\"",
-        "name": "Professional Summary",
+        "name": "פסקת פתיחה",
         "num": "2",
         "tip_class": "",
-        "tooltip_text": "2–3 lines max. Tailor it to the role. This is your 6-second pitch.",
-        "tooltip_title": "Professional Summary"
+        "tooltip_text": "2–3 שורות, מותאמות למשרה. זה הפיץ' של 6 השניות שלכם.",
+        "tooltip_title": "פסקת פתיחה"
       },
       {
         "bad_example": "❌ \"Responsible for improving the performance of the backend systems.\"",
-        "body": "This is the heart of your CV. Use bullet points — not paragraphs. Start each bullet with a strong verb (Built, Led, Reduced, Launched). Add numbers wherever possible: team size, revenue impact, performance gains, users affected. Keep the most recent 2–3 roles; anything older than 10 years can be one line.",
+        "body": "הלב של קורות החיים. בולטים — לא פסקאות. כל שורה נפתחת בפועל חזק (Built, Led, Reduced, Launched) וכוללת מספר: גודל צוות, שיפור ביצועים, כמות משתמשים. את הטכנולוגיות ומילות המפתח (ה-buzzwords) הדגישו ב-bold — העין שסורקת את הדף צריכה לתפוס אותן בשנייה. 2–3 תפקידים אחרונים בפירוט; ישן יותר — שורה אחת.",
         "dot_left": "75%",
         "dot_top": "40%",
         "good_example": "✅ \"Reduced API response time by 40% through caching layer redesign, serving 2M daily users.\"",
-        "name": "Work Experience",
+        "name": "ניסיון תעסוקתי",
         "num": "3",
         "tip_class": "tip-left",
-        "tooltip_text": "Use bullet points with numbers. \"Led team of 6\" beats \"responsible for team management\".",
-        "tooltip_title": "Work Experience"
+        "tooltip_text": "בולטים עם מספרים וטכנולוגיות מודגשות. \"Led team of 6\" מנצח \"responsible for\".",
+        "tooltip_title": "ניסיון תעסוקתי"
       },
       {
         "bad_example": "❌ High school diploma when you already have a degree",
-        "body": "Unless you're a recent graduate (0–2 years experience), education goes near the bottom. List degree, institution, and graduation year. If your GPA was exceptional or you have a relevant thesis, add it. Bootcamps, online certifications (AWS, GCP, etc.) count — list them here or in a separate Certifications section.",
+        "body": "בוגרים טריים וסטודנטים — ההשכלה גבוה בדף, עם צפי סיום וזמינות. כל השאר — קרוב לתחתית: תואר, מוסד, שנה. ממוצע רק אם 85 ומעלה. בוטקמפים והסמכות (AWS, GCP) נחשבים — כאן או בסעיף נפרד. תיכון? רק אם אין שום דבר מעליו.",
         "dot_left": "20%",
         "dot_top": "62%",
         "good_example": "✅ \"B.Sc. Computer Science — Tel Aviv University, 2019\"",
-        "name": "Education",
+        "name": "השכלה",
         "num": "4",
         "tip_class": "",
-        "tooltip_text": "Keep it short unless you're a fresh grad. Degree, institution, year. No high school.",
-        "tooltip_title": "Education"
+        "tooltip_text": "קצר, אלא אם אתם בוגרים טריים. תואר, מוסד, שנה. בלי תיכון.",
+        "tooltip_title": "השכלה"
       },
       {
         "bad_example": "❌ Microsoft Word, Teamwork, Quick learner, Passionate",
-        "body": "Use the job description as a cheat sheet. Mirror their language exactly — ATS systems match keywords. Group skills by category: Languages, Frameworks, Tools, Cloud. Don't list soft skills like \"teamwork\" — they're implied. Don't list things you'd struggle to discuss in an interview.",
+        "body": "תיאור המשרה הוא דף הרמזים שלכם: שקפו את המילים שלו אחד-לאחד — מערכות ATS מסננות לפי מילות מפתח, ואת ה-buzzwords האלה מדגישים ב-bold לאורך כל הדף. קבצו לקטגוריות: Languages, Frameworks, Tools, Cloud. בלי \"teamwork\" וחבריו, בלי דירוגים עצמיים (8/10, כוכביות) — ובלי שום דבר שתתקשו לדבר עליו בראיון.",
         "dot_left": "70%",
         "dot_top": "80%",
         "good_example": "✅ Python, TypeScript, React, Node.js, PostgreSQL, AWS, Docker, Kubernetes",
-        "name": "Skills",
+        "name": "כישורים (Skills)",
         "num": "5",
         "tip_class": "tip-left",
-        "tooltip_text": "Only list skills that are relevant. Recruiters scan for keywords — use the job posting's language.",
-        "tooltip_title": "Skills"
+        "tooltip_text": "רק כישורים רלוונטיים, במילים של המשרה, מודגשים. כל מילה בדף היא שאלה בראיון.",
+        "tooltip_title": "כישורים"
       }
     ],
     "essentials_title": "כל המדריך בדקה אחת",

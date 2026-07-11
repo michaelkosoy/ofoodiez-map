@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
@@ -176,6 +176,7 @@
         .ht-tip-ex {
             font-size: 0.78rem; border-radius: 6px; padding: 4px 10px;
             font-weight: 500; display: inline-flex; align-items: center; gap: 6px;
+            direction: ltr; text-align: left; /* examples stay English */
         }
         .ht-tip-ex.good { background: rgba(37,211,102,0.08); color: #5fc97a; border-left: 2px solid #25d366; }
         .ht-tip-ex.bad  { background: rgba(224,112,112,0.08); color: #e07070; border-left: 2px solid #c0374a; }
@@ -237,7 +238,7 @@
     {% set active_hitech_page = 'cv-guide' %}
     {% include 'components/hitech_menu.html' %}
 
-    <div class="ht-cv-page">
+    <div class="ht-cv-page" dir="rtl">
 
         <!-- Hero -->
         <section class="ht-cv-hero">
