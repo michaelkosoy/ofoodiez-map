@@ -207,6 +207,16 @@ def debug_templates():
             info["approval_status"] = wa.get("status")
             if wa.get("rejection_reason"):
                 info["rejection_reason"] = wa.get("rejection_reason")
+            # the content definition itself (body + button count) — a structure
+            # that violates WhatsApp rules fails sends with 63013 even in-session
+            rc = _rq.get(f"https://content.twilio.com/v1/Content/{sid}",
+                         auth=auth, timeout=10)
+            types = (rc.json() or {}).get("types") or {}
+            info["types"] = {
+                t: {"body": str((d or {}).get("body"))[:90],
+                    "buttons": [a.get("title") for a in (d or {}).get("actions") or []]}
+                for t, d in types.items()
+            }
         except Exception as exc:
             info["approval_status"] = f"fetch failed: {exc}"
         out[name] = info
