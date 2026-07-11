@@ -141,19 +141,34 @@ def cv_review_api():
         'contents': [{'parts': parts}],
         'generationConfig': {'responseMimeType': 'application/json'},
     }
+    # NOTE: never return 502/504 from here — Cloudflare replaces those bodies
+    # with its own error page and the frontend loses our JSON message.
     try:
         resp = requests.post(GEMINI_URL, json=payload, timeout=90,
                              headers={'x-goog-api-key': key})
-        resp.raise_for_status()
+    except requests.RequestException as exc:
+        print(f"❌ CV review: Gemini request failed: {exc}")
+        return jsonify({'error': 'Could not reach the AI service. Please try again in a minute.'}), 503
+
+    if resp.status_code != 200:
+        print(f"❌ CV review: Gemini returned {resp.status_code}: {resp.text[:500]}")
+        if resp.status_code == 429:
+            msg = 'The AI reviewer is at capacity right now. Please try again in a few minutes.'
+        else:
+            msg = f'The AI reviewer is misconfigured on this server (upstream error {resp.status_code}).'
+        return jsonify({'error': msg}), 503
+
+    try:
         raw = resp.json()['candidates'][0]['content']['parts'][0]['text']
-    except (requests.RequestException, KeyError, IndexError, TypeError, ValueError):
-        return jsonify({'error': 'The AI reviewer could not process your CV right now. Please try again in a minute.'}), 502
+    except (KeyError, IndexError, TypeError, ValueError):
+        print(f"❌ CV review: unexpected Gemini response shape: {resp.text[:500]}")
+        return jsonify({'error': 'The AI reviewer returned an unexpected answer. Please try again.'}), 503
 
     try:
         review = json.loads(_strip_code_fences(raw))
     except (ValueError, TypeError):
         review = None
     if not isinstance(review, dict) or 'score' not in review:
-        return jsonify({'error': 'The AI reviewer returned an unexpected answer. Please try again.'}), 502
+        return jsonify({'error': 'The AI reviewer returned an unexpected answer. Please try again.'}), 503
 
     return jsonify(review)
