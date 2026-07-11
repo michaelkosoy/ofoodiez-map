@@ -11,9 +11,11 @@ Register in app.py with:
     app.register_blueprint(cv_review_bp)
 """
 
+import base64
 import json
 import os
 
+import requests
 from flask import Blueprint, jsonify, render_template, request
 
 cv_review_bp = Blueprint('cv_review', __name__)
@@ -24,9 +26,13 @@ ALLOWED_EXTENSIONS = ('.pdf', '.txt')
 GUIDE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           'app', 'data', 'cv_guide_full.md')
 
-# Module-level caches, filled lazily on the first API request.
+# Plain REST call: the google-generativeai SDK's grpc stack killed the single
+# gunicorn worker on Render at first use, so we talk to the HTTP API directly.
+GEMINI_URL = ('https://generativelanguage.googleapis.com/v1beta/'
+              'models/gemini-2.5-flash:generateContent')
+
+# Module-level cache, filled lazily on the first API request.
 _guide_text = None
-_gemini_model = None
 
 REVIEW_INSTRUCTIONS = """You are a strict but encouraging CV reviewer for junior developers and students trying to break into the Israeli high-tech industry.
 
@@ -66,20 +72,12 @@ def _load_guide():
     return _guide_text
 
 
-def _get_model():
-    """Configure Gemini lazily on first use. Returns None when unavailable."""
-    global _gemini_model
-    if _gemini_model is None:
-        api_key = os.environ.get('GEMINI_API_KEY')
-        if not api_key or api_key == 'your_gemini_api_key_here':
-            return None
-        try:
-            import google.generativeai as genai
-        except ImportError:
-            return None
-        genai.configure(api_key=api_key)
-        _gemini_model = genai.GenerativeModel('gemini-2.5-flash')
-    return _gemini_model
+def _api_key():
+    """The Gemini API key from the environment, or None when unavailable."""
+    key = os.environ.get('GEMINI_API_KEY')
+    if not key or key == 'your_gemini_api_key_here':
+        return None
+    return key
 
 
 def _strip_code_fences(text):
@@ -118,8 +116,8 @@ def cv_review_api():
     if not file_bytes:
         return jsonify({'error': 'The uploaded file is empty.'}), 400
 
-    model = _get_model()
-    if model is None:
+    key = _api_key()
+    if key is None:
         return jsonify({'error': 'The AI reviewer is not configured on this server yet. Please try again later.'}), 503
 
     try:
@@ -131,20 +129,24 @@ def cv_review_api():
               + '\n\n===== THE GUIDE (your grading rubric) =====\n\n'
               + guide
               + '\n\n===== END OF GUIDE =====\n')
-    parts = [prompt]
+    parts = [{'text': prompt}]
     if ext == '.pdf':
-        parts.append({'mime_type': 'application/pdf', 'data': file_bytes})
+        parts.append({'inline_data': {'mime_type': 'application/pdf',
+                                      'data': base64.b64encode(file_bytes).decode('ascii')}})
     else:
         cv_text = file_bytes.decode('utf-8', errors='replace')
-        parts.append('===== THE CV TO REVIEW =====\n\n' + cv_text)
+        parts.append({'text': '===== THE CV TO REVIEW =====\n\n' + cv_text})
 
+    payload = {
+        'contents': [{'parts': parts}],
+        'generationConfig': {'responseMimeType': 'application/json'},
+    }
     try:
-        response = model.generate_content(
-            parts,
-            generation_config={'response_mime_type': 'application/json'}
-        )
-        raw = response.text
-    except Exception:
+        resp = requests.post(GEMINI_URL, json=payload, timeout=90,
+                             headers={'x-goog-api-key': key})
+        resp.raise_for_status()
+        raw = resp.json()['candidates'][0]['content']['parts'][0]['text']
+    except (requests.RequestException, KeyError, IndexError, TypeError, ValueError):
         return jsonify({'error': 'The AI reviewer could not process your CV right now. Please try again in a minute.'}), 502
 
     try:
