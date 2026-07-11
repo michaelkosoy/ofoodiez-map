@@ -188,13 +188,21 @@ ADVOCATE_DONE = (
 )
 
 # ---- Phase C: candidate company search ----
+# Appended wherever we ask for a company name — the live list of companies
+# with advocates, for candidates who don't have a specific one in mind.
+_COMPANIES_LIST_LINE = (
+    "👀 Not sure which? Browse the companies we have advocates in:\n"
+    "https://ofoodiez.com/hitech/referrals-bot"
+)
 CAND_COMPANY = (
     "You're all set — welcome aboard! 🎉🚀\n"
-    "Which company are you aiming for?"
+    "Which company are you aiming for?\n"
+    + _COMPANIES_LIST_LINE
 )
 CAND_WELCOME_BACK = (
     "Hey {first}, welcome back! 👋🧡\n"
-    "Which company are you aiming for?"
+    "Which company are you aiming for?\n"
+    + _COMPANIES_LIST_LINE
 )
 CAND_REFERRAL_LINK = (
     "Great news — *{advocate}* from *{company}* shared a referral link with you! 🔗🎉\n"
@@ -272,6 +280,7 @@ CAND_COMPANY_VAGUE = (
     "company's *exact name* — not a role, a field, or something like 'high tech', "
     "'startups' or 'all'. 🙏\n"
     "Which company would you like a referral to? (e.g. *Google*, *Wix*, *Elbit*)\n"
+    + _COMPANIES_LIST_LINE + "\n"
     "Type *menu* to go back."
 )
 CAND_RESUME_SOON = (
