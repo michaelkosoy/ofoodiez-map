@@ -349,8 +349,17 @@ def get_whatsapp_applications():
     for app_row, usr, comp in results:
         ra = rec_agg.get(app_row.id, {"emailed": 0, "approved": 0})
         job = app_row.job_posting_url or (("desc: " + app_row.job_description) if app_row.job_description else "")
+        # Exact status derived from what actually happened (the stored field is
+        # always "submitted"). Every row here IS a real CV submission.
+        if ra["approved"]:
+            status = "Approved"          # an advocate confirmed the referral
+        elif ra["emailed"]:
+            status = "Emailed"           # forwarded to ≥1 advocate, awaiting reply
+        else:
+            status = "Submitted"         # CV in, no advocate email yet (manual routing)
         out.append({
             "id": app_row.id,
+            "user_id": app_row.candidate_user_id,
             "candidate": _name(usr),
             "number": usr.phone,
             "company": comp.name,
@@ -361,10 +370,59 @@ def get_whatsapp_applications():
             "resume": app_row.resume_filename or "",
             "emailed": ra["emailed"],
             "approved": ra["approved"],
-            "status": app_row.status,
+            "status": status,
             "created": _fmt(app_row.created_at),
         })
     return jsonify(out)
+
+
+@admin_bp.route('/api/whatsapp/users/<int:id>/flow', methods=['GET'])
+@login_required
+def get_whatsapp_user_flow(id):
+    """The full journey of one user, reconstructed from what we store: sign-up,
+    company searches we couldn't serve (advocate not found), submitted applications
+    (advocate found / emailed / approved), and their current live conversation."""
+    u = WaUser.query.get_or_404(id)
+    conv = WaConversation.query.filter_by(user_id=u.id).first()
+    rec_by_app = {}
+    for r in WaApplicationRecipient.query.all():
+        rec_by_app.setdefault(r.application_id, []).append(r)
+
+    events = []  # (sort_dt, dict)
+    for req in WaCompanyRequest.query.filter_by(candidate_user_id=u.id).all():
+        events.append((req.created_at, {
+            "kind": "search", "when": _fmt(req.created_at),
+            "company": req.company_name_raw,
+            "detail": ("not in our list yet" if req.reason == "unknown_company"
+                       else "no advocate there yet"),
+            "status": req.status,   # open | handled
+        }))
+    for a in WaApplication.query.filter_by(candidate_user_id=u.id).all():
+        comp = WaCompany.query.get(a.company_id)
+        recs = rec_by_app.get(a.id, [])
+        events.append((a.created_at, {
+            "kind": "application", "when": _fmt(a.created_at),
+            "company": comp.name if comp else "?",
+            "role": a.role_query or "",
+            "resume": a.resume_filename or "",
+            "emailed": len(recs),
+            "approved": sum(1 for r in recs if r.approved_at),
+        }))
+    events.sort(key=lambda e: e[0] or datetime.min)
+
+    state = None
+    if conv and conv.flow:
+        d = conv.data or {}
+        state = {"flow": conv.flow, "step": conv.step, "company": d.get("company_name"),
+                 "role": d.get("role_query"), "advocate": d.get("advocate_name"),
+                 "when": _fmt(conv.updated_at)}
+    return jsonify({
+        "user": {"name": _name(u), "email": u.email or "", "phone": u.phone,
+                 "joined": _fmt(u.created_at), "registered": bool(u.is_registered),
+                 "blocked": bool(u.is_blocked)},
+        "state": state,
+        "events": [e[1] for e in events],
+    })
 
 
 def _req_key(req):

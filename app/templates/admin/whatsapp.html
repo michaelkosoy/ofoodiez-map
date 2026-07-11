@@ -183,6 +183,63 @@ function act(url, body, msg, table) {
         });
 }
 
+function escHtml(s) {
+    return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m];
+    });
+}
+function flowItem(icon, title, when, detail) {
+    return '<div style="margin:0 0 12px;">'
+        + '<div style="font-weight:600;">' + icon + ' ' + title
+        + ' <span style="font-weight:400;color:#999;font-size:.78rem;">' + escHtml(when) + '</span></div>'
+        + (detail ? '<div style="font-size:.85rem;color:#444;margin-top:2px;">' + detail + '</div>' : '')
+        + '</div>';
+}
+function renderFlow(f) {
+    var u = f.user;
+    var h = '<div style="text-align:left;font-size:.9rem;">';
+    h += '<div style="margin-bottom:12px;color:#555;">'
+        + '<b>' + escHtml(u.name) + '</b>'
+        + (u.registered ? ' · <span style="color:#2e7d32;">registered</span>' : ' · <span style="color:#c62828;">not registered</span>')
+        + (u.blocked ? ' · <span style="color:#c62828;">blocked</span>' : '')
+        + '<br>' + escHtml(u.email || 'no email') + ' · ' + escHtml(u.phone) + '</div>';
+    h += '<div style="border-left:2px solid #e0e0e0;margin-left:6px;padding-left:14px;">';
+    h += flowItem('🟢', 'Signed up', u.joined, '');
+    (f.events || []).forEach(function (e) {
+        if (e.kind === 'search') {
+            h += flowItem('🔎', 'Searched “' + escHtml(e.company) + '”', e.when,
+                '<span style="color:#c62828;">✗ advocate not found</span> — ' + escHtml(e.detail)
+                + (e.status === 'handled' ? ' · <span style="color:#2e7d32;">now added</span>' : ' · still pending'));
+        } else if (e.kind === 'application') {
+            var routed = e.emailed > 0
+                ? '<span style="color:#2e7d32;">✓ advocate found — sent to ' + e.emailed + ' advocate' + (e.emailed === 1 ? '' : 's') + '</span>'
+                    + (e.approved > 0 ? ' · <b style="color:#2e7d32;">approved ×' + e.approved + '</b>' : '')
+                : '<span style="color:#e65100;">CV saved · no advocate email (manual routing)</span>';
+            h += flowItem('📄', 'Submitted CV — ' + escHtml(e.company), e.when,
+                (e.role ? 'Role: ' + escHtml(e.role) + '<br>' : '') + routed);
+        }
+    });
+    h += '</div>';
+    if (f.state) {
+        h += '<div style="margin-top:14px;padding:10px 12px;background:#fff7e6;border:1px solid #ffe0a3;border-radius:8px;">'
+            + '<b>In progress now</b> — ' + escHtml(f.state.flow) + ' / ' + escHtml(f.state.step)
+            + (f.state.company ? '<br>Company: ' + escHtml(f.state.company) : '')
+            + (f.state.role ? '<br>Role: ' + escHtml(f.state.role) : '')
+            + (f.state.advocate ? '<br>Advocate: ' + escHtml(f.state.advocate) : '')
+            + '<br><span style="color:#999;font-size:.8rem;">updated ' + escHtml(f.state.when) + '</span></div>';
+    } else {
+        h += '<div style="margin-top:14px;color:#999;">No active conversation.</div>';
+    }
+    return h + '</div>';
+}
+function openUserFlow(userId) {
+    if (!userId) return;
+    fetch('/admin/api/whatsapp/users/' + userId + '/flow')
+        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function (f) { Swal.fire({ title: f.user.name || 'User flow', html: renderFlow(f), width: 820, showConfirmButton: true, confirmButtonText: 'Close' }); })
+        .catch(function () { Swal.fire({ icon: 'error', title: 'Could not load flow' }); });
+}
+
 function putSave(url, body, table) {
     fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
         .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'failed'); }); return r.json(); })
@@ -364,7 +421,7 @@ var COLS = {
         },
         { title: "Emailed", field: "emailed", width: 90 },
         { title: "Approved", field: "approved", width: 100 },
-        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 120, formatter: function (c) { var v = c.getValue(); var col = v === 'Approved' ? '#2e7d32' : (v === 'Emailed' ? '#1565c0' : '#e65100'); return '<span style="color:' + col + ';font-weight:600;">' + (v || '') + '</span>'; } },
         {
             title: "Actions", headerSort: false, width: 170, hozAlign: "center",
             formatter: function () {
@@ -378,8 +435,7 @@ var COLS = {
                     editModal('Edit application', [
                         { key: 'role', label: 'Role', value: d.role },
                         { key: 'job_posting_url', label: 'Job link', value: d.job_posting_url },
-                        { key: 'job_description', label: 'Job description', value: d.job_description },
-                        { key: 'status', label: 'Status', value: d.status }
+                        { key: 'job_description', label: 'Job description', value: d.job_description }
                     ], function (v) { putSave('/admin/api/whatsapp/applications/' + d.id, v, c.getTable()); });
                 } else if (btn.dataset.a === 'delete') {
                     Swal.fire({ title: 'Delete application?', text: (d.candidate || '') + ' · ' + (d.company || ''), icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
@@ -502,6 +558,16 @@ function showTab(name) {
                 document.getElementById('bulk-delete-requests-count').textContent = data.length;
                 handleBtn.style.display = data.length ? 'inline-flex' : 'none';
                 deleteBtn.style.display = data.length ? 'inline-flex' : 'none';
+            });
+        }
+        if (name === 'applications' || name === 'candidates') {
+            // Click a row → the person's full flow (sign-up → searches → submissions).
+            TABLES[name].on("rowClick", function (e, row) {
+                if (e.target.closest('button') || e.target.closest('input')) return;
+                openUserFlow(name === 'candidates' ? row.getData().id : row.getData().user_id);
+            });
+            TABLES[name].on("dataLoaded", function () {
+                TABLES[name].getRows().forEach(function (r) { r.getElement().style.cursor = 'pointer'; });
             });
         }
     } else {
