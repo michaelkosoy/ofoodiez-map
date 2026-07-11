@@ -83,6 +83,14 @@ class _WaConfig:
     def WA_CT_EXPLORE_MORE(self):
         return os.environ.get("WA_CT_EXPLORE_MORE")
 
+    @property
+    def WA_CT_ADVOCATE_PING(self):
+        # WhatsApp heads-up to an advocate that a candidate asked for a referral
+        # (body vars: 1=advocate, 2=candidate, 3=role, 4=company). A template is
+        # required to reach advocates outside WhatsApp's 24h session window;
+        # without it we fall back to free-form text, which only delivers in-window.
+        return os.environ.get("WA_CT_ADVOCATE_PING")
+
     # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
     @property
     def SUPABASE_URL(self):

@@ -6,6 +6,7 @@ are config-gated, so the flow still completes and the application is recorded
 even if they're unset).
 """
 import difflib
+import logging
 import re
 import secrets
 from datetime import datetime
@@ -22,6 +23,8 @@ from .models import (
     WaCompanyRequest,
     WaUser,
 )
+
+logger = logging.getLogger("whatsapp_bot")
 
 
 # Accepted CV file types (Twilio MediaContentType0 -> file extension).
@@ -228,12 +231,14 @@ def _resolve_company(user, conv, data, company):
     return "cand_no_advocates"
 
 
-def _send_link(user, conv, data, adv):
+def _send_link(user, conv, data, adv, show_title=True):
     """Hand over an advocate's referral link (using whatever title/name we have)
-    and keep the candidate in-flow so they can still send a CV for another role."""
+    and keep the candidate in-flow so they can still send a CV for another role.
+    show_title=False hides the advocate's title — used when it doesn't match the
+    candidate's asked role, so the mismatch stays behind the scenes."""
     conversation.set_state(conv, "candidate", "cand_after_link", data)
     name = _advocate_first_name(adv)
-    title = (adv.role_title or "").strip()
+    title = (adv.role_title or "").strip() if show_title else ""
     company = data.get("company_name", "")
     link = adv.referral_link
     if name and title:
@@ -290,11 +295,13 @@ def _match_and_route(user, conv, data, role_query):
         messaging.send_prompt(user.phone, copy.CAND_JOB_LINK.format(
             company=data.get("company_name", "")))
         return "cand_match_email"
-    # No title match → a generic (untitled) link if there is one, else the CV path.
-    generic = next((a for a in advocates
-                    if a.referral_link and not (a.role_title or "").strip()), None)
-    if generic:
-        return _send_link(user, conv, data, generic)
+    # No title match → any referral link at the company (prefer an untitled one),
+    # sent without a title so the candidate never learns their role wasn't matched.
+    fallback = (next((a for a in advocates
+                      if a.referral_link and not (a.role_title or "").strip()), None)
+                or next((a for a in advocates if a.referral_link), None))
+    if fallback:
+        return _send_link(user, conv, data, fallback, show_title=False)
     # No match — but keep the search behind the scenes: ask for the job link like
     # any other path (the CV still routes to the team / ops behind the scenes).
     data.setdefault("advocate_name", "the team")
@@ -497,8 +504,34 @@ def _notify_advocates(application, candidate_user, data, resume_bytes,
             email_status="sent" if ok else "pending",
             approval_token=token,
         ))
+        if adv_user and adv_user.phone:
+            _ping_advocate_whatsapp(adv_user.phone, adv_first, name,
+                                    data.get("role_query", ""),
+                                    data.get("company_name", ""), to_email)
     db.session.commit()
     return len(advocates)
+
+
+def _ping_advocate_whatsapp(phone, adv_first, candidate_name, role, company, email):
+    """WhatsApp heads-up to the advocate alongside the application email. The
+    WA_CT_ADVOCATE_PING template reaches advocates outside WhatsApp's 24h session
+    window; without it we fall back to free-form text (delivers in-window only).
+    Best-effort — a send failure never breaks the application flow."""
+    try:
+        if WaConfig.WA_CT_ADVOCATE_PING:
+            messaging.send_buttons(phone, WaConfig.WA_CT_ADVOCATE_PING, {
+                "1": adv_first or "there",
+                "2": candidate_name,
+                "3": role or "a role",
+                "4": company or "your company",
+            })
+        else:
+            messaging.send_text(phone, copy.ADVOCATE_PING.format(
+                advocate=adv_first or "there", candidate=candidate_name,
+                role=role or "a role", company=company or "your company",
+                email=email))
+    except Exception:
+        logger.exception("wa: advocate WhatsApp ping failed (%s)", phone)
 
 
 def _log_request(user, raw, norm, company_id, reason):

@@ -222,11 +222,6 @@ CAND_ROLE_MATCH = (
     "What *role* are you aiming for? I'll match you to the right person there "
     "(e.g. DevOps, Data Scientist, Product Manager)."
 )
-CAND_NO_MATCH_CV = (
-    "I don't have a *{role}* referral at *{company}* just yet 🤔\n"
-    "I can still pass your CV to the team there — first, paste the *link to the job "
-    "posting* (the company's careers page or LinkedIn). 🔗"
-)
 CAND_AFTER_LINK_ROLE = (
     "Sure! Which *role* are you aiming for? "
     "Tell me and I'll grab your CV next. 🎯"
@@ -293,3 +288,9 @@ CAND_SUBMITTED = (
     "Type *menu* anytime if you'd like to do more."
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"
+ADVOCATE_PING = (
+    "Hey {advocate}! 🎉 *{candidate}* just asked you to refer them for "
+    "*{role}* at *{company}*.\n"
+    "We've emailed the full application with their CV to {email} — "
+    "take a look when you get a chance. Thanks for being an advocate! 🙏"
+)
