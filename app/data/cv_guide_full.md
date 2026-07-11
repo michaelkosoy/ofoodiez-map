@@ -153,11 +153,16 @@
 
 ### פרטים אישיים — מה כן ומה לא
 
-**כן**, בשורה אחת או שתיים בראש הדף:
+**כן**, בראש הדף:
 
-> שם מלא | טלפון | מייל | LinkedIn | GitHub
+> שם מלא
+>
+> טייטל קצר (למשל: Software Engineer)
+>
+> טלפון | מייל | LinkedIn | GitHub
 
 - **שם** — גרסה אחת. לא ‎David "Dudi" Cohen‎. השם שכולם קוראים לכם בו ביום-יום.
+- **טייטל מתחת לשם** — שורה אחת, ממורכזת, שאומרת מי אתם מקצועית: ‎Software Engineer‎, ‎Backend Developer‎, ‎Computer Science Student‎. זה הדבר הראשון שהעין מחפשת אחרי השם — אל תשאירו את הקורא לנחש מה אתם.
 - **מייל** — קליקבילי (קישור `mailto:`), על שמכם, אצל ספק עדכני (Gmail או דומיין אישי — לא וואלה). לא כינוי מביך משנות התיכון. אפשר לפתוח תיבה ייעודית לחיפוש ולמזג אותה עם הקיימת.
 - **טלפון** — קליקבילי (קישור `tel:`), כדי שמי שקורא מהנייד יתקשר בלחיצה. אם מגישים לחברה בינלאומית — פורמט בינלאומי (‎+972‎).
 - **קישורים ל-GitHub ול-LinkedIn** — רק אם יש שם תוכן אמיתי. פרופיל GitHub ריק לא עוזר, ואפילו קצת מזיק.
@@ -284,6 +289,8 @@
 
 <p align="center"><a href="tel:+972541234567">054-1234567</a> · <a href="mailto:dana.levi@gmail.com">dana.levi@gmail.com</a> · <a href="https://linkedin.com/in/dana-levi">linkedin.com/in/dana-levi</a> · <a href="https://github.com/dana-levi">github.com/dana-levi</a> · Tel Aviv</p>
 
+<p align="center"><strong>Computer Science Student — Backend Development</strong></p>
+
 <hr>
 
 Third-year Computer Science student at Tel Aviv University (GPA 88), looking for a part-time backend student position. Hands-on experience with **Python**, **FastAPI** and **PostgreSQL** from personal projects and hackathons, including LLM-based features built with the **Claude API**.
@@ -340,6 +347,8 @@ Hebrew — native | English — fluent
 <h2 align="center">Dana Levi</h2>
 
 <p align="center"><a href="tel:+972541234567">054-1234567</a> · <a href="mailto:dana.levi@gmail.com">dana.levi@gmail.com</a> · <a href="https://linkedin.com/in/dana-levi">linkedin.com/in/dana-levi</a> · <a href="https://github.com/dana-levi">github.com/dana-levi</a> · Tel Aviv</p>
+
+<p align="center"><strong>Backend Software Engineer</strong></p>
 
 <hr>
 
