@@ -165,7 +165,8 @@ def cv_review_api():
 
     payload = {
         'contents': [{'parts': parts}],
-        'generationConfig': {'responseMimeType': 'application/json'},
+        'generationConfig': {'responseMimeType': 'application/json',
+                             'maxOutputTokens': 8192},
     }
     # NOTE: never return 502/504 from here — Cloudflare replaces those bodies
     # with its own error page and the frontend loses our JSON message.
@@ -184,10 +185,16 @@ def cv_review_api():
             msg = f'The AI reviewer is misconfigured on this server (upstream error {resp.status_code}).'
         return jsonify({'error': msg}), 503
 
+    candidate = {}
     try:
-        raw = resp.json()['candidates'][0]['content']['parts'][0]['text']
+        candidate = resp.json()['candidates'][0]
+        # long JSON answers arrive split across multiple parts — join them all
+        raw = ''.join(p.get('text', '') for p in candidate['content']['parts']
+                      if isinstance(p, dict))
+        if not raw:
+            raise KeyError('no text parts')
     except (KeyError, IndexError, TypeError, ValueError):
-        print(f"❌ CV review: unexpected Gemini response shape: {resp.text[:500]}")
+        print(f"❌ CV review: unexpected Gemini response shape: {resp.text[:800]}")
         return jsonify({'error': 'The AI reviewer returned an unexpected answer. Please try again.'}), 503
 
     try:
@@ -195,6 +202,8 @@ def cv_review_api():
     except (ValueError, TypeError):
         review = None
     if not isinstance(review, dict) or 'score' not in review:
+        print(f"❌ CV review: unparseable model output "
+              f"(finishReason={candidate.get('finishReason')}): ...{raw[-400:]}")
         return jsonify({'error': 'The AI reviewer returned an unexpected answer. Please try again.'}), 503
 
     return jsonify(review)
