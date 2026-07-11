@@ -58,7 +58,8 @@ Review rules:
 - Be strict about the guide's rules but encouraging in tone — the reader is a junior or a student.
 - Quote specific lines from the CV, in their original language, as evidence wherever relevant.
 - Every "fail" or "partial" checklist rule must have a matching entry in "improvements"; things done well per the guide belong in "strengths".
-- Each improvement MUST include a "rewrite": a concrete, ready-to-paste replacement written in English, built ONLY from details that actually appear in the CV — rephrase and restructure what exists, never invent experience, numbers or technologies. Where a real number is missing, put a placeholder like [X users] so the candidate fills it in.
+- Each improvement MUST include a "before": the exact offending line(s) quoted VERBATIM from the CV, in their original language, so the candidate can compare side by side. If the problem is a missing element (nothing to quote), use an empty string.
+- Each improvement MUST include a "rewrite": a concrete, ready-to-paste replacement written in English, built ONLY from details that actually appear in the CV — rephrase and restructure what exists, never invent experience, numbers or technologies. Where a real number is missing, put a placeholder like [X users] so the candidate fills it in. The rewrite should directly replace the "before" text.
 - "action_items" is the candidate's to-do list: 4–7 short, imperative Hebrew steps ordered by impact (e.g. "מחקו את הגיל ואת שורת הממליצים", "הוסיפו שורת טייטל מתחת לשם").
 - ALL feedback text (verdict, strengths, improvement issues/fixes, action items, checklist notes) MUST be written in Hebrew. Quoted CV lines and every "rewrite" stay in English.
 - "score" is an integer from 0 to 100 reflecting overall compliance with the guide.
@@ -66,7 +67,7 @@ Review rules:
 - If the uploaded document is not actually a CV, give a low score and say so in the verdict (in Hebrew).
 
 Respond with STRICT JSON only — no markdown, no code fences, no commentary before or after. Exactly this shape:
-{"score": <int 0-100>, "verdict": "<one-line Hebrew summary>", "strengths": ["<Hebrew>", ...], "improvements": [{"area": "<Hebrew section name>", "issue": "<Hebrew, quoting the CV where relevant>", "fix": "<concrete Hebrew suggestion>", "rewrite": "<ready-to-paste English replacement based only on the CV's own content>"}, ...], "action_items": ["<Hebrew imperative step>", ...], "checklist": [{"rule": "<exact Hebrew rule name from the checklist>", "status": "pass|partial|fail", "note": "<short Hebrew note>"}, ...]}
+{"score": <int 0-100>, "verdict": "<one-line Hebrew summary>", "strengths": ["<Hebrew>", ...], "improvements": [{"area": "<Hebrew section name>", "issue": "<Hebrew, quoting the CV where relevant>", "fix": "<concrete Hebrew suggestion>", "before": "<verbatim quote of the current CV line(s), or empty string>", "rewrite": "<ready-to-paste English replacement based only on the CV's own content>"}, ...], "action_items": ["<Hebrew imperative step>", ...], "checklist": [{"rule": "<exact Hebrew rule name from the checklist>", "status": "pass|partial|fail", "note": "<short Hebrew note>"}, ...]}
 """
 
 

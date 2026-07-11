@@ -118,16 +118,25 @@
             border-radius: 6px; padding: 8px 12px;
         }
         .ht-cvr-imp-fix i { color: var(--burgundy-mid); font-size: 11px; margin-left: 6px; }
-        .ht-cvr-imp-rewrite {
+        .ht-cvr-imp-before, .ht-cvr-imp-rewrite {
             margin-top: 8px; padding: 9px 12px;
-            background: rgba(249,246,235,0.05); border: 1px dashed rgba(249,246,235,0.2);
-            border-radius: 6px; font-size: 0.78rem; color: var(--butter);
+            border-radius: 6px; font-size: 0.78rem;
             line-height: 1.6; direction: ltr; text-align: left;
         }
-        .ht-cvr-imp-rewrite .cvr-rw-label {
-            display: block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em;
-            text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 4px;
+        .ht-cvr-imp-before {
+            background: rgba(224,112,112,0.07); border: 1px dashed rgba(224,112,112,0.35);
+            color: var(--butter-dim);
         }
+        .ht-cvr-imp-rewrite {
+            background: rgba(37,211,102,0.07); border: 1px dashed rgba(37,211,102,0.35);
+            color: var(--butter);
+        }
+        .cvr-rw-label {
+            display: block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em;
+            text-transform: uppercase; margin-bottom: 4px;
+        }
+        .ht-cvr-imp-before .cvr-rw-label { color: #e07070; }
+        .ht-cvr-imp-rewrite .cvr-rw-label { color: #5fc97a; }
 
         /* Action items */
         .ht-cvr-actions { display: flex; flex-direction: column; gap: 8px; }
@@ -189,20 +198,19 @@
         </section>
 
         {% if locked %}
-        <!-- Coming soon (public view; unlocks with the admin session) -->
+        <!-- Password gate (private beta; public message: coming soon) -->
         <section class="ht-cvr-section">
-            <div class="ht-cvr-card" style="text-align:center; padding: 38px 22px;">
-                <i class="fas fa-robot" style="font-size:30px; color:var(--burgundy-mid); margin-bottom:14px;"></i>
-                <div class="ht-cvr-drop-title">Coming soon</div>
-                <div class="ht-cvr-drop-sub" style="margin-top:6px;">The AI CV reviewer is getting its final polish. Meanwhile, the full guide is ready:</div>
-                <form method="POST" style="margin:18px auto 0; max-width:300px; display:flex; gap:8px;">
-                    <input type="password" name="password" placeholder="Access password" autocomplete="off"
-                           style="flex:1; min-width:0; background:#100810; border:1px solid var(--border); border-radius:999px; color:var(--butter); padding:10px 16px; font-family:'Outfit',sans-serif; font-size:0.85rem; text-align:center; outline:none;">
-                    <button type="submit" class="ht-cvr-btn" style="width:auto; margin-top:0; padding:10px 20px;">Unlock</button>
-                </form>
+            <form class="ht-cvr-card" method="POST" style="text-align:center; padding: 40px 26px;">
+                <i class="fas fa-robot" style="font-size:30px; color:var(--burgundy-mid); margin-bottom:16px;"></i>
+                <p class="ht-eyebrow" style="margin-bottom:10px;">Coming Soon</p>
+                <div class="ht-cvr-drop-title" style="font-size:1.15rem;">AI CV Review — private beta</div>
+                <div class="ht-cvr-drop-sub" style="margin-top:8px;">Not open to the public just yet. Have the access password? Come on in.</div>
+                <input type="password" name="password" placeholder="Password" required autocomplete="off"
+                       style="display:block; width:100%; max-width:280px; box-sizing:border-box; margin:20px auto 0; background:#100810; border:1px solid var(--border); border-radius:10px; color:var(--butter); padding:12px 14px; font-family:'Outfit',sans-serif; font-size:0.95rem; text-align:center; letter-spacing:0.22em; outline:none;">
+                <button type="submit" class="ht-cvr-btn" style="max-width:280px; margin:12px auto 0;">Unlock</button>
                 {% if error %}<div class="ht-cvr-error visible" style="margin-top:12px;">Wrong password — try again.</div>{% endif %}
-                <p class="ht-cvr-guide-note" style="margin-top:16px;"><a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a></p>
-            </div>
+                <p class="ht-cvr-guide-note" style="margin-top:18px;">Meanwhile, the full <a href="/hitech/cv-guide/full">Job Search &amp; CV Guide</a> is ready</p>
+            </form>
         </section>
         {% else %}
         <!-- Upload card -->
@@ -472,6 +480,16 @@
                         fix.appendChild(bulb);
                         fix.appendChild(document.createTextNode(String(imp.fix)));
                         card.appendChild(fix);
+                    }
+                    if (imp.before) {
+                        var bf = document.createElement('div');
+                        bf.className = 'ht-cvr-imp-before';
+                        var bfLabel = document.createElement('span');
+                        bfLabel.className = 'cvr-rw-label';
+                        bfLabel.textContent = 'What you wrote';
+                        bf.appendChild(bfLabel);
+                        bf.appendChild(document.createTextNode(String(imp.before)));
+                        card.appendChild(bf);
                     }
                     if (imp.rewrite) {
                         var rw = document.createElement('div');
