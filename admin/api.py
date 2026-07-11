@@ -376,6 +376,25 @@ def get_whatsapp_applications():
     return jsonify(out)
 
 
+def _recipient_advocate(rec):
+    """Advocate details for one application recipient — who the CV was sent to."""
+    adv = WaAdvocate.query.get(rec.advocate_id) if rec.advocate_id else None
+    name = None
+    if adv:
+        if adv.user_id:
+            au = WaUser.query.get(adv.user_id)
+            if au:
+                name = f"{au.first_name or ''} {au.last_name or ''}".strip() or None
+        name = name or adv.advocate_name
+    return {
+        "name": name or "advocate",
+        "email": rec.email or (adv.email if adv else "") or "",
+        "title": (adv.role_title if adv else "") or "",
+        "approved": bool(rec.approved_at),
+        "status": rec.email_status or "sent",   # sent | pending | failed
+    }
+
+
 @admin_bp.route('/api/whatsapp/users/<int:id>/flow', methods=['GET'])
 @login_required
 def get_whatsapp_user_flow(id):
@@ -399,15 +418,25 @@ def get_whatsapp_user_flow(id):
         }))
     for a in WaApplication.query.filter_by(candidate_user_id=u.id).all():
         comp = WaCompany.query.get(a.company_id)
+        cname = comp.name if comp else "?"
         recs = rec_by_app.get(a.id, [])
         events.append((a.created_at, {
             "kind": "application", "when": _fmt(a.created_at),
-            "company": comp.name if comp else "?",
-            "role": a.role_query or "",
-            "resume": a.resume_filename or "",
-            "emailed": len(recs),
-            "approved": sum(1 for r in recs if r.approved_at),
+            "company": cname, "role": a.role_query or "",
+            "resume": a.resume_filename or "", "emailed": len(recs),
         }))
+        # Each advocate the CV reached becomes its own phase: emailed → (approved).
+        for r in recs:
+            adv = _recipient_advocate(r)
+            events.append((r.emailed_at or a.created_at, {
+                "kind": "emailed", "when": _fmt(r.emailed_at or a.created_at),
+                "company": cname, "advocate": adv, "status": r.email_status or "sent",
+            }))
+            if r.approved_at:
+                events.append((r.approved_at, {
+                    "kind": "approved", "when": _fmt(r.approved_at),
+                    "company": cname, "advocate": adv,
+                }))
     events.sort(key=lambda e: e[0] or datetime.min)
 
     state = None
