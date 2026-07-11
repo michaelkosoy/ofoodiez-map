@@ -39,6 +39,13 @@
       "publisher": { "@id": "https://ofoodiez.com/#org" }
     }
     </script>
+    {% if c.faq %}
+    <script type="application/ld+json">
+    {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+      {% for f in c.faq %}{"@type": "Question", "name": {{ f.q | tojson }}, "acceptedAnswer": {"@type": "Answer", "text": {{ f.a | tojson }}}}{{ "," if not loop.last }}
+      {% endfor %}]}
+    </script>
+    {% endif %}
 
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
@@ -302,6 +309,30 @@
             </div>
             <div id="ht-no-results"><i class="fas fa-search"></i>No companies found for that search.</div>
         </section>
+
+        {% if c.faq %}
+        <hr class="ht-divider">
+
+        <!-- FAQ — שאלות נפוצות -->
+        <style>
+            .ht-faq-section { padding: 0 20px 60px; max-width: 700px; margin: 0 auto; width: 100%; }
+            .ht-faq-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; }
+            .ht-faq-item summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 15px 18px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--butter); }
+            .ht-faq-item summary::-webkit-details-marker { display: none; }
+            .ht-faq-item summary::after { content: '+'; color: var(--burgundy-mid); font-size: 1.2rem; font-weight: 400; flex-shrink: 0; transition: transform 0.2s; }
+            .ht-faq-item[open] summary::after { transform: rotate(45deg); }
+            .ht-faq-a { padding: 0 18px 16px; font-size: 0.85rem; color: var(--butter-dim); line-height: 1.75; }
+        </style>
+        <section class="ht-faq-section" dir="rtl">
+            <p class="ht-section-title">{{ c.faq_title | default('שאלות נפוצות') }}</p>
+            {% for f in c.faq %}
+            <details class="ht-faq-item">
+                <summary>{{ f.q }}</summary>
+                <div class="ht-faq-a">{{ f.a }}</div>
+            </details>
+            {% endfor %}
+        </section>
+        {% endif %}
 
         <div class="bottom-nav-spacer"></div>
     </div>
