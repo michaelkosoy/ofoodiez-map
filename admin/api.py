@@ -860,7 +860,7 @@ def update_whatsapp_requests_by_company():
         if r.candidate_user_id in seen:
             continue
         seen.add(r.candidate_user_id)
-        if _notify_via_bot(r.id):
+        if _notify_via_bot(r.id) == "sent":
             emailed += 1
     return jsonify({"updated": len(rows), "candidates": len(seen), "emailed": emailed, "status": status})
 
@@ -907,17 +907,21 @@ def update_hitech_content():
 def _notify_via_bot(request_id):
     """Ask the BOT service (which has the SendGrid env vars; this main app does
     not) to email the candidate that their requested company is now available.
-    Best-effort → returns True iff the bot reports the email was sent. The shared
-    key (WA_CRON_SECRET / ADMIN_SECRET) must match on both services."""
+    Best-effort → returns the bot's result string so the admin UI can show WHY a
+    candidate wasn't emailed: 'sent' | 'no_email' | 'no_advocate' | 'failed' |
+    'unreachable'. The shared key (WA_CRON_SECRET / ADMIN_SECRET) must match on
+    both services — a mismatch shows up as 'unreachable'."""
     base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
     secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
     try:
         resp = requests.post(f"{base}/wa/requests/{request_id}/notify",
                              params={"key": secret}, timeout=15)
-        return bool(resp.ok and resp.json().get("emailed"))
+        if resp.ok:
+            return (resp.json() or {}).get("result") or "failed"
+        return "unreachable"
     except Exception:
         logger.exception("admin: notify-via-bot failed for request %s", request_id)
-        return False
+        return "unreachable"
 
 
 @admin_bp.route('/api/whatsapp/requests/<int:id>', methods=['PUT'])
@@ -931,8 +935,9 @@ def update_whatsapp_request(id):
     req.status = status
     db.session.commit()
     # On "Mark handled", let the candidate know their company is now available.
-    emailed = _notify_via_bot(req.id) if newly_handled else False
-    return jsonify({"id": req.id, "status": req.status, "emailed": emailed})
+    notify_result = _notify_via_bot(req.id) if newly_handled else None
+    return jsonify({"id": req.id, "status": req.status,
+                    "emailed": notify_result == "sent", "notify_result": notify_result})
 
 
 @admin_bp.route('/api/whatsapp/users/<int:id>', methods=['PUT'])

@@ -144,9 +144,10 @@ def send_company_available_email(to_email, candidate_name, company_name):
         return False
     text_body = (
         f"Hey {candidate_name or 'there'}! 😊\n\n"
-        f"Good news — {company_name} is now on Ofoodiez Referrals, and we have someone "
-        f"there who can refer you! 🎉\n\n"
-        f"Just message us on WhatsApp and ask for a referral to {company_name} to get started.\n\n"
+        f"Good news — {company_name} was added to Ofoodiez Referrals and we found an "
+        f"advocate there who can refer you! 🎉\n\n"
+        f"Message us on WhatsApp, ask for a referral to {company_name} and send your "
+        f"CV again — it'll go straight to them.\n\n"
         f"— The Ofoodiez team"
     )
     payload = {
@@ -191,6 +192,33 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
         "subject": f"Referral request: {company_name} ({reason})",
         "content": [{"type": "text/plain", "value": body}],
     }
+    return _post(payload)
+
+
+def send_contact_email(name, phone, email, message):
+    """Forward a Contact-Us message from the WhatsApp bot to ops (WA_OPS_EMAIL).
+    Reply-To is the user's email when we have one, so ops can reply directly.
+    Best-effort: returns False if SendGrid / the ops address aren't configured."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    to_email = WaConfig.WA_OPS_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+    body = (
+        f"New Contact-Us message from the WhatsApp bot.\n\n"
+        f"From: {name}\n"
+        f"WhatsApp: {phone}\n"
+        f"Email: {email or '—'}\n\n"
+        f"Message:\n{message}\n"
+    )
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez Contact"},
+        "subject": f"Contact Us — {name}",
+        "content": [{"type": "text/plain", "value": body}],
+    }
+    if email:
+        payload["reply_to"] = {"email": email, "name": name}
     return _post(payload)
 
 
