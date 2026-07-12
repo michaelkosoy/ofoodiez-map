@@ -76,6 +76,20 @@ CONTACT_INFO = (
     "Reach us at *info@ofoodiez.com* or DM us on Instagram *@ofoodiez* 🧡\n"
     "Type *menu* anytime to start over."
 )
+CONTACT_PROMPT = (
+    "✉️ *Contact us*\n"
+    "Type your message below and I'll pass it straight to the Ofoodiez team.\n"
+    "We'll get back to you soon. (Type *menu* to go back.)"
+)
+CONTACT_SENT = (
+    "Thanks! 🙌 Your message is on its way to our team — we'll be in touch soon.\n"
+    "Type *menu* anytime to do more."
+)
+# Profile editing is a later feature — Contact Us handles change requests for now.
+PROFILE_COMING_SOON = (
+    "✏️ Editing your details from here is coming soon!\n"
+    "For now, tap *Contact us* and send us a message if you'd like to update anything."
+)
 # ---- Signed-in user: edit your own details ----
 PROFILE_MENU = (
     "Your details 👤\n"

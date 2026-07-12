@@ -9,7 +9,7 @@ Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 import logging
 from datetime import datetime, timedelta, timezone
 
-from . import candidate, conversation, copy, employee, messaging, profile, registration
+from . import candidate, contact, conversation, copy, employee, messaging, profile, registration
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
@@ -61,9 +61,9 @@ def handle(inbound):
     if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
         return _entry(user, conv)
 
-    # Registered users can jump straight to editing their own details.
+    # Editing your own details is a later feature — point them to Contact Us.
     if user.is_registered and text.lower() in PROFILE_WORDS:
-        return profile.start(user, conv)
+        return _profile_coming_soon(user, conv)
 
     # Path selection from the Welcome menu.
     if payload in _PATHS:
@@ -74,8 +74,10 @@ def handle(inbound):
         return candidate.handle(user, conv, inbound)
     if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
         return employee.handle(user, conv, payload, text)
+    if conv.flow == "contact" and conv.step and conv.step.startswith("contact_"):
+        return contact.handle(user, conv, payload, text)
     if conv.flow == "profile" and conv.step and conv.step.startswith("prof_"):
-        return profile.handle(user, conv, payload, text)
+        return profile.handle(user, conv, payload, text)  # dormant — editing deferred
 
     # No active flow / anything unrecognized → sign-up (if needed) or Welcome.
     return _entry(user, conv)
@@ -88,18 +90,12 @@ def _entry(user, conv):
 
 
 def _enter_path(user, conv, flow):
-    # "Edit my details" button (registered-user Welcome menu).
+    # "Edit my details" button — profile editing is deferred; show a coming-soon note.
     if flow == "profile":
-        if user.is_registered:
-            return profile.start(user, conv)
-        return _entry(user, conv)  # stale button from before they were removed
-    # Contact option: signed-in users edit their own details; others get contact info.
+        return _profile_coming_soon(user, conv)
+    # Contact Us → let everyone send us a message (forwarded to ops by email).
     if flow == "contact":
-        if user.is_registered:
-            return profile.start(user, conv)
-        messaging.send_prompt(user.phone, copy.CONTACT_INFO)
-        conversation.reset_state(conv)
-        return "enter_contact"
+        return contact.start(user, conv)
     # Employees collect their identity inside the advocate flow's combined
     # question, so they skip the separate sign-up.
     if flow == "employee":
@@ -108,6 +104,13 @@ def _enter_path(user, conv, flow):
     if not user.is_registered:
         return registration.start(user, conv, pending_flow="candidate")
     return candidate.start(user, conv)
+
+
+def _profile_coming_soon(user, conv):
+    """Editing your own details is a later feature; for now nudge to Contact Us."""
+    conversation.reset_state(conv)
+    messaging.send_prompt(user.phone, copy.PROFILE_COMING_SOON)
+    return "profile_coming_soon"
 
 
 def _welcome(user, conv):
