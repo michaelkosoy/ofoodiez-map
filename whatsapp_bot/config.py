@@ -98,6 +98,13 @@ class _WaConfig:
         # without it we fall back to free-form text, which only delivers in-window.
         return os.environ.get("WA_CT_ADVOCATE_PING")
 
+    @property
+    def WA_CT_COMPANY_AVAILABLE(self):
+        # WhatsApp version of the "your requested company is now available" email
+        # (body vars: 1=candidate first name, 2=company). Template required to reach
+        # candidates outside the 24h window — they usually asked days earlier.
+        return os.environ.get("WA_CT_COMPANY_AVAILABLE")
+
     # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
     @property
     def SUPABASE_URL(self):

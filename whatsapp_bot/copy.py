@@ -324,3 +324,9 @@ ADVOCATE_PING = (
     "We've emailed the full application with their CV to {email} — "
     "take a look when you get a chance. Thanks for being an advocate! 🙏"
 )
+# WhatsApp version of the company-available email (shorter, per Ofir).
+COMPANY_AVAILABLE_PING = (
+    "Hey {name}! 🎉 Good news — *{company}* was added and we found an advocate "
+    "who can refer you!\n"
+    "Ask me for a referral to *{company}* and send your CV again 🚀"
+)
