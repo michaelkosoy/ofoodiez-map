@@ -258,6 +258,19 @@
                             <p class="game-detail-body">{{ game.instructions | replace('\n', '<br>') | safe }}</p>
                         </div>
                         {% endif %}
+
+                        {% if game.lists %}
+                        {% for lst in game.lists %}
+                        <details class="game-list-toggle">
+                            <summary><i class="fas fa-list"></i> {{ lst.label }} ({{ lst['items']|length }}) <i class="fas fa-chevron-down toggle-arrow"></i></summary>
+                            <ul class="game-list-items">
+                                {% for item in lst['items'] %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                        {% endfor %}
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -270,19 +283,32 @@
                         {% if game.description %}
                         <p class="game-subtitle">{{ game.description }}</p>
                         {% endif %}
-                        
+
                         {% if game.materials %}
                         <div class="game-detail-item">
                             <span class="game-detail-label"><i class="fas fa-clipboard-list"></i> חומרים דרושים:</span>
                             <p class="game-detail-body">{{ game.materials }}</p>
                         </div>
                         {% endif %}
-                        
+
                         {% if game.instructions %}
                         <div class="game-detail-item">
                             <span class="game-detail-label"><i class="fas fa-info-circle"></i> איך משחקים:</span>
                             <p class="game-detail-body">{{ game.instructions | replace('\n', '<br>') | safe }}</p>
                         </div>
+                        {% endif %}
+
+                        {% if game.lists %}
+                        {% for lst in game.lists %}
+                        <details class="game-list-toggle">
+                            <summary><i class="fas fa-list"></i> {{ lst.label }} ({{ lst['items']|length }}) <i class="fas fa-chevron-down toggle-arrow"></i></summary>
+                            <ul class="game-list-items">
+                                {% for item in lst['items'] %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                        {% endfor %}
                         {% endif %}
                     </div>
                     {% endfor %}
