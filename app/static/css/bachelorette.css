@@ -843,6 +843,48 @@ body {
     line-height: 1.6;
     color: var(--text-main);
 }
+.game-list-toggle {
+    margin-top: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-md, 10px);
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.015);
+}
+.game-list-toggle + .game-list-toggle {
+    margin-top: 10px;
+}
+.game-list-toggle summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    user-select: none;
+}
+.game-list-toggle summary::-webkit-details-marker {
+    display: none;
+}
+.game-list-toggle .toggle-arrow {
+    margin-inline-start: auto;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+.game-list-toggle[open] .toggle-arrow {
+    transform: rotate(180deg);
+}
+.game-list-items {
+    margin: 12px 0 2px 0;
+    padding-inline-start: 20px;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--text-main);
+}
+.game-list-items li {
+    margin-bottom: 6px;
+}
 
 /* ============ BRANDING & DESIGNS ============ */
 .branding-header {
