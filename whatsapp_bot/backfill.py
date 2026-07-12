@@ -57,6 +57,43 @@ def _notify(req_row, company=None):
     return "sent" if ok else "failed"
 
 
+@wa_bp.route("/requests", methods=["POST"])
+def add_request():
+    """Ops: manually queue a backfill request for someone who asked OUTSIDE the
+    bot. Creates the wa_users row if the phone is new. Keyed like the rest.
+    JSON/form fields: company, phone (E.164), email?, first_name?, last_name?"""
+    if not _authorized():
+        return jsonify({"error": "forbidden"}), 403
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    company = (data.get("company") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    if not company or not phone:
+        return jsonify({"error": "company and phone are required"}), 400
+    user = WaUser.query.filter_by(phone=phone).first()
+    if user is None:
+        user = WaUser(phone=phone)
+        db.session.add(user)
+    for field in ("email", "first_name", "last_name"):
+        if data.get(field) and not getattr(user, field):
+            setattr(user, field, data[field].strip())
+    db.session.flush()
+    norm = " ".join(company.lower().split())
+    comp = WaCompany.query.filter_by(normalized_name=norm).first()
+    req_row = WaCompanyRequest(
+        candidate_user_id=user.id,
+        company_name_raw=company,
+        normalized_name=norm,
+        resolved_company_id=comp.id if comp else None,
+        reason="manual",
+        status="open",
+    )
+    db.session.add(req_row)
+    db.session.commit()
+    logger.info("wa backfill: manual request added company=%r user=%s", company, user.id)
+    return jsonify({"id": req_row.id, "user_id": user.id, "company": company,
+                    "company_exists": bool(comp)}), 201
+
+
 @wa_bp.route("/requests/<int:req_id>/notify", methods=["POST"])
 def notify_request(req_id):
     """Manual path: the admin flipped this request to handled; tell the candidate."""
