@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצהרת נגישות — Ofoodiez</title>
+    <meta name="description" content="הצהרת הנגישות של אתר Ofoodiez">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <meta name="theme-color" content="#5A3A31">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: Arial, 'Outfit', sans-serif; background: #f9f6eb; color: #362118; margin: 0; padding: 24px 18px 90px; line-height: 1.75; }
+        main { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 30px 26px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        h1 { font-size: 1.7rem; margin-top: 0; }
+        h2 { font-size: 1.15rem; margin-top: 26px; }
+        a { color: #1a56b0; }
+        ul { padding-right: 20px; }
+        .updated { color: #8a7a70; font-size: .9rem; }
+    </style>
+</head>
+
+<body>
+    <main id="main">
+        <h1>הצהרת נגישות</h1>
+        <p>אתר Ofoodiez (ofoodiez.com) רואה חשיבות רבה במתן שירות שוויוני ונגיש לכלל הגולשים,
+            לרבות אנשים עם מוגבלות, ופועל להנגשת האתר בהתאם לתקנות שוויון זכויות לאנשים עם
+            מוגבלות (התאמות נגישות לשירות), התשע"ג-2013, ולתקן הישראלי ת"י 5568 המבוסס על
+            הנחיות <span dir="ltr">WCAG 2.1</span> ברמה AA.</p>
+
+        <h2>מה באתר הונגש</h2>
+        <ul>
+            <li>תפריט נגישות זמין בכל עמודי האתר (כפתור ♿ בצד השמאלי-תחתון): הגדלת טקסט,
+                ניגודיות גבוהה, גווני אפור, הדגשת קישורים, פונט קריא ועצירת אנימציות.</li>
+            <li>ניתן להגדיל ולהקטין את התצוגה בכל העמודים (צביטה במובייל / <span dir="ltr">Ctrl +</span> במחשב).</li>
+            <li>תיאורי טקסט חלופי (alt) לתמונות.</li>
+            <li>מבנה עמודים סמנטי, כותרות מדורגות וטפסים עם תוויות.</li>
+            <li>האתר שמיש בניווט מקלדת בדפדפנים הנפוצים.</li>
+        </ul>
+
+        <h2>חלקים שנגישותם עשויה להיות חלקית</h2>
+        <ul>
+            <li>רכיבים של צדדים שלישיים: מפות Google, הטמעות Instagram, עמודי תשלום של Grow
+                ושיחות WhatsApp — הנגשתם באחריות הספקים, ואנו מקפידים לבחור ספקים העומדים בדרישות.</li>
+            <li>תכנים ישנים (תמונות/פוסטים) מונגשים בהדרגה.</li>
+        </ul>
+
+        <h2>נתקלתם בבעיה? נשמח לתקן</h2>
+        <p>אם נתקלתם בקושי נגישות באתר, נשמח שתפנו אלינו ונטפל בפנייה בהקדם, בדרך כלל בתוך
+            עד 5 ימי עסקים:</p>
+        <ul>
+            <li>דוא"ל: <a href="mailto:contact@ofoodiez.com">contact@ofoodiez.com</a></li>
+            <li>טלפון/וואטסאפ: <a href="tel:+972542471816" dir="ltr">054-2471816</a></li>
+        </ul>
+
+        <p lang="en" dir="ltr"><strong>English:</strong> Ofoodiez strives to make this website
+            accessible per Israeli Standard 5568 (WCAG 2.1 AA). An accessibility menu is available
+            on every page (the ♿ button). If you encounter an accessibility issue, please contact
+            <a href="mailto:contact@ofoodiez.com">contact@ofoodiez.com</a> and we'll fix it promptly.</p>
+
+        <p class="updated">ההצהרה עודכנה לאחרונה: 12.07.2026</p>
+    </main>
+</body>
+
+</html>

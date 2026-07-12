@@ -261,6 +261,14 @@ def _load_blog(slug):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
+
+@app.route('/accessibility')
+def accessibility_statement():
+    """הצהרת נגישות — required by the IL accessibility regulations (IS 5568);
+    linked from the accessibility menu present on every page."""
+    return render_template('accessibility.html')
+
+
 @app.route('/blog/japan')
 def blog_japan():
     """Japan travel & food guide. Buyers of the 'japan' Grow item get the guide;
