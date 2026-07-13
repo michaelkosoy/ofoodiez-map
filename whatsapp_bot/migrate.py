@@ -129,7 +129,7 @@ _STATEMENTS = [
     "alter table public.wa_applications add column if not exists job_description text",
     # ---- seed known careers pages, keyed by normalized_name (fills NULL only,
     # so admin edits via /admin → WhatsApp → Companies are never overwritten;
-    # all URLs verified live 2026-07-11) ----
+    # all URLs verified live 2026-07-11, updated 2026-07-13) ----
     """update public.wa_companies c set careers_url = v.url
         from (values
             ('google',        'https://careers.google.com/'),
@@ -145,7 +145,9 @@ _STATEMENTS = [
             ('appcharge',     'https://appcharge.com/careers'),
             ('appsflyer',     'https://www.appsflyer.com/careers/'),
             ('aqua security', 'https://www.aquasec.com/about-us/careers/'),
+            ('armis',         'https://www.armis.com/armis-careers/'),
             ('aryon security', 'https://www.aryon.security/careers'),
+            ('at&t israel r&d center', 'https://il.att.com/'),
             ('autofleet',     'https://autofleet.io/careers'),
             ('beyondtrust',   'https://www.beyondtrust.com/careers'),
             ('biocatch',      'https://www.biocatch.com/cybersecurity-careers'),
@@ -156,6 +158,7 @@ _STATEMENTS = [
             ('credito',       'https://credito.co.il/jobs/'),
             ('crowdstrike',   'https://www.crowdstrike.com/careers/'),
             ('cycode',        'https://cycode.com/careers/'),
+            ('cyera',         'https://www.cyera.com/careers'),
             ('deloitte',      'https://careers.deloitte.co.il/'),
             ('dream security', 'https://dreamgroup.com/careers'),
             ('entitle',       'https://www.beyondtrust.com/careers'),
@@ -175,9 +178,12 @@ _STATEMENTS = [
             ('natural intelligence', 'https://www.naturalint.com/jobs'),
             ('nexxen',        'https://www.nexxen.com/careers'),
             ('nice',          'https://www.nice.com/careers'),
+            ('nvidia',        'https://www.nvidia.com/en-us/about-nvidia/careers/'),
             ('pagaya',        'https://pagaya.com/careers'),
             ('palo alto networks', 'https://jobs.paloaltonetworks.com/'),
+            ('papaya gaming', 'https://careers.papayagaming.com/'),
             ('payoneer',      'https://careers.payoneer.com/'),
+            ('perion',        'https://www.perion.com/careers/'),
             ('personetics',   'https://personetics.com/careers/'),
             ('plus500',       'https://careers.plus500.com/'),
             ('pontera',       'https://pontera.com/careers'),
@@ -185,8 +191,11 @@ _STATEMENTS = [
             ('radware',       'https://www.radware.com/careers/'),
             ('rapyd',         'https://www.rapyd.net/company/careers/'),
             ('riskified',     'https://www.riskified.com/careers/'),
+            ('riverside',     'https://careers.riverside.com/'),
             ('scaleops',      'https://scaleops.com/careers'),
             ('sciplay',       'https://sciplay.com/careers/'),
+            ('sela',          'https://selacloud.com/careers'),
+            ('sentra',        'https://sentra.io/careers'),
             ('sunflower',     'https://www.comeet.com/jobs/sunflower/AA.009'),
             ('superplay',     'https://www.superplay.co/careers/'),
             ('team8',         'https://team8.vc/careers'),

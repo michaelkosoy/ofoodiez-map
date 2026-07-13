@@ -86,6 +86,7 @@
 <script>
 var hitechContent = {};
 var currentSection = 'hitech';
+var currentFaqs = [];
 
 function loadContent() {
   fetch('/admin/api/hitech/content')
@@ -166,6 +167,14 @@ function renderEditor() {
     html += textareaField('directory_desc', 'Directory Section Description', sectionData.directory_desc);
     html += inputField('search_placeholder', 'Search Box Placeholder Text', sectionData.search_placeholder);
 
+    html += '<p class="section-title">Common Questions (FAQ)</p>';
+    html += inputField('faq_title', 'FAQ Section Header', sectionData.faq_title);
+    currentFaqs = (sectionData.faq || []).slice();
+    html += '<div id="faq-list">';
+    currentFaqs.forEach((f, idx) => { html += faqItemHtml(idx, f.q, f.a); });
+    html += '</div>';
+    html += '<button type="button" class="btn" onclick="addFaqItem()"><i class="fas fa-plus"></i> Add Question</button>';
+
   } else if (currentSection === 'cv') {
     html += '<p class="section-title">CV Page Settings</p>';
     html += inputField('page_title', 'Meta/Browser Page Title', sectionData.page_title);
@@ -234,6 +243,48 @@ function textareaField(key, label, val) {
   return `<div class="editor-field"><label>${label}</label><textarea rows="3" data-key="${key}">${val}</textarea></div>`;
 }
 
+function faqItemHtml(idx, q, a) {
+  var qVal = (q || '').replace(/"/g, '&quot;');
+  var aVal = (a || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<div class="sub-card" data-faq-idx="${idx}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h4 style="margin:0;color:var(--sidebar-bg)">Question #${idx + 1}</h4>
+      <button type="button" class="btn btn-danger" style="font-size:.78rem;padding:5px 10px" onclick="removeFaqItem(${idx})"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="editor-field"><label>Question</label><input type="text" data-key="faq_q_${idx}" value="${qVal}"></div>
+    <div class="editor-field"><label>Answer</label><textarea rows="3" data-key="faq_a_${idx}">${aVal}</textarea></div>
+  </div>`;
+}
+
+function syncFaqsFromDom() {
+  var items = [];
+  document.querySelectorAll('#faq-list [data-faq-idx]').forEach(div => {
+    var idx = div.getAttribute('data-faq-idx');
+    items.push({
+      q: document.querySelector(`[data-key="faq_q_${idx}"]`).value,
+      a: document.querySelector(`[data-key="faq_a_${idx}"]`).value
+    });
+  });
+  currentFaqs = items;
+}
+
+function renderFaqList() {
+  var listEl = document.getElementById('faq-list');
+  listEl.innerHTML = currentFaqs.map((f, idx) => faqItemHtml(idx, f.q, f.a)).join('');
+}
+
+function addFaqItem() {
+  syncFaqsFromDom();
+  currentFaqs.push({ q: '', a: '' });
+  renderFaqList();
+}
+
+function removeFaqItem(idx) {
+  syncFaqsFromDom();
+  currentFaqs.splice(idx, 1);
+  renderFaqList();
+}
+
 function collectData() {
   var sectionData = {};
 
@@ -286,7 +337,9 @@ function collectData() {
       directory_title: document.querySelector('[data-key="directory_title"]').value,
       directory_desc: document.querySelector('[data-key="directory_desc"]').value,
       search_placeholder: document.querySelector('[data-key="search_placeholder"]').value,
-      steps: []
+      faq_title: document.querySelector('[data-key="faq_title"]').value,
+      steps: [],
+      faq: []
     };
     var stepDivs = document.querySelectorAll('[data-step-idx]');
     stepDivs.forEach(div => {
@@ -296,6 +349,8 @@ function collectData() {
         text: document.querySelector(`[data-key="step_text_${idx}"]`).value
       });
     });
+    syncFaqsFromDom();
+    sectionData.faq = currentFaqs;
 
   } else if (currentSection === 'cv') {
     sectionData = {

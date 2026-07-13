@@ -36,7 +36,31 @@ A Flask web app and food blog. Main features:
 - `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE`, `GROW_API_BASE` — direct Grow Light API access (same effect as the Make webhook; only if Grow support issues credentials). Without either transport the guide falls back to the static link + manual activation.
 - `GROW_JAPAN_PAY_LINK` — the Japan guide's public Grow payment-page URL (has a default in `billing.py`). Item price **and name** are managed **in the Grow dashboard only**: the site reads them live from each item's page (`grow_page_item()`), shows the price on the locked page, and charges it at checkout. Never hardcode prices. All sellable items live in `billing.GROW_ITEMS` (slug → page_url/catalog/path); per-user purchases in the `site_purchases` table. See docs/ai/blog-pages.md § Paid (gated) pages.
 
+## Content conventions — text must be editable, not hardcoded
+Any user-facing copy added to the site (headlines, button labels, descriptions, FAQ
+entries, etc.) must live in an editable JSON content file under `app/data/`, not
+hardcoded as literal strings in the Jinja templates. This keeps every page editable
+from the admin panel, and sets the site up for an eventual translation/i18n feature
+(swap one JSON file for a per-locale one) without touching template code.
+
+Follow the existing pattern used for the HiTech pages:
+- **Data file**: `app/data/hitech_content.json`, keyed by page (`hitech`, `community`,
+  `bot`, `cv`). Loaded via `_load_hitech_content()` in `app.py` and passed to templates
+  as `c`, e.g. `{{ c.headline }}`. Always reference copy through `c.<key>`, never inline
+  text, and give new keys a sensible fallback with `| default('...')` in the template.
+- **Admin editor**: `app/templates/admin/hitech_content.html` + the GET/PUT endpoints at
+  `/admin/api/hitech/content` (`admin/api.py`) — a generic "load JSON → render form
+  fields → save whole JSON back" editor keyed by section. When adding a new field or
+  repeatable list (cards, steps, FAQ items) to a page, add the matching form field(s) to
+  this editor's `renderEditor()`/`collectData()` so it stays editable from
+  `/admin/hitech/content`. Variable-length lists (like FAQ) should support add/remove,
+  not just a fixed set of fields.
+- Non-HiTech pages that grow admin-editable copy should follow the same shape: one JSON
+  file per page/section in `app/data/`, one admin editor page + API pair to read/write it.
+
 ## Do not do
 - Do not push large images (>500KB) directly to the git repo — it can break the production deployment
 - Do not create blog pages outside `/blog/` prefix
 - Do not add routes after the `/blog/<category>` catch-all — they won't be reached
+- Do not hardcode new user-facing text directly in templates — add it to the relevant
+  JSON content file and expose it in the matching admin editor (see "Content conventions" above)
