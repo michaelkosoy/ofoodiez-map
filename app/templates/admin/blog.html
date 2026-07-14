@@ -95,6 +95,51 @@
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* Party Games tables: click row to edit, drag handle to reorder */
+  #bachelorette-games-elegant-table .tabulator-row,
+  #bachelorette-games-rowdy-table .tabulator-row {
+    cursor: pointer;
+  }
+  .drag-handle-cell {
+    cursor: grab;
+    color: #aaa;
+  }
+  .game-list-block {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px 34px 12px 12px;
+    margin-bottom: 10px;
+    position: relative;
+    background: #fafafa;
+  }
+  .game-list-remove-btn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .game-list-remove-btn:hover { color: #c0392b; }
+  .games-hint {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+
+  /* Make textarea cell editors (e.g. venues Description) big enough to actually read while typing */
+  .tabulator-cell.tabulator-editing textarea {
+    min-height: 100px !important;
+    min-width: 320px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    padding: 8px !important;
+    resize: vertical !important;
+    z-index: 20;
+  }
 </style>
 {% endblock %}
 
@@ -149,6 +194,151 @@ function cityField(cityKey, subKey, label, rows) {
     '<textarea rows="' + rows + '" data-city="' + cityKey + '" data-sub="' + subKey + '">' + val + '</textarea></div>';
 }
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function truncateFormatter(maxLen) {
+  return function(cell) {
+    var v = String(cell.getValue() || '').replace(/\n/g, ' ');
+    if (v.length > maxLen) v = v.slice(0, maxLen) + '…';
+    return escapeHtml(v);
+  };
+}
+
+function listsSummaryFormatter(cell) {
+  var lists = cell.getValue() || [];
+  if (!lists.length) return '<span style="color:#bbb;">—</span>';
+  var totalItems = lists.reduce(function(sum, l) { return sum + ((l.items || []).length); }, 0);
+  return lists.length + ' list' + (lists.length > 1 ? 's' : '') + ' · ' + totalItems + ' items';
+}
+
+function gameTableColumns() {
+  return [
+    { rowHandle: true, formatter: "handle", headerSort: false, width: 34, hozAlign: "center", cssClass: "drag-handle-cell" },
+    { title: "#", field: "id", width: 40, headerSort: false, cssClass: "readonly" },
+    { title: "Title", field: "title", minWidth: 140, formatter: truncateFormatter(60) },
+    { title: "Description", field: "description", minWidth: 180, formatter: truncateFormatter(80) },
+    { title: "Instructions", field: "instructions", minWidth: 200, formatter: truncateFormatter(90) },
+    { title: "Lists", field: "lists", width: 130, headerSort: false, formatter: listsSummaryFormatter },
+    {
+      formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
+      width: 50, hozAlign: "center", headerSort: false, cssClass: "game-delete-cell",
+      cellClick: function(e, cell) { cell.getRow().delete(); }
+    }
+  ];
+}
+
+// Tabulator invokes rowClick internally alongside cellClick regardless of
+// e.stopPropagation(), so guard by checking what was actually clicked.
+function isGameRowActionClick(e) {
+  return !!(e.target.closest('.game-delete-cell') || e.target.closest('.drag-handle-cell'));
+}
+
+function renumberGameRows(table) {
+  if (!table) return;
+  table.getRows().forEach(function(row, idx) {
+    if (row.getData().id !== idx + 1) row.update({ id: idx + 1 });
+  });
+}
+
+function renderListBlock(label, itemsText) {
+  return '<div class="game-list-block">' +
+    '<button type="button" class="game-list-remove-btn" title="Remove list"><i class="fas fa-times-circle"></i></button>' +
+    '<div class="form-group" style="margin-bottom:8px;">' +
+      '<label style="font-size:12px;">List Label (e.g. "השאלות")</label>' +
+      '<input type="text" class="form-control game-list-label" value="' + escapeHtml(label) + '" style="padding:8px 10px;font-size:13px;">' +
+    '</div>' +
+    '<div class="form-group">' +
+      '<label style="font-size:12px;">Items — one per line</label>' +
+      '<textarea class="form-control game-list-items-input" rows="4" style="padding:8px 10px;font-size:13px;">' + escapeHtml(itemsText) + '</textarea>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindRemoveListButtons() {
+  document.querySelectorAll('.game-list-remove-btn').forEach(function(btn) {
+    btn.onclick = function() { btn.closest('.game-list-block').remove(); };
+  });
+}
+
+function openGameModal(row, tableForNew) {
+  var table = row ? row.getTable() : tableForNew;
+  var data = row ? row.getData() : { title: '', description: '', materials: '', instructions: '', lists: [] };
+  var lists = data.lists || [];
+  var listsHtml = lists.map(function(l) {
+    return renderListBlock(l.label || '', (l.items || []).join('\n'));
+  }).join('');
+
+  Swal.fire({
+    title: row ? 'Edit Game' : 'New Game',
+    customClass: { popup: 'swal-wide-popup' },
+    width: 720,
+    html:
+      '<div class="modal-grid full-width" style="text-align:right;direction:rtl;">' +
+        '<div class="form-group"><label>Title <span class="required">*</span></label>' +
+          '<input type="text" id="game-title" class="form-control" value="' + escapeHtml(data.title) + '"></div>' +
+        '<div class="form-group"><label>Description</label>' +
+          '<textarea id="game-description" class="form-control" rows="2">' + escapeHtml(data.description) + '</textarea></div>' +
+        '<div class="form-group"><label>Materials</label>' +
+          '<textarea id="game-materials" class="form-control" rows="2">' + escapeHtml(data.materials) + '</textarea></div>' +
+        '<div class="form-group"><label>Instructions (how to play)</label>' +
+          '<textarea id="game-instructions" class="form-control" rows="5">' + escapeHtml(data.instructions) + '</textarea></div>' +
+        '<div class="form-group">' +
+          '<label>Question / Item Lists <span style="font-weight:400;color:#888;font-size:12px;">(shown as expandable sections on the card)</span></label>' +
+          '<div id="game-lists-container">' + listsHtml + '</div>' +
+          '<button type="button" id="game-add-list-btn" class="btn" style="margin-top:6px;padding:6px 12px;font-size:13px;background:#f1f3f5;color:#495057;border:none;border-radius:6px;cursor:pointer;"><i class="fas fa-plus"></i> Add List</button>' +
+        '</div>' +
+      '</div>',
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: '<i class="fas fa-save"></i> Save',
+    confirmButtonColor: '#2e7d32',
+    didOpen: function() {
+      bindRemoveListButtons();
+      document.getElementById('game-add-list-btn').addEventListener('click', function() {
+        document.getElementById('game-lists-container').insertAdjacentHTML('beforeend', renderListBlock('', ''));
+        bindRemoveListButtons();
+      });
+    },
+    preConfirm: function() {
+      var title = document.getElementById('game-title').value.trim();
+      if (!title) {
+        Swal.showValidationMessage('Title is required');
+        return false;
+      }
+      var newLists = [];
+      document.querySelectorAll('.game-list-block').forEach(function(block) {
+        var label = block.querySelector('.game-list-label').value.trim();
+        var items = block.querySelector('.game-list-items-input').value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+        if (label && items.length) newLists.push({ label: label, items: items });
+      });
+      return {
+        title: title,
+        description: document.getElementById('game-description').value.trim(),
+        materials: document.getElementById('game-materials').value.trim(),
+        instructions: document.getElementById('game-instructions').value.trim(),
+        lists: newLists
+      };
+    }
+  }).then(function(result) {
+    if (!result.isConfirmed) return;
+    if (row) {
+      row.update(result.value);
+    } else if (table) {
+      var maxId = 0;
+      table.getData().forEach(function(r) { if (r.id > maxId) maxId = r.id; });
+      result.value.id = maxId + 1;
+      table.addRow(result.value, true);
+    }
+  });
+}
+
 function switchAdminTab(tabName) {
   document.querySelectorAll('.admin-subtab-btn').forEach(function(btn) {
     btn.classList.remove('active');
@@ -156,15 +346,28 @@ function switchAdminTab(tabName) {
   document.querySelectorAll('.admin-tab-content').forEach(function(content) {
     content.classList.remove('active');
   });
-  
+
   // Find button by its onclick target
   var btn = Array.from(document.querySelectorAll('.admin-subtab-btn')).find(function(b) {
     return b.getAttribute('onclick').includes("'" + tabName + "'");
   });
   if (btn) btn.classList.add('active');
-  
+
   var content = document.getElementById('admin-tab-' + tabName);
   if (content) content.classList.add('active');
+
+  // Tables built while their tab was hidden get a zero-width "fitColumns" layout;
+  // redraw once the tab (and its real width) is actually visible.
+  var tablesByTab = {
+    venues: [bacheloretteTable],
+    suppliers: [bacheloretteSuppliersTable],
+    games: [bacheloretteGamesElegantTable, bacheloretteGamesRowdyTable],
+    designs: [bacheloretteDesignsSetsTable, bacheloretteAETable, bachelorettePSTable],
+    gifts: [bacheloretteGiftsTable]
+  };
+  (tablesByTab[tabName] || []).forEach(function(t) {
+    if (t) t.redraw(true);
+  });
 }
 
 function renderEditor() {
@@ -248,6 +451,7 @@ function renderEditor() {
 
     // Tab 4: Games
     html += '<div id="admin-tab-games" class="admin-tab-content">';
+    html += '  <p class="games-hint"><i class="fas fa-circle-info"></i> Click a row to edit all fields (including question/task lists). Drag the <i class="fas fa-grip-vertical"></i> handle to reorder — the order here matches the card order on the site.</p>';
     html += '  <div style="margin-bottom:30px;">';
     html += '    <div style="display:flex;align-items:center;margin-bottom:15px;gap:12px;">';
     html += '      <h3 style="margin:0;font-size:16px;font-weight:700;">✨ Elegant Games (רווקה קלאסית ואלגנטית)</h3>';
@@ -336,7 +540,7 @@ function renderEditor() {
           { title: "Link Text", field: "link_text", editor: "input", width: 90 },
           { title: "Instagram", field: "instagram", editor: "input", width: 120 },
           { title: "WhatsApp", field: "whatsapp", editor: "input", width: 120 },
-          { title: "Description", field: "description", editor: "input", minWidth: 200 },
+          { title: "Description", field: "description", editor: "textarea", editorParams: { verticalNavigation: "editor" }, minWidth: 260 },
           {
             formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
             width: 50, hozAlign: "center", headerSort: false,
@@ -376,19 +580,14 @@ function renderEditor() {
       bacheloretteGamesElegantTable = new Tabulator("#bachelorette-games-elegant-table", {
         data: gamesElegant,
         layout: "fitColumns",
-        columns: [
-          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
-          { title: "Title", field: "title", editor: "input", minWidth: 120 },
-          { title: "Description", field: "description", editor: "input", minWidth: 180 },
-          { title: "Materials", field: "materials", editor: "input", minWidth: 120 },
-          { title: "Instructions", field: "instructions", editor: "textarea", editorParams: { verticalNavigation: "editor" }, minWidth: 250 },
-          {
-            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
-            width: 50, hozAlign: "center", headerSort: false,
-            cellClick: function(e, cell) { cell.getRow().delete(); }
-          }
-        ]
+        movableRows: true,
+        columns: gameTableColumns()
       });
+      // Bound via .on() rather than the constructor option: with movableRows enabled,
+      // Tabulator's drag-tracking swallows the native click before the rowClick
+      // constructor callback ever runs, but the rowClick *event* still fires reliably.
+      bacheloretteGamesElegantTable.on('rowClick', function(e, row) { if (!isGameRowActionClick(e)) openGameModal(row); });
+      bacheloretteGamesElegantTable.on('rowMoved', function(row) { renumberGameRows(row.getTable()); });
 
       // 4. Games Rowdy Table
       var gamesRowdy = (blogData.games || {}).rowdy || [];
@@ -396,19 +595,11 @@ function renderEditor() {
       bacheloretteGamesRowdyTable = new Tabulator("#bachelorette-games-rowdy-table", {
         data: gamesRowdy,
         layout: "fitColumns",
-        columns: [
-          { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
-          { title: "Title", field: "title", editor: "input", minWidth: 120 },
-          { title: "Description", field: "description", editor: "input", minWidth: 180 },
-          { title: "Materials", field: "materials", editor: "input", minWidth: 120 },
-          { title: "Instructions", field: "instructions", editor: "textarea", editorParams: { verticalNavigation: "editor" }, minWidth: 250 },
-          {
-            formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
-            width: 50, hozAlign: "center", headerSort: false,
-            cellClick: function(e, cell) { cell.getRow().delete(); }
-          }
-        ]
+        movableRows: true,
+        columns: gameTableColumns()
       });
+      bacheloretteGamesRowdyTable.on('rowClick', function(e, row) { if (!isGameRowActionClick(e)) openGameModal(row); });
+      bacheloretteGamesRowdyTable.on('rowMoved', function(row) { renumberGameRows(row.getTable()); });
 
       // 5. Designs Sets Table
       var designSets = ((blogData.designs || {}).sets || []);
@@ -529,21 +720,24 @@ function renderEditor() {
 }
 
 function addBacheloretteRow(type) {
+  if (type === 'games_elegant') {
+    openGameModal(null, bacheloretteGamesElegantTable);
+    return;
+  }
+  if (type === 'games_rowdy') {
+    openGameModal(null, bacheloretteGamesRowdyTable);
+    return;
+  }
+
   var table = null;
   var defaultRow = {};
-  
+
   if (type === 'venues' && bacheloretteTable) {
     table = bacheloretteTable;
     defaultRow = { name: "שם המקום החדש", category: "חלל ושף", description: "", location: "", price: "", link: "#", link_text: "", instagram: "https://instagram.com/", whatsapp: "" };
   } else if (type === 'suppliers' && bacheloretteSuppliersTable) {
     table = bacheloretteSuppliersTable;
     defaultRow = { name: "שם הספק החדש", category: "דיג׳יי", location: "", price: "", instagram: "https://instagram.com/", whatsapp: "", description: "" };
-  } else if (type === 'games_elegant' && bacheloretteGamesElegantTable) {
-    table = bacheloretteGamesElegantTable;
-    defaultRow = { title: "משחק אלגנטי חדש", description: "", materials: "", instructions: "" };
-  } else if (type === 'games_rowdy' && bacheloretteGamesRowdyTable) {
-    table = bacheloretteGamesRowdyTable;
-    defaultRow = { title: "משחק פרוע חדש", description: "", materials: "", instructions: "" };
   } else if (type === 'designs_sets' && bacheloretteDesignsSetsTable) {
     table = bacheloretteDesignsSetsTable;
     defaultRow = { name: "סט מיתוג חדש", description: "", canva_link: "https://www.canva.com/" };
