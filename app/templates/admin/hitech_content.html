@@ -141,6 +141,8 @@ function renderEditor() {
     html += inputField('form_title', 'Form Block Title', sectionData.form_title);
     html += textareaField('warning_text', 'LinkedIn Warning Banner Description', sectionData.warning_text);
     html += inputField('submit_btn', 'Submit Button Label', sectionData.submit_btn);
+    html += inputField('counter_text', 'Waitlist Counter — Line 1 (after the live count)', sectionData.counter_text);
+    html += inputField('counter_subtext', 'Waitlist Counter — Line 2 (below line 1)', sectionData.counter_subtext);
 
   } else if (currentSection === 'bot') {
     html += '<p class="section-title">Bot Page Hero</p>';
@@ -324,7 +326,9 @@ function collectData() {
       hero_sub: document.querySelector('[data-key="hero_sub"]').value,
       form_title: document.querySelector('[data-key="form_title"]').value,
       warning_text: document.querySelector('[data-key="warning_text"]').value,
-      submit_btn: document.querySelector('[data-key="submit_btn"]').value
+      submit_btn: document.querySelector('[data-key="submit_btn"]').value,
+      counter_text: document.querySelector('[data-key="counter_text"]').value,
+      counter_subtext: document.querySelector('[data-key="counter_subtext"]').value
     };
 
   } else if (currentSection === 'bot') {
