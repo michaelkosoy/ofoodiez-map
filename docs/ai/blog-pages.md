@@ -34,10 +34,18 @@ per-user payment link, and the `/webhooks/grow` callback grants the purchase (ro
 `site_purchases`). Admin can view/edit per-user items in the Members grid ("Items" column).
 
 Alternatively, give the item a public **landing/sales page** instead of the plain locked
-page (what `/blog/japan` does with `blog_japan_landing.html`): the route renders the guide
-for owners and the landing for everyone else; the landing CTA is a plain link to
+page (what `/blog/japan` used to do with `blog_japan_landing.html`): the route renders the
+guide for owners and the landing for everyone else; the landing CTA is a plain link to
 `GET /pay/<slug>` — anonymous clickers are sent to sign up first and the purchase resumes
 automatically after auth (`next_after_auth`).
+
+**Current status (2026-07-13): `/blog/japan` is open to everyone**, un-gated on purpose.
+The route just renders `blog_japan.html` directly — no `has_item`/`GROW_ITEMS` check.
+`blog_japan_landing.html`, `billing.GROW_ITEMS['japan']`, and the Grow purchase/webhook
+flow are all still intact and untouched; re-gating it is just restoring the
+`has_item(user, 'japan')` check that used to wrap the route (see git history on
+`app.py`'s `blog_japan()`). Same pattern for `/hitech/cv-guide/full`: currently open to
+everyone, the password gate code is still there in `hitech_cv_full()` but bypassed.
 
 ## Page structure
 Every blog page must include:

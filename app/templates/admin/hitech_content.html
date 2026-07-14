@@ -226,6 +226,8 @@ function renderEditor() {
       html += inputField(`cs_icon_${idx}`, 'Icon FontAwesome Class', cs.icon);
       html += inputField(`cs_title_${idx}`, 'Card Title', cs.title);
       html += textareaField(`cs_desc_${idx}`, 'Description Text', cs.desc);
+      html += inputField(`cs_href_${idx}`, 'Link Destination (leave blank if not clickable yet)', cs.href);
+      html += inputField(`cs_badge_${idx}`, 'Badge Text (leave blank for no badge)', cs.badge);
       html += `</div>`;
     });
   }
@@ -401,7 +403,9 @@ function collectData() {
       sectionData.coming_soon.push({
         icon: document.querySelector(`[data-key="cs_icon_${idx}"]`).value,
         title: document.querySelector(`[data-key="cs_title_${idx}"]`).value,
-        desc: document.querySelector(`[data-key="cs_desc_${idx}"]`).value
+        desc: document.querySelector(`[data-key="cs_desc_${idx}"]`).value,
+        href: document.querySelector(`[data-key="cs_href_${idx}"]`).value,
+        badge: document.querySelector(`[data-key="cs_badge_${idx}"]`).value
       });
     });
   }

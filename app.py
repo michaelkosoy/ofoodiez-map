@@ -271,20 +271,13 @@ def accessibility_statement():
 
 @app.route('/blog/japan')
 def blog_japan():
-    """Japan travel & food guide. Buyers of the 'japan' Grow item get the guide;
-    everyone else (incl. anonymous visitors) gets the public landing/sales page —
-    its CTA walks them through signup -> payment -> access."""
-    from billing import has_item, GROW_ITEMS, grow_page_item, grow_light_ready
-    user = current_user()
-    if user and has_item(user, 'japan'):
-        return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY,
-                               c=_load_blog('japan'))
-    it = GROW_ITEMS['japan']
-    live = grow_page_item(it['page_url'])
-    return render_template('blog_japan_landing.html', user=user,
-                           price=live['price'] if live else None,
-                           auto=grow_light_ready() and live is not None,
-                           pay_link=it['page_url'])
+    """Japan travel & food guide — open to everyone for now.
+
+    ponytail: the Grow paywall + landing/sales page (blog_japan_landing.html) are
+    kept in place but unused while the guide is open; to re-gate, restore the
+    has_item/GROW_ITEMS check that used to live here (see git history)."""
+    return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY,
+                           c=_load_blog('japan'))
 
 @app.route('/blog/instagram')
 def blog_instagram():
@@ -422,10 +415,13 @@ def hitech_cv():
 
 @app.route('/hitech/cv-guide/full', methods=['GET', 'POST'])
 def hitech_cv_full():
-    """Full Job Search & CV guide (Hebrew), served from app/data/cv_guide_full.md.
+    """Full Job Search & CV guide (Hebrew), served from app/data/cv_guide_full.md —
+    open to everyone for now.
 
-    ponytail: shared password gate until this moves behind the Grow paywall
-    (swap for billing.item_gate like /blog/japan).
+    ponytail: the shared password gate below is kept in place but unused while the
+    guide is open; to re-enable, make guide_md conditional on
+    session.get('cv_guide_unlocked') again (or swap for billing.item_gate like
+    /blog/japan used to do).
     """
     error = False
     if request.method == 'POST':
@@ -433,11 +429,9 @@ def hitech_cv_full():
             session['cv_guide_unlocked'] = True
             return redirect(url_for('hitech_cv_full'))
         error = True
-    guide_md = None
-    if session.get('cv_guide_unlocked'):
-        path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'cv_guide_full.md')
-        with open(path, encoding='utf-8') as f:
-            guide_md = f.read()
+    path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'cv_guide_full.md')
+    with open(path, encoding='utf-8') as f:
+        guide_md = f.read()
     return render_template('hitech_cv_full.html', active_hitech_page='cv-guide',
                            active_page='hitech', guide_md=guide_md, error=error)
 
