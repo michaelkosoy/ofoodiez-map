@@ -107,6 +107,37 @@
     .pill-short { display: none; }
     .pill-full  { display: inline; }
 
+    .ht-pill-dropdown { position: relative; flex: 0 0 auto; }
+
+    /* CV Guide dropdown */
+    .ht-pill-dropdown-menu {
+        display: none;
+        position: fixed;
+        background: #100810;
+        border: 1px solid rgba(114, 8, 21, 0.35);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.5);
+        min-width: 190px;
+        z-index: 9999;
+        padding: 5px 0;
+        overflow: hidden;
+    }
+    .ht-pill-dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 16px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(249, 246, 235, 0.85);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .15s;
+    }
+    .ht-pill-dropdown-menu a i { font-size: 11px; color: var(--burgundy-mid); width: 14px; text-align: center; }
+    .ht-pill-dropdown-menu a:hover { background: rgba(114, 8, 21, 0.25); color: #f9f6eb; }
+
     /* Account button in HiTech nav */
     .ht-nav-account {
         grid-column: 3;
@@ -243,11 +274,14 @@
                     <span class="pill-full">Referrals Bot</span>
                     <span class="pill-short">Bot</span>
                 </a>
-                <a href="/hitech/cv-guide" class="ht-pill {% if active_hitech_page == 'cv-guide' %}active{% endif %}">
-                    <i class="fas fa-file-alt"></i>
-                    <span class="pill-full">CV Guide</span>
-                    <span class="pill-short">CV</span>
-                </a>
+                <div class="ht-pill-dropdown" id="cv-pill-wrap">
+                    <a href="/hitech/cv-guide" id="cv-pill-btn"
+                        class="ht-pill {% if active_hitech_page in ['cv-guide', 'cv-review'] %}active{% endif %}">
+                        <i class="fas fa-file-alt"></i>
+                        <span class="pill-full">CV Guide <i class="fas fa-chevron-down" style="font-size:8px;opacity:.7;"></i></span>
+                        <span class="pill-short">CV</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -272,6 +306,13 @@
     </div>
 </div>
 
+<!-- CV Guide dropdown — outside bar so overflow doesn't clip it -->
+<div class="ht-pill-dropdown-menu" id="cv-pill-menu">
+    <a href="/hitech/cv-guide"><i class="fas fa-file-alt"></i> How to write a CV</a>
+    <a href="/hitech/cv-guide/full"><i class="fas fa-book-open"></i> Full guide — interviews &amp; CV</a>
+    <a href="/hitech/cv-review"><i class="fas fa-wand-magic-sparkles"></i> AI CV reviewer</a>
+</div>
+
 <script>
     (function () {
         function applyHtNavPadding() {
@@ -285,6 +326,30 @@
             applyHtNavPadding();
         }
         window.addEventListener('resize', applyHtNavPadding);
+    })();
+
+    (function () {
+        var wrap = document.getElementById('cv-pill-wrap');
+        var menu = document.getElementById('cv-pill-menu');
+        if (!wrap || !menu) return;
+        var hideTimer = null;
+
+        function show() {
+            clearTimeout(hideTimer);
+            var r = wrap.getBoundingClientRect();
+            menu.style.top = (r.bottom + 6) + 'px';
+            menu.style.left = r.left + 'px';
+            menu.style.display = 'block';
+        }
+        function scheduleHide() {
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(function () { menu.style.display = 'none'; }, 300);
+        }
+
+        wrap.addEventListener('mouseenter', show);
+        wrap.addEventListener('mouseleave', scheduleHide);
+        menu.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+        menu.addEventListener('mouseleave', scheduleHide);
     })();
 
     (function () {
