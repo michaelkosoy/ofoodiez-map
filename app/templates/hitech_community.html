@@ -162,6 +162,30 @@
         .ht-feedback.success { color: #d4a0a8; }
         .ht-feedback.error   { color: #e07070; }
 
+        .ht-counter-row {
+            margin-top: 16px;
+        }
+        .ht-counter-line1, .ht-counter-line2 {
+            margin: 0;
+            font-size: 0.78rem; font-weight: 400;
+            line-height: 1.5; text-align: center;
+            color: var(--butter-dim);
+        }
+        .ht-counter-line2 { margin-top: 3px; }
+        .ht-counter-dot {
+            display: inline-block;
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--burgundy-mid);
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .ht-counter-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--butter);
+            font-variant-numeric: tabular-nums;
+        }
+
         @media (max-width: 480px) {
             .ht-form-card { padding: 28px 20px; }
             .ht-input-row { grid-template-columns: 1fr; }
@@ -212,6 +236,10 @@
                 <button class="ht-submit" id="ht-submit-btn" onclick="submitCommunity()">
                     {{ c.submit_btn | default('Join the waitlist') | safe }}
                 </button>
+                <div class="ht-counter-row">
+                    <p class="ht-counter-line1"><span class="ht-counter-dot"></span><span class="ht-counter-num" id="ht-counter-num">299</span> {{ c.counter_text | default("people already on the waitlist.") | safe }}</p>
+                    <p class="ht-counter-line2">{{ c.counter_subtext | default("No spam — one update a month, right before the next event.") | safe }}</p>
+                </div>
                 <p class="ht-feedback" id="ht-feedback"></p>
             </div>
         </div>
@@ -294,6 +322,26 @@
                 submitBtn.textContent = 'Join the waitlist';
             }
         }
+
+        (function() {
+            var counterEl = document.getElementById('ht-counter-num');
+            if (!counterEl) return;
+            var count = 299;
+            var meanDelay = 2000, minDelay = 500, maxDelay = 5000;
+            function nextDelay() {
+                // exponential-distribution wait so ticks feel organic, not a metronomic every-2s tick
+                var delay = -meanDelay * Math.log(Math.random());
+                return Math.min(Math.max(delay, minDelay), maxDelay);
+            }
+            function scheduleNext() {
+                setTimeout(function() {
+                    count += 1;
+                    counterEl.textContent = count.toLocaleString();
+                    scheduleNext();
+                }, nextDelay());
+            }
+            scheduleNext();
+        })();
 
         document.getElementById('ht-email').addEventListener('keydown', function(e){ if(e.key==='Enter') submitCommunity(); });
         ['ht-name','ht-email','ht-job-title','ht-company','ht-linkedin'].forEach(function(id){

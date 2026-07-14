@@ -53,6 +53,8 @@
     ]
   },
   "community": {
+    "counter_text": "people already on the waitlist.",
+    "counter_subtext": "No spam — one update a month, right before the next event.",
     "eyebrow": "Invite Only",
     "form_title": "Apply for the waitlist",
     "headline": "For people<br>with good <em>taste.</em>",
