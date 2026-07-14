@@ -128,7 +128,7 @@ def _strip_code_fences(text):
 
 
 def _review_unlocked():
-    return bool(session.get('cv_review_unlocked') or session.get('admin_logged_in'))
+    return bool(session.get('cv_review_unlocked'))
 
 
 @cv_review_bp.route('/hitech/cv-review', methods=['GET', 'POST'])

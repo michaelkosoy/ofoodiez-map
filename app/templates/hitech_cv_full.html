@@ -56,6 +56,18 @@
 
         /* ── Guide content ───────────────────────────────────────────── */
         .ht-guide-wrap { max-width: 800px; margin: 0 auto; padding: 92px 22px 60px; width: 100%; box-sizing: border-box; }
+        .ht-track-toggle {
+            display: flex; gap: 4px; max-width: 340px; margin: 0 auto 32px;
+            padding: 4px; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+        .ht-track-btn {
+            flex: 1; border: none; background: transparent; cursor: pointer;
+            padding: 9px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem;
+            color: var(--butter-dim);
+        }
+        .ht-track-btn.active { background: var(--burgundy); color: var(--butter); }
         .ht-guide { color: var(--butter-dim); font-weight: 300; line-height: 1.78; font-size: 0.95rem; }
         .ht-guide h1 { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.7rem, 4.5vw, 2.5rem); font-weight: 700; line-height: 1.15; color: var(--butter); margin: 0 0 16px; }
         .ht-guide h2 { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--butter); margin: 46px 0 14px; line-height: 1.25; }
@@ -111,6 +123,10 @@
     <div class="ht-cv-page">
         {% if guide_md %}
         <div class="ht-guide-wrap">
+            <div class="ht-track-toggle">
+                <button type="button" class="ht-track-btn" data-track="tech">משרה טכנית</button>
+                <button type="button" class="ht-track-btn" data-track="business">משרה לא טכנית</button>
+            </div>
             <div class="ht-guide" id="ht-guide"></div>
         </div>
         {% else %}
@@ -134,8 +150,37 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
     <script>
         (function () {
-            var md = {{ guide_md | tojson }};
-            document.getElementById('ht-guide').innerHTML = marked.parse(md);
+            var rawMd = {{ guide_md | tojson }};
+            var guideEl = document.getElementById('ht-guide');
+            var toggleBtns = document.querySelectorAll('.ht-track-btn');
+
+            function filterTrack(md, track) {
+                var other = track === 'business' ? 'tech' : 'business';
+                var otherBlock = new RegExp('<!--' + other + '-only-->[\\s\\S]*?<!--/' + other + '-only-->\\n?', 'g');
+                return md.replace(otherBlock, '').replace(/<!--\/?(tech|business)-only-->\n?/g, '');
+            }
+
+            function render(track) {
+                guideEl.innerHTML = marked.parse(filterTrack(rawMd, track));
+                toggleBtns.forEach(function (btn) {
+                    btn.classList.toggle('active', btn.dataset.track === track);
+                });
+            }
+
+            function initialTrack() {
+                var params = new URLSearchParams(window.location.search);
+                return params.get('track') || localStorage.getItem('cv_guide_track') || 'tech';
+            }
+
+            toggleBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var track = btn.dataset.track;
+                    localStorage.setItem('cv_guide_track', track);
+                    render(track);
+                });
+            });
+
+            render(initialTrack());
         })();
     </script>
     {% endif %}
