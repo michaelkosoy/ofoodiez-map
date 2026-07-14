@@ -336,10 +336,13 @@
 
         function show() {
             clearTimeout(hideTimer);
-            var r = wrap.getBoundingClientRect();
-            menu.style.top = (r.bottom + 6) + 'px';
-            menu.style.left = r.left + 'px';
             menu.style.display = 'block';
+            var r = wrap.getBoundingClientRect();
+            var margin = 8;
+            var left = Math.min(r.left, window.innerWidth - menu.offsetWidth - margin);
+            left = Math.max(left, margin);
+            menu.style.top = (r.bottom + 6) + 'px';
+            menu.style.left = left + 'px';
         }
         function scheduleHide() {
             clearTimeout(hideTimer);
