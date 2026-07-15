@@ -50,6 +50,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bachelorette.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/business-submission-form.css') }}">
 </head>
 
 <body>
@@ -127,6 +128,10 @@
                 </div>
             </div>
 
+            <button type="button" class="submit-business-cta" onclick="openBusinessModal()">
+                <i class="fas fa-plus-circle"></i> יש לכם עסק שמתאים? הוסיפו אותו כאן
+            </button>
+
             <!-- Places Grid -->
             <div class="places-grid" id="placesGrid">
                 {% for place in bachelorette_data.places %}
@@ -158,13 +163,16 @@
                             <i class="fas fa-tag"></i>
                             <span class="price-text">{{ place.price }}</span>
                         </div>
-                        
+                        {% if place.discount %}
+                        <div class="discount-badge">🎁 {{ place.discount }}</div>
+                        {% endif %}
+
                         <p class="description">{{ place.description }}</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
+
             <!-- Empty State -->
             <div id="emptyState" class="empty-state" style="display: none;">
                 <i class="fas fa-search-minus"></i>
@@ -178,10 +186,15 @@
             <div class="supplier-filters-container">
                 <button class="supplier-filter-btn active" data-filter="all">הכל</button>
                 <button class="supplier-filter-btn" data-filter="דיג׳יי">🎧 דיג׳יי</button>
-                <button class="supplier-filter-btn" data-filter="שף">🍳 שפים</button>
+                <button class="supplier-filter-btn" data-filter="שף פרטי">🍳 שף פרטי</button>
                 <button class="supplier-filter-btn" data-filter="אטרקציה">✨ אטרקציות</button>
-                <button class="supplier-filter-btn" data-filter="בר קוקטיילים">🍹 בר קוקטיילים</button>
+                <button class="supplier-filter-btn" data-filter="בר אלכוהול">🍾 בר אלכוהול</button>
+                <button class="supplier-filter-btn" data-filter="אחר">🌟 אחר</button>
             </div>
+
+            <button type="button" class="submit-business-cta" onclick="openBusinessModal()">
+                <i class="fas fa-plus-circle"></i> יש לכם עסק שמתאים? הוסיפו אותו כאן
+            </button>
 
             <div class="suppliers-grid">
                 {% for supplier in bachelorette_data.suppliers %}
@@ -210,6 +223,9 @@
                             <i class="fas fa-tag"></i>
                             <span class="price-text">{{ supplier.price }}</span>
                         </div>
+                        {% endif %}
+                        {% if supplier.discount %}
+                        <div class="discount-badge">🎁 {{ supplier.discount }}</div>
                         {% endif %}
                         <p class="supplier-description">{{ supplier.description }}</p>
                     </div>
@@ -406,6 +422,8 @@
     <!-- Sticky Bottom Navigation -->
     {% include 'components/bottom_nav.html' %}
 
+    {% include 'components/business_submission_modal.html' %}
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Search & Venues Filters Elements
@@ -565,6 +583,11 @@
             });
         });
     </script>
+
+    <!-- Generic "add your business" submission modal logic — see
+         app/static/js/business-submission-form.js and
+         app/templates/components/business_submission_modal.html -->
+    <script src="{{ url_for('static', filename='js/business-submission-form.js') }}"></script>
 </body>
 
 </html>

@@ -115,6 +115,7 @@ function renderEditor() {
     html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
 
     html += '<p class="section-title">Feature Navigation Cards</p>';
+    html += inputField('cards_label', 'Navigation Cards Section Label', sectionData.cards_label);
     var cards = sectionData.cards || [];
     cards.forEach((card, idx) => {
       html += `<div class="sub-card" data-card-idx="${idx}">`;

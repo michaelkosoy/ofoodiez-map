@@ -344,6 +344,18 @@ body {
     border-radius: 6px;
 }
 
+.discount-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 10px;
+    background: rgba(236, 200, 115, 0.25);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #7a5c1e;
+}
+
 .description {
     margin-top: 8px;
     font-size: 0.85rem;
@@ -1126,3 +1138,8 @@ body {
         padding: 16px;
     }
 }
+
+/* "Add your business" CTA/modal/toast styles now live in the generic,
+   page-agnostic app/static/css/business-submission-form.css (included
+   directly by bachelorette.html) so they can be reused by other listing
+   pages (e.g. a future HiTech suppliers directory) without duplication. */

@@ -1,0 +1,237 @@
+/* Generic "Add your business" submission CTA + modal + toast.
+   Used by any blog listing page that lets the public submit a business for
+   moderation (bachelorette venues/suppliers today; e.g. a future HiTech
+   suppliers directory). Self-contained: defines its own --biz-* custom
+   properties with sensible defaults instead of depending on the including
+   page's own theme variable names, so it can be dropped into any page as-is.
+   A page can override --biz-* in its own stylesheet to reskin it. */
+:root {
+    --biz-primary: #720815;
+    --biz-text-main: #362118;
+    --biz-text-muted: #636E72;
+    --biz-radius-lg: 20px;
+    --biz-radius-md: 16px;
+    --biz-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.submit-business-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 25px;
+    padding: 12px 20px;
+    border: 2px dashed var(--biz-primary);
+    border-radius: var(--biz-radius-md);
+    background: rgba(114, 8, 21, 0.04);
+    color: var(--biz-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.submit-business-cta:hover {
+    background: rgba(114, 8, 21, 0.09);
+}
+
+.biz-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    /* Above the fixed top nav (.blog-category-menu, z-index: 9000) and its
+       dropdowns (up to 999999) so the modal always sits on top of chrome. */
+    z-index: 1000000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.biz-modal.show {
+    display: flex;
+}
+.biz-modal-content {
+    background: #fff;
+    border-radius: var(--biz-radius-lg);
+    box-shadow: var(--biz-shadow);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+}
+.biz-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.biz-modal-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    color: var(--biz-primary);
+}
+.biz-modal-subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--biz-text-muted);
+}
+.biz-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--biz-text-muted);
+    cursor: pointer;
+    padding: 0;
+}
+
+.biz-kind-toggle {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.biz-kind-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.12);
+    border-radius: var(--biz-radius-md);
+    background: #fff;
+    color: var(--biz-text-main);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+}
+.biz-kind-btn:hover {
+    border-color: var(--biz-primary);
+}
+.biz-kind-btn.active {
+    border-color: var(--biz-primary);
+    background: rgba(114, 8, 21, 0.06);
+    color: var(--biz-primary);
+}
+
+.biz-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+.biz-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.biz-discount-group {
+    padding: 12px;
+    background: rgba(236, 200, 115, 0.15);
+    border: 1px dashed rgba(236, 200, 115, 0.8);
+    border-radius: var(--biz-radius-md);
+}
+@media (max-width: 480px) {
+    .biz-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+.biz-form-group label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--biz-text-main);
+}
+.biz-form-group .required-star {
+    color: var(--biz-primary);
+}
+.biz-form-group .biz-hint {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--biz-text-muted);
+}
+.biz-form-group input,
+.biz-form-group select,
+.biz-form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--biz-text-main);
+    background: #fff;
+    resize: vertical;
+}
+.biz-form-group input:disabled,
+.biz-form-group select:disabled {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--biz-text-muted);
+}
+.biz-form-group input:focus,
+.biz-form-group select:focus,
+.biz-form-group textarea:focus {
+    outline: none;
+    border-color: var(--biz-primary);
+}
+.biz-form-section-label {
+    margin: 18px 0 10px 0;
+    padding-top: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--biz-text-main);
+}
+.biz-form-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 13px;
+    border: none;
+    border-radius: var(--biz-radius-md);
+    background: var(--biz-primary);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.biz-form-submit-btn:hover {
+    opacity: 0.92;
+}
+.biz-form-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.biz-toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--biz-text-main);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: var(--biz-shadow);
+    z-index: 1000001;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    max-width: 90vw;
+    text-align: center;
+}
+.biz-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.biz-toast-error {
+    background: var(--biz-primary);
+}

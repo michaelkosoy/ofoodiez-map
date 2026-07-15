@@ -975,9 +975,9 @@
     32.0525443,
     34.7559285
   ],
-  "Rothschild Blvd 2, Tel Aviv, Israel": [
-    32.0629118,
-    34.7693102
+  "HaYarkon St 64, tel aviv, Tel Aviv, Israel": [
+    32.0753438,
+    34.7667358
   ],
   "Lilienblum 30, Tel Aviv-Yafo, Tel Aviv, Israel": [
     32.0621447,
@@ -986,14 +986,6 @@
   "Montefiore 22, Tel Aviv, Israel": [
     32.0649754,
     34.7715131
-  ],
-  "Dizengoff St 259, Tel Aviv-Yafo, Tel Aviv, Israel": [
-    32.0942492,
-    34.77658
-  ],
-  "HaYarkon St 64, tel aviv, Tel Aviv, Israel": [
-    32.0753438,
-    34.7667358
   ],
   "yavne 31, Tel Aviv, Tel Aviv, Israel": [
     32.0630924,
@@ -1006,5 +998,9 @@
   "Ha-Arba'a St 20, Tel Aviv-Yafo, Tel Aviv, Israel": [
     32.0703088,
     34.7853178
+  ],
+  "Dizengoff St 259, Tel Aviv-Yafo, Tel Aviv, Israel": [
+    32.0942492,
+    34.77658
   ]
 }

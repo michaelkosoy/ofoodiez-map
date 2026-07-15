@@ -1,0 +1,101 @@
+{#
+  Generic "add your business" submission modal. Include from any page that
+  passes `listing_slug` (a key in listing_submissions.LISTING_SUBMISSION_CONFIGS)
+  and `listing_config` (that same config dict) into its render_template() call.
+  Pair with app/static/css/business-submission-form.css and
+  app/static/js/business-submission-form.js — nothing here is page-specific.
+#}
+<script>
+    window.BUSINESS_SUBMISSION_CONFIG = {
+        slug: {{ listing_slug | tojson }},
+        kinds: {{ listing_config.kinds | tojson }}
+    };
+</script>
+
+<div id="business-modal" class="biz-modal" onclick="closeBusinessModalOnOutside(event)">
+    <div class="biz-modal-content">
+        <div class="biz-modal-header">
+            <div>
+                <h2>הוסיפו את העסק שלכם</h2>
+                <p class="biz-modal-subtitle">ההגשה תיבדק לפני שתפורסם באתר</p>
+            </div>
+            <button type="button" class="biz-modal-close" onclick="closeBusinessModal()">&times;</button>
+        </div>
+        <form id="business-form" onsubmit="submitBusinessForm(event)">
+            <input type="hidden" id="biz-kind" name="kind">
+
+            <!-- Honeypot: real users never see this, kept off-screen (not display:none, which some bots skip). -->
+            <div class="biz-form-group" style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                <label for="biz-website">אתר</label>
+                <input type="text" id="biz-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="biz-form-group">
+                <label>מה תרצו להוסיף? <span class="required-star">*</span></label>
+                <div class="biz-kind-toggle" id="biz-kind-toggle"></div>
+            </div>
+
+            <div class="biz-form-group">
+                <label for="biz-name">שם העסק <span class="required-star">*</span></label>
+                <input type="text" id="biz-name" required>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-category">קטגוריה <span class="required-star">*</span></label>
+                <select id="biz-category" required disabled></select>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-description">תיאור</label>
+                <textarea id="biz-description" rows="3" placeholder="ספרו לנו על העסק שלכם - מה כלול, כמות משתתפות וכו'"></textarea>
+            </div>
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-location">אזור / מיקום</label>
+                    <input type="text" id="biz-location">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-price">מחיר</label>
+                    <input type="text" id="biz-price" placeholder="לדוגמה: 350₪ לאדם">
+                </div>
+            </div>
+            <div class="biz-form-group biz-discount-group">
+                <label for="biz-discount">🎁 איזו הנחה תציעו לקהילת העוקבים של Ofoodiez? <span class="biz-hint">(לא חובה)</span></label>
+                <input type="text" id="biz-discount" placeholder="לדוגמה: 10% הנחה בהצגת קוד OFOODIEZ">
+            </div>
+
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-link">קישור לאתר / הזמנה</label>
+                    <input type="url" id="biz-link" placeholder="https://">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-instagram">אינסטגרם</label>
+                    <input type="url" id="biz-instagram" placeholder="https://instagram.com/...">
+                </div>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-whatsapp">וואטסאפ</label>
+                <input type="text" id="biz-whatsapp" placeholder="לדוגמה: 0521234567">
+            </div>
+
+            <p class="biz-form-section-label">פרטי יצירת קשר <span style="font-weight:400;">(לשימוש שלנו בלבד, לא יפורסם)</span></p>
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-contact-name">שם איש קשר</label>
+                    <input type="text" id="biz-contact-name">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-contact-email">אימייל</label>
+                    <input type="email" id="biz-contact-email">
+                </div>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-contact-phone">טלפון <span class="biz-hint">(אימייל או טלפון - חובה למלא לפחות אחד)</span></label>
+                <input type="text" id="biz-contact-phone">
+            </div>
+
+            <button type="submit" class="biz-form-submit-btn">
+                <i class="fas fa-paper-plane"></i> שליחת הבקשה
+            </button>
+        </form>
+    </div>
+</div>

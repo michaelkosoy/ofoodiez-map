@@ -1426,12 +1426,84 @@ def get_blog(slug):
 @admin_bp.route('/api/blog/<slug>', methods=['PUT'])
 @login_required
 def save_blog(slug):
+    from listing_submissions import atomic_write_json
     path = _blog_path(slug)
     if not os.path.exists(path):
         return jsonify({'error': 'Not found'}), 404
     data = request.json
     if not data:
         return jsonify({'error': 'No data'}), 400
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    atomic_write_json(path, data)
     return jsonify({'ok': True})
+
+
+@admin_bp.route('/api/<slug>/listing-status', methods=['POST'])
+@login_required
+def update_listing_status(slug):
+    """Approve/reject a submitted business listing (a places/suppliers-style
+    entry carrying a submission_id — hand-curated rows have none and aren't
+    addressable here; submission_id is distinct from the admin table's cosmetic
+    display "id" column, which is reassigned/stripped on every render).
+    Generic across any page configured in listing_submissions.py. Unlike the
+    generic save_blog PUT, this fires a best-effort notification email to the
+    submitter, so it's kept separate from plain field edits."""
+    from listing_submissions import get_config, blog_json_path, atomic_write_json
+
+    config = get_config(slug)
+    if not config:
+        return jsonify({'error': 'Unknown listing page'}), 404
+
+    data = request.json or {}
+    kind = data.get('kind')
+    submission_id = data.get('submission_id')
+    new_status = data.get('status')
+    if kind not in config['kinds'] or not submission_id or new_status not in ('approved', 'rejected'):
+        return jsonify({'error': 'kind, submission_id and a valid status are required'}), 400
+
+    path = blog_json_path(slug)
+    if not os.path.exists(path):
+        return jsonify({'error': 'Not found'}), 404
+    with open(path, encoding='utf-8') as f:
+        blog_data = json.load(f)
+
+    array_key = config['kinds'][kind]['array_key']
+    entries = blog_data.get(array_key, [])
+    entry = next((e for e in entries if e.get('submission_id') == submission_id), None)
+    if not entry:
+        return jsonify({'error': 'Submission not found'}), 404
+
+    entry['status'] = new_status
+    entry['reviewed_at'] = datetime.utcnow().isoformat()
+
+    atomic_write_json(path, blog_data)
+
+    contact_email = (entry.get('contact_email') or '').strip()
+    if contact_email:
+        try:
+            from whatsapp_bot.emailer import send_custom_community_email
+            listing_title = config['listing_title_he']
+            listing_url = config['listing_url']
+            if new_status == 'approved':
+                subject = f"העסק שלך אושר ב{listing_title}! 🎉"
+                html = (
+                    "<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: rtl; text-align: right;'>"
+                    f"<p>שלום {entry.get('contact_name') or ''},</p>"
+                    f"<p>העסק <b>{entry.get('name')}</b> אושר ומופיע כעת ב{listing_title} של Ofoodiez!</p>"
+                    f"<p><a href='{listing_url}'>לצפייה</a></p>"
+                    "<p>תודה, Ofoodiez</p></div>"
+                )
+                text = f"Hi {entry.get('contact_name') or ''},\n\n{entry.get('name')} has been approved and is now live: {listing_url}\n\nThanks,\nOfoodiez"
+            else:
+                subject = f"עדכון לגבי ההגשה שלך ל{listing_title}"
+                html = (
+                    "<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: rtl; text-align: right;'>"
+                    f"<p>שלום {entry.get('contact_name') or ''},</p>"
+                    f"<p>תודה שהגשת את <b>{entry.get('name')}</b> ל{listing_title} של Ofoodiez. הפעם לא נוכל לפרסם את ההגשה.</p>"
+                    "<p>תודה, Ofoodiez</p></div>"
+                )
+                text = f"Hi {entry.get('contact_name') or ''},\n\nThanks for submitting {entry.get('name')}. We're not able to publish it this time.\n\nThanks,\nOfoodiez"
+            send_custom_community_email(to_email=contact_email, subject=subject, body_html=html, body_text=text)
+        except Exception as e:
+            logger.warning("%s listing status email failed: %s", slug, e)
+
+    return jsonify({'ok': True, 'entry': entry})

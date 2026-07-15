@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import json
 import time
+import secrets
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -295,7 +296,12 @@ def map_page():
 
 @app.route('/blog/bachelorette')
 def bachelorette_page():
-    return render_template('bachelorette.html', bachelorette_data=_load_blog('bachelorette'), data=home_data)
+    from listing_submissions import get_config, filter_approved
+    listing_config = get_config('bachelorette')
+    bachelorette_data = _load_blog('bachelorette')
+    bachelorette_data = filter_approved(bachelorette_data, listing_config)
+    return render_template('bachelorette.html', bachelorette_data=bachelorette_data, data=home_data,
+                           listing_slug='bachelorette', listing_config=listing_config)
 
 @app.route('/bachelorette')
 def bachelorette_redirect():
@@ -520,6 +526,127 @@ def hitech_subscribe():
     _db.session.commit()
 
     return jsonify({'success': True, 'message': 'subscribed'})
+
+
+# ── Business listing submissions (generic, config-driven — see listing_submissions.py):
+# per-IP rate limit. ponytail: in-memory dict — correct for the single gunicorn
+# worker in the Procfile; move to flask-limiter/redis if --workers ever grows
+# past 1. (Same pattern as cv_review.py's rate limiter.)
+_LISTING_RATE_LIMIT = 5        # submissions…
+_LISTING_RATE_WINDOW = 3600    # …per hour, per client IP
+_listing_recent_submissions = {}  # ip -> [timestamps]
+
+
+def _listing_client_ip():
+    return (request.headers.get('CF-Connecting-IP')
+            or request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+            or request.remote_addr or 'unknown')
+
+
+def _listing_rate_limited(ip):
+    now = time.time()
+    hits = [t for t in _listing_recent_submissions.get(ip, []) if now - t < _LISTING_RATE_WINDOW]
+    if len(hits) >= _LISTING_RATE_LIMIT:
+        _listing_recent_submissions[ip] = hits
+        return True
+    hits.append(now)
+    _listing_recent_submissions[ip] = hits
+    if len(_listing_recent_submissions) > 10000:  # crude memory guard
+        _listing_recent_submissions.clear()
+    return False
+
+
+@app.route('/api/<slug>/submit-business', methods=['POST'])
+def submit_business_listing(slug):
+    """Public 'add your business' form for any configured blog listing page
+    (see listing_submissions.LISTING_SUBMISSION_CONFIGS). Lands as a pending
+    entry directly in the matching array of blog_<slug>.json, filtered out of
+    the public page until an admin approves it."""
+    from listing_submissions import get_config, blog_json_path, atomic_write_json
+
+    config = get_config(slug)
+    if not config:
+        return jsonify({'success': False, 'message': 'Unknown listing page.'}), 404
+
+    data = request.get_json(silent=True) or {}
+
+    # Honeypot: real users never see/fill this field, bots often do.
+    if (data.get('website') or '').strip():
+        return jsonify({'success': True})
+
+    ip = _listing_client_ip()
+    if _listing_rate_limited(ip):
+        return jsonify({'success': False, 'message': 'Too many submissions, please try again later.'}), 429
+
+    kind = (data.get('kind') or '').strip()
+    name = (data.get('name') or '').strip()
+    contact_email = (data.get('contact_email') or '').strip()
+    contact_phone = (data.get('contact_phone') or '').strip()
+
+    if kind not in config['kinds']:
+        return jsonify({'success': False, 'message': 'Invalid submission type.'}), 400
+    if not name:
+        return jsonify({'success': False, 'message': 'Business name is required.'}), 400
+    if not contact_email and not contact_phone:
+        return jsonify({'success': False, 'message': 'Please provide an email or phone number so we can reach you.'}), 400
+
+    entry = {
+        'submission_id': secrets.token_hex(5),
+        'status': 'pending',
+        'name': name,
+        'category': (data.get('category') or '').strip(),
+        'description': (data.get('description') or '').strip(),
+        'location': (data.get('location') or '').strip(),
+        'price': (data.get('price') or '').strip(),
+        'discount': (data.get('discount') or '').strip(),
+        'link': (data.get('link') or '').strip(),
+        'link_text': (data.get('link_text') or '').strip(),
+        'instagram': (data.get('instagram') or '').strip(),
+        'whatsapp': (data.get('whatsapp') or '').strip(),
+        'contact_name': (data.get('contact_name') or '').strip(),
+        'contact_email': contact_email,
+        'contact_phone': contact_phone,
+        'submitted_at': datetime.utcnow().isoformat(),
+    }
+
+    path = blog_json_path(slug)
+    with open(path, encoding='utf-8') as f:
+        blog_data = json.load(f)
+    array_key = config['kinds'][kind]['array_key']
+    blog_data.setdefault(array_key, []).append(entry)
+    atomic_write_json(path, blog_data)
+
+    try:
+        from whatsapp_bot.emailer import send_custom_community_email
+        ops_email = os.environ.get("WA_OPS_EMAIL") or "info@ofoodiez.com"
+        kind_label = config['kinds'][kind]['label_he']
+        listing_title = config['listing_title_he']
+        send_custom_community_email(
+            to_email=ops_email,
+            subject=f"הגשת עסק חדשה ל{listing_title}: {name}",
+            body_html=(
+                "<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: rtl; text-align: right;'>"
+                f"<p>התקבלה הגשה חדשה ({kind_label}) ל{listing_title}, ממתינה לאישור:</p>"
+                f"<p><b>שם:</b> {name}<br>"
+                f"<b>קטגוריה:</b> {entry['category']}<br>"
+                f"<b>הנחה מוצעת:</b> {entry['discount'] or '-'}<br>"
+                f"<b>איש קשר:</b> {entry['contact_name'] or '-'}<br>"
+                f"<b>אימייל:</b> {contact_email or '-'}<br>"
+                f"<b>טלפון:</b> {contact_phone or '-'}</p>"
+                "<p>לאישור/דחייה: כנסו לפאנל הניהול.</p>"
+                "</div>"
+            ),
+            body_text=(
+                f"New {kind} submission for {listing_title}, pending approval:\n"
+                f"Name: {name}\nCategory: {entry['category']}\nDiscount offered: {entry['discount'] or '-'}\n"
+                f"Contact: {entry['contact_name'] or '-'} / {contact_email or '-'} / {contact_phone or '-'}\n"
+                "Review it in the admin panel."
+            ),
+        )
+    except Exception as e:
+        print(f"⚠️ Error sending {slug} submission notification: {e}")
+
+    return jsonify({'success': True})
 
 
 @app.route('/privacy')
