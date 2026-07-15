@@ -257,7 +257,7 @@
       {
         "title": "Chat with Me",
         "url": "https://api.whatsapp.com/send?phone=972559218943",
-        "icon": "fas fa-brain",
+        "icon": "fas fa-wand-magic-sparkles",
         "desc": "Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.",
         "cta": "Open WhatsApp"
       }
