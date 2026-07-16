@@ -88,7 +88,10 @@ def start(user, conv):
     if company_ids:
         conversation.set_state(conv, "employee", "emp_edit_pick",
                                {"edit_company_ids": company_ids})
-        messaging.send_prompt(user.phone, _companies_list_text(user, company_ids))
+        # ponytail: plain text, not send_prompt. This menu is always shown in-window
+        # (they just tapped a button), and its rich {details} body was being silently
+        # rejected as a WA_CT_PROMPT template variable — leaving advocates stuck.
+        messaging.send_text(user.phone, _companies_list_text(user, company_ids))
         return "emp_edit_pick"
     # New advocate → sign them up (router already gated on is_registered).
     conversation.set_state(conv, "employee", "emp_company", {})
@@ -528,7 +531,9 @@ def _send_edit_menu(user, company_id, company_name, prefix=""):
         details.append(f"• Email: {', '.join(emails)}")
     if not link and not emails:
         details.append("• (no link or email yet)")
-    messaging.send_prompt(user.phone, prefix + copy.EMP_EDIT_MENU.format(
+    # ponytail: plain text, not send_prompt — see start(); the edit menu is in-window
+    # and its {details} body was being dropped as a WA_CT_PROMPT template variable.
+    messaging.send_text(user.phone, prefix + copy.EMP_EDIT_MENU.format(
         company=company_name, details="\n".join(details)))
 
 
