@@ -167,9 +167,77 @@
         }
       ]
     },
+    "contentTypes": {
+      "title": "Content formats I create",
+      "subtitle": "From founder moments to team celebrations, every piece of content builds your brand.",
+      "items": [
+        {
+          "name": "Employee Stories",
+          "description": "Authentic stories of people behind your product. Voices that attract talent.",
+          "icon": "👤"
+        },
+        {
+          "name": "Behind the Scenes",
+          "description": "Show the real culture. Office moments, collaboration, and work that matters.",
+          "icon": "📹"
+        },
+        {
+          "name": "Day in the Life",
+          "description": "Take followers inside your company. A day from the perspective of your team.",
+          "icon": "☀️"
+        },
+        {
+          "name": "Tech Content",
+          "description": "Engineering insights, product demos, and technical thought leadership.",
+          "icon": "⚙️"
+        },
+        {
+          "name": "Founder Stories",
+          "description": "Build your founder as a recognizable voice. Vision, journey, and lessons learned.",
+          "icon": "🎯"
+        },
+        {
+          "name": "Company Milestones",
+          "description": "Launch announcements, funding news, and victories worth celebrating.",
+          "icon": "🏆"
+        },
+        {
+          "name": "Team Moments",
+          "description": "Culture in action. Team wins, celebrations, and human connection.",
+          "icon": "🤝"
+        },
+        {
+          "name": "Events & Community",
+          "description": "Happy hours, offsites, meetups. The moments that build community.",
+          "icon": "🎉"
+        }
+      ]
+    },
+    "companies": {
+      "title": "Trusted by top tech companies",
+      "subtitle": "Companies building the future trust me with their stories.",
+      "items": [
+        {
+          "name": "Cyera",
+          "logo": "cyera"
+        },
+        {
+          "name": "ScaleOps",
+          "logo": "scaleops"
+        },
+        {
+          "name": "Mate Security",
+          "logo": "matesecurity"
+        },
+        {
+          "name": "Appcharge",
+          "logo": "appcharge"
+        }
+      ]
+    },
     "sociofeed": {
       "title": "Stories from the studio",
-      "description": "Startup visits, office culture, events, and behind the scenes moments."
+      "description": "A mix of content types that build momentum and attract top talent."
     },
     "finalcta": {
       "headline": "Your company already has a story.",

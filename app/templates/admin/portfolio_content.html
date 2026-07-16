@@ -390,6 +390,80 @@ function renderEditor() {
     </div>
   `;
 
+  // Content Types
+  html += `
+    <div class="section-title">Content Types Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="contenttypes-title" value="${escapeHtml(c.contentTypes?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subtitle</label>
+      <input type="text" id="contenttypes-subtitle" value="${escapeHtml(c.contentTypes?.subtitle || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Content Types</div>
+  `;
+
+  if (c.contentTypes?.items) {
+    c.contentTypes.items.forEach((item, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Content Type Name</label>
+            <input type="text" id="contenttype-name-${i}" value="${escapeHtml(item.name || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Icon/Emoji</label>
+            <input type="text" id="contenttype-icon-${i}" value="${escapeHtml(item.icon || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Description</label>
+            <textarea id="contenttype-desc-${i}">${escapeHtml(item.description || '')}</textarea>
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeContentType(${i})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addContentType()">+ Add Content Type</button>`;
+
+  // Companies
+  html += `
+    <div class="section-title">Companies Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="companies-title" value="${escapeHtml(c.companies?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subtitle</label>
+      <input type="text" id="companies-subtitle" value="${escapeHtml(c.companies?.subtitle || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Companies</div>
+  `;
+
+  if (c.companies?.items) {
+    c.companies.items.forEach((company, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Company Name</label>
+            <input type="text" id="company-name-${i}" value="${escapeHtml(company.name || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Logo Identifier (for future image upload)</label>
+            <input type="text" id="company-logo-${i}" value="${escapeHtml(company.logo || '')}">
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeCompany(${i})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addCompany()">+ Add Company</button>`;
+
   // Credibility
   html += `
     <div class="section-title">Credibility</div>
@@ -532,6 +606,37 @@ function collectData() {
     cta: document.getElementById('finalcta-cta').value,
   };
 
+  // Content Types
+  c.contentTypes = {
+    title: document.getElementById('contenttypes-title').value,
+    subtitle: document.getElementById('contenttypes-subtitle').value,
+    items: [],
+  };
+  i = 0;
+  while (document.getElementById(`contenttype-name-${i}`)) {
+    c.contentTypes.items.push({
+      name: document.getElementById(`contenttype-name-${i}`).value,
+      icon: document.getElementById(`contenttype-icon-${i}`).value,
+      description: document.getElementById(`contenttype-desc-${i}`).value,
+    });
+    i++;
+  }
+
+  // Companies
+  c.companies = {
+    title: document.getElementById('companies-title').value,
+    subtitle: document.getElementById('companies-subtitle').value,
+    items: [],
+  };
+  i = 0;
+  while (document.getElementById(`company-name-${i}`)) {
+    c.companies.items.push({
+      name: document.getElementById(`company-name-${i}`).value,
+      logo: document.getElementById(`company-logo-${i}`).value,
+    });
+    i++;
+  }
+
   // Credibility
   c.credibility = {
     highlight: document.getElementById('credibility-highlight').value,
@@ -654,6 +759,34 @@ function addPackageItem(i) {
 function removePackageItem(i, j) {
   const data = collectData();
   data.portfolio.packages.items[i].includes.splice(j, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addContentType() {
+  const data = collectData();
+  data.portfolio.contentTypes.items.push({name: '', icon: '', description: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeContentType(i) {
+  const data = collectData();
+  data.portfolio.contentTypes.items.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addCompany() {
+  const data = collectData();
+  data.portfolio.companies.items.push({name: '', logo: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeCompany(i) {
+  const data = collectData();
+  data.portfolio.companies.items.splice(i, 1);
   portfolioContent = data;
   renderEditor();
 }
