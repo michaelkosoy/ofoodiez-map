@@ -312,6 +312,24 @@ def about_page():
     """About Me page."""
     return render_template('about.html', data=home_data)
 
+
+@app.route('/portfolio')
+def portfolio_page():
+    """Employer Branding & Founder-Led Content Studio portfolio."""
+    content = _load_portfolio_content()
+    return render_template('portfolio.html', c=content.get('portfolio', {}))
+
+
+def _load_portfolio_content():
+    """Load portfolio content from portfolio_content.json."""
+    path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'portfolio_content.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 def _load_hitech_data(filename):
     """Load a JSON data file from app/data/ for HiTech pages."""
     path = os.path.join(os.path.dirname(__file__), 'app', 'data', filename)

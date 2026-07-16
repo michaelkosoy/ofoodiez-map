@@ -1,0 +1,664 @@
+{% extends "admin/base.html" %}
+{% block title %}Portfolio Content Editor{% endblock %}
+
+{% block extra_css %}
+<style>
+  .content-editor { max-width: 900px; margin-bottom: 40px; }
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent-color);
+  }
+  .editor-field { margin-bottom: 18px; }
+  .editor-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .editor-field textarea, .editor-field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: .2s;
+    resize: vertical;
+  }
+  .editor-field textarea:focus, .editor-field input[type="text"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(211,167,138,.2);
+  }
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--primary-bg);
+    padding: 14px 0 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 10;
+    border-top: 1px solid #eee;
+  }
+  .save-msg { font-size: 14px; color: var(--success-color); font-weight: 600; display: none; }
+  .sub-card {
+    background: #fdfcf7;
+    border: 1px dashed rgba(90, 58, 49, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .array-items { margin-bottom: 16px; }
+  .item-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+  <h2><i class="fas fa-edit"></i> Portfolio Content Editor</h2>
+</div>
+
+<div class="content-editor" id="content-editor">
+  <div style="color:#999;padding:40px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+</div>
+
+<div class="save-bar">
+  <button class="btn btn-success" onclick="saveContent()"><i class="fas fa-save"></i> Save Changes</button>
+  <span class="save-msg" id="save-msg">Saved!</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var portfolioContent = {};
+
+function loadContent() {
+  fetch('/admin/api/portfolio/content')
+    .then(r => r.json())
+    .then(data => {
+      portfolioContent = data;
+      renderEditor();
+    })
+    .catch(() => {
+      document.getElementById('content-editor').innerHTML = '<p style="color:red">Failed to load content data.</p>';
+    });
+}
+
+function renderEditor() {
+  const c = portfolioContent.portfolio || {};
+  let html = '';
+
+  // Meta
+  html += `
+    <div class="section-title">Meta</div>
+    <div class="editor-field">
+      <label>Page Title</label>
+      <input type="text" id="meta-title" value="${escapeHtml(c.meta?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Page Description</label>
+      <textarea id="meta-description">${escapeHtml(c.meta?.description || '')}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>Canonical URL</label>
+      <input type="text" id="meta-canonical" value="${escapeHtml(c.meta?.canonical || '')}">
+    </div>
+  `;
+
+  // Hero
+  html += `
+    <div class="section-title">Hero Section</div>
+    <div class="editor-field">
+      <label>Main Headline</label>
+      <input type="text" id="hero-headline" value="${escapeHtml(c.hero?.headline || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Headline Emphasis (em tag)</label>
+      <input type="text" id="hero-emphasis" value="${escapeHtml(c.hero?.headlineEmphasis || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subheadline</label>
+      <textarea id="hero-subheadline">${escapeHtml(c.hero?.subheadline || '')}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>CTA Button Text</label>
+      <input type="text" id="hero-cta" value="${escapeHtml(c.hero?.cta || '')}">
+    </div>
+  `;
+
+  // Problem
+  html += `
+    <div class="section-title">Problem Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="problem-title" value="${escapeHtml(c.problem?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Body Text</label>
+      <textarea id="problem-body">${escapeHtml(c.problem?.body || '')}</textarea>
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Challenges List</div>
+    <div class="array-items" id="challenges-list"></div>
+    <button class="btn btn-small" onclick="addChallenge()">+ Add Challenge</button>
+  `;
+
+  // Render challenges
+  if (c.problem?.challenges) {
+    c.problem.challenges.forEach((ch, i) => {
+      html += `
+        <div class="sub-card">
+          <input type="text" id="challenge-${i}" value="${escapeHtml(ch)}" placeholder="Challenge text">
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeChallenge(${i})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // Difference
+  html += `
+    <div class="section-title">Difference Section</div>
+    <div class="editor-field">
+      <label>Title Part 1</label>
+      <input type="text" id="diff-title" value="${escapeHtml(c.difference?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Title Part 2 (emphasis)</label>
+      <input type="text" id="diff-emphasis" value="${escapeHtml(c.difference?.titleEmphasis || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Body Text</label>
+      <textarea id="diff-body">${escapeHtml(c.difference?.body || '')}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>Highlight Text</label>
+      <input type="text" id="diff-highlight" value="${escapeHtml(c.difference?.highlight || '')}">
+    </div>
+  `;
+
+  // Services
+  html += `
+    <div class="section-title">Services Section</div>
+    <div class="editor-field">
+      <label>Section Title</label>
+      <input type="text" id="services-title" value="${escapeHtml(c.services?.title || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Services List</div>
+  `;
+
+  if (c.services?.items) {
+    c.services.items.forEach((svc, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Service Name</label>
+            <input type="text" id="service-name-${i}" value="${escapeHtml(svc.name || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Description</label>
+            <textarea id="service-desc-${i}">${escapeHtml(svc.description || '')}</textarea>
+          </div>
+          <div><strong>Examples:</strong></div>
+          <div id="service-examples-${i}" class="array-items"></div>
+          <button class="btn btn-small" onclick="addServiceExample(${i})">+ Add Example</button>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeService(${i})">Remove Service</button>
+          </div>
+        </div>
+      `;
+      if (svc.examples) {
+        svc.examples.forEach((ex, j) => {
+          html += `
+            <div class="sub-card" style="margin-left: 16px;">
+              <input type="text" id="service-example-${i}-${j}" value="${escapeHtml(ex)}">
+              <button class="btn btn-small" onclick="removeServiceExample(${i}, ${j})">Remove</button>
+            </div>
+          `;
+        });
+      }
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addService()">+ Add Service</button>`;
+
+  // Why Me
+  html += `
+    <div class="section-title">Why Me Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="whyme-title" value="${escapeHtml(c.whyme?.title || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Cards</div>
+  `;
+
+  if (c.whyme?.cards) {
+    c.whyme.cards.forEach((card, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Card Title</label>
+            <input type="text" id="whyme-card-title-${i}" value="${escapeHtml(card.title || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Card Body</label>
+            <textarea id="whyme-card-body-${i}">${escapeHtml(card.body || '')}</textarea>
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeWhyMeCard(${i})">Remove Card</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addWhyMeCard()">+ Add Card</button>`;
+
+  // Process
+  html += `
+    <div class="section-title">Process Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="process-title" value="${escapeHtml(c.process?.title || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Steps</div>
+  `;
+
+  if (c.process?.steps) {
+    c.process.steps.forEach((step, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Step Number</label>
+            <input type="text" id="process-number-${i}" value="${step.number || ''}">
+          </div>
+          <div class="editor-field">
+            <label>Step Title</label>
+            <input type="text" id="process-title-${i}" value="${escapeHtml(step.title || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Step Description</label>
+            <textarea id="process-desc-${i}">${escapeHtml(step.description || '')}</textarea>
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeProcessStep(${i})">Remove Step</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addProcessStep()">+ Add Step</button>`;
+
+  // Packages
+  html += `
+    <div class="section-title">Packages Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="packages-title" value="${escapeHtml(c.packages?.title || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Packages</div>
+  `;
+
+  if (c.packages?.items) {
+    c.packages.items.forEach((pkg, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Package Name</label>
+            <input type="text" id="package-name-${i}" value="${escapeHtml(pkg.name || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Subtitle</label>
+            <input type="text" id="package-subtitle-${i}" value="${escapeHtml(pkg.subtitle || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Description</label>
+            <textarea id="package-desc-${i}">${escapeHtml(pkg.description || '')}</textarea>
+          </div>
+          <div class="editor-field">
+            <label>Minimum Commitment</label>
+            <input type="text" id="package-commitment-${i}" value="${escapeHtml(pkg.minimumCommitment || '')}">
+          </div>
+          <div><strong>Includes:</strong></div>
+          <div id="package-items-${i}"></div>
+          <button class="btn btn-small" onclick="addPackageItem(${i})">+ Add Item</button>
+          <div class="editor-field">
+            <label>Goal</label>
+            <textarea id="package-goal-${i}">${escapeHtml(pkg.goal || '')}</textarea>
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removePackage(${i})">Remove Package</button>
+          </div>
+        </div>
+      `;
+      if (pkg.includes) {
+        pkg.includes.forEach((item, j) => {
+          html += `
+            <div class="sub-card" style="margin-left: 16px;">
+              <input type="text" id="package-item-${i}-${j}" value="${escapeHtml(item)}">
+              <button class="btn btn-small" onclick="removePackageItem(${i}, ${j})">Remove</button>
+            </div>
+          `;
+        });
+      }
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addPackage()">+ Add Package</button>`;
+
+  // Social Feed
+  html += `
+    <div class="section-title">Social Feed Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="feed-title" value="${escapeHtml(c.sociofeed?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Description</label>
+      <input type="text" id="feed-desc" value="${escapeHtml(c.sociofeed?.description || '')}">
+    </div>
+  `;
+
+  // Final CTA
+  html += `
+    <div class="section-title">Final CTA Section</div>
+    <div class="editor-field">
+      <label>Headline</label>
+      <input type="text" id="finalcta-headline" value="${escapeHtml(c.finalcta?.headline || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subheadline</label>
+      <input type="text" id="finalcta-subheadline" value="${escapeHtml(c.finalcta?.subheadline || '')}">
+    </div>
+    <div class="editor-field">
+      <label>CTA Button Text</label>
+      <input type="text" id="finalcta-cta" value="${escapeHtml(c.finalcta?.cta || '')}">
+    </div>
+  `;
+
+  // Credibility
+  html += `
+    <div class="section-title">Credibility</div>
+    <div class="editor-field">
+      <label>Highlight Text</label>
+      <input type="text" id="credibility-highlight" value="${escapeHtml(c.credibility?.highlight || '')}">
+    </div>
+  `;
+
+  document.getElementById('content-editor').innerHTML = html;
+}
+
+function escapeHtml(text) {
+  const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+  return (text || '').replace(/[&<>"']/g, m => map[m]);
+}
+
+function collectData() {
+  const c = portfolioContent.portfolio || {};
+
+  // Meta
+  c.meta = {
+    title: document.getElementById('meta-title').value,
+    description: document.getElementById('meta-description').value,
+    canonical: document.getElementById('meta-canonical').value,
+  };
+
+  // Hero
+  c.hero = {
+    headline: document.getElementById('hero-headline').value,
+    headlineEmphasis: document.getElementById('hero-emphasis').value,
+    subheadline: document.getElementById('hero-subheadline').value,
+    cta: document.getElementById('hero-cta').value,
+  };
+
+  // Problem
+  c.problem = {
+    title: document.getElementById('problem-title').value,
+    body: document.getElementById('problem-body').value,
+    challenges: [],
+  };
+  let i = 0;
+  while (document.getElementById(`challenge-${i}`)) {
+    c.problem.challenges.push(document.getElementById(`challenge-${i}`).value);
+    i++;
+  }
+
+  // Difference
+  c.difference = {
+    title: document.getElementById('diff-title').value,
+    titleEmphasis: document.getElementById('diff-emphasis').value,
+    body: document.getElementById('diff-body').value,
+    highlight: document.getElementById('diff-highlight').value,
+  };
+
+  // Services
+  c.services = {
+    title: document.getElementById('services-title').value,
+    items: [],
+  };
+  i = 0;
+  while (document.getElementById(`service-name-${i}`)) {
+    const svc = {
+      name: document.getElementById(`service-name-${i}`).value,
+      description: document.getElementById(`service-desc-${i}`).value,
+      examples: [],
+    };
+    let j = 0;
+    while (document.getElementById(`service-example-${i}-${j}`)) {
+      svc.examples.push(document.getElementById(`service-example-${i}-${j}`).value);
+      j++;
+    }
+    c.services.items.push(svc);
+    i++;
+  }
+
+  // Why Me
+  c.whyme = {
+    title: document.getElementById('whyme-title').value,
+    cards: [],
+  };
+  i = 0;
+  while (document.getElementById(`whyme-card-title-${i}`)) {
+    c.whyme.cards.push({
+      title: document.getElementById(`whyme-card-title-${i}`).value,
+      body: document.getElementById(`whyme-card-body-${i}`).value,
+    });
+    i++;
+  }
+
+  // Process
+  c.process = {
+    title: document.getElementById('process-title').value,
+    steps: [],
+  };
+  i = 0;
+  while (document.getElementById(`process-number-${i}`)) {
+    c.process.steps.push({
+      number: parseInt(document.getElementById(`process-number-${i}`).value),
+      title: document.getElementById(`process-title-${i}`).value,
+      description: document.getElementById(`process-desc-${i}`).value,
+    });
+    i++;
+  }
+
+  // Packages
+  c.packages = {
+    title: document.getElementById('packages-title').value,
+    items: [],
+  };
+  i = 0;
+  while (document.getElementById(`package-name-${i}`)) {
+    const pkg = {
+      name: document.getElementById(`package-name-${i}`).value,
+      subtitle: document.getElementById(`package-subtitle-${i}`).value,
+      description: document.getElementById(`package-desc-${i}`).value,
+      minimumCommitment: document.getElementById(`package-commitment-${i}`).value || undefined,
+      includes: [],
+      goal: document.getElementById(`package-goal-${i}`).value,
+    };
+    let j = 0;
+    while (document.getElementById(`package-item-${i}-${j}`)) {
+      pkg.includes.push(document.getElementById(`package-item-${i}-${j}`).value);
+      j++;
+    }
+    c.packages.items.push(pkg);
+    i++;
+  }
+
+  // Social Feed
+  c.sociofeed = {
+    title: document.getElementById('feed-title').value,
+    description: document.getElementById('feed-desc').value,
+  };
+
+  // Final CTA
+  c.finalcta = {
+    headline: document.getElementById('finalcta-headline').value,
+    subheadline: document.getElementById('finalcta-subheadline').value,
+    cta: document.getElementById('finalcta-cta').value,
+  };
+
+  // Credibility
+  c.credibility = {
+    highlight: document.getElementById('credibility-highlight').value,
+  };
+
+  portfolioContent.portfolio = c;
+  return portfolioContent;
+}
+
+function saveContent() {
+  const data = collectData();
+  fetch('/admin/api/portfolio/content', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data),
+  })
+    .then(r => r.json())
+    .then(() => {
+      document.getElementById('save-msg').style.display = 'inline';
+      setTimeout(() => {
+        document.getElementById('save-msg').style.display = 'none';
+      }, 3000);
+    })
+    .catch(e => alert(`Error: ${e}`));
+}
+
+// Helper functions for adding/removing items
+function addChallenge() {
+  const data = collectData();
+  data.portfolio.problem.challenges.push('');
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeChallenge(i) {
+  const data = collectData();
+  data.portfolio.problem.challenges.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addService() {
+  const data = collectData();
+  data.portfolio.services.items.push({name: '', description: '', examples: []});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeService(i) {
+  const data = collectData();
+  data.portfolio.services.items.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addServiceExample(i) {
+  const data = collectData();
+  data.portfolio.services.items[i].examples.push('');
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeServiceExample(i, j) {
+  const data = collectData();
+  data.portfolio.services.items[i].examples.splice(j, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addWhyMeCard() {
+  const data = collectData();
+  data.portfolio.whyme.cards.push({title: '', body: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeWhyMeCard(i) {
+  const data = collectData();
+  data.portfolio.whyme.cards.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addProcessStep() {
+  const data = collectData();
+  const stepNum = (data.portfolio.process.steps.length || 0) + 1;
+  data.portfolio.process.steps.push({number: stepNum, title: '', description: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeProcessStep(i) {
+  const data = collectData();
+  data.portfolio.process.steps.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addPackage() {
+  const data = collectData();
+  data.portfolio.packages.items.push({name: '', subtitle: '', description: '', includes: [], goal: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removePackage(i) {
+  const data = collectData();
+  data.portfolio.packages.items.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addPackageItem(i) {
+  const data = collectData();
+  data.portfolio.packages.items[i].includes.push('');
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removePackageItem(i, j) {
+  const data = collectData();
+  data.portfolio.packages.items[i].includes.splice(j, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+// Initialize on load
+loadContent();
+</script>
+{% endblock %}

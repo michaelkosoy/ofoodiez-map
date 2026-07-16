@@ -904,6 +904,32 @@ def update_hitech_content():
         return jsonify({"error": str(e)}), 500
 
 
+@admin_bp.route('/api/portfolio/content', methods=['GET'])
+@login_required
+def get_portfolio_content():
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app', 'data', 'portfolio_content.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route('/api/portfolio/content', methods=['PUT'])
+@login_required
+def update_portfolio_content():
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app', 'data', 'portfolio_content.json')
+    data = request.json
+    if not data:
+        return jsonify({"error": "No JSON payload provided"}), 400
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def _notify_via_bot(request_id):
     """Ask the BOT service (which has the SendGrid env vars; this main app does
     not) to email the candidate that their requested company is now available.

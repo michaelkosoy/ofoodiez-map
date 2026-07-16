@@ -1,0 +1,183 @@
+{
+  "portfolio": {
+    "meta": {
+      "title": "Employer Branding & Founder-Led Content Studio",
+      "description": "A tech insider who knows how to tell your startup's story. Employer branding, founder marketing, and social strategy for technology companies.",
+      "canonical": "https://ofoodiez.com/portfolio"
+    },
+    "hero": {
+      "headline": "Not another social agency.",
+      "headlineEmphasis": "A tech insider who knows how to tell your story.",
+      "subheadline": "I help technology companies turn their people, culture and technology into stories that attract talent, build trust and create brands people want to be part of.",
+      "cta": "Build your employer brand"
+    },
+    "problem": {
+      "title": "Great startups are being ignored.",
+      "body": "Startups invest millions in building amazing products.\n\nBut too many struggle to tell their story.",
+      "challenges": [
+        "Employer branding has no clear owner",
+        "HR teams don't have time to create content consistently",
+        "Employees are expected to create content without strategy",
+        "Companies don't know which stories are worth sharing",
+        "LinkedIn updates alone don't create a memorable brand"
+      ]
+    },
+    "difference": {
+      "title": "Most agencies research tech companies.",
+      "titleEmphasis": "I worked inside them.",
+      "body": "I don't need to learn how startup culture works.\n\nI was part of it.\n\nI understand the people behind the products, the challenges founders face, and what makes technical talent connect with a company.",
+      "highlight": "Tech background + storytelling expertise + owned community."
+    },
+    "services": {
+      "title": "What I help startups build",
+      "items": [
+        {
+          "name": "Employer Branding",
+          "description": "Turn your people and culture into stories people want to watch.",
+          "examples": [
+            "Employee stories",
+            "Day in the life",
+            "Behind the scenes",
+            "Engineering stories",
+            "Team moments",
+            "Company milestones"
+          ]
+        },
+        {
+          "name": "Founder-Led Marketing",
+          "description": "People connect with people.\n\nBuild founders into recognizable voices through:",
+          "examples": [
+            "Founder stories",
+            "Vision content",
+            "Building journey",
+            "Industry opinions"
+          ]
+        },
+        {
+          "name": "Social Strategy & Content Creation",
+          "description": "A complete content partner.",
+          "examples": [
+            "Strategy",
+            "Creative concepts",
+            "Copywriting",
+            "Filming",
+            "Editing",
+            "Publishing",
+            "Analytics"
+          ]
+        },
+        {
+          "name": "Talent Attraction",
+          "description": "Build relationships with future candidates before they start searching.",
+          "examples": [
+            "Authentic company presence",
+            "Community exposure",
+            "Recruiting-focused content",
+            "Events and culture moments"
+          ]
+        }
+      ]
+    },
+    "whyme": {
+      "title": "Why startups choose me",
+      "cards": [
+        {
+          "title": "Tech Insider",
+          "body": "I am not a marketer trying to understand tech.\n\nI come from the startup ecosystem."
+        },
+        {
+          "title": "Owned Tech Community",
+          "body": "30K+ followers.\n\n70%+ tech audience.\n\nA trusted community instead of paid reach."
+        },
+        {
+          "title": "End-to-End Partner",
+          "body": "One strategic partner from idea to execution.\n\nStrategy. Creative. Production. Publishing."
+        },
+        {
+          "title": "Gen Z Native",
+          "body": "I understand how the next generation of talent consumes content and what makes people stop scrolling."
+        }
+      ]
+    },
+    "process": {
+      "title": "From company story to content engine",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Discovery",
+          "description": "Understand your company, culture, hiring goals and audience."
+        },
+        {
+          "number": 2,
+          "title": "Strategy",
+          "description": "Build content pillars, formats, calendar and KPIs."
+        },
+        {
+          "number": 3,
+          "title": "Production",
+          "description": "Filming days at your offices. Creating authentic content."
+        },
+        {
+          "number": 4,
+          "title": "Distribution",
+          "description": "Publish through your channels and amplify through my tech community."
+        },
+        {
+          "number": 5,
+          "title": "Growth",
+          "description": "Analyze performance. Improve formats. Scale what works."
+        }
+      ]
+    },
+    "packages": {
+      "title": "Packages",
+      "items": [
+        {
+          "name": "LAUNCH",
+          "subtitle": "One-time Employer Branding Activation",
+          "description": "For startups that want to introduce their story and get noticed.",
+          "includes": [
+            "Discovery session",
+            "Employer branding strategy",
+            "Creative concept",
+            "Office filming day",
+            "Video production and editing",
+            "One premium video published through my community channels"
+          ],
+          "goal": "Create awareness and introduce your company to the right audience."
+        },
+        {
+          "name": "BOOST",
+          "subtitle": "Ongoing Employer Branding Partnership",
+          "description": "For companies that want to build visibility and attract talent consistently.",
+          "includes": [
+            "Employer branding strategy",
+            "Content calendar",
+            "KPI planning",
+            "Filming days",
+            "Employee stories",
+            "Founder content",
+            "Behind-the-scenes content",
+            "LinkedIn content",
+            "Instagram content",
+            "Analytics and optimization"
+          ],
+          "goal": "Build a recognizable employer brand that attracts the right people before hiring starts.",
+          "minimumCommitment": "3 months"
+        }
+      ]
+    },
+    "sociofeed": {
+      "title": "Stories from the studio",
+      "description": "Startup visits, office culture, events, and behind the scenes moments."
+    },
+    "finalcta": {
+      "headline": "Your company already has a story.",
+      "subheadline": "Let's make people notice it.",
+      "cta": "Book a discovery call"
+    },
+    "credibility": {
+      "highlight": "Built a 30K+ tech community through Ofoodiez"
+    }
+  }
+}

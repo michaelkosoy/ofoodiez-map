@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}</title>
+    <meta name="description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story. Employer branding and founder-led content for technology companies.') }}">
+    <link rel="canonical" href="{{ c.meta.canonical | default('https://ofoodiez.com/portfolio') }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ c.meta.canonical | default('https://ofoodiez.com/portfolio') }}">
+    <meta property="og:title" content="{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}">
+    <meta property="og:description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story.') }}">
+    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}">
+    <meta property="twitter:description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story.') }}">
+    <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <!-- PWA & Icons -->
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        :root {
+            --bg: #08060a;
+            --bg-card: #100810;
+            --burgundy: #720815;
+            --burgundy-mid: #9b1a2a;
+            --burgundy-glow: rgba(114, 8, 21, 0.22);
+            --butter: #f9f6eb;
+            --butter-dim: rgba(249, 246, 235, 0.55);
+            --butter-faint: rgba(249, 246, 235, 0.18);
+            --border: rgba(114, 8, 21, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--butter);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden !important;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 45% at 50% -8%, rgba(114, 8, 21, 0.28) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 25% at 85% 95%, rgba(114, 8, 21, 0.12) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .portfolio-page {
+            position: relative;
+            z-index: 1;
+            min-height: 100dvh;
+        }
+
+        /* ── Header / Topbar ── */
+        .port-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(8, 6, 10, 0.7);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .port-logo {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--butter);
+        }
+
+        .port-nav {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .port-nav-link {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--butter-dim);
+            transition: color 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .port-nav-link:hover {
+            color: var(--butter);
+        }
+
+        .port-cta-btn {
+            padding: 10px 24px;
+            background: var(--burgundy-mid);
+            color: var(--butter);
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .port-cta-btn:hover {
+            background: var(--burgundy);
+            box-shadow: 0 8px 24px rgba(114, 8, 21, 0.4);
+        }
+
+        /* ── Hero Section ── */
+        .port-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 60px;
+            min-height: 70dvh;
+        }
+
+        .port-hero-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--burgundy-mid);
+            margin-bottom: 24px;
+        }
+
+        .port-hero-headline {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 700;
+            line-height: 1.05;
+            color: var(--butter);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-hero-headline em {
+            font-style: italic;
+            color: var(--burgundy-mid);
+            text-shadow: 0 0 40px rgba(114, 8, 21, 0.6);
+        }
+
+        .port-hero-divider {
+            width: 48px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--burgundy-mid), transparent);
+            margin: 28px auto;
+        }
+
+        .port-hero-subheading {
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            font-weight: 300;
+            color: var(--butter-dim);
+            max-width: 520px;
+            line-height: 1.8;
+            margin-bottom: 48px;
+        }
+
+        .port-hero-cta {
+            padding: 14px 40px;
+            background: var(--burgundy-mid);
+            color: var(--butter);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .port-hero-cta:hover {
+            background: var(--burgundy);
+            box-shadow: 0 12px 40px rgba(114, 8, 21, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ── Content Sections ── */
+        .port-section {
+            padding: 80px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .port-section-title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--butter);
+            margin-bottom: 40px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-section-title em {
+            font-style: italic;
+            color: var(--burgundy-mid);
+        }
+
+        .port-section-body {
+            font-size: 1.05rem;
+            font-weight: 300;
+            line-height: 1.8;
+            color: var(--butter-dim);
+            max-width: 680px;
+            white-space: pre-line;
+        }
+
+        /* ── Problem Section ── */
+        .port-problem {
+            background: rgba(16, 8, 16, 0.4);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .port-challenges {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .port-challenge {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .port-challenge:last-child {
+            border-bottom: none;
+        }
+
+        .port-challenge-icon {
+            font-size: 0.7rem;
+            color: var(--burgundy-mid);
+            margin-top: 4px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .port-challenge-text {
+            font-size: 1rem;
+            color: var(--butter);
+            line-height: 1.6;
+        }
+
+        /* ── Difference Section ── */
+        .port-difference {
+            background: rgba(155, 26, 42, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 60px 48px;
+        }
+
+        .port-difference-highlight {
+            margin-top: 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--burgundy-mid);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* ── Services Section ── */
+        .port-services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .port-service-card {
+            background: rgba(16, 8, 16, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 36px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .port-service-card:hover {
+            border-color: var(--burgundy-mid);
+            background: rgba(155, 26, 42, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .port-service-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--butter);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-service-desc {
+            font-size: 1rem;
+            color: var(--butter-dim);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            white-space: pre-line;
+            flex-grow: 1;
+        }
+
+        .port-service-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .port-service-example {
+            font-size: 0.95rem;
+            color: var(--burgundy-mid);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .port-service-example::before {
+            content: '→';
+            min-width: 16px;
+        }
+
+        /* ── Why Me Section ── */
+        .port-whyme {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .port-whyme-card {
+            background: rgba(16, 8, 16, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 36px;
+            transition: all 0.3s;
+        }
+
+        .port-whyme-card:hover {
+            border-color: var(--burgundy-mid);
+            background: rgba(155, 26, 42, 0.1);
+        }
+
+        .port-whyme-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--butter);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-whyme-body {
+            font-size: 0.95rem;
+            color: var(--butter-dim);
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        /* ── Process Section ── */
+        .port-process {
+            margin-top: 40px;
+        }
+
+        .port-process-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            position: relative;
+        }
+
+        .port-process-step {
+            background: rgba(16, 8, 16, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 36px 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .port-process-step:hover {
+            border-color: var(--burgundy-mid);
+            background: rgba(155, 26, 42, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .port-process-number {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--burgundy-mid);
+            margin-bottom: 16px;
+        }
+
+        .port-process-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--butter);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-process-desc {
+            font-size: 0.95rem;
+            color: var(--butter-dim);
+            line-height: 1.6;
+        }
+
+        /* ── Packages Section ── */
+        .port-packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .port-package {
+            background: rgba(16, 8, 16, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 48px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .port-package:hover {
+            border-color: var(--burgundy-mid);
+            background: rgba(155, 26, 42, 0.12);
+            box-shadow: 0 12px 48px rgba(114, 8, 21, 0.2);
+        }
+
+        .port-package-name {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--burgundy-mid);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .port-package-subtitle {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--butter);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-package-desc {
+            font-size: 0.95rem;
+            color: var(--butter-dim);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .port-package-commitment {
+            font-size: 0.85rem;
+            color: var(--burgundy-mid);
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .port-package-includes {
+            flex-grow: 1;
+            margin-bottom: 28px;
+        }
+
+        .port-package-includes-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--butter);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .port-package-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .port-package-item {
+            font-size: 0.9rem;
+            color: var(--butter-dim);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .port-package-item::before {
+            content: '✓';
+            color: var(--burgundy-mid);
+            font-weight: 700;
+            min-width: 16px;
+        }
+
+        .port-package-goal {
+            font-size: 0.9rem;
+            color: var(--burgundy-mid);
+            font-style: italic;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Social Feed Section ── */
+        .port-feed {
+            background: rgba(16, 8, 16, 0.4);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .port-feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .port-feed-placeholder {
+            aspect-ratio: 1;
+            background: rgba(155, 26, 42, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--butter-dim);
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .port-feed-placeholder:hover {
+            border-color: var(--burgundy-mid);
+            background: rgba(155, 26, 42, 0.12);
+        }
+
+        /* ── Final CTA Section ── */
+        .port-final-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px;
+            background: linear-gradient(135deg, rgba(114, 8, 21, 0.15) 0%, rgba(155, 26, 42, 0.08) 100%);
+            border-top: 1px solid var(--border);
+        }
+
+        .port-final-headline {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--butter);
+            margin-bottom: 16px;
+            max-width: 600px;
+            letter-spacing: -0.01em;
+        }
+
+        .port-final-subheading {
+            font-size: 1.05rem;
+            font-weight: 300;
+            color: var(--butter-dim);
+            margin-bottom: 40px;
+            max-width: 500px;
+            line-height: 1.7;
+        }
+
+        .port-final-cta-btn {
+            padding: 16px 48px;
+            background: var(--burgundy-mid);
+            color: var(--butter);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .port-final-cta-btn:hover {
+            background: var(--burgundy);
+            box-shadow: 0 12px 40px rgba(114, 8, 21, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .port-header {
+                padding: 16px 20px;
+            }
+
+            .port-nav {
+                display: none;
+            }
+
+            .port-hero {
+                padding: 60px 20px 40px;
+                min-height: auto;
+            }
+
+            .port-section {
+                padding: 60px 20px;
+            }
+
+            .port-difference {
+                padding: 40px 28px;
+            }
+
+            .port-package {
+                padding: 32px 24px;
+            }
+
+            .port-process-timeline {
+                grid-template-columns: 1fr;
+            }
+
+            .port-final-cta {
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="portfolio-page">
+        <!-- Header -->
+        <header class="port-header">
+            <div class="port-logo">Studio</div>
+            <nav class="port-nav">
+                <a href="#services" class="port-nav-link">Services</a>
+                <a href="#process" class="port-nav-link">Process</a>
+                <a href="#packages" class="port-nav-link">Packages</a>
+                <button class="port-cta-btn" onclick="scrollToSection('cta')">Get Started</button>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="port-hero">
+            <div class="port-hero-eyebrow">Employer Branding & Founder-Led Content</div>
+            <h1 class="port-hero-headline">{{ c.hero.headline }}<br><em>{{ c.hero.headlineEmphasis }}</em></h1>
+            <div class="port-hero-divider"></div>
+            <p class="port-hero-subheading">{{ c.hero.subheadline }}</p>
+            <button class="port-hero-cta" onclick="scrollToSection('cta')">{{ c.hero.cta }}</button>
+        </section>
+
+        <!-- Problem Section -->
+        <section class="port-section port-problem">
+            <h2 class="port-section-title">{{ c.problem.title }}</h2>
+            <p class="port-section-body">{{ c.problem.body }}</p>
+            <div class="port-challenges">
+                {% for challenge in c.problem['challenges'] %}
+                <div class="port-challenge">
+                    <div class="port-challenge-icon">•</div>
+                    <div class="port-challenge-text">{{ challenge }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Difference Section -->
+        <section class="port-section">
+            <div class="port-difference">
+                <h2 class="port-section-title">{{ c.difference.title }}<br><em>{{ c.difference.titleEmphasis }}</em></h2>
+                <p class="port-section-body">{{ c.difference.body }}</p>
+                <div class="port-difference-highlight">{{ c.difference.highlight }}</div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="port-section" id="services">
+            <h2 class="port-section-title">{{ c.services.title }}</h2>
+            <div class="port-services">
+                {% for service in c.services['items'] %}
+                <div class="port-service-card">
+                    <h3 class="port-service-name">{{ service.name }}</h3>
+                    <p class="port-service-desc">{{ service.description }}</p>
+                    <div class="port-service-examples">
+                        {% for example in service.examples %}
+                        <div class="port-service-example">{{ example }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Why Me Section -->
+        <section class="port-section">
+            <h2 class="port-section-title">{{ c.whyme.title }}</h2>
+            <div class="port-whyme">
+                {% for card in c.whyme['cards'] %}
+                <div class="port-whyme-card">
+                    <h3 class="port-whyme-title">{{ card.title }}</h3>
+                    <p class="port-whyme-body">{{ card.body }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="port-section" id="process">
+            <h2 class="port-section-title">{{ c.process.title }}</h2>
+            <div class="port-process-timeline">
+                {% for step in c.process['steps'] %}
+                <div class="port-process-step">
+                    <div class="port-process-number">{{ step.number }}</div>
+                    <h3 class="port-process-title">{{ step.title }}</h3>
+                    <p class="port-process-desc">{{ step.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Packages Section -->
+        <section class="port-section" id="packages">
+            <h2 class="port-section-title">{{ c.packages.title }}</h2>
+            <div class="port-packages">
+                {% for package in c.packages['items'] %}
+                <div class="port-package">
+                    <div>
+                        <div class="port-package-name">{{ package.name }}</div>
+                        <div class="port-package-subtitle">{{ package.subtitle }}</div>
+                        <p class="port-package-desc">{{ package.description }}</p>
+                        {% if package.minimumCommitment %}
+                        <div class="port-package-commitment">Minimum: {{ package.minimumCommitment }}</div>
+                        {% endif %}
+                        <div class="port-package-includes">
+                            <div class="port-package-includes-title">Includes:</div>
+                            <div class="port-package-list">
+                                {% for item in package.includes %}
+                                <div class="port-package-item">{{ item }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="port-package-goal">{{ package.goal }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Social Feed Section -->
+        <section class="port-section port-feed">
+            <h2 class="port-section-title">{{ c.sociofeed.title }}</h2>
+            <p class="port-section-body" style="margin-bottom: 32px;">{{ c.sociofeed.description }}</p>
+            <div class="port-feed-grid">
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+                <div class="port-feed-placeholder">📸</div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="port-final-cta" id="cta">
+            <h2 class="port-final-headline">{{ c.finalcta.headline }}</h2>
+            <p class="port-final-subheading">{{ c.finalcta.subheadline }}</p>
+            <button class="port-final-cta-btn" onclick="handleCTA()">{{ c.finalcta.cta }}</button>
+            <p style="margin-top: 40px; font-size: 0.85rem; color: var(--butter-dim);">
+                {{ c.credibility.highlight }}
+            </p>
+        </section>
+    </div>
+
+    <script>
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function handleCTA() {
+            // In future: connect to booking system or email
+            console.log('CTA clicked - book discovery call');
+            // Placeholder for now
+        }
+    </script>
+</body>
+</html>
