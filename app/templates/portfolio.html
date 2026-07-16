@@ -940,7 +940,7 @@
         <section id="pricing">
             <h2 class="section-title">Pricing</h2>
             <div class="packages-container">
-                {% for package in c.packages.items %}
+                {% for package in c.packages['items'] %}
                 <div class="package-card">
                     <div>
                         <div class="package-tag">PACKAGE {{ loop.index }}: {{ package.name }}</div>
