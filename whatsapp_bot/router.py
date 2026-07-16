@@ -25,6 +25,14 @@ _PATHS = {
     "PATH_PROFILE": "profile",  # "Edit my details" button on WA_CT_WELCOME_BACK
 }
 
+# Typed equivalents of the Welcome buttons. Some WhatsApp clients silently drop a
+# quick-reply tap, so we accept the plain word too — but only when NOT mid-flow,
+# so it can't swallow a company name / role answer.
+PATH_WORDS = {
+    "candidate": "candidate", "employee": "employee", "advocate": "employee",
+    "contact": "contact", "contact us": "contact",
+}
+
 # Registered users can jump to their profile editor by keyword (the Welcome
 # "Contact" button routes there too); multi-word so it won't eat a company name.
 PROFILE_WORDS = {
@@ -78,6 +86,11 @@ def handle(inbound):
     # Path selection from the Welcome menu.
     if payload in _PATHS:
         return _enter_path(user, conv, _PATHS[payload])
+
+    # Typed equivalent of a Welcome button (for clients that drop the tap). Only
+    # at the menu (no active flow) so it can't eat a mid-flow answer.
+    if not conv.flow and text.lower() in PATH_WORDS:
+        return _enter_path(user, conv, PATH_WORDS[text.lower()])
 
     # In-flow dispatch.
     if conv.flow == "candidate" and conv.step and conv.step.startswith("cand_"):
