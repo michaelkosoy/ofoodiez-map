@@ -402,11 +402,12 @@ async function deployCampaign(product) {
 </section>
 <!-- Process Timeline Section -->
 <section id="process" class="py-16 px-gutter md:px-margin-desktop">
-<div class="max-w-7xl mx-auto">
+<div class="max-w-full">
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
 <!-- Horizontal Timeline -->
-<div class="flex flex-col md:flex-row gap-6 justify-between">
+<div class="flex flex-col md:flex-row gap-6 justify-center overflow-x-auto w-full md:px-4">
+<div class="flex gap-6 w-full md:w-auto mx-auto md:mx-0 md:justify-between">
 
 <!-- Step 1 -->
 <div class="flex-1 bg-white neo-brutal-border p-6 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
@@ -465,6 +466,7 @@ async function deployCampaign(product) {
 
 </div>
 </div>
+</div>
 </section>
 <!-- Pricing Section -->
 <section class="py-20" id="pricing">
@@ -472,8 +474,11 @@ async function deployCampaign(product) {
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
 <div class="bg-white neo-brutal-border p-8 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
 <div class="mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#121212] font-bold mb-4">PACKAGE 1: LAUNCH</span>
-<h3 class="font-headline-md text-custom-brown mb-2 font-bold">{{ c.packages['items'][0].subtitle }}</h3>
+<h3 class="font-display-lg text-custom-brown mb-3 font-black">Launch</h3>
+<div class="mb-4">
+<p class="font-headline-md text-custom-burgundy font-bold">₪7,000</p>
+<p class="font-body-md text-custom-brown text-sm">+ 2K USD success fee on referrals</p>
+</div>
 <p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][0].description }}</p>
 </div>
 <div class="border-t-2 border-custom-brown pt-6 flex-grow">
@@ -493,8 +498,11 @@ async function deployCampaign(product) {
 </div>
 <div class="bg-custom-brown neo-brutal-border p-8 flex flex-col h-full text-white shadow-[8px_8px_0px_0px_#800020] rounded-3xl relative overflow-hidden">
 <div class="mb-6 relative z-10">
-<span class="bg-custom-burgundy text-white px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#FFF200] font-bold mb-4">PACKAGE 2: BOOST</span>
-<h3 class="font-headline-md text-white mb-2 font-bold">{{ c.packages['items'][1].subtitle }}</h3>
+<h3 class="font-display-lg text-custom-butter mb-3 font-black">Boost</h3>
+<div class="mb-4">
+<p class="font-headline-md text-custom-butter font-bold">From ₪10,000/month</p>
+<p class="font-body-md text-white/90 text-sm">Includes Launch package + 4 contents per month with stories</p>
+</div>
 <p class="font-body-md text-white/90 font-medium">{{ c.packages['items'][1].description }}</p>
 {% if c.packages['items'][1].minimumCommitment %}
 <p class="font-label-mono text-sm text-custom-butter mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
@@ -519,13 +527,17 @@ async function deployCampaign(product) {
 </section>
 <!-- Footer -->
 <footer class="w-full mt-stack-xl bg-custom-brown text-white border-t-4 border-custom-burgundy">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg w-full">
 <div>
 <div class="font-headline-lg text-headline-lg font-black text-custom-butter">
-        STUDIO_CD
+<span class="text-white text-lg font-normal">the</span> Studio
+      </div>
+<div class="mt-2 text-custom-butter font-label-bold text-label-bold">
+        by Ofoodiez
       </div>
 <div class="mt-4 text-white/70 font-mono text-sm">
         // ©2024 STUDIO_CD — BORN IN TECH.<br/>// ENGINEERED FOR CREATIVES.
       </div>
 </div>
-</div></footer></main></body></html>
+</div>
+</footer></main></body></html>
