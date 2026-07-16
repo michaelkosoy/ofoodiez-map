@@ -1,988 +1,465 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
-<head>
+
+<html class="light" lang="en" style=""><head>
     {% include 'components/analytics.html' %}
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}</title>
     <meta name="description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story.') }}">
     <link rel="canonical" href="{{ c.meta.canonical | default('https://ofoodiez.com/portfolio') }}">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ c.meta.canonical | default('https://ofoodiez.com/portfolio') }}">
     <meta property="og:title" content="{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}">
     <meta property="og:description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story.') }}">
-    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="{{ c.meta.title | default('Employer Branding & Founder-Led Content Studio') }}">
     <meta property="twitter:description" content="{{ c.meta.description | default('A tech insider who knows how to tell your startup story.') }}">
-    <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
 
-    <!-- PWA & Icons -->
+    <!-- Icons -->
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
     <meta name="theme-color" content="#ffffff">
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-surface-variant": "#48473e",
+                "on-tertiary-fixed": "#40000b",
+                "on-primary-container": "#6f6e53",
+                "tertiary-container": "#ffecec",
+                "on-primary-fixed": "#1d1c08",
+                "error-container": "#ffdad6",
+                "on-primary": "#ffffff",
+                "surface-container-highest": "#e2e2e2",
+                "surface-container": "#eeeeee",
+                "inverse-surface": "#121212",
+                "tertiary-fixed": "#ffdada",
+                "secondary-fixed-dim": "#dec1af",
+                "on-primary-fixed-variant": "#49482f",
+                "primary": "#800020",
+                "surface": "#f9f9f9",
+                "on-background": "#1a1c1c",
+                "surface-container-lowest": "#ffffff",
+                "surface-tint": "#800020",
+                "on-tertiary": "#ffffff",
+                "on-secondary": "#ffffff",
+                "on-secondary-container": "#755e50",
+                "surface-container-high": "#e8e8e8",
+                "inverse-primary": "#cac8a8",
+                "outline-variant": "#cac7ba",
+                "tertiary": "#800020",
+                "on-surface": "#1a1c1c",
+                "background": "#ffffff",
+                "secondary-fixed": "#fbddca",
+                "on-tertiary-fixed-variant": "#8e0f28",
+                "secondary-container": "#f8dac8",
+                "secondary": "#705a4c",
+                "surface-variant": "#e2e2e2",
+                "on-secondary-fixed-variant": "#574335",
+                "primary-fixed-dim": "#cac8a8",
+                "on-tertiary-container": "#c33b4b",
+                "outline": "#3E2723",
+                "inverse-on-surface": "#f0f1f1",
+                "primary-container": "#f5f2d0",
+                "error": "#ba1a1a",
+                "on-error": "#ffffff",
+                "tertiary-fixed-dim": "#ffb3b5",
+                "surface-bright": "#ffffff",
+                "on-error-container": "#93000a",
+                "primary-fixed": "#e7e4c3",
+                "surface-dim": "#dadada",
+                "surface-container-low": "#f3f3f4",
+                "on-secondary-fixed": "#28180d",
+                "custom-butter": "#FFF200",
+                "custom-brown": "#121212",
+                "custom-burgundy": "#800020"
+        },
+        "borderRadius": {
+                "DEFAULT": "0rem",
+                "lg": "0rem",
+                "xl": "0rem",
+                "full": "0rem"
+        },
+        "spacing": {
+                "stack-md": "24px",
+                "container-max": "1440px",
+                "margin-mobile": "20px",
+                "stack-lg": "48px",
+                "unit": "4px",
+                "gutter": "24px",
+                "stack-xl": "80px",
+                "margin-desktop": "64px",
+                "stack-xs": "8px",
+                "bento-gap": "16px"
+        },
+        "fontFamily": {
+                "headline-lg": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "label-sm": [
+                        "Space Mono"
+                ],
+                "display-lg": [
+                        "Inter"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "label-bold": [
+                        "Space Mono"
+                ],
+                "label-mono": ["Space Mono"],
+                "display-lg-mobile": ["Inter"]
+        },
+        "fontSize": {
+                "headline-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "1.5",
+                                "letterSpacing": "0",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "1",
+                                "letterSpacing": "0",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "72px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "900"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.6",
+                                "letterSpacing": "0",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "32px",
+                        {
+                                "lineHeight": "1.3",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "label-bold": [
+                        "14px",
+                        {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-mono": ["14px", { "lineHeight": "20px", "fontWeight": "700" }],
+                "display-lg-mobile": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "900" }]
+        }
+},
+    },
+  }
+}catch(_e){}</script>
     <style>
-        :root {
-            --custom-butter: #F5F2D0;
-            --custom-brown: #121212;
-            --custom-burgundy: #800020;
-            --bg: #ffffff;
-            --on-surface: #1a1c1c;
-            --surface-container: #eeeeee;
-            --outline: #3E2723;
-            --surface-variant: #e2e2e2;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html, body {
-            background: var(--bg);
-            color: var(--on-surface);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden !important;
-        }
-
-        .material-symbols-outlined {
-            font-family: 'Material Symbols Outlined';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 24px;
-            display: inline-block;
-            line-height: 1;
-            text-transform: none;
-            letter-spacing: normal;
-            word-wrap: normal;
-            white-space: nowrap;
-            direction: ltr;
-        }
-
-        /* ── Navigation ── */
-        nav {
-            width: 100%;
-            top: 0;
-            sticky;
-            background: white;
-            border-bottom: 2px solid var(--custom-brown);
-            z-index: 50;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 64px;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
-
-        .nav-logo {
-            font-size: 18px;
-            font-weight: 900;
-            color: var(--custom-burgundy);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-            list-style: none;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 12px;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--custom-brown);
-            border-bottom: 2px solid transparent;
-            padding-bottom: 4px;
-            transition: all 0.2s;
-        }
-
-        .nav-link.active {
-            color: var(--custom-burgundy);
-            border-bottom-color: var(--custom-burgundy);
-        }
-
-        .nav-link:hover {
-            color: var(--custom-burgundy);
-        }
-
-        .nav-cta {
-            background: var(--custom-burgundy);
-            color: white;
-            padding: 8px 20px;
-            font-weight: 700;
-            font-size: 12px;
-            text-transform: uppercase;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 20px;
-        }
-
-        .nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 4px 4px 0px 0px var(--custom-brown);
-        }
-
-        /* ── Hero Section ── */
-        header {
-            padding: 80px 64px 40px;
-            background: white;
-            border-bottom: 2px solid var(--custom-brown);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hero-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            max-width: 1440px;
-            width: 100%;
-            align-items: center;
-        }
-
-        .hero-tag {
-            background: var(--custom-butter);
-            color: var(--custom-brown);
-            padding: 6px 16px;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 24px;
-            border: 2px solid var(--custom-brown);
-            border-radius: 20px;
-            transform: rotate(-1deg);
-            box-shadow: 4px 4px 0px 0px var(--custom-brown);
-        }
-
-        .hero-title {
-            font-size: 72px;
-            font-weight: 900;
-            line-height: 1.1;
-            color: var(--custom-brown);
-            margin-bottom: 24px;
-            letter-spacing: -0.04em;
-        }
-
-        .hero-title .highlight {
-            background: var(--custom-butter);
-            padding: 0 8px;
-            transform: skew(-6deg);
-            display: inline-block;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            line-height: 1.6;
-            color: var(--custom-brown);
-            max-width: 480px;
-            margin-bottom: 32px;
-            border-left: 4px solid var(--custom-burgundy);
-            padding-left: 16px;
-            font-weight: 500;
-        }
-
-        .hero-cta {
-            background: var(--custom-burgundy);
-            color: white;
-            padding: 16px 32px;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            border: 2px solid var(--custom-brown);
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            border-radius: 8px;
-            box-shadow: 6px 6px 0px 0px var(--custom-brown);
-        }
-
-        .hero-cta:hover {
-            transform: translateY(-2px) translateX(-2px);
-        }
-
-        .hero-visual {
-            aspect-ratio: 3/4;
-            background: var(--custom-brown);
-            border: 2px solid var(--custom-brown);
-            border-radius: 24px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 12px 12px 0px 0px var(--custom-burgundy);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .hero-visual-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-        }
-
-        /* ── Marquee Section ── */
-        .marquee-section {
-            background: var(--custom-butter);
-            border-bottom: 2px solid var(--custom-brown);
-            padding: 16px 0;
-            overflow: hidden;
-        }
-
-        .marquee-content {
-            font-size: 40px;
-            line-height: 1;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.02em;
-            color: var(--custom-brown);
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            white-space: nowrap;
-            animation: scroll 30s linear infinite;
-        }
-
-        @keyframes scroll {
+        .neo-brutal-border { border: 2px solid #121212; }
+        .neo-brutal-shadow-hover:hover { box-shadow: 6px 6px 0px 0px #121212; }
+        .sticker-rotate-1 { transform: rotate(-1deg); }
+        .sticker-rotate-2 { transform: rotate(2deg); }
+        .sticker-rotate-3 { transform: rotate(3deg); }
+        @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-
-        /* ── Section Base ── */
-        section {
-            padding: 80px 64px;
-            background: white;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            font-size: 48px;
-            font-weight: 900;
-            line-height: 1.2;
-            color: var(--custom-brown);
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
-        }
-
-        .section-subtitle {
-            font-size: 16px;
-            line-height: 1.5;
-            color: var(--custom-brown);
-            margin-bottom: 48px;
-            max-width: 650px;
-        }
-
-        /* ── Engineer's Edge Section ── */
-        .engineers-edge {
-            background: var(--custom-brown);
-            color: white;
-            position: relative;
-            border-bottom: 2px solid var(--custom-brown);
-        }
-
-        .engineers-edge::before {
-            content: 'const system = new HighPerformanceEngine({ mode: "production", target: "developer_audience", creative_tier: "premium" }); async function deployCampaign(product) { await analyzeArchitecture(product); return generateUnignorableContent(product); }';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.1);
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding: 24px;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .engineers-edge > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .engineers-edge .section-title {
-            color: var(--custom-butter);
-        }
-
-        .engineers-edge .edge-tag {
-            background: var(--custom-butter);
-            color: var(--custom-brown);
-            padding: 6px 16px;
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 24px;
-            border: 2px solid var(--custom-brown);
-            border-radius: 20px;
-            transform: rotate(-2deg);
-            box-shadow: 4px 4px 0px 0px var(--custom-burgundy);
-        }
-
-        .edge-text {
-            font-size: 18px;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        .edge-highlight {
-            background: var(--custom-burgundy);
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline;
-        }
-
-        /* ── Services Grid ── */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
-        }
-
-        .service-card {
-            background: white;
-            border: 2px solid var(--custom-brown);
-            border-radius: 12px;
-            padding: 32px;
-            transition: all 0.3s;
-        }
-
-        .service-card:hover {
-            box-shadow: 6px 6px 0px 0px var(--custom-brown);
-            transform: translateY(-2px);
-        }
-
-        .service-name {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--custom-brown);
-            margin-bottom: 12px;
-        }
-
-        .service-desc {
-            font-size: 14px;
-            color: var(--custom-brown);
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .service-examples {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .service-example {
-            font-size: 12px;
-            color: var(--custom-burgundy);
-            font-weight: 600;
-            display: flex;
-            gap: 8px;
-        }
-
-        .service-example::before {
-            content: '→';
-        }
-
-        /* ── Package Cards ── */
-        .packages-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 28px;
-            margin-top: 32px;
-        }
-
-        .package-card {
-            border: 2px solid var(--custom-brown);
-            border-radius: 24px;
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s;
-        }
-
-        .package-card:nth-child(1) {
-            background: white;
-            box-shadow: 8px 8px 0px 0px var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) {
-            background: var(--custom-brown);
-            color: white;
-            box-shadow: 8px 8px 0px 0px var(--custom-burgundy);
-        }
-
-        .package-tag {
-            background: var(--custom-burgundy);
-            color: white;
-            padding: 6px 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 12px;
-            border-radius: 20px;
-            border: 2px solid var(--custom-brown);
-            width: fit-content;
-        }
-
-        .package-card:nth-child(2) .package-tag {
-            background: var(--custom-burgundy);
-            color: white;
-            box-shadow: 2px 2px 0px 0px var(--custom-butter);
-        }
-
-        .package-name {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .package-card:nth-child(1) .package-name {
-            color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-name {
-            color: var(--custom-butter);
-        }
-
-        .package-subtitle {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .package-card:nth-child(1) .package-subtitle {
-            color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-subtitle {
-            color: white;
-        }
-
-        .package-desc {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-
-        .package-card:nth-child(1) .package-desc {
-            color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-desc {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .package-commitment {
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 20px;
-        }
-
-        .package-card:nth-child(1) .package-commitment {
-            color: var(--custom-burgundy);
-        }
-
-        .package-card:nth-child(2) .package-commitment {
-            color: var(--custom-butter);
-        }
-
-        .package-includes-label {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
-            border-bottom: 1px solid;
-            padding-bottom: 12px;
-        }
-
-        .package-card:nth-child(1) .package-includes-label {
-            color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-includes-label {
-            color: white;
-            border-bottom-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .package-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .package-item {
-            font-size: 14px;
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-        }
-
-        .package-card:nth-child(1) .package-item {
-            color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-item {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .package-item::before {
-            content: '✓';
-            color: var(--custom-burgundy);
-            font-weight: 700;
-            min-width: 14px;
-        }
-
-        .package-card:nth-child(2) .package-item::before {
-            color: var(--custom-butter);
-        }
-
-        .package-goal {
-            font-size: 12px;
-            font-style: italic;
-            padding-top: 12px;
-            border-top: 2px solid;
-        }
-
-        .package-card:nth-child(1) .package-goal {
-            color: var(--custom-burgundy);
-            border-top-color: var(--custom-brown);
-        }
-
-        .package-card:nth-child(2) .package-goal {
-            color: var(--custom-butter);
-            border-top-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* ── Footer ── */
-        footer {
-            background: var(--custom-brown);
-            color: white;
-            padding: 80px 64px;
-            border-top: 4px solid var(--custom-burgundy);
-        }
-
-        .footer-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
-
-        .footer-logo {
-            font-size: 32px;
-            font-weight: 900;
-            color: var(--custom-butter);
-        }
-
-        .footer-credit {
-            margin-top: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Space Mono', monospace;
-            font-size: 12px;
-        }
-
-        /* ── Portfolio Grid (Bento) ── */
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            auto-rows: 300px;
-            gap: 16px;
-            margin-top: 32px;
-        }
-
-        .portfolio-tile {
-            grid-column: span 4;
-            grid-row: span 1;
-            position: relative;
-            background: var(--custom-brown);
-            border: 2px solid var(--custom-brown);
-            border-radius: 24px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        .portfolio-tile:nth-child(1) {
-            grid-column: span 4;
-            grid-row: span 2;
-        }
-
-        .portfolio-tile:nth-child(2) {
-            grid-column: span 8;
-            grid-row: span 1;
-        }
-
-        .portfolio-tile:hover {
-            box-shadow: 6px 6px 0px 0px var(--custom-brown);
-            transform: translateY(-4px);
-        }
-
-        .portfolio-tile::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to top, rgba(18, 18, 18, 0.9), transparent);
-            z-index: 1;
-        }
-
-        .portfolio-label {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: var(--custom-butter);
-            color: var(--custom-brown);
-            padding: 6px 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 11px;
-            font-weight: 700;
-            border: 2px solid var(--custom-brown);
-            border-radius: 20px;
-            z-index: 2;
-            box-shadow: 2px 2px 0px 0px var(--custom-brown);
-        }
-
-        .portfolio-content {
-            position: relative;
-            z-index: 2;
-            padding: 24px;
-            color: white;
-        }
-
-        .portfolio-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .portfolio-desc {
-            font-size: 12px;
-            font-family: 'Space Mono', monospace;
-            color: var(--custom-butter);
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 1024px) {
-            .nav-container {
-                padding: 12px 32px;
-            }
-
-            header {
-                padding: 40px 32px;
-            }
-
-            .hero-container {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .hero-title {
-                font-size: 48px;
-            }
-
-            section {
-                padding: 60px 32px;
-            }
-
-            .portfolio-grid {
-                grid-template-columns: repeat(6, 1fr);
-                auto-rows: 250px;
-            }
-
-            .portfolio-tile:nth-child(1) {
-                grid-column: span 3;
-                grid-row: span 2;
-            }
-
-            .portfolio-tile:nth-child(2) {
-                grid-column: span 3;
-                grid-row: span 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                padding: 12px 20px;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            header {
-                padding: 40px 20px;
-                min-height: auto;
-            }
-
-            .hero-container {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-title {
-                font-size: 32px;
-            }
-
-            .section-title {
-                font-size: 32px;
-            }
-
-            section {
-                padding: 48px 20px;
-            }
-
-            footer {
-                padding: 48px 20px;
-            }
-
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .packages-container {
-                grid-template-columns: 1fr;
-            }
-
-            .portfolio-grid {
-                grid-template-columns: 1fr;
-                auto-rows: auto;
-            }
-
-            .portfolio-tile,
-            .portfolio-tile:nth-child(1),
-            .portfolio-tile:nth-child(2) {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
-                min-height: 250px;
-            }
+        .marquee-content {
+            animation: marquee 30s linear infinite;
         }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="nav-logo">STUDIO_CD</div>
-            <ul class="nav-links">
-                <li><a href="#work" class="nav-link">Work</a></li>
-                <li><a href="#process" class="nav-link">Process</a></li>
-                <li><a href="#pricing" class="nav-link">Pricing</a></li>
-            </ul>
-            <button class="nav-cta" onclick="scrollToSection('pricing')">Connect</button>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header>
-        <div class="hero-container">
-            <div>
-                <div class="hero-tag">Engineered for Tech</div>
-                <h1 class="hero-title">Make your startup <span class="highlight">impossible</span> to scroll past.</h1>
-                <p class="hero-subtitle">{{ c.hero.subheadline }}</p>
-                <button class="hero-cta" onclick="scrollToSection('pricing')">
-                    Deploy Creative <span class="material-symbols-outlined">terminal</span>
-                </button>
-            </div>
-            <div class="hero-visual">
-                <img class="hero-visual-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKJbDxtD-qX9TfnsJ_sPa4beFndkF4U2vHa85Cn4yC6G-jRypOfcVbRjt54UF4PJXI4FzCGF-3xR2poBaOx68hY7Y6LufypE6ApHpjoTc6Jyq4Vkls9nCsiLExrBFEkdOgloh7IrMWW_YGrOz5xBMpaVSgVnH9ltmLmjlJgwb4t1QqGRotUf0JGppz-aXvNVWOHe69pLQ4N8bpWOGX4akT9rI7JmqZ9-RLLeVsHBk_WeDzjAsADJsHzWiDyiPbc0FWP7GSr-GjHuo" alt="Hero video frame">
-            </div>
-        </div>
-    </header>
-
-    <!-- Client Marquee -->
-    <div class="marquee-section">
-        <div class="marquee-content">
-            <span>Cybersecurity startup</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>AI platform</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>Developer tool</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>Fintech</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>SaaS</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>Cybersecurity startup</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>AI platform</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>Developer tool</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>Fintech</span>
-            <span class="material-symbols-outlined">code</span>
-            <span>SaaS</span>
-        </div>
+<body class="bg-white text-on-surface font-body-md selection:bg-custom-butter selection:text-custom-brown overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="w-full top-0 sticky bg-white border-b-2 border-custom-brown z-50 rounded-full rounded-3xl">
+<div class="flex justify-between items-center px-margin-desktop py-stack-xs max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-black text-custom-burgundy">
+      STUDIO_CD
     </div>
+<ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
+<li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
+<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
+<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
+</ul>
+<button class="bg-custom-burgundy text-white neo-brutal-border px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full rounded-2xl">
+      Connect
+    </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="pt-40 pb-20 px-gutter md:px-margin-desktop min-h-screen flex flex-col justify-center relative overflow-hidden bg-white border-b-2 border-custom-brown">
+<div class="absolute inset-0 code-pattern"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-bento-gap max-w-7xl mx-auto w-full relative z-10">
+<!-- Text Content -->
+<div class="lg:col-span-7 flex flex-col justify-center items-start">
+<div class="relative inline-block mb-6">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#121212] rounded-full rounded-xl">Engineered for Tech</span>
+</div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-custom-brown mb-6 relative z-10 font-black">
+                    Make your startup <br class="hidden md:block"/>
+<span class="text-custom-burgundy relative inline-block bg-custom-butter px-2 transform -skew-x-6 rounded-xl">
+                        impossible
+</span>
+                    to scroll past.
+                </h1>
+<p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mb-10 border-l-4 border-custom-burgundy pl-4">
+                    {{ c.hero.subheadline }}
+                </p>
+<div class="relative">
+<button class="bg-custom-burgundy text-white neo-brutal-border px-8 py-4 font-label-mono text-label-mono uppercase text-lg hover:-translate-y-1 hover:-translate-x-1 shadow-[6px_6px_0px_0px_#121212] transition-all flex items-center gap-3 z-20 relative rounded-xl rounded-2xl">
+                        Deploy Creative <span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+</div>
+<!-- Hero Visual (Showreel Frame) -->
+<div class="lg:col-span-5 relative mt-16 lg:mt-0">
+<div class="aspect-[3/4] w-full max-w-sm mx-auto bg-custom-brown neo-brutal-border shadow-[12px_12px_0px_0px_#800020] overflow-hidden relative group rounded-3xl">
+<!-- Placeholder for video -->
+<div class="bg-cover bg-center w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="A dynamic, brightly lit vertical video frame showing a fast-paced tech montage. The scene features a young diverse team working excitedly around a glowing laptop in a modern industrial loft office. The lighting is high-contrast, cinematic, and saturated with electric blue and bright white tones, conveying a sense of urgent, creative energy typical of a modern TikTok or Reels showreel." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKJbDxtD-qX9TfnsJ_sPa4beFndkF4U2vHa85Cn4yC6G-jRypOfcVbRjt54UF4PJXI4FzCGF-3xR2poBaOx68hY7Y6LufypE6ApHpjoTc6Jyq4Vkls9nCsiLExrBFEkdOgloh7IrMWW_YGrOz5xBMpaVSgVnH9ltmLmjlJgwb4t1QqGRotUf0JGppz-aXvNVWOHe69pLQ4N8bpWOGX4akT9rI7JmqZ9-RLLeVsHBk_WeDzjAsADJsHzWiDyiPbc0FWP7GSr-GjHuo')"></div>
+<!-- Play Overlay -->
+<div class="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+<div class="w-20 h-20 bg-custom-butter border-4 border-custom-brown flex items-center justify-center shadow-[4px_4px_0px_0px_#121212] text-custom-brown transform hover:scale-110 transition-transform rounded-full">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="absolute bottom-0 left-0 right-0 h-2 bg-custom-brown border-t-2 border-custom-brown">
+<div class="h-full bg-custom-butter w-1/3"></div>
+</div>
+</div>
+<!-- Editing Marker Sticker -->
+<div class="absolute top-1/2 -right-8 bg-custom-butter text-custom-brown px-3 py-1 neo-brutal-border sticker-rotate-2 font-label-mono text-xs z-20 shadow-[4px_4px_0px_0px_#121212] rounded-full">
+                    [init run_sequence]
+                </div>
+</div>
+</div>
+</header>
+<!-- Client Marquee -->
+<div class="border-b-2 border-custom-brown bg-custom-butter py-4 marquee-container">
+<div class="marquee-content font-display-2xl text-[40px] leading-none uppercase tracking-tight text-custom-brown font-black flex items-center gap-8">
+<span class="">Cybersecurity startup</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">AI platform</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">Developer tool</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">Fintech</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">SaaS</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<!-- Repeat for seamless loop -->
+<span class="">Cybersecurity startup</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">AI platform</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">Developer tool</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">Fintech</span>
+<span class="material-symbols-outlined text-custom-burgundy">code</span>
+<span class="">SaaS</span>
+</div>
+</div>
+<!-- The Engineer's Edge Section -->
+<section class="py-24 bg-custom-brown text-white relative overflow-hidden border-b-2 border-custom-brown" id="engineers-edge">
+<!-- Abstract Tech Background -->
+<div class="absolute inset-0 opacity-10 font-label-mono text-xs whitespace-pre select-none pointer-events-none p-4">
+const system = new HighPerformanceEngine({
+    mode: 'production',
+    target: 'developer_audience',
+    creative_tier: 'premium'
+});
 
-    <!-- Engineer's Edge Section -->
-    <section class="engineers-edge">
-        <div class="edge-tag">Built by an Engineer, not an Agency</div>
-        <h2 class="section-title">The Engineer's Edge.</h2>
-        <p class="edge-text">
-            I was a software engineer in cybersecurity. I don't just 'make videos'; <span class="edge-highlight">I understand your architecture, your users, and why your product actually matters.</span> Stop wasting time explaining APIs to ad agencies.
+async function deployCampaign(product) {
+    await analyzeArchitecture(product);
+    await understandUsers(product);
+    return generateUnignorableContent(product);
+}
+
+// Executing...
+// 0x7FFF8000
+// &gt; Analyzing attack vectors...
+// &gt; Mapping CI/CD pipelines...
+// &gt; Synthesizing value prop...
+    </div>
+<div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop relative z-10 text-center">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-full rounded-xl">Built by an Engineer, not an Agency</span>
+<h2 class="font-display-lg-mobile md:font-display-lg text-custom-butter mb-8 font-black">The Engineer's Edge.</h2>
+<p class="font-body-lg text-white/90 max-w-3xl mx-auto text-xl leading-relaxed font-medium">
+            I was a software engineer in cybersecurity. I don't just 'make videos'; <span class="text-custom-butter bg-custom-burgundy px-2 rounded-lg rounded-xl">I understand your architecture, your users, and why your product actually matters.</span> Stop wasting time explaining APIs to ad agencies.
         </p>
-    </section>
-
-    <!-- Main Content -->
-    <main>
-        <!-- Trusted By Section -->
-        <section style="text-align: center;">
-            <h3 style="font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 32px; color: var(--custom-brown);">Trusted by Technical Teams</h3>
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 48px; opacity: 0.8; font-size: 32px; font-weight: 900; color: var(--custom-brown);">
-                <div>CY<span style="color: var(--custom-burgundy);">ERA</span></div>
-                <div>SCALE<span style="color: var(--custom-burgundy);">OPS</span></div>
-                <div>MATE<span style="color: var(--custom-burgundy);">SECURITY</span></div>
-                <div>APP<span style="color: var(--custom-burgundy);">CHARGE</span></div>
-            </div>
-        </section>
-
-        <!-- Portfolio Grid Section -->
-        <section id="work" style="padding: 80px 64px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; gap: 48px;">
-                <div style="flex: 1; min-width: 300px;">
-                    <h2 class="section-title" style="margin-bottom: 12px;">The work, in motion.</h2>
-                    <p style="font-size: 16px; line-height: 1.6; color: var(--custom-brown); max-width: 600px; border-left: 4px solid var(--custom-burgundy); padding-left: 16px; font-weight: 500;">High-performing creative designed specifically for the timeline. I'm not a social agency—I'm a tech insider.</p>
-                </div>
-                <button style="font-family: 'Space Mono', monospace; text-transform: uppercase; font-weight: 700; font-size: 12px; color: var(--custom-brown); background: none; border: none; border-bottom: 4px solid var(--custom-brown); padding-bottom: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0;" onclick="alert('View all projects')">
+</div>
+</section>
+<!-- Main Content Canvas -->
+<main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
+<!-- Trusted By Section -->
+<section class="py-12 text-center" id="trusted">
+<h3 class="font-label-mono uppercase text-custom-brown mb-8 tracking-widest font-bold">Trusted by Technical Teams</h3>
+<div class="flex flex-wrap justify-center items-center gap-12 opacity-80 hover:opacity-100 transition-all duration-300"><div class="font-display-lg-mobile font-black text-custom-brown">CY<span class="text-custom-burgundy">ERA</span></div><div class="font-display-lg-mobile font-black text-custom-brown">SCALE<span class="text-custom-burgundy">OPS</span></div><div class="font-display-lg-mobile font-black text-custom-brown">MATE<span class="text-custom-burgundy">SECURITY</span></div><div class="font-display-lg-mobile font-black text-custom-brown">APP<span class="text-custom-burgundy">CHARGE</span></div></div>
+</section>
+<!-- Portfolio Grid Section -->
+<section class="scroll-mt-32" id="work">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+<div>
+<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-headline-md text-custom-brown font-black">The work, in motion.</h2>
+<p class="font-body-lg text-custom-brown font-medium mt-2 max-w-2xl border-l-4 border-custom-burgundy pl-4">High-performing creative designed specifically for the timeline. I'm not a social agency—I'm a tech</p>
+</div>
+<button class="font-label-mono uppercase flex items-center gap-2 text-custom-brown hover:text-custom-burgundy transition-colors border-b-4 border-custom-brown hover:border-custom-burgundy pb-1 font-bold">
                     View all projects <span class="material-symbols-outlined">arrow_outward</span>
-                </button>
-            </div>
-
-            <!-- Bento Grid -->
-            <div class="portfolio-grid">
-                <!-- Large Vertical Tile -->
-                <div class="portfolio-tile">
-                    <div class="portfolio-label">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span> 1.2M views
+</button>
+</div>
+<!-- Bento Grid Portfolio -->
+<div class="grid grid-cols-1 md:grid-cols-12 auto-rows-[300px] gap-bento-gap">
+<!-- Large Vertical Tile -->
+<div class="md:col-span-4 md:row-span-2 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A stylized portrait layout of a dynamic tech founder speaking animatedly into a microphone. The background is a vibrant, neon-lit server room. The image has a heavy neo-brutalism aesthetic with thick black outlines, stark contrast, and electric blue highlights. The lighting is dramatic and colorful, emphasizing a modern internet-native vlog style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 1.2M views
                     </div>
-                    <div class="portfolio-content">
-                        <div class="portfolio-title">DataShield AI</div>
-                        <div class="portfolio-desc">Founder-led cybersecurity series</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">DataShield AI</h3>
+<p class="font-body-md text-custom-butter font-mono">Founder-led cybersecurity series</p>
+</div>
+</div>
+<!-- Horizontal Tile -->
+<div class="md:col-span-8 md:row-span-1 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A wide landscape image showcasing a sleek, dark-mode dashboard interface floating in a 3D isometric perspective. Bright coral and electric blue data visualization charts pop against the dark background. The scene includes abstract geometric shapes and subtle motion blur to suggest speed and data processing. The aesthetic is clean, modern, and highly technical." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArUMMRp6bbcOAicQ-5fyUJSd9YowUmi0pWaIt8ThsegU_m86rTIBjQa16LNo5dDlorv2cfnUrZ-SDkNui4o53ybSOlwwsOqS1hoicQ9Amav77fESp6HCnOHGddqqQDywRNu8lJHsAYlCQ75e1ZbiPg2h-7Yccp0xO9JDG040o4iqt0txnolTQHK2Iam4kiH7PIJgEPCD-GwmMUxKcJHkEIJNx5cjzJzOlSnOksgNim5biPRgVRtV8OfwJYKsk9Jhb8vnqVZrsQ_r8')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 right-4 bg-white text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border sticker-rotate-3 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+                        Product Storytelling
                     </div>
-                </div>
-
-                <!-- Horizontal Tile -->
-                <div class="portfolio-tile">
-                    <div class="portfolio-label">Product Storytelling</div>
-                    <div class="portfolio-content">
-                        <div class="portfolio-title">DevFlow Launch</div>
-                        <div class="portfolio-desc">Making CI/CD pipelines cinematic.</div>
-                    </div>
-                </div>
-
-                <!-- Stat Tile -->
-                <div class="portfolio-tile" style="background: var(--custom-butter); border-color: var(--custom-butter); display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; gap: 12px;">
-                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--custom-burgundy);">monitoring</span>
-                    <div style="color: var(--custom-brown);">
-                        <div style="font-size: 28px; font-weight: 900; margin-bottom: 4px;">+340%</div>
-                        <div style="font-size: 12px; font-weight: 600;">Increase in inbound demos</div>
-                    </div>
-                </div>
-
-                <!-- Another Tile -->
-                <div class="portfolio-tile">
-                    <div class="portfolio-content">
-                        <div class="portfolio-title">Employer Branding</div>
-                        <div class="portfolio-desc">Hiring top-tier devs.</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Pricing Section -->
-        <section id="pricing">
-            <h2 class="section-title">Pricing</h2>
-            <div class="packages-container">
-                {% for package in c.packages['items'] %}
-                <div class="package-card">
-                    <div>
-                        <div class="package-tag">PACKAGE {{ loop.index }}: {{ package.name }}</div>
-                        <h3 class="package-name">{{ package.subtitle }}</h3>
-                        <p class="package-desc">{{ package.description }}</p>
-                        {% if package.minimumCommitment %}
-                        <div class="package-commitment">Minimum commitment: {{ package.minimumCommitment }}</div>
-                        {% endif %}
-                        <div class="package-includes-label">Includes:</div>
-                        <div class="package-list">
-                            {% for item in package.includes %}
-                            <div class="package-item">{{ item }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="package-goal"><strong>Goal:</strong> {{ package.goal }}</div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div>
-                <div class="footer-logo">STUDIO_CD</div>
-                <div class="footer-credit">
-                    // ©2024 STUDIO_CD — BORN IN TECH.<br>
-                    // ENGINEERED FOR CREATIVES.
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    </script>
-</body>
-</html>
+<div class="absolute bottom-6 left-6 border-l-4 border-custom-butter pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">DevFlow Launch</h3>
+<p class="font-body-md text-white/80 font-mono">Making CI/CD pipelines cinematic.</p>
+</div>
+</div>
+<!-- Square Tile 1 -->
+<div class="md:col-span-4 md:row-span-1 relative group bg-custom-butter neo-brutal-border p-6 flex flex-col justify-between neo-brutal-shadow-hover transition-all duration-300 shadow-[6px_6px_0px_0px_#121212] rounded-3xl">
+<span class="material-symbols-outlined text-[48px] text-custom-burgundy">monitoring</span>
+<div class="border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-custom-brown mb-2 font-black">+340%</h3>
+<p class="font-body-md text-custom-brown font-bold">Increase in inbound demos for SecOps client.</p>
+</div>
+</div>
+<!-- Square Tile 2 -->
+<div class="md:col-span-4 md:row-span-1 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A close up, high-contrast shot of a mechanical keyboard and hands typing rapidly. The lighting is low-key with intense electric blue under-glow from the keys. The style mimics an energetic, fast-paced 'day in the life of a developer' TikTok aesthetic, with subtle motion blur on the hands." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAT3zsffb7H0l6JhXfYOtOiomsX_AfGp8hH3lx7RWKma-kRt_3OHt_Rw4EtVIqAyQ5Nad3RpxzuzdDd1D066n3zX7rbF3DCEEgc02aiU1t2B-UvCBTwWAwoQXltk1GD5jKbq6zGRAUBCljBG1WmbYSfsQCrPZkWDrZ3vcpm-0l1bQ9ed9b663TCQB3iU4y3FtxSkuShWgsZxUWDPUAmN9reTNTSgf5nVru4iElYdFpHrOGvujqWMQtPcuDwsFB4CqAJaHwugTCX7So')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute bottom-6 left-6 border-l-4 border-white pl-4">
+<h3 class="font-body-lg font-black text-white mb-1">Employer Branding</h3>
+<p class="font-body-md text-white/80 font-mono">Hiring top-tier devs.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="py-20" id="pricing">
+<h2 class="font-display-lg-mobile md:font-headline-md text-custom-brown mb-12 text-center font-black">Pricing</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+<div class="bg-white neo-brutal-border p-8 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
+<div class="mb-6">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#121212] font-bold mb-4">PACKAGE 1: LAUNCH</span>
+<h3 class="font-headline-md text-custom-brown mb-2 font-bold">{{ c.packages['items'][0].subtitle }}</h3>
+<p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][0].description }}</p>
+</div>
+<div class="border-t-2 border-custom-brown pt-6 flex-grow">
+<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-4 tracking-wider">Includes:</h4>
+<ul class="space-y-3 font-body-md text-custom-brown mb-8 font-medium">
+{% for item in c.packages['items'][0].includes %}
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-xl">check_circle</span> {{ item }}</li>
+{% endfor %}
+</ul>
+<div class="bg-custom-butter/20 p-4 rounded-2xl border-l-4 border-custom-burgundy mb-6">
+<p class="font-body-md text-custom-brown"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full bg-custom-butter text-custom-brown neo-brutal-border py-4 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2">Initialize Launch <span class="material-symbols-outlined">rocket_launch</span></button>
+</div>
+</div>
+<div class="bg-custom-brown neo-brutal-border p-8 flex flex-col h-full text-white shadow-[8px_8px_0px_0px_#800020] rounded-3xl relative overflow-hidden">
+<div class="mb-6 relative z-10">
+<span class="bg-custom-burgundy text-white px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#FFF200] font-bold mb-4">PACKAGE 2: BOOST</span>
+<h3 class="font-headline-md text-white mb-2 font-bold">{{ c.packages['items'][1].subtitle }}</h3>
+<p class="font-body-md text-white/90 font-medium">{{ c.packages['items'][1].description }}</p>
+{% if c.packages['items'][1].minimumCommitment %}
+<p class="font-label-mono text-sm text-custom-butter mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
+{% endif %}
+</div>
+<div class="border-t-2 border-white/20 pt-6 flex-grow relative z-10">
+<h4 class="font-label-mono uppercase text-custom-butter font-bold mb-4 tracking-wider">Includes:</h4>
+<ul class="space-y-3 font-body-md text-white/90 mb-8">
+{% for item in c.packages['items'][1].includes %}
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-butter text-xl">check_circle</span> {{ item }}</li>
+{% endfor %}
+</ul>
+<div class="bg-white/5 p-4 rounded-2xl border-l-4 border-custom-butter mb-6">
+<p class="font-body-md text-white"><strong class="text-custom-butter font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
+</div>
+</div>
+<div class="mt-auto relative z-10">
+<button class="w-full bg-custom-burgundy text-white neo-brutal-border border-white py-4 font-label-mono uppercase hover:bg-white hover:text-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#FFF200] rounded-2xl flex items-center justify-center gap-2">Deploy Boost <span class="material-symbols-outlined">bolt</span></button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full mt-stack-xl bg-custom-brown text-white border-t-4 border-custom-burgundy">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto">
+<div>
+<div class="font-headline-lg text-headline-lg font-black text-custom-butter">
+        STUDIO_CD
+      </div>
+<div class="mt-4 text-white/70 font-mono text-sm">
+        // ©2024 STUDIO_CD — BORN IN TECH.<br/>// ENGINEERED FOR CREATIVES.
+      </div>
+</div>
+</div></footer></main></body></html>
