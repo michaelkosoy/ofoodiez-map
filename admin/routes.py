@@ -33,6 +33,11 @@ def hitech_emails():
 def hitech_content():
     return render_template('admin/hitech_content.html')
 
+@admin_bp.route('/portfolio/content')
+@login_required
+def portfolio_content():
+    return render_template('admin/portfolio_content.html')
+
 @admin_bp.route('/members')
 @login_required
 def members():
