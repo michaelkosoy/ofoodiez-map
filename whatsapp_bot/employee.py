@@ -83,6 +83,7 @@ def start(user, conv):
     # Returning advocate → show what they submitted so they can edit/remove it.
     # One company jumps straight to the edit menu; several → pick which first.
     company_ids = _advocate_company_ids(user)
+    logger.info("wa employee.start: user=%s companies=%s", user.id, company_ids)
     if len(company_ids) == 1:
         return _open_edit_menu(user, conv, company_ids[0])
     if company_ids:

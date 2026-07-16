@@ -123,6 +123,11 @@ def webhook():
             "media_url": form.get("MediaUrl0"),
             "media_content_type": form.get("MediaContentType0"),
         }
+        # ponytail: temp diagnostic — the audit table doesn't store the button
+        # payload/text, so log them to pin down button-tap routing. Remove once done.
+        logger.info("wa webhook in: sid=%s from=%s payload=%r btntext=%r body=%r",
+                    message_sid, from_phone, form.get("ButtonPayload"),
+                    form.get("ButtonText"), body[:80])
         parsed_command = router.handle(inbound)
     except Exception as exc:
         db.session.rollback()  # clear any aborted transaction so we can log + reply
