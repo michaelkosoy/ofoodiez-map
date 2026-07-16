@@ -99,8 +99,34 @@
         }
       ]
     },
+    "workflow": {
+      "title": "How we work",
+      "subtitle": "A complete content partner from strategy to publishing",
+      "steps": [
+        {
+          "title": "Strategy",
+          "description": "Organized calendar & KPIs"
+        },
+        {
+          "title": "Creative",
+          "description": "Concepts & storytelling"
+        },
+        {
+          "title": "Film",
+          "description": "Shoot at your offices"
+        },
+        {
+          "title": "Edit",
+          "description": "Produce & perfect"
+        },
+        {
+          "title": "Upload",
+          "description": "Publish & amplify"
+        }
+      ]
+    },
     "process": {
-      "title": "From company story to content engine",
+      "title": "Full engagement process",
       "steps": [
         {
           "number": 1,

@@ -269,6 +269,41 @@ function renderEditor() {
   }
   html += `<button class="btn btn-small" onclick="addWhyMeCard()">+ Add Card</button>`;
 
+  // Workflow
+  html += `
+    <div class="section-title">Workflow Section</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="workflow-title" value="${escapeHtml(c.workflow?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subtitle</label>
+      <input type="text" id="workflow-subtitle" value="${escapeHtml(c.workflow?.subtitle || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Workflow Steps</div>
+  `;
+
+  if (c.workflow?.steps) {
+    c.workflow.steps.forEach((step, i) => {
+      html += `
+        <div class="sub-card">
+          <div class="editor-field">
+            <label>Step Title</label>
+            <input type="text" id="workflow-title-${i}" value="${escapeHtml(step.title || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Step Description</label>
+            <textarea id="workflow-desc-${i}">${escapeHtml(step.description || '')}</textarea>
+          </div>
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeWorkflowStep(${i})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `<button class="btn btn-small" onclick="addWorkflowStep()">+ Add Workflow Step</button>`;
+
   // Process
   html += `
     <div class="section-title">Process Section</div>
@@ -554,6 +589,21 @@ function collectData() {
     i++;
   }
 
+  // Workflow
+  c.workflow = {
+    title: document.getElementById('workflow-title').value,
+    subtitle: document.getElementById('workflow-subtitle').value,
+    steps: [],
+  };
+  i = 0;
+  while (document.getElementById(`workflow-title-${i}`)) {
+    c.workflow.steps.push({
+      title: document.getElementById(`workflow-title-${i}`).value,
+      description: document.getElementById(`workflow-desc-${i}`).value,
+    });
+    i++;
+  }
+
   // Process
   c.process = {
     title: document.getElementById('process-title').value,
@@ -759,6 +809,20 @@ function addPackageItem(i) {
 function removePackageItem(i, j) {
   const data = collectData();
   data.portfolio.packages.items[i].includes.splice(j, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addWorkflowStep() {
+  const data = collectData();
+  data.portfolio.workflow.steps.push({title: '', description: ''});
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeWorkflowStep(i) {
+  const data = collectData();
+  data.portfolio.workflow.steps.splice(i, 1);
   portfolioContent = data;
   renderEditor();
 }
