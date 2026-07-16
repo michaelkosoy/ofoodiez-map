@@ -220,13 +220,14 @@
 <body class="bg-white text-on-surface font-body-md selection:bg-custom-butter selection:text-custom-brown overflow-x-hidden">
 <!-- TopNavBar -->
 <nav class="w-full top-0 sticky bg-white border-b-2 border-custom-brown z-50 rounded-full rounded-3xl">
-<div class="flex justify-between items-center px-margin-desktop py-stack-xs max-w-container-max mx-auto">
+<div class="flex justify-between items-center px-gutter md:px-margin-desktop py-stack-xs max-w-container-max mx-auto">
 <div class="flex flex-col items-start gap-0">
       <div class="font-headline-md text-headline-md font-black text-custom-burgundy leading-tight">
         <span class="text-sm font-label-bold">the</span> <span class="text-2xl">Studio</span>
       </div>
       <span class="font-label-mono text-label-mono text-xs text-custom-brown">by Ofoodiez</span>
     </div>
+<div class="hidden md:flex items-center gap-8">
 <ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
 <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
 <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
@@ -235,6 +236,10 @@
 <button class="bg-custom-burgundy text-white neo-brutal-border px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full rounded-2xl">
       Connect
     </button>
+</div>
+<button class="md:hidden bg-custom-burgundy text-white neo-brutal-border p-2 font-label-bold text-label-bold rounded-full rounded-2xl">
+  <span class="material-symbols-outlined">menu</span>
+</button>
 </div>
 </nav>
 <!-- Hero Section -->
@@ -493,7 +498,8 @@ async function deployCampaign(product) {
 <p class="font-body-md text-custom-brown"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
 </div>
 </div>
-<div class="mt-auto">
+<div class="mt-auto pt-4 border-t-2 border-custom-brown">
+<p class="text-center font-label-bold text-label-bold text-custom-burgundy mb-3">₪7,000 + 2K USD</p>
 <button class="w-full bg-custom-butter text-custom-brown neo-brutal-border py-4 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2">Initialize Launch <span class="material-symbols-outlined">rocket_launch</span></button>
 </div>
 </div>
@@ -520,7 +526,8 @@ async function deployCampaign(product) {
 <p class="font-body-md text-white"><strong class="text-custom-butter font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
 </div>
 </div>
-<div class="mt-auto relative z-10">
+<div class="mt-auto relative z-10 pt-4 border-t-2 border-white/20">
+<p class="text-center font-label-bold text-label-bold text-custom-butter mb-3">From ₪10,000/month</p>
 <button class="w-full bg-custom-burgundy text-white neo-brutal-border border-white py-4 font-label-mono uppercase hover:bg-white hover:text-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#FFF200] rounded-2xl flex items-center justify-center gap-2">Deploy Boost <span class="material-symbols-outlined">bolt</span></button>
 </div>
 </div>
