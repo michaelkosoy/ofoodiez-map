@@ -571,28 +571,32 @@ async function deployCampaign(product) {
 </div>
 </footer></main>
 <script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const sideMenu = document.getElementById('side-menu');
-  const menuClose = document.getElementById('menu-close');
-  const menuOverlay = document.getElementById('menu-overlay');
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sideMenu = document.getElementById('side-menu');
+    const menuClose = document.getElementById('menu-close');
+    const menuOverlay = document.getElementById('menu-overlay');
 
-  // Open menu
-  menuToggle.addEventListener('click', () => {
-    sideMenu.classList.remove('hidden');
-  });
+    if (!menuToggle || !sideMenu || !menuClose || !menuOverlay) return;
 
-  // Close menu
-  const closeMenu = () => {
-    sideMenu.classList.add('hidden');
-  };
+    // Open menu
+    menuToggle.addEventListener('click', () => {
+      sideMenu.classList.remove('hidden');
+    });
 
-  menuClose.addEventListener('click', closeMenu);
-  menuOverlay.addEventListener('click', closeMenu);
+    // Close menu
+    const closeMenu = () => {
+      sideMenu.classList.add('hidden');
+    };
 
-  // Close menu when clicking on a link
-  const menuLinks = sideMenu.querySelectorAll('a');
-  menuLinks.forEach(link => {
-    link.addEventListener('click', closeMenu);
+    menuClose.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
+    // Close menu when clicking on a link
+    const menuLinks = sideMenu.querySelectorAll('a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
   });
 </script>
 </body></html>
