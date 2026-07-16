@@ -221,8 +221,11 @@
 <!-- TopNavBar -->
 <nav class="w-full top-0 sticky bg-white border-b-2 border-custom-brown z-50 rounded-full rounded-3xl">
 <div class="flex justify-between items-center px-margin-desktop py-stack-xs max-w-container-max mx-auto">
-<div class="font-headline-md text-headline-md font-black text-custom-burgundy">
-      STUDIO_CD
+<div class="flex flex-col items-start gap-0">
+      <div class="font-headline-md text-headline-md font-black text-custom-burgundy leading-tight">
+        <span class="text-sm font-label-bold">the</span> <span class="text-2xl">Studio</span>
+      </div>
+      <span class="font-label-mono text-label-mono text-xs text-custom-brown">by Ofoodiez</span>
     </div>
 <ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
 <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
@@ -402,12 +405,11 @@ async function deployCampaign(product) {
 </section>
 <!-- Process Timeline Section -->
 <section id="process" class="py-16 px-gutter md:px-margin-desktop">
-<div class="max-w-full">
+<div class="max-w-container-max mx-auto">
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
 <!-- Horizontal Timeline -->
-<div class="flex flex-col md:flex-row gap-6 justify-center overflow-x-auto w-full md:px-4">
-<div class="flex gap-6 w-full md:w-auto mx-auto md:mx-0 md:justify-between">
+<div class="flex flex-col md:flex-row gap-4 md:gap-6 justify-between w-full">
 
 <!-- Step 1 -->
 <div class="flex-1 bg-white neo-brutal-border p-6 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
@@ -527,7 +529,7 @@ async function deployCampaign(product) {
 </section>
 <!-- Footer -->
 <footer class="w-full mt-stack-xl bg-custom-brown text-white border-t-4 border-custom-burgundy">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg w-full">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto w-full">
 <div>
 <div class="font-headline-lg text-headline-lg font-black text-custom-butter">
 <span class="text-white text-lg font-normal">the</span> Studio
