@@ -33,6 +33,16 @@ PROFILE_WORDS = {
 }
 
 
+def _wants_menu(payload, text):
+    """The Back-to-Menu button + the reset keywords. We also match the button's
+    visible label, not just payload BACK_TO_MENU: a tapped WA_CT_PROMPT button
+    arrives with its label as the body (e.g. '↩️ Back to Menu') and its payload id
+    isn't guaranteed to be BACK_TO_MENU across templates, so the label match is
+    what makes the button reliably reset."""
+    t = (text or "").strip().lower()
+    return payload == "BACK_TO_MENU" or "back to menu" in t or t in RESET_WORDS
+
+
 def handle(inbound):
     user = conversation.get_or_create_user(inbound["phone"], inbound.get("profile_name"))
     conv = conversation.get_state(user)
@@ -53,12 +63,12 @@ def handle(inbound):
     # Back-to-Menu / reset still escape, but just re-trigger sign-up while the
     # phone is still unregistered.
     if conv.flow == "registration":
-        if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
+        if _wants_menu(payload, text):
             return _entry(user, conv)
         return registration.handle(user, conv, payload, text)
 
     # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
-    if payload == "BACK_TO_MENU" or text.lower() in RESET_WORDS:
+    if _wants_menu(payload, text):
         return _entry(user, conv)
 
     # Editing your own details is a later feature — point them to Contact Us.
