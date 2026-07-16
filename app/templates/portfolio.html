@@ -220,10 +220,14 @@
 <body class="bg-white text-on-surface font-body-md selection:bg-custom-butter selection:text-custom-brown overflow-x-hidden">
 <!-- TopNavBar -->
 <nav class="w-full top-0 sticky bg-white border-b-2 border-custom-brown z-50 rounded-full rounded-3xl">
-<div class="flex justify-between items-center px-margin-desktop py-stack-xs max-w-container-max mx-auto">
-<div class="font-headline-md text-headline-md font-black text-custom-burgundy">
-      STUDIO_CD
+<div class="flex justify-between items-center px-gutter md:px-margin-desktop py-stack-xs max-w-container-max mx-auto">
+<div class="flex flex-col items-start gap-0">
+      <div class="font-headline-md text-headline-md font-black text-custom-burgundy leading-tight">
+        <span class="text-sm font-label-bold">the</span> <span class="text-2xl">Studio</span>
+      </div>
+      <span class="font-label-mono text-label-mono text-xs text-custom-brown">by Ofoodiez</span>
     </div>
+<div class="hidden md:flex items-center gap-8">
 <ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
 <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
 <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
@@ -233,7 +237,28 @@
       Connect
     </button>
 </div>
+<button id="menu-toggle" class="md:hidden bg-custom-burgundy text-white neo-brutal-border p-2 font-label-bold text-label-bold rounded-full rounded-2xl">
+  <span class="material-symbols-outlined">menu</span>
+</button>
+</div>
 </nav>
+<!-- Mobile Side Menu -->
+<div id="side-menu" class="hidden fixed inset-0 z-50 md:hidden">
+  <div class="absolute inset-0 bg-black/50" id="menu-overlay"></div>
+  <div class="absolute top-0 right-0 h-full w-64 bg-white neo-brutal-border shadow-[4px_4px_0px_0px_#121212] flex flex-col p-6">
+    <button id="menu-close" class="self-end mb-8">
+      <span class="material-symbols-outlined text-custom-burgundy">close</span>
+    </button>
+    <ul class="flex flex-col gap-6 font-label-bold text-label-bold uppercase tracking-widest">
+      <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
+      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
+      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
+    </ul>
+    <button class="mt-auto bg-custom-burgundy text-white neo-brutal-border px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full w-full">
+      Connect
+    </button>
+  </div>
+</div>
 <!-- Hero Section -->
 <header class="pt-40 pb-20 px-gutter md:px-margin-desktop min-h-screen flex flex-col justify-center relative overflow-hidden bg-white border-b-2 border-custom-brown">
 <div class="absolute inset-0 code-pattern"></div>
@@ -400,14 +425,83 @@ async function deployCampaign(product) {
 </div>
 </div>
 </section>
+<!-- Process Timeline Section -->
+<section id="process" class="py-12 px-gutter md:px-gutter lg:px-margin-desktop">
+<div class="mx-auto">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
+
+<!-- Timeline Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+
+<!-- Step 1 -->
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
+<span class="font-label-bold text-label-bold text-custom-burgundy font-black">1</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Discovery</h3>
+</div>
+<p class="font-body-md text-custom-brown text-sm">Understand your company, culture, hiring goals and audience.</p>
+</div>
+
+<!-- Step 2 -->
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
+<span class="font-label-bold text-label-bold text-custom-burgundy font-black">2</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Strategy</h3>
+</div>
+<p class="font-body-md text-custom-brown text-sm">Build content pillars, formats, calendar and KPIs.</p>
+</div>
+
+<!-- Step 3 -->
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
+<span class="font-label-bold text-label-bold text-custom-burgundy font-black">3</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Production</h3>
+</div>
+<p class="font-body-md text-custom-brown text-sm">Filming days at your offices. Creating authentic content.</p>
+</div>
+
+<!-- Step 4 -->
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
+<span class="font-label-bold text-label-bold text-custom-burgundy font-black">4</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Distribution</h3>
+</div>
+<p class="font-body-md text-custom-brown text-sm">Publish through your channels and amplify through my tech community.</p>
+</div>
+
+<!-- Step 5 -->
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
+<span class="font-label-bold text-label-bold text-custom-burgundy font-black">5</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Growth</h3>
+</div>
+<p class="font-body-md text-custom-brown text-sm">Analyze performance. Improve formats. Scale what works.</p>
+</div>
+
+</div>
+</div>
+</section>
 <!-- Pricing Section -->
 <section class="py-20" id="pricing">
 <h2 class="font-display-lg-mobile md:font-headline-md text-custom-brown mb-12 text-center font-black">Pricing</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
 <div class="bg-white neo-brutal-border p-8 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
 <div class="mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#121212] font-bold mb-4">PACKAGE 1: LAUNCH</span>
-<h3 class="font-headline-md text-custom-brown mb-2 font-bold">{{ c.packages['items'][0].subtitle }}</h3>
+<h3 class="font-display-lg text-custom-brown mb-3 font-black">Launch</h3>
+<div class="mb-4">
+<p class="font-headline-md text-custom-burgundy font-bold">₪7,000</p>
+<p class="font-body-md text-custom-brown text-sm">+ 2K USD success fee on referrals</p>
+</div>
 <p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][0].description }}</p>
 </div>
 <div class="border-t-2 border-custom-brown pt-6 flex-grow">
@@ -421,14 +515,20 @@ async function deployCampaign(product) {
 <p class="font-body-md text-custom-brown"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
 </div>
 </div>
-<div class="mt-auto">
-<button class="w-full bg-custom-butter text-custom-brown neo-brutal-border py-4 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2">Initialize Launch <span class="material-symbols-outlined">rocket_launch</span></button>
+<div class="mt-auto pt-4 border-t-2 border-custom-brown">
+<button class="w-full bg-custom-butter text-custom-brown neo-brutal-border py-4 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex flex-col items-center justify-center gap-2">
+<span class="text-sm font-label-bold">₪7,000 + 2K USD</span>
+<span class="flex items-center gap-2">Initialize Launch <span class="material-symbols-outlined">rocket_launch</span></span>
+</button>
 </div>
 </div>
 <div class="bg-custom-brown neo-brutal-border p-8 flex flex-col h-full text-white shadow-[8px_8px_0px_0px_#800020] rounded-3xl relative overflow-hidden">
 <div class="mb-6 relative z-10">
-<span class="bg-custom-burgundy text-white px-4 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block rounded-full shadow-[2px_2px_0px_0px_#FFF200] font-bold mb-4">PACKAGE 2: BOOST</span>
-<h3 class="font-headline-md text-white mb-2 font-bold">{{ c.packages['items'][1].subtitle }}</h3>
+<h3 class="font-display-lg text-custom-butter mb-3 font-black">Boost</h3>
+<div class="mb-4">
+<p class="font-headline-md text-custom-butter font-bold">From ₪10,000/month</p>
+<p class="font-body-md text-white/90 text-sm">Includes Launch package + 4 contents per month with stories</p>
+</div>
 <p class="font-body-md text-white/90 font-medium">{{ c.packages['items'][1].description }}</p>
 {% if c.packages['items'][1].minimumCommitment %}
 <p class="font-label-mono text-sm text-custom-butter mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
@@ -445,21 +545,58 @@ async function deployCampaign(product) {
 <p class="font-body-md text-white"><strong class="text-custom-butter font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
 </div>
 </div>
-<div class="mt-auto relative z-10">
-<button class="w-full bg-custom-burgundy text-white neo-brutal-border border-white py-4 font-label-mono uppercase hover:bg-white hover:text-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#FFF200] rounded-2xl flex items-center justify-center gap-2">Deploy Boost <span class="material-symbols-outlined">bolt</span></button>
+<div class="mt-auto relative z-10 pt-4 border-t-2 border-white/20">
+<button class="w-full bg-custom-burgundy text-white neo-brutal-border border-white py-4 font-label-mono uppercase hover:bg-white hover:text-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#FFF200] rounded-2xl flex flex-col items-center justify-center gap-2">
+<span class="text-sm font-label-bold">From ₪10,000/month</span>
+<span class="flex items-center gap-2">Deploy Boost <span class="material-symbols-outlined">bolt</span></span>
+</button>
 </div>
 </div>
 </div>
 </section>
 <!-- Footer -->
 <footer class="w-full mt-stack-xl bg-custom-brown text-white border-t-4 border-custom-burgundy">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto w-full">
 <div>
 <div class="font-headline-lg text-headline-lg font-black text-custom-butter">
-        STUDIO_CD
+<span class="text-white text-lg font-normal">the</span> Studio
+      </div>
+<div class="mt-2 text-custom-butter font-label-bold text-label-bold">
+        by Ofoodiez
       </div>
 <div class="mt-4 text-white/70 font-mono text-sm">
         // ©2024 STUDIO_CD — BORN IN TECH.<br/>// ENGINEERED FOR CREATIVES.
       </div>
 </div>
-</div></footer></main></body></html>
+</div>
+</footer></main>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sideMenu = document.getElementById('side-menu');
+    const menuClose = document.getElementById('menu-close');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    if (!menuToggle || !sideMenu || !menuClose || !menuOverlay) return;
+
+    // Open menu
+    menuToggle.addEventListener('click', () => {
+      sideMenu.classList.remove('hidden');
+    });
+
+    // Close menu
+    const closeMenu = () => {
+      sideMenu.classList.add('hidden');
+    };
+
+    menuClose.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
+    // Close menu when clicking on a link
+    const menuLinks = sideMenu.querySelectorAll('a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+  });
+</script>
+</body></html>
