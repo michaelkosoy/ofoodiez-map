@@ -1,40 +1,16 @@
 {
   "bot": {
-    "directory_desc": "These companies have employees active in our network ready to refer candidates. Start the bot on WhatsApp to connect with them.",
-    "directory_title": "Active Advocates Directory",
+    "page_title": "Referrals Bot — Ofoodiez HiTech",
+    "meta_description": "My WhatsApp referrals bot connects you with advocates inside top tech companies. Find companies, search advocates, and get real introductions.",
     "eyebrow": "Referrals Bot",
-    "faq": [
-      {
-        "a": "רפרל הוא הגשת מועמדות דרך עובד מתוך החברה — \"חבר מביא חבר\". קורות חיים שמגיעים דרך רפרל מקבלים בדרך כלל עדיפות על פני הגשה רגילה: הם עוברים ישירות למגייסים עם המלצה אישית, והסיכוי לקבל תשובה גבוה משמעותית.",
-        "q": "מה זה רפרל (Referral)?"
-      },
-      {
-        "a": "פותחים את הבוט בוואטסאפ, בוחרים חברה מרשימת החברות עם Advocates פעילים, ומצרפים קורות חיים. הבוט מחבר אתכם לעובד/ת בחברה שהתנדבו להגיש רפרלים — והם מגישים את המועמדות שלכם פנימית.",
-        "q": "איך עובד רפרל בוט?"
-      },
-      {
-        "a": "כלום — הבוט חינמי לגמרי למחפשי עבודה. הוא נבנה בשביל הקהילה.",
-        "q": "כמה עולה להשתמש ברפרל בוט?"
-      },
-      {
-        "a": "עשרות חברות מובילות בישראל ובעולם — Google, Meta, Microsoft, Amazon, Wix, monday.com, Fiverr ועוד. הרשימה המלאה מופיעה כאן בעמוד ומתעדכנת כל הזמן, וכל חברה בה מיוצגת על ידי עובד/ת פעיל/ה.",
-        "q": "לאילו חברות הייטק אפשר לקבל רפרל?"
-      },
-      {
-        "a": "שולחים הודעה לבוט בוואטסאפ ובוחרים להצטרף כ-Advocate. תקבלו קורות חיים של מועמדים רלוונטיים לחברה שלכם ותוכלו להגיש אותם פנימית — לעזור למישהו למצוא עבודה, ובדרך כלל גם ליהנות מבונוס גיוס.",
-        "q": "אני עובד/ת בהייטק — איך מצטרפים כ-Advocate?"
-      },
-      {
-        "a": "לא — אף אחד לא יכול להבטיח ראיון. רפרל כן מבטיח שקורות החיים שלכם ייכנסו למערכת עם המלצה של עובד מבפנים, וזה משפר משמעותית את הסיכוי לעבור את הסינון הראשוני בהייטק.",
-        "q": "האם רפרל מבטיח ראיון עבודה?"
-      }
-    ],
-    "faq_title": "שאלות נפוצות",
     "headline": "Real referrals.<br><em>Zero cold applications.</em>",
     "hero_sub": "Stop sending your resume into black holes. My automated WhatsApp bot connects you directly with employees inside companies you want to work at who have offered to refer candidates.",
-    "meta_description": "My WhatsApp referrals bot connects you with advocates inside top tech companies. Find companies, search advocates, and get real introductions.",
-    "page_title": "Referrals Bot — Ofoodiez HiTech",
+    "whatsapp_btn_text": "Start Referral Bot",
+    "whatsapp_btn_sub": "Free to use • Opens in WhatsApp",
+    "directory_title": "Active Advocates Directory",
+    "directory_desc": "These companies have employees active in our network ready to refer candidates. Start the bot on WhatsApp to connect with them.",
     "search_placeholder": "Search companies…",
+    "faq_title": "שאלות נפוצות",
     "steps": [
       {
         "num": "1",
@@ -49,8 +25,32 @@
         "text": "Get referred internally"
       }
     ],
-    "whatsapp_btn_sub": "Free to use • Opens in WhatsApp",
-    "whatsapp_btn_text": "Start Referral Bot"
+    "faq": [
+      {
+        "q": "מה זה רפרל (Referral)?",
+        "a": "רפרל הוא הגשת מועמדות דרך עובד מתוך החברה — \"חבר מביא חבר\". קורות חיים שמגיעים דרך רפרל מקבלים בדרך כלל עדיפות על פני הגשה רגילה, והסיכוי לקבל תשובה גבוה משמעותית"
+      },
+      {
+        "q": "איך עובד רפרל בוט?",
+        "a": "פותחים את הבוט בוואטסאפ, בוחרים חברה מרשימת החברות עם Advocates פעילים, ומצרפים קורות חיים. הבוט מחבר אתכם לעובד/ת בחברה שהתנדבו להגיש רפרלים — והם מגישים את המועמדות שלכם פנימית."
+      },
+      {
+        "q": "כמה עולה להשתמש ברפרל בוט?",
+        "a": "כלום — הבוט חינמי לגמרי למחפשי עבודה. הוא נבנה בשביל הקהילה."
+      },
+      {
+        "q": "לאילו חברות הייטק אפשר לקבל רפרל?",
+        "a": "עשרות חברות מובילות בישראל ובעולם — Google, Meta, Microsoft, Amazon, Wix, monday.com, Fiverr ועוד. הרשימה המלאה מופיעה כאן בעמוד ומתעדכנת כל הזמן, וכל חברה בה מיוצגת על ידי עובד/ת פעיל/ה."
+      },
+      {
+        "q": "אני עובד/ת בהייטק — איך מצטרפים כ-Advocate?",
+        "a": "שולחים הודעה לבוט בוואטסאפ ובוחרים להצטרף כ-Advocate. תקבלו קורות חיים של מועמדים רלוונטיים לחברה שלכם ותוכלו להגיש אותם פנימית — לעזור למישהו למצוא עבודה, ובדרך כלל גם ליהנות מבונוס גיוס."
+      },
+      {
+        "q": "האם רפרל מבטיח ראיון עבודה?",
+        "a": "לא — אף אחד לא יכול להבטיח ראיון. רפרל כן מבטיח שקורות החיים שלכם ייכנסו למערכת עם המלצה של עובד מבפנים, וזה משפר משמעותית את הסיכוי לעבור את הסינון הראשוני בהייטק."
+      }
+    ]
   },
   "community": {
     "counter_subtext": "No spam — one update a month, right before the next event.",
@@ -244,7 +244,7 @@
         "title": "Referrals Bot",
         "url": "/hitech/referrals-bot",
         "icon": "fas fa-robot",
-        "desc": "My WhatsApp bot connects you directly with advocates inside top tech companies. One message, real introductions.",
+        "desc": "My WhatsApp bot connects you directly with advocates inside top tech companies.",
         "cta": "Meet the bot"
       },
       {
@@ -255,11 +255,11 @@
         "cta": "Read the guide"
       },
       {
-        "title": "Chat with Me",
-        "url": "https://api.whatsapp.com/send?phone=972559218943",
+        "title": "CV AI Reviewer",
+        "url": "/hitech/cv-review",
         "icon": "fas fa-wand-magic-sparkles",
-        "desc": "Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.",
-        "cta": "Open WhatsApp"
+        "desc": "Review your CV and get recommendations on what to change to increase your chances of getting a call from HR",
+        "cta": "Open AI Reviewer"
       }
     ]
   }
