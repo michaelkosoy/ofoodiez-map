@@ -170,7 +170,7 @@ def handle(user, conv, inbound):
         return _handle_resume(user, conv, data, inbound)
 
     if step == "cand_explore_more":
-        return _handle_explore(user, conv, payload)
+        return _handle_explore(user, conv, payload, text)
 
     return start(user, conv)
 
@@ -450,21 +450,24 @@ def _handle_resume(user, conv, data, inbound):
         # still saved on the application for manual routing in the admin.
         _notify_ops(user, data.get("company_name", ""), "cv_no_email_advocate")
 
+    # Always offer "apply to another role?" — quick-reply buttons if the template
+    # is configured, else a plain-text yes/no (button taps are unreliable, so the
+    # typed fallback in _handle_explore covers both).
+    conversation.set_state(conv, "candidate", "cand_explore_more",
+                           {"company_id": data.get("company_id"), "company_name": data.get("company_name")})
     if WaConfig.WA_CT_EXPLORE_MORE:
-        conversation.set_state(conv, "candidate", "cand_explore_more",
-                               {"company_id": data.get("company_id"), "company_name": data.get("company_name")})
         messaging.send_buttons(user.phone, WaConfig.WA_CT_EXPLORE_MORE, {"1": str(recipients)})
     else:
-        # Flow done — leave it; no auto Welcome (user can type 'menu' to do more).
-        conversation.reset_state(conv)
-        messaging.send_prompt(user.phone, copy.CAND_SUBMITTED.format(
-            advocate=data.get("advocate_name", "the advocate"),
-            company=data.get("company_name", "the company")))
+        messaging.send_prompt(user.phone, copy.CAND_EXPLORE_MORE)
     return "cand_submitted"
 
 
-def _handle_explore(user, conv, payload):
-    if payload == "EXPLORE_YES":
+_EXPLORE_YES_WORDS = {"yes", "y", "yep", "yeah", "yup", "sure", "ok", "okay",
+                      "another", "more", "again", "👍", "✅"}
+
+
+def _handle_explore(user, conv, payload, text=""):
+    if payload == "EXPLORE_YES" or (text or "").strip().lower() in _EXPLORE_YES_WORDS:
         return start(user, conv)
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.CAND_FINISHED)

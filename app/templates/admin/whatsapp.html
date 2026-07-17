@@ -353,6 +353,8 @@ var COLS = {
         { title: "Method", field: "method", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
         { title: "Work email", field: "email", headerFilter: "input", minWidth: 170 },
         { title: "Referral link", field: "referral_link", formatter: linkCell, width: 110 },
+        { title: "Shares name", field: "share_contact", hozAlign: "center", width: 110, formatter: function (c) { return c.getValue() ? '✅' : '—'; } },
+        { title: "LinkedIn", field: "linkedin_url", formatter: linkCell, width: 90 },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
         { title: "Joined", field: "created", width: 150 },
         {
@@ -380,6 +382,8 @@ var COLS = {
                         { key: 'email', label: 'Work email', value: d.email },
                         { key: 'referral_link', label: 'Referral link', value: d.referral_link },
                         { key: 'role_title', label: 'Role title', value: d.title },
+                        { key: 'share_contact_with_candidate', label: 'Share name with candidate? (yes / no)', value: d.share_contact ? 'yes' : 'no' },
+                        { key: 'linkedin_url', label: 'LinkedIn URL (shown to candidate only if sharing)', value: d.linkedin_url },
                         { key: 'status', label: 'Status (active / inactive / pending)', value: d.status }
                     ], function (v) { putSave('/admin/api/whatsapp/advocates/' + d.id, v, c.getTable()); });
                 } else if (btn.dataset.a === 'delete') {
@@ -696,6 +700,15 @@ function openAdvocatesModal(company) {
               }
             },
             { title: 'Role / Title', field: 'role_title', editor: 'input', minWidth: 140 },
+            { title: 'Shares name', field: 'share_contact', hozAlign: 'center', width: 110,
+              editor: 'list', editorParams: { values: { true: 'Yes', false: 'No' } },
+              formatter: function(cell) { var v = cell.getValue(); return (v && v !== 'false' && v !== 'No') ? '✅' : '—'; } },
+            { title: 'LinkedIn', field: 'linkedin_url', editor: 'input', minWidth: 140,
+              formatter: function(cell) {
+                var v = cell.getValue();
+                return v ? '<a href="' + v + '" target="_blank" rel="noopener" style="color:#5A3A31;text-decoration:underline;">link ↗</a>' : '<span style="color:#ccc;">—</span>';
+              }
+            },
             { title: 'Status', field: 'status', editor: 'list',
               editorParams: { values: ['active', 'inactive', 'pending'] }, width: 110 },
             {
@@ -725,7 +738,7 @@ function openAdvocatesModal(company) {
         fetch('/admin/api/whatsapp/advocates/' + d.id, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: d.email, referral_link: d.referral_link, role_title: d.role_title, status: d.status })
+            body: JSON.stringify({ email: d.email, referral_link: d.referral_link, role_title: d.role_title, share_contact_with_candidate: d.share_contact, linkedin_url: d.linkedin_url, status: d.status })
         }).then(function(r) {
             if (!r.ok) {
                 Swal.fire({ icon: 'error', title: 'Save failed', timer: 1500, showConfirmButton: false });

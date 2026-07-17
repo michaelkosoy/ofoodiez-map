@@ -74,6 +74,8 @@ create table if not exists public.wa_advocates (
     email         text,                                -- work email for applications (email method)
     referral_link text,                                 -- self-serve coded link (link method)
     role_title    text,
+    share_contact_with_candidate boolean,               -- opt-in: candidate sees who referred them
+    linkedin_url  text,                                  -- optional, shown to candidate only when sharing is on
     status      text not null default 'active' check (status in ('active','pending','inactive')),
     created_at  timestamptz not null default now(),
     updated_at  timestamptz not null default now()

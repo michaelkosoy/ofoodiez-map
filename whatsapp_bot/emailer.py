@@ -129,8 +129,12 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
     return _post(payload)
 
 
-def send_referral_confirmed_email(to_email, candidate_name, advocate_name, company, role):
+def send_referral_confirmed_email(to_email, candidate_name, advocate_name, company, role,
+                                  share_contact=False, linkedin_url=""):
     """Tell the candidate an advocate confirmed their referral. Best-effort.
+
+    Opt-in privacy: the advocate is only named (first name + optional LinkedIn)
+    when ``share_contact`` is True; otherwise the referrer stays anonymous.
 
     Sent as PLAIN TEXT ONLY with a personal subject (no HTML, no links, no emoji
     in the subject) so Gmail files it in Primary, not Promotions — this is the
@@ -141,17 +145,28 @@ def send_referral_confirmed_email(to_email, candidate_name, advocate_name, compa
     if not api_key or not from_email or not to_email:
         return False
 
+    if share_contact and advocate_name:
+        who = f"{advocate_name} from {company}"
+        subject = f"{advocate_name} referred you at {company}"
+        linkedin_line = (f"\nConnect with them on LinkedIn: {linkedin_url}\n"
+                         if linkedin_url else "")
+    else:
+        who = f"someone at {company}"
+        subject = f"You've been referred at {company}"
+        linkedin_line = ""
+
     text_body = (
         f"Hey {candidate_name or 'there'}! 😊\n\n"
-        f"Great news — {advocate_name} from {company} just confirmed your referral "
-        f"for {role or 'the role'}.\n\n"
+        f"Great news — {who} just confirmed your referral "
+        f"for {role or 'the role'}.\n"
+        f"{linkedin_line}\n"
         f"Fingers crossed — we're rooting for you. 🤞\n\n"
         f"— The Ofoodiez team"
     )
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
         "from": {"email": from_email, "name": "Ofoodiez Referrals"},
-        "subject": f"{advocate_name} referred you at {company}",
+        "subject": subject,
         "content": [{"type": "text/plain", "value": text_body}],
     }
     return _post(payload)

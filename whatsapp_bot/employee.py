@@ -118,6 +118,9 @@ def handle(user, conv, payload, text):
     if step == "emp_details_confirm":
         return _handle_details_confirm(user, conv, data, text, payload)
 
+    if step == "emp_privacy_consent":
+        return _handle_privacy_consent(user, conv, data, text)
+
     if step == "emp_email":
         return _handle_email(user, conv, data, text)
 
@@ -272,9 +275,29 @@ def _handle_details_confirm(user, conv, data, text, payload):
         # Not a yes → treat the message as corrected details and re-parse.
         return _handle_details(user, conv, data, text)
     _persist_identity(user, data)
+    conversation.set_state(conv, "employee", "emp_privacy_consent", data)
+    messaging.send_prompt(user.phone, copy.EMP_PRIVACY)
+    return "emp_details_confirmed"
+
+
+def _handle_privacy_consent(user, conv, data, text):
+    """Opt-in consent for candidates to see who referred them. A LinkedIn URL
+    counts as a yes; an explicit yes shares the name only; anything else (incl.
+    'no'/'skip'/unrecognized) stays private — the safe default."""
+    t = (text or "").strip()
+    m = re.search(r"https?://\S+", t)          # a URL anywhere → they want it shared
+    url = m.group(0).rstrip(".,") if m else None
+    said_yes = any(w in _CONFIRM_WORDS for w in t.lower().split())
+    if url:
+        data["share_contact_with_candidate"] = True
+        data["linkedin_url"] = url
+    elif said_yes:
+        data["share_contact_with_candidate"] = True
+    else:
+        data["share_contact_with_candidate"] = False
     conversation.set_state(conv, "employee", "emp_method", data)
     _send_method_choice(user, data.get("company_name", "your company"))
-    return "emp_details_confirmed"
+    return "emp_privacy_consent"
 
 
 def _persist_identity(user, data):
@@ -287,6 +310,15 @@ def _persist_identity(user, data):
         user.email = data["email"]
     user.terms_accepted_at = user.terms_accepted_at or datetime.utcnow()
     db.session.commit()
+
+
+def _apply_privacy(advocate, data):
+    """Set the opt-in sharing flag + optional LinkedIn from the collected consent.
+    Only touches fields the flow actually captured, so edits don't clobber them."""
+    if "share_contact_with_candidate" in data:
+        advocate.share_contact_with_candidate = bool(data.get("share_contact_with_candidate"))
+    if data.get("linkedin_url"):
+        advocate.linkedin_url = data["linkedin_url"]
 
 
 def _handle_email(user, conv, data, text):
@@ -318,6 +350,7 @@ def _finalize_email_advocate(user, conv, data):
         advocate.role_title = data.get("role_title") or advocate.role_title
         advocate.advocate_name = data.get("full_name") or advocate.advocate_name
         advocate.status = "active"
+        _apply_privacy(advocate, data)
         advocate.updated_at = datetime.utcnow()
         db.session.commit()
     except SQLAlchemyError:
@@ -441,13 +474,16 @@ def _create_advocates(user, data, emails):
             advocate.status = "active"
             if role_title:
                 advocate.role_title = role_title
+            _apply_privacy(advocate, data)
             advocate.updated_at = datetime.utcnow()
             db.session.commit()
             saved.append(email)
             continue
-        db.session.add(WaAdvocate(
+        new_adv = WaAdvocate(
             user_id=user.id, company_id=company_id, email=email,
-            role_title=role_title, status="active"))
+            role_title=role_title, status="active")
+        _apply_privacy(new_adv, data)
+        db.session.add(new_adv)
         try:
             db.session.commit()
             saved.append(email)
@@ -474,12 +510,14 @@ def _create_link_advocate(user, data, link):
             advocate.email = email
         if full_name:
             advocate.advocate_name = full_name
+        _apply_privacy(advocate, data)
         advocate.updated_at = datetime.utcnow()
         db.session.commit()
         return advocate
     advocate = WaAdvocate(
         user_id=user.id, company_id=company_id, referral_link=link,
         role_title=role_title, email=email, advocate_name=full_name, status="active")
+    _apply_privacy(advocate, data)
     db.session.add(advocate)
     try:
         db.session.commit()

@@ -163,6 +163,8 @@ def _context(rec):
         "company": (company.name if company else None) or "the company",
         "role": (application.role_query if application else None) or "the role",
         "advocate": (adv_user.first_name if adv_user else None) or "your advocate",
+        "share_contact": bool(advocate.share_contact_with_candidate) if advocate else False,
+        "linkedin": (advocate.linkedin_url if advocate else None) or "",
     }
 
 
@@ -176,6 +178,8 @@ def _notify_candidate(rec, ctx):
             advocate_name=ctx["advocate"],
             company=ctx["company"],
             role=ctx["role"],
+            share_contact=ctx["share_contact"],
+            linkedin_url=ctx["linkedin"],
         )
     except Exception:
         logger.exception("wa: failed to send referral-confirmed email")

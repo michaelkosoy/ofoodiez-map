@@ -302,6 +302,8 @@ def get_whatsapp_advocates():
             "email": adv.email or "",
             "referral_link": adv.referral_link or "",
             "title": adv.role_title or "",
+            "share_contact": bool(adv.share_contact_with_candidate),
+            "linkedin_url": adv.linkedin_url or "",
             "status": adv.status,
             "created": _fmt(adv.created_at),
         })
@@ -518,6 +520,13 @@ def update_whatsapp_advocate(id):
         adv.role_title = (data["role_title"] or "").strip() or None
     if "advocate_name" in data:
         adv.advocate_name = (data["advocate_name"] or "").strip() or None
+    if "share_contact_with_candidate" in data:
+        v = data["share_contact_with_candidate"]
+        if isinstance(v, str):
+            v = v.strip().lower() in ("yes", "y", "true", "1", "on", "share", "shared")
+        adv.share_contact_with_candidate = bool(v)
+    if "linkedin_url" in data:
+        adv.linkedin_url = (data["linkedin_url"] or "").strip() or None
     if data.get("company"):
         c = _resolve_company(data["company"])
         if c:
@@ -555,6 +564,8 @@ def get_company_advocates(id):
             "email": adv.email or "",
             "referral_link": adv.referral_link or "",
             "role_title": adv.role_title or "",
+            "share_contact": bool(adv.share_contact_with_candidate),
+            "linkedin_url": adv.linkedin_url or "",
             "status": adv.status,
             "created": _fmt(adv.created_at),
         })

@@ -127,6 +127,12 @@ EMP_DETAILS_CONFIRM = (
     "• Title: {title}\n\n"
     "Looks right? Reply *yes* — or just *resend* to fix it."
 )
+EMP_PRIVACY = (
+    "One quick thing 🔒 — when you refer someone, may they see that *you* "
+    "referred them?\n\n"
+    "Reply *yes* to share your first name (you can also paste your *LinkedIn URL* "
+    "to include it), or *no* to stay anonymous."
+)
 # ---- Employee: edit an existing submission ----
 EMP_EDIT_MENU = (
     "You're set up to refer for *{company}* 💼\n"
@@ -316,6 +322,11 @@ CAND_SUBMITTED = (
     "Done! ✅ I've forwarded your application to *{advocate}* at *{company}* — "
     "fingers crossed! 🤞🎉\n"
     "Type *menu* anytime if you'd like to do more."
+)
+CAND_EXPLORE_MORE = (
+    "Done! ✅ Your CV is on its way — fingers crossed! 🤞🎉\n\n"
+    "Want to apply to another role? Reply *yes* to search another company, "
+    "or *no* if you're all set. 🙂"
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"
 ADVOCATE_PING = (

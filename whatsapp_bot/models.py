@@ -48,6 +48,9 @@ class WaAdvocate(db.Model):
     referral_link = db.Column(db.Text)  # self-serve coded link auto-shared with candidates (link method)
     role_title = db.Column(db.Text)
     advocate_name = db.Column(db.Text)  # display name for a curated advocate with no bot user
+    # Opt-in: candidates only see who referred them if this is True (NULL/False = anonymous).
+    share_contact_with_candidate = db.Column(db.Boolean)
+    linkedin_url = db.Column(db.Text)   # optional, only shown to candidates when sharing is on
     status = db.Column(db.Text, nullable=False, default="active")  # active|pending|inactive
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
