@@ -220,7 +220,11 @@ def debug_templates():
             types = (rc.json() or {}).get("types") or {}
             info["types"] = {
                 t: {"body": str((d or {}).get("body"))[:90],
-                    "buttons": [a.get("title") for a in (d or {}).get("actions") or []]}
+                    # full action objects (id/payload + title) — a bad/duplicate/empty
+                    # button id is why some quick-reply taps never route.
+                    "buttons": [{"id": a.get("id"), "title": a.get("title"),
+                                 "type": a.get("type")}
+                                for a in (d or {}).get("actions") or []]}
                 for t, d in types.items()
             }
         except Exception as exc:
