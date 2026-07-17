@@ -350,6 +350,21 @@ def _load_hitech_content():
         return {}
 
 
+def _reading_minutes(content):
+    """Rough read-time (~200 wpm). Accepts a string or a nested dict/list of strings,
+    so it works for both the markdown guide and the cv content dict — no stored field
+    to keep in sync. Hebrew splits on whitespace like English, so .split() is fine."""
+    def words(x):
+        if isinstance(x, str):
+            return len(x.split())
+        if isinstance(x, dict):
+            return sum(words(v) for v in x.values())
+        if isinstance(x, list):
+            return sum(words(v) for v in x)
+        return 0
+    return max(1, round(words(content) / 200))
+
+
 @app.route('/hitech')
 def hitech_page():
     """HiTech hub home page — hero + feature cards + companies carousel."""
@@ -434,7 +449,9 @@ def hitech_bot():
 def hitech_cv():
     """HiTech interactive CV guide."""
     content = _load_hitech_content()
-    return render_template('hitech_cv.html', active_hitech_page='cv-guide', active_page='hitech', c=content.get('cv', {}))
+    cv = content.get('cv', {})
+    return render_template('hitech_cv.html', active_hitech_page='cv-guide', active_page='hitech',
+                           c=cv, read_time=_reading_minutes(cv))
 
 
 @app.route('/hitech/cv-guide/full', methods=['GET', 'POST'])
@@ -456,8 +473,11 @@ def hitech_cv_full():
     path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'cv_guide_full.md')
     with open(path, encoding='utf-8') as f:
         guide_md = f.read()
+    # ponytail: counts both tech+business tracks, so the tech reader's estimate is a
+    # touch high; fine for a ~X-min heuristic. Compute per-track in JS if it matters.
     return render_template('hitech_cv_full.html', active_hitech_page='cv-guide',
-                           active_page='hitech', guide_md=guide_md, error=error)
+                           active_page='hitech', guide_md=guide_md, error=error,
+                           read_time=_reading_minutes(guide_md))
 
 
 @app.route('/hitech/unsubscribe')
