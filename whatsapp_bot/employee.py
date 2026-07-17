@@ -181,9 +181,12 @@ def _method_choice(text, payload):
     if payload == "EMP_METHOD_LINK":
         return "link"
     t = (text or "").strip().lower()
-    if t in _METHOD_EMAIL_WORDS:
+    # Match the button's label too (e.g. "🔗 Share my link" / "📧 Email me CVs"),
+    # not just the exact words/payload — some templates' button payloads are
+    # unreliable, so a tap arrives only as its visible label.
+    if t in _METHOD_EMAIL_WORDS or "email" in t:
         return "email"
-    if t in _METHOD_LINK_WORDS:
+    if t in _METHOD_LINK_WORDS or "link" in t:
         return "link"
     return None
 
