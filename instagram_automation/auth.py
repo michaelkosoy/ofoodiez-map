@@ -258,6 +258,33 @@ def refresh_user_token(user):
         return {"error": str(e)}
 
 
+@ig_bp.route('/auth/refresh-token-cron')
+def auth_refresh_token_cron():
+    """Keyed, session-less token refresh for a scheduler (cron) so the long-lived
+    IG token never lapses and the feed stops falling back to an expired cache.
+    Meta's ig_refresh_token only works while the token is still valid, so this
+    must run well before the 60-day expiry — a fully-expired token still needs a
+    manual /ig/auth/login. Same key convention as the WhatsApp crons."""
+    key = request.args.get('key')
+    secret = os.environ.get('WA_CRON_SECRET') or os.environ.get('ADMIN_SECRET', 'ofoodiez2025')
+    if key != secret:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    results = []
+    for user in User.query.filter_by(is_active=True).all():
+        # Skip mock/test accounts — their tokens can't be refreshed.
+        if not user.access_token or user.access_token == 'test_token_123' or user.ig_username == 'tester_account':
+            continue
+        r = refresh_user_token(user)
+        results.append({
+            "username": user.ig_username,
+            "success": bool(r.get('success')),
+            "days_remaining": user.token_days_remaining() if r.get('success') else None,
+            "error": r.get('error'),
+        })
+    return jsonify({"refreshed": results})
+
+
 def get_current_user():
     """Get the currently logged-in user from session."""
     user_id = session.get('ig_user_id')

@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         card.innerHTML = `
             <div class="ig-post-image-container">
-                <img src="${imageUrl}" alt="Instagram Post" class="ig-post-image" loading="lazy">
+                <img src="${imageUrl}" alt="Instagram Post" class="ig-post-image" loading="lazy" onerror="this.onerror=null;this.src='/static/img/logo.png';this.classList.add('ig-post-image--fallback');">
                 ${iconHtml}
             </div>
             <div class="ig-post-content">

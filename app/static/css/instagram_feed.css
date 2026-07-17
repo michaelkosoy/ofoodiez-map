@@ -118,6 +118,10 @@
     object-fit: cover;
 }
 
+/* Shown when Instagram's time-signed CDN URL has expired (img onerror) — a faint
+   logo placeholder instead of a blank/broken card. */
+.ig-post-image--fallback { object-fit: contain; padding: 22%; opacity: 0.3; background: #f8f9fa; }
+
 .ig-post-type-icon {
     position: absolute;
     top: 5px;
