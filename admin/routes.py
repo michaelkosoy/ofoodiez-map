@@ -47,3 +47,8 @@ def members():
 @login_required
 def blog():
     return render_template('admin/blog.html')
+
+@admin_bp.route('/hitech/suppliers')
+@login_required
+def hitech_suppliers():
+    return render_template('admin/hitech_suppliers.html')

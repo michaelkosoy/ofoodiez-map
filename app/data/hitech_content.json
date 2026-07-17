@@ -224,43 +224,50 @@
     ]
   },
   "hitech": {
-    "page_title": "Ofoodiez HiTech — For People With Good Taste",
-    "meta_description": "The HiTech community for food-loving tech professionals. Referral bot, CV guide, exclusive events and companies that care about people.",
+    "cards": [
+      {
+        "cta": "Join the waitlist",
+        "desc": "Join an invite-only network of food-loving tech professionals. Exclusive events, dinners, and the right people around the table.",
+        "icon": "fas fa-users",
+        "title": "The Community",
+        "url": "/hitech/community"
+      },
+      {
+        "cta": "Meet the bot",
+        "desc": "My WhatsApp bot connects you directly with advocates inside top tech companies. One message, real introductions.",
+        "icon": "fas fa-robot",
+        "title": "Referrals Bot",
+        "url": "/hitech/referrals-bot"
+      },
+      {
+        "cta": "Read the guide",
+        "desc": "The Ofoodiez guide to writing a CV that actually opens doors — with an interactive walkthrough of every section that matters.",
+        "icon": "fas fa-file-alt",
+        "title": "CV Guide",
+        "url": "/hitech/cv-guide"
+      },
+      {
+        "cta": "Open WhatsApp",
+        "desc": "Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.",
+        "icon": "fas fa-wand-magic-sparkles",
+        "title": "Chat with Me",
+        "url": "https://api.whatsapp.com/send?phone=972559218943"
+      }
+    ],
+    "cards_label": "Explore",
+    "companies_empty": "More partner companies coming soon.",
+    "companies_title": "Companies I work with",
     "eyebrow": "Ofoodiez × HiTech",
     "headline": "Tech. Careers.<br><em>Community.</em>",
     "hero_sub": "Exclusive events, real referrals inside top companies, a CV guide that actually works — and the right people around the table.",
-    "cards_label": "Explore",
-    "companies_title": "Companies I work with",
-    "companies_empty": "More partner companies coming soon.",
-    "cards": [
-      {
-        "title": "The Community",
-        "url": "/hitech/community",
-        "icon": "fas fa-users",
-        "desc": "Join an invite-only network of food-loving tech professionals. Exclusive events, dinners, and the right people around the table.",
-        "cta": "Join the waitlist"
-      },
-      {
-        "title": "Referrals Bot",
-        "url": "/hitech/referrals-bot",
-        "icon": "fas fa-robot",
-        "desc": "My WhatsApp bot connects you directly with advocates inside top tech companies. One message, real introductions.",
-        "cta": "Meet the bot"
-      },
-      {
-        "title": "CV Guide",
-        "url": "/hitech/cv-guide",
-        "icon": "fas fa-file-alt",
-        "desc": "The Ofoodiez guide to writing a CV that actually opens doors — with an interactive walkthrough of every section that matters.",
-        "cta": "Read the guide"
-      },
-      {
-        "title": "Chat with Me",
-        "url": "https://api.whatsapp.com/send?phone=972559218943",
-        "icon": "fas fa-wand-magic-sparkles",
-        "desc": "Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.",
-        "cta": "Open WhatsApp"
-      }
-    ]
+    "meta_description": "The HiTech community for food-loving tech professionals. Referral bot, CV guide, exclusive events and companies that care about people.",
+    "page_title": "Ofoodiez HiTech — For People With Good Taste"
+  },
+  "suppliers": {
+    "cta": "נותנים שירות לקריירה? הוסיפו את עצמכם",
+    "empty_state": "עדיין אין ספקים ברשימה — היו הראשונים להצטרף 👆",
+    "eyebrow": "כלים לקריירה",
+    "headline": "נותני שירות ל<em>קריירה בהייטק</em>",
+    "hero_sub": "כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד. מכירים מישהו מעולה? הוסיפו אותו לרשימה."
   }
 }

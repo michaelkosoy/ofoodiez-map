@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ספקי קריירה בהייטק — Ofoodiez HiTech</title>
+    <meta name="description" content="נותני שירות לקריירה בהייטק — כותבי קורות חיים, מלווי קריירה, מנטורים וקורסים. מדריך מומלצים של קהילת Ofoodiez, ופתוח להצטרפות.">
+    <link rel="canonical" href="https://ofoodiez.com/hitech/suppliers">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ofoodiez">
+    <meta property="og:url" content="https://ofoodiez.com/hitech/suppliers">
+    <meta property="og:title" content="ספקי קריירה בהייטק — Ofoodiez HiTech">
+    <meta property="og:description" content="כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד.">
+    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#08060a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hitech.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/business-submission-form.css') }}">
+
+    <style>
+        .hs-page { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
+
+        /* Hero */
+        .hs-hero { padding: 80px 24px 24px; text-align: center; max-width: 720px; margin: 0 auto; }
+        .hs-eyebrow { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 16px; }
+        .hs-title { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 700; line-height: 1.12; color: var(--butter); margin-bottom: 10px; }
+        .hs-title em { font-style: italic; color: var(--burgundy-mid); }
+        .hs-rule { width: 48px; height: 1px; background: linear-gradient(90deg, transparent, var(--burgundy), transparent); margin: 20px auto; }
+        .hs-sub { font-size: clamp(0.88rem, 2vw, 1rem); font-weight: 300; color: var(--butter-dim); max-width: 540px; margin: 0 auto; line-height: 1.7; }
+
+        /* Directory */
+        .hs-directory { padding: 8px 20px 50px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+        /* Category filters */
+        .hs-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .hs-filter-btn { flex: 0 0 auto; padding: 7px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-card); color: var(--butter-dim); font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all .2s; }
+        .hs-filter-btn:hover { color: var(--butter); border-color: var(--burgundy-mid); }
+        .hs-filter-btn.active { background: var(--burgundy); color: var(--butter); border-color: transparent; }
+
+        /* Submit CTA */
+        .hs-cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 460px; margin: 0 auto 26px; box-sizing: border-box; background: var(--burgundy); color: var(--butter); border: none; border-radius: 999px; padding: 14px 22px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: filter .2s; }
+        .hs-cta:hover { filter: brightness(1.2); }
+
+        /* Card grid */
+        .hs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+        .hs-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: transform .2s, border-color .2s; }
+        .hs-card:hover { transform: translateY(-3px); border-color: var(--burgundy-mid); }
+        .hs-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .hs-name { font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--butter); margin: 0 0 8px; line-height: 1.25; }
+        .hs-badge { display: inline-block; font-size: 0.68rem; font-weight: 600; color: var(--burgundy-mid); background: rgba(114,8,21,0.14); border: 1px solid rgba(114,8,21,0.28); border-radius: 999px; padding: 3px 10px; }
+        .hs-socials { display: flex; gap: 7px; flex-shrink: 0; }
+        .hs-social { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(249,246,235,0.06); border: 1px solid var(--border); color: var(--butter-dim); font-size: 14px; text-decoration: none; transition: all .2s; }
+        .hs-social:hover { color: var(--butter); border-color: var(--burgundy-mid); background: rgba(114,8,21,0.2); }
+        .hs-social.hs-wa:hover { color: #25d366; }
+        .hs-desc { font-size: 0.85rem; font-weight: 300; color: var(--butter-dim); line-height: 1.6; margin: 0; }
+
+        .hs-empty { text-align: center; color: var(--butter-dim); font-weight: 300; padding: 44px 20px; font-size: 0.95rem; line-height: 1.7; }
+
+        @media (max-width: 540px) { .hs-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    {% set active_hitech_page = 'suppliers' %}
+    {% include 'components/hitech_menu.html' %}
+
+    <div class="hs-page" dir="rtl">
+        <section class="hs-hero">
+            <p class="hs-eyebrow">{{ c.eyebrow | default('כלים לקריירה') | safe }}</p>
+            <h1 class="hs-title">{{ c.headline | default('נותני שירות ל<em>קריירה בהייטק</em>') | safe }}</h1>
+            <div class="hs-rule"></div>
+            <p class="hs-sub">{{ c.hero_sub | default('כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד. מכירים מישהו מעולה? הוסיפו אותו לרשימה.') | safe }}</p>
+        </section>
+
+        <section class="hs-directory">
+            <div class="hs-filters">
+                <button class="hs-filter-btn active" data-filter="all">הכל</button>
+                <button class="hs-filter-btn" data-filter="כתיבת קורות חיים">📝 קורות חיים</button>
+                <button class="hs-filter-btn" data-filter="ליווי קריירה">🎯 ליווי קריירה</button>
+                <button class="hs-filter-btn" data-filter="הכנה לראיונות">💬 ראיונות</button>
+                <button class="hs-filter-btn" data-filter="מנטורינג">🧭 מנטורינג</button>
+                <button class="hs-filter-btn" data-filter="קורסים ובוטקאמפים">🎓 קורסים</button>
+                <button class="hs-filter-btn" data-filter="לינקדאין ופורטפוליו">💼 לינקדאין</button>
+                <button class="hs-filter-btn" data-filter="אחר">✨ אחר</button>
+            </div>
+
+            <button type="button" class="hs-cta" onclick="openBusinessModal()">
+                <i class="fas fa-plus-circle"></i> {{ c.cta | default('נותנים שירות לקריירה? הוסיפו את עצמכם') }}
+            </button>
+
+            <div class="hs-grid">
+                {% for s in suppliers_data.suppliers %}
+                <div class="hs-card" data-category="{{ s.category }}">
+                    <div class="hs-card-head">
+                        <div>
+                            <h2 class="hs-name">{{ s.name }}</h2>
+                            {% if s.category %}<span class="hs-badge">{{ s.category }}</span>{% endif %}
+                        </div>
+                        <div class="hs-socials">
+                            {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="hs-social" title="לאתר / פרופיל"><i class="fas fa-globe"></i></a>{% endif %}
+                            {% if s.instagram and s.instagram != "https://instagram.com/" %}<a href="{{ s.instagram }}" target="_blank" rel="noopener" class="hs-social" title="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+                            {% if s.whatsapp %}<a href="https://wa.me/{{ s.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" rel="noopener" class="hs-social hs-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
+                        </div>
+                    </div>
+                    {% if s.description %}<p class="hs-desc">{{ s.description }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not suppliers_data.suppliers %}
+            <p class="hs-empty">{{ c.empty_state | default('עדיין אין ספקים ברשימה — היו הראשונים להצטרף 👆') | safe }}</p>
+            {% endif %}
+        </section>
+
+        <div class="bottom-nav-spacer"></div>
+    </div>
+
+    {% include 'components/business_submission_modal.html' %}
+    <script src="{{ url_for('static', filename='js/business-submission-form.js') }}"></script>
+    <script>
+        // Category filter — show/hide cards by data-category (same pattern as bachelorette).
+        (function () {
+            var btns = document.querySelectorAll('.hs-filter-btn');
+            var cards = document.querySelectorAll('.hs-card');
+            btns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    btns.forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    var f = btn.dataset.filter;
+                    cards.forEach(function (card) {
+                        card.style.display = (f === 'all' || card.dataset.category === f) ? '' : 'none';
+                    });
+                });
+            });
+        })();
+    </script>
+
+    {% include 'components/bottom_nav.html' %}
+</body>
+</html>

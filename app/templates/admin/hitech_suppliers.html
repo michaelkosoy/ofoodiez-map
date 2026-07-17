@@ -1,0 +1,143 @@
+{% extends "admin/base.html" %}
+{% block title %}HiTech Suppliers{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>HiTech Career Suppliers</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <span id="hs-save-msg" style="display:none; color:var(--success-color); font-weight:600;">Saved ✓</span>
+        <button class="btn" onclick="hsAddRow()"><i class="fas fa-plus"></i> Add supplier</button>
+        <button class="btn btn-success" onclick="hsSave()"><i class="fas fa-save"></i> Save Changes</button>
+    </div>
+</div>
+
+<p style="margin-bottom:16px; color:#666; font-size:14px; line-height:1.6;">
+    Public submissions land here as <b>Pending</b>. Use ✓ to approve (publishes it and emails the submitter)
+    or ✗ to reject. Edit any cell or add a supplier by hand, then hit <b>Save Changes</b>. Deleting a row also
+    needs a Save. <a href="/hitech/suppliers" target="_blank">View the live page →</a>
+</p>
+
+<div id="hs-table"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var SLUG = 'hitech_suppliers';
+var CATEGORIES = ["כתיבת קורות חיים", "ליווי קריירה", "הכנה לראיונות", "מנטורינג",
+                  "קורסים ובוטקאמפים", "לינקדאין ופורטפוליו", "אחר"];
+
+// ── Moderation helpers (cloned from admin/blog.html — the backend endpoints are
+// generic/slug-driven, see listing_submissions.py) ──────────────────────────
+var LISTING_STATUS_COLORS = { approved: '#2e7d32', pending: '#e67e22', needs_editing: '#2980b9', rejected: '#e74c3c' };
+var LISTING_STATUS_LABELS = { approved: 'On the list', pending: 'Pending', needs_editing: 'Needs editing', rejected: 'Rejected' };
+
+function listingStatusFormatter(cell) {
+    var s = cell.getValue() || 'approved';
+    var color = LISTING_STATUS_COLORS[s] || '#999';
+    var label = LISTING_STATUS_LABELS[s] || s;
+    return '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;background:' + color + ';">' + label + '</span>';
+}
+
+function listingApproveReject(slug, kind, cell, newStatus) {
+    var row = cell.getRow();
+    var data = row.getData();
+    if (!data.submission_id) return;
+    fetch('/admin/api/' + slug + '/listing-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: kind, submission_id: data.submission_id, status: newStatus })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        if (res.ok) { row.update({ status: newStatus }); }
+        else { alert('Error: ' + (res.error || 'unknown')); }
+    })
+    .catch(function() { alert('Request failed.'); });
+}
+
+function listingActionsColumn(slug, kind) {
+    return {
+        formatter: function(cell) {
+            var data = cell.getRow().getData();
+            var html = '';
+            if (data.submission_id) {
+                html += "<button class='listing-approve-btn' style='background:none;border:none;color:#2e7d32;cursor:pointer;margin-inline-end:6px;' title='Approve'><i class='fas fa-check-circle'></i></button>";
+                html += "<button class='listing-reject-btn' style='background:none;border:none;color:#e67e22;cursor:pointer;margin-inline-end:6px;' title='Reject'><i class='fas fa-times-circle'></i></button>";
+            }
+            html += "<button class='listing-delete-btn' style='background:none;border:none;color:#e74c3c;cursor:pointer;' title='Delete'><i class='fas fa-trash'></i></button>";
+            return html;
+        },
+        width: 110, hozAlign: "center", headerSort: false,
+        cellClick: function(e, cell) {
+            if (e.target.closest('.listing-approve-btn')) { listingApproveReject(slug, kind, cell, 'approved'); }
+            else if (e.target.closest('.listing-reject-btn')) { listingApproveReject(slug, kind, cell, 'rejected'); }
+            else if (e.target.closest('.listing-delete-btn')) { cell.getRow().delete(); }
+        }
+    };
+}
+
+function listingContactColumns() {
+    return [
+        { title: "Status", field: "status", editor: "list", editorParams: { values: ["approved", "pending", "needs_editing", "rejected"] }, formatter: listingStatusFormatter, headerFilter: "list", headerFilterParams: { values: { "": "All", approved: "Approved", pending: "Pending", needs_editing: "Needs editing", rejected: "Rejected" } }, width: 130 },
+        { title: "Contact Name", field: "contact_name", editor: "input", width: 120 },
+        { title: "Contact Email", field: "contact_email", editor: "input", width: 160 },
+        { title: "Contact Phone", field: "contact_phone", editor: "input", width: 120 }
+    ];
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+var hsTable = new Tabulator("#hs-table", {
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 50,
+    placeholder: "No suppliers yet — public submissions will appear here.",
+    columns: [
+        { title: "ID", field: "id", width: 50, headerSort: false, cssClass: "readonly" },
+        { title: "Name", field: "name", editor: "input", headerFilter: "input", minWidth: 130 },
+        { title: "Category", field: "category", editor: "list", editorParams: { values: CATEGORIES }, width: 150 },
+        { title: "Description", field: "description", editor: "input", minWidth: 240 },
+        { title: "Website / LinkedIn", field: "link", editor: "input", minWidth: 150 },
+        { title: "Instagram", field: "instagram", editor: "input", width: 120 },
+        { title: "WhatsApp", field: "whatsapp", editor: "input", width: 120 },
+    ].concat(listingContactColumns()).concat([listingActionsColumn(SLUG, 'supplier')])
+});
+
+function hsLoad() {
+    fetch('/admin/api/blog/' + SLUG)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var suppliers = (data && data.suppliers) || [];
+            suppliers.forEach(function(s, idx) { s.id = idx + 1; });
+            hsTable.setData(suppliers);
+        })
+        .catch(function() { alert('Failed to load suppliers.'); });
+}
+
+function hsAddRow() {
+    hsTable.addRow({ id: hsTable.getDataCount() + 1, name: '', category: '', description: '' }, true);
+}
+
+function hsSave() {
+    // Strip the cosmetic display "id"; everything else (submission_id, status,
+    // submitted_at, contact_*) rides along in the row data.
+    var rows = hsTable.getData().map(function(r) { var c = Object.assign({}, r); delete c.id; return c; });
+    fetch('/admin/api/blog/' + SLUG, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suppliers: rows })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        if (res.ok) {
+            var m = document.getElementById('hs-save-msg');
+            m.style.display = 'inline';
+            setTimeout(function() { m.style.display = 'none'; }, 2500);
+            hsLoad();
+        } else { alert('Error: ' + (res.error || 'unknown')); }
+    })
+    .catch(function() { alert('Save failed.'); });
+}
+
+window.addEventListener('load', hsLoad);
+</script>
+{% endblock %}

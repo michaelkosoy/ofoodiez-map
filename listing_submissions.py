@@ -32,6 +32,21 @@ LISTING_SUBMISSION_CONFIGS = {
         'listing_title_he': 'מדריך הרווקות',
         'listing_url': 'https://ofoodiez.com/blog/bachelorette',
     },
+    # Career-service providers for the HiTech section. Slug is decoupled from the
+    # URL (this page lives at /hitech/suppliers, not /blog/) — blog_json_path just
+    # maps it to app/data/blog_hitech_suppliers.json.
+    'hitech_suppliers': {
+        'kinds': {
+            'supplier': {
+                'array_key': 'suppliers',
+                'label_he': 'ספק',
+                'categories': ["כתיבת קורות חיים", "ליווי קריירה", "הכנה לראיונות",
+                               "מנטורינג", "קורסים ובוטקאמפים", "לינקדאין ופורטפוליו", "אחר"],
+            },
+        },
+        'listing_title_he': 'ספקי הקריירה בהייטק',
+        'listing_url': 'https://ofoodiez.com/hitech/suppliers',
+    },
 }
 
 

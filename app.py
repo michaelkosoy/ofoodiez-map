@@ -480,6 +480,23 @@ def hitech_cv_full():
                            read_time=_reading_minutes(guide_md))
 
 
+@app.route('/hitech/suppliers')
+def hitech_suppliers():
+    """HiTech career-suppliers directory — public gallery of approved providers
+    plus public self-submission. Approval is handled by the generic listing
+    machinery (see listing_submissions.py), same as /blog/bachelorette."""
+    from listing_submissions import get_config, filter_approved
+    listing_config = get_config('hitech_suppliers')
+    data = filter_approved(_load_blog('hitech_suppliers'), listing_config)
+    content = _load_hitech_content()
+    return render_template('hitech_suppliers.html',
+                           suppliers_data=data,
+                           listing_slug='hitech_suppliers',
+                           listing_config=listing_config,
+                           active_hitech_page='suppliers', active_page='hitech',
+                           c=content.get('suppliers', {}))
+
+
 @app.route('/hitech/unsubscribe')
 def hitech_unsubscribe():
     """Unsubscribe a user from the HiTech community waitlist."""

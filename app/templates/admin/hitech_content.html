@@ -68,6 +68,7 @@
       <option value="community">Community Page</option>
       <option value="bot">Referrals Bot Page</option>
       <option value="cv">CV Guide Page</option>
+      <option value="suppliers">Suppliers Page</option>
     </select>
   </div>
 </div>
@@ -233,6 +234,13 @@ function renderEditor() {
       html += inputField(`cs_badge_${idx}`, 'Badge Text (leave blank for no badge)', cs.badge);
       html += `</div>`;
     });
+  } else if (currentSection === 'suppliers') {
+    html += '<p class="section-title">Suppliers Page Settings</p>';
+    html += inputField('eyebrow', 'Hero Eyebrow Text', sectionData.eyebrow);
+    html += inputField('headline', 'Hero Main Headline (HTML allowed)', sectionData.headline);
+    html += textareaField('hero_sub', 'Hero Subtext Description', sectionData.hero_sub);
+    html += inputField('cta', 'Submit CTA Button Label', sectionData.cta);
+    html += textareaField('empty_state', 'Empty-list Message (shown when no suppliers yet)', sectionData.empty_state);
   }
 
   editorEl.innerHTML = html;
@@ -413,6 +421,14 @@ function collectData() {
         badge: document.querySelector(`[data-key="cs_badge_${idx}"]`).value
       });
     });
+  } else if (currentSection === 'suppliers') {
+    sectionData = {
+      eyebrow: document.querySelector('[data-key="eyebrow"]').value,
+      headline: document.querySelector('[data-key="headline"]').value,
+      hero_sub: document.querySelector('[data-key="hero_sub"]').value,
+      cta: document.querySelector('[data-key="cta"]').value,
+      empty_state: document.querySelector('[data-key="empty_state"]').value
+    };
   }
 
   hitechContent[currentSection] = sectionData;
