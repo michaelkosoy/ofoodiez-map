@@ -77,10 +77,22 @@ def healthz():
 def webhook():
     started = time.monotonic()
 
+    # DIAG: dump the FULL raw inbound BEFORE the signature check, so button-reply
+    # POSTs that fail signature are still visible (flat=False shows duplicate keys,
+    # which would break HMAC). Shows To (sandbox vs prod), ButtonPayload, quoted-reply
+    # params, everything. Temporary — remove after diagnosis.
+    logger.warning("wa RX form: %s", dict(request.form.to_dict(flat=False)))
+    logger.warning("wa RX hdr sig=%s ua=%s", request.headers.get("X-Twilio-Signature"),
+                   request.headers.get("User-Agent"))
+
     # 1. Verify signature (fail closed) before doing anything else.
     if not _verify_twilio_signature(request):
-        logger.warning("wa webhook: rejected request with invalid Twilio signature")
+        logger.warning("wa webhook: SIGNATURE REJECT sid=%s from=%s to=%s payload=%r btntext=%r "
+                       "pinned_url=%s", request.form.get("MessageSid"), request.form.get("From"),
+                       request.form.get("To"), request.form.get("ButtonPayload"),
+                       request.form.get("ButtonText"), WaConfig.TWILIO_WEBHOOK_URL)
         return Response("Forbidden", status=403)
+    logger.warning("wa SIG OK sid=%s to=%s", request.form.get("MessageSid"), request.form.get("To"))
 
     form = request.form
     message_sid = form.get("MessageSid", "")
@@ -145,6 +157,8 @@ def webhook():
         audit.response_summary = (parsed_command or "")[:200]
         audit.processing_ms = int((time.monotonic() - started) * 1000)
         audit.error = error_text
+        logger.warning("wa webhook out: sid=%s cmd=%s ms=%s err=%s",
+                       message_sid, parsed_command, audit.processing_ms, error_text)
         try:
             db.session.commit()
         except Exception:
