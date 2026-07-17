@@ -14,7 +14,7 @@ from datetime import datetime
 
 from database.models import db
 
-from . import conversation, copy, emailer, messaging, storage
+from . import approvals, conversation, copy, emailer, messaging, storage
 from .config import WaConfig
 from .models import (
     WaAdvocate,
@@ -537,12 +537,16 @@ def _notify_advocates(application, candidate_user, data, resume_bytes,
     adv_user = WaUser.query.get(advocate.user_id)
     adv_first = (adv_user.first_name if adv_user else None) or ""
     token = secrets.token_urlsafe(24)
-    approval_url = f"{WaConfig.WA_PUBLIC_BASE_URL}/wa/referral/approve?t={token}"
+    base = WaConfig.WA_PUBLIC_BASE_URL
+    approval_url = f"{base}/wa/referral/approve?t={token}"
+    deny_url = f"{base}/wa/referral/deny?t={token}"
+    cv_url = f"{base}/wa/applications/{application.id}/cv?t={approvals.sign_cv_token(application.id)}"
     ok = emailer.send_application_email(
         to_email, adv_first, name, candidate_user.email or "",
         data.get("role_query", ""), data.get("company_name", ""),
         data.get("job_posting_url", ""), job_description=data.get("job_description", ""),
-        approval_url=approval_url, resume_bytes=resume_bytes,
+        approval_url=approval_url, deny_url=deny_url, cv_url=cv_url,
+        resume_bytes=resume_bytes,
         resume_filename=resume_filename, resume_content_type=resume_content_type,
     )
     db.session.add(WaApplicationRecipient(

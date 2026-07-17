@@ -11,13 +11,15 @@ not Twilio webhooks, so they don't do signature verification.
 """
 import html
 import logging
+import os
 from datetime import datetime
 
 from flask import Response, request
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from database.models import db
 
-from . import emailer, wa_bp
+from . import emailer, storage, wa_bp
 from .models import (
     WaAdvocate,
     WaApplication,
@@ -27,6 +29,28 @@ from .models import (
 )
 
 logger = logging.getLogger("whatsapp_bot")
+
+_CV_MAX_AGE = 24 * 3600  # CV download links expire after 24h
+
+
+def _cv_serializer():
+    # Same default as app.py so signing (candidate.py) and verifying (here) agree
+    # whether the bot runs in the main app or its own service.
+    secret = os.environ.get("SECRET_KEY", "ofoodiez-dev-secret-change-in-prod")
+    return URLSafeTimedSerializer(secret, salt="wa-cv-download")
+
+
+def sign_cv_token(application_id):
+    """A 24h-expiring signed token that authorises downloading one application's CV."""
+    return _cv_serializer().dumps(int(application_id))
+
+
+def _verify_cv_token(token, application_id):
+    try:
+        signed_id = _cv_serializer().loads(token or "", max_age=_CV_MAX_AGE)
+    except (BadSignature, SignatureExpired, ValueError, TypeError):
+        return False
+    return int(signed_id) == int(application_id)
 
 
 @wa_bp.route("/referral/approve", methods=["GET"])
@@ -58,6 +82,63 @@ def referral_approve_submit():
         f"Now go bag that referral bonus 💸 — tech referrals are basically "
         f"corporate bounty hunting via PDF. 🤠",
     )
+
+
+@wa_bp.route("/referral/deny", methods=["GET"])
+def referral_deny_page():
+    rec = _lookup(request.args.get("t", ""))
+    if rec is None:
+        return _page("Link not found", "This referral link is invalid or has expired.")
+    if rec.approved_at:
+        return _page("Already confirmed",
+                     "You already confirmed this referral, so we can't mark it as "
+                     "not-submitted. If that was a mistake, just reply to the email.")
+    if rec.denied_at:
+        return _page("Thanks", "You've already told us you didn't submit this — noted. 🙏")
+    return _deny_confirm_page(rec.approval_token, _context(rec))
+
+
+@wa_bp.route("/referral/deny", methods=["POST"])
+def referral_deny_submit():
+    rec = _lookup(request.form.get("t", ""))
+    if rec is None:
+        return _page("Link not found", "This referral link is invalid or has expired.")
+    if rec.approved_at:
+        return _page("Already confirmed",
+                     "You already confirmed this referral, so we can't mark it as not-submitted.")
+    if not rec.denied_at:
+        rec.denied_at = datetime.utcnow()
+        db.session.commit()
+    return _page(
+        "Thanks for flagging it",
+        "Got it — we've marked this as something you didn't submit and won't count "
+        "it as a referral. Sorry for the noise, and thanks for letting us know. 🙏",
+    )
+
+
+@wa_bp.route("/applications/<int:app_id>/cv", methods=["GET"])
+def application_cv(app_id):
+    """Token-guarded CV download for the link in the advocate email. The signed
+    token (24h) IS the auth — no login. Streams the file server-side so the
+    advocate never hits a Twilio/Supabase auth prompt."""
+    if not _verify_cv_token(request.args.get("t", ""), app_id):
+        return _page("Link expired",
+                     "This CV download link is invalid or has expired (they last 24h). "
+                     "The CV is also attached to the original email.")
+    app_row = WaApplication.query.get(app_id)
+    path = (app_row.resume_path if app_row else "") or ""
+    if not path:
+        return _page("Not found", "There's no CV on file for this application.")
+    if path.startswith("http"):
+        content, ctype = storage.download_twilio_media(path)
+    else:
+        content, ctype = storage.download_object(path)
+    if content is None:
+        return _page("Unavailable",
+                     "We couldn't fetch the CV right now — please use the attachment instead.")
+    filename = (app_row.resume_filename if app_row else None) or "cv.pdf"
+    return Response(content, mimetype=ctype or "application/octet-stream",
+                    headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 def _lookup(token):
@@ -138,3 +219,19 @@ def _confirm_page(token, ctx):
         "<p style='color:#888;font-size:13px;margin-top:16px;'>We'll let them know they've been referred.</p>"
     )
     return _shell("Confirm referral", inner)
+
+
+def _deny_confirm_page(token, ctx):
+    inner = (
+        "<h2 style='color:#222;'>Didn't submit this?</h2>"
+        f"<p style='color:#444;font-size:16px;line-height:1.5;'>Confirm that you did "
+        f"<b>not</b> submit an application for <b>{html.escape(ctx['candidate'])}</b> "
+        f"at <b>{html.escape(ctx['company'])}</b>. We'll flag it and won't count it as a referral.</p>"
+        "<form method='POST' action='/wa/referral/deny' style='margin-top:24px;'>"
+        f"<input type='hidden' name='t' value='{html.escape(token)}'>"
+        "<button type='submit' style='background:#c0392b;color:#fff;border:none;"
+        "padding:14px 26px;border-radius:10px;font-size:16px;font-weight:bold;"
+        "cursor:pointer;'>I didn't submit this</button>"
+        "</form>"
+    )
+    return _shell("Didn't submit this", inner)

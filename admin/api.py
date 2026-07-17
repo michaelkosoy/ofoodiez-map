@@ -8,7 +8,7 @@ from flask import jsonify, request, Response, current_app
 from database.models import db, HappyHourPlace, PopupEvent, HitechEmail, User, Purchase
 from whatsapp_bot.models import (
     WaConversation, WaCompany, WaAdvocate, WaUser,
-    WaApplication, WaApplicationRecipient, WaCompanyRequest,
+    WaApplication, WaApplicationRecipient, WaCompanyRequest, WaContactMessage,
 )
 from . import admin_bp
 from .auth import login_required
@@ -337,26 +337,30 @@ def get_whatsapp_candidates():
 def get_whatsapp_applications():
     rec_agg = {}
     for r in WaApplicationRecipient.query.all():
-        a = rec_agg.setdefault(r.application_id, {"emailed": 0, "approved": 0})
+        a = rec_agg.setdefault(r.application_id, {"emailed": 0, "approved": 0, "denied": 0})
         a["emailed"] += 1
         if r.approved_at:
             a["approved"] += 1
+        if r.denied_at:
+            a["denied"] += 1
     results = db.session.query(WaApplication, WaUser, WaCompany).join(
         WaUser, WaApplication.candidate_user_id == WaUser.id).join(
         WaCompany, WaApplication.company_id == WaCompany.id).order_by(
         WaApplication.created_at.desc()).all()
     out = []
     for app_row, usr, comp in results:
-        ra = rec_agg.get(app_row.id, {"emailed": 0, "approved": 0})
+        ra = rec_agg.get(app_row.id, {"emailed": 0, "approved": 0, "denied": 0})
         job = app_row.job_posting_url or (("desc: " + app_row.job_description) if app_row.job_description else "")
         # Exact status derived from what actually happened (the stored field is
         # always "submitted"). Every row here IS a real CV submission.
         if ra["approved"]:
             status = "Approved"          # an advocate confirmed the referral
+        elif ra["denied"]:
+            status = "Disputed"          # advocate tapped "I didn't submit this"
         elif ra["emailed"]:
             status = "Emailed"           # forwarded to ≥1 advocate, awaiting reply
         else:
-            status = "Submitted"         # CV in, no advocate email yet (manual routing)
+            status = "Not submitted"     # no advocate email — the CV did NOT reach an advocate
         out.append({
             "id": app_row.id,
             "user_id": app_row.candidate_user_id,
@@ -370,6 +374,7 @@ def get_whatsapp_applications():
             "resume": app_row.resume_filename or "",
             "emailed": ra["emailed"],
             "approved": ra["approved"],
+            "denied": ra["denied"],
             "status": status,
             "created": _fmt(app_row.created_at),
         })
@@ -872,6 +877,44 @@ def delete_whatsapp_requests_by_company():
     key, rows = _requests_for_key(request.args.get("key"))
     for r in rows:
         db.session.delete(r)
+    db.session.commit()
+    return '', 204
+
+
+# --- WhatsApp Bot: Contact-Us messages ---
+
+@admin_bp.route('/api/whatsapp/contacts', methods=['GET'])
+@login_required
+def get_whatsapp_contacts():
+    rows = WaContactMessage.query.order_by(WaContactMessage.created_at.desc()).all()
+    return jsonify([{
+        "id": m.id,
+        "name": m.name or "—",
+        "phone": m.phone or "",
+        "email": m.email or "",
+        "message": m.message or "",
+        "status": "handled" if m.handled_at else "open",
+        "created": _fmt(m.created_at),
+    } for m in rows])
+
+
+@admin_bp.route('/api/whatsapp/contacts/<int:id>', methods=['PUT'])
+@login_required
+def update_whatsapp_contact(id):
+    m = WaContactMessage.query.get_or_404(id)
+    status = (request.json or {}).get("status")
+    if status not in ("open", "handled"):
+        return jsonify({"error": "invalid status"}), 400
+    m.handled_at = datetime.utcnow() if status == "handled" else None
+    db.session.commit()
+    return jsonify({"id": m.id, "status": status})
+
+
+@admin_bp.route('/api/whatsapp/contacts/<int:id>', methods=['DELETE'])
+@login_required
+def delete_whatsapp_contact(id):
+    m = WaContactMessage.query.get_or_404(id)
+    db.session.delete(m)
     db.session.commit()
     return '', 204
 

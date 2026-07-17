@@ -81,6 +81,24 @@ class WaCompanyRequest(db.Model):
         return f"<WaCompanyRequest {self.company_name_raw!r} {self.reason}>"
 
 
+class WaContactMessage(db.Model):
+    """A free-text Contact-Us message from the bot. Emailed to ops AND stored so
+    the admin panel can track which ones were handled."""
+    __tablename__ = "wa_contact_messages"
+
+    id = _pk()
+    user_id = db.Column(db.BigInteger, db.ForeignKey("wa_users.id"))  # nullable — sender may be unknown
+    name = db.Column(db.Text)
+    phone = db.Column(db.Text)
+    email = db.Column(db.Text)
+    message = db.Column(db.Text, nullable=False)
+    handled_at = db.Column(db.DateTime)   # set when ops marks it handled in the admin panel
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<WaContactMessage {self.phone} handled={bool(self.handled_at)}>"
+
+
 class WaApplication(db.Model):
     """A candidate's submitted application to a company."""
     __tablename__ = "wa_applications"
@@ -114,6 +132,7 @@ class WaApplicationRecipient(db.Model):
     error = db.Column(db.Text)
     approval_token = db.Column(db.Text, unique=True)  # capability token in the advocate's "I referred them" link
     approved_at = db.Column(db.DateTime)              # set when the advocate confirms the referral
+    denied_at = db.Column(db.DateTime)               # set when the advocate taps "I didn't submit this"
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

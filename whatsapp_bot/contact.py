@@ -6,7 +6,10 @@ when we have one), then confirm.
 """
 import logging
 
+from database.models import db
+
 from . import conversation, copy, emailer, messaging
+from .models import WaContactMessage
 
 logger = logging.getLogger("whatsapp_bot")
 
@@ -29,6 +32,15 @@ def handle(user, conv, payload, text):
             emailer.send_contact_email(name, user.phone, user.email, msg)
         except Exception:                 # never break the flow on a send hiccup
             logger.exception("wa contact: send failed")
+        try:                              # store for the admin "Contact us" tab
+            db.session.add(WaContactMessage(
+                user_id=user.id, name=name, phone=user.phone,
+                email=user.email, message=msg,
+            ))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            logger.exception("wa contact: store failed")
         conversation.reset_state(conv)
         messaging.send_prompt(user.phone, copy.CONTACT_SENT)
         return "contact_sent"

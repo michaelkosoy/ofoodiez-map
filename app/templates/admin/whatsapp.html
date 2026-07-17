@@ -95,6 +95,7 @@
     <button class="tab-btn" data-tab="candidates">Candidates</button>
     <button class="tab-btn" data-tab="applications">Applications &amp; referrals</button>
     <button class="tab-btn" data-tab="requests">Backfill requests</button>
+    <button class="tab-btn" data-tab="contacts">Contact us</button>
 </div>
 
 <div class="tab-section" id="section-companies" style="display:none;">
@@ -131,6 +132,10 @@
         </span>
     </h3>
     <div id="t-requests"></div>
+</div>
+<div class="tab-section" id="section-contacts" style="display:none;">
+    <h3>Contact us (messages from the bot)</h3>
+    <div id="t-contacts"></div>
 </div>
 <!-- Advocates modal -->
 <div id="adv-modal-overlay">
@@ -247,6 +252,31 @@ function openUserFlow(userId) {
         .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
         .then(function (f) { Swal.fire({ title: f.user.name || 'User flow', html: renderFlow(f), width: 820, showConfirmButton: true, confirmButtonText: 'Close' }); })
         .catch(function () { Swal.fire({ icon: 'error', title: 'Could not load flow' }); });
+}
+function openApplication(d) {
+    // One row = one CV submission to one company. Show ONLY that submission —
+    // not the candidate's whole bot conversation (that's the Candidates tab).
+    var sent = (d.emailed || 0) > 0;
+    var job = d.job_posting_url
+        ? '<a href="' + escHtml(d.job_posting_url) + '" target="_blank" rel="noopener">' + escHtml(d.job_posting_url) + '</a>'
+        : (d.job_description ? escHtml(d.job_description) : '<span style="color:#999;">&mdash;</span>');
+    var cv = d.resume
+        ? '<a href="/admin/api/whatsapp/applications/' + d.id + '/cv" target="_blank" rel="noopener">' + escHtml(d.resume) + '</a>'
+        : '<span style="color:#999;">none</span>';
+    var h = '<div style="text-align:left;font-size:.9rem;">'
+        + '<div style="margin-bottom:12px;color:#555;"><b>' + escHtml(d.candidate) + '</b> &middot; ' + escHtml(d.number)
+        + '<br><span style="color:#999;font-size:.8rem;">submitted ' + escHtml(d.created) + '</span></div>'
+        + '<div style="border-left:2px solid #e0e0e0;margin-left:6px;padding-left:14px;">'
+        + flowItem('💼', 'Role', '', d.role ? escHtml(d.role) : '<span style="color:#999;">not specified</span>')
+        + flowItem('🔗', 'Job link / details', '', job)
+        + flowItem('📄', 'CV', '', cv)
+        + flowItem(sent ? '📧' : '⚠️', 'Sent to advocate', '',
+            sent
+                ? (d.emailed + ' advocate(s) emailed'
+                    + (d.approved ? ' &middot; <span style="color:#2e7d32;">' + d.approved + ' approved</span>' : ''))
+                : '<span style="color:#c62828;">Not sent to any advocate &mdash; the CV did not reach an advocate</span>')
+        + '</div></div>';
+    Swal.fire({ title: escHtml(d.company) + ' — submission', html: h, width: 600, showConfirmButton: true, confirmButtonText: 'Close' });
 }
 
 function putSave(url, body, table) {
@@ -430,7 +460,7 @@ var COLS = {
         },
         { title: "Emailed", field: "emailed", width: 90 },
         { title: "Approved", field: "approved", width: 100 },
-        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 120, formatter: function (c) { var v = c.getValue(); var col = v === 'Approved' ? '#2e7d32' : (v === 'Emailed' ? '#1565c0' : '#e65100'); return '<span style="color:' + col + ';font-weight:600;">' + (v || '') + '</span>'; } },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 120, formatter: function (c) { var v = c.getValue(); var col = v === 'Approved' ? '#2e7d32' : (v === 'Disputed' ? '#c0392b' : (v === 'Emailed' ? '#1565c0' : '#e65100')); return '<span style="color:' + col + ';font-weight:600;">' + (v || '') + '</span>'; } },
         {
             title: "Actions", headerSort: false, width: 170, hozAlign: "center",
             formatter: function () {
@@ -516,6 +546,42 @@ var COLS = {
                 }
             }
         }
+    ],
+    contacts: [
+        { title: "Received", field: "created", width: 140 },
+        { title: "From", field: "name", headerFilter: "input", width: 150 },
+        { title: "WhatsApp", field: "phone", width: 130 },
+        { title: "Email", field: "email", headerFilter: "input", width: 180 },
+        { title: "Message", field: "message", headerFilter: "input", minWidth: 260, formatter: "textarea" },
+        { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
+        {
+            title: "Actions", headerSort: false, width: 200, hozAlign: "center",
+            formatter: function (c) {
+                var d = c.getRow().getData();
+                var toggle = d.status === 'open'
+                    ? '<button class="act ok" data-a="toggle">Mark handled</button>'
+                    : '<button class="act" data-a="toggle">Reopen</button>';
+                return toggle + ' <button class="act danger" data-a="delete">Delete</button>';
+            },
+            cellClick: function (e, c) {
+                var btn = e.target.closest('button'); if (!btn) return;
+                var d = c.getRow().getData();
+                var table = c.getTable();
+                if (btn.dataset.a === 'toggle') {
+                    act('/admin/api/whatsapp/contacts/' + d.id, { status: d.status === 'open' ? 'handled' : 'open' }, 'Updated', table);
+                } else if (btn.dataset.a === 'delete') {
+                    Swal.fire({ title: 'Delete message?', text: (d.name || '') + ' · ' + (d.phone || ''), icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Delete' })
+                        .then(function (res) {
+                            if (!res.isConfirmed) return;
+                            fetch('/admin/api/whatsapp/contacts/' + d.id, { method: 'DELETE' })
+                                .then(function (r) {
+                                    if (r.ok) { table.replaceData(); Swal.fire({ icon: 'success', title: 'Deleted', timer: 900, showConfirmButton: false }); }
+                                    else Swal.fire('Error', 'Could not delete', 'error');
+                                });
+                        });
+                }
+            }
+        }
     ]
 };
 var URLS = {
@@ -523,7 +589,8 @@ var URLS = {
     advocates: "{{ url_for('admin.get_whatsapp_advocates') }}",
     candidates: "{{ url_for('admin.get_whatsapp_candidates') }}",
     applications: "{{ url_for('admin.get_whatsapp_applications') }}",
-    requests: "{{ url_for('admin.get_whatsapp_requests') }}"
+    requests: "{{ url_for('admin.get_whatsapp_requests') }}",
+    contacts: "{{ url_for('admin.get_whatsapp_contacts') }}"
 };
 
 // ---- tabs (lazy-init Tabulator so hidden tables size correctly) ----
@@ -569,11 +636,19 @@ function showTab(name) {
                 deleteBtn.style.display = data.length ? 'inline-flex' : 'none';
             });
         }
+        if (name === 'contacts') {
+            // Default view: unhandled messages first (switch the Status filter to see handled ones).
+            TABLES[name].on("tableBuilt", function() {
+                TABLES['contacts'].setHeaderFilterValue('status', 'open');
+            });
+        }
         if (name === 'applications' || name === 'candidates') {
-            // Click a row → the person's full flow (sign-up → searches → submissions).
+            // Applications: click a row → THAT one submission. Candidates: click a row →
+            // the person's full flow (sign-up → searches → submissions).
             TABLES[name].on("rowClick", function (e, row) {
                 if (e.target.closest('button') || e.target.closest('input')) return;
-                openUserFlow(name === 'candidates' ? row.getData().id : row.getData().user_id);
+                if (name === 'applications') openApplication(row.getData());
+                else openUserFlow(row.getData().id);
             });
             TABLES[name].on("dataLoaded", function () {
                 TABLES[name].getRows().forEach(function (r) { r.getElement().style.cursor = 'pointer'; });

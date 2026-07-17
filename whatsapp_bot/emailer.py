@@ -19,10 +19,13 @@ _SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
 
 def send_application_email(to_email, advocate_name, candidate_name, candidate_email,
                            role, company, job_url, job_description="", approval_url="",
+                           deny_url="", cv_url="",
                            resume_bytes=None, resume_filename="resume.pdf",
                            resume_content_type="application/pdf"):
     """Email an advocate a candidate's application (CV attached). Includes the
-    candidate's email and an "I referred them" confirmation button (approval_url).
+    candidate's email, an "I referred them" confirmation button (approval_url), an
+    "I didn't submit this" denial link (deny_url), and a clickable CV download
+    link (cv_url) alongside the attachment.
     Returns True if sent, False if SendGrid isn't configured or the send failed.
 
     Sends both a text/plain and a text/html part so the button renders.
@@ -41,19 +44,38 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
     else:
         detail_txt, detail_html = "", ""
 
+    deny_txt = (
+        f"\nDidn't submit this / don't recognise it? Let us know here:\n{deny_url}\n"
+        if deny_url else ""
+    )
     confirm_txt = (
-        f"\n✅ Did you refer them? Confirm here and we'll let them know:\n{approval_url}\n"
+        f"\n✅ Did you refer them? Confirm here and we'll let them know:\n{approval_url}\n{deny_txt}"
         if approval_url else ""
     )
+    deny_html = (
+        f'<p style="margin:8px 0 0;font-size:13px;">'
+        f'<a href="{html.escape(deny_url)}" style="color:#999;">'
+        f'I didn\'t submit this</a></p>'
+        if deny_url else ""
+    )
     confirm_html = (
-        f'<p style="margin:24px 0;">'
+        f'<p style="margin:24px 0 0;">'
         f'<a href="{html.escape(approval_url)}" '
         f'style="background:#ff7a59;color:#fff;text-decoration:none;padding:12px 22px;'
         f'border-radius:8px;font-weight:bold;display:inline-block;">'
         f'✅ Yes, I referred them</a></p>'
-        f'<p style="font-size:13px;color:#666;">Tapping this confirms you referred '
+        f'{deny_html}'
+        f'<p style="font-size:13px;color:#666;margin-top:16px;">Tapping this confirms you referred '
         f'{html.escape(candidate_name)} — we\'ll let them know. 🎉</p>'
         if approval_url else ""
+    )
+    cv_txt = (
+        f"Their CV is attached (or download it here: {cv_url})\n" if cv_url
+        else "Their CV is attached.\n"
+    )
+    cv_html = (
+        f'<p>📎 Their CV is attached — <a href="{html.escape(cv_url)}">download it here</a>.</p>'
+        if cv_url else "<p>📎 Their CV is attached.</p>"
     )
 
     text_body = (
@@ -62,7 +84,7 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
         f"would love a referral from you.\n\n"
         f"Candidate email: {candidate_email or '—'}\n"
         f"{detail_txt}\n"
-        f"Their CV is attached.\n"
+        f"{cv_txt}"
         f"{confirm_txt}\n"
         f"Thanks so much for being an Ofoodiez advocate — you're helping someone "
         f"land their dream job! 🙏\n\n"
@@ -80,7 +102,7 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
         f"and would love a referral from you.</p>"
         f"<p>📧 Candidate email: {cand_email_html}</p>"
         f"{detail_html}"
-        f"<p>📎 Their CV is attached.</p>"
+        f"{cv_html}"
         f"{confirm_html}"
         "<p>Thanks so much for being an Ofoodiez advocate — you're helping someone "
         "land their dream job! 🙏</p>"
