@@ -434,7 +434,7 @@ async function deployCampaign(product) {
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
 
 <!-- Step 1 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[220px]">
 <div class="flex items-start gap-4 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">1</span>
@@ -445,7 +445,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 2 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[220px]">
 <div class="flex items-start gap-4 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">2</span>
@@ -456,7 +456,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 3 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[220px]">
 <div class="flex items-start gap-4 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">3</span>
@@ -467,7 +467,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 4 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[220px]">
 <div class="flex items-start gap-4 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">4</span>
@@ -478,7 +478,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 5 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212]">
+<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[220px]">
 <div class="flex items-start gap-4 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">5</span>
@@ -495,13 +495,9 @@ async function deployCampaign(product) {
 <section class="py-20" id="pricing">
 <h2 class="font-display-lg-mobile md:font-headline-md text-custom-brown mb-12 text-center font-black">Pricing</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-<div class="bg-white neo-brutal-border p-8 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
+<div class="bg-custom-butter neo-brutal-border p-8 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
 <div class="mb-6">
 <h3 class="font-display-lg text-custom-brown mb-3 font-black">Launch</h3>
-<div class="mb-4">
-<p class="font-headline-md text-custom-burgundy font-bold">₪7,000</p>
-<p class="font-body-md text-custom-brown text-sm">+ 2K USD success fee on referrals</p>
-</div>
 <p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][0].description }}</p>
 </div>
 <div class="border-t-2 border-custom-brown pt-6 flex-grow">
@@ -522,13 +518,9 @@ async function deployCampaign(product) {
 </button>
 </div>
 </div>
-<div class="bg-custom-brown neo-brutal-border p-8 flex flex-col h-full text-white shadow-[8px_8px_0px_0px_#800020] rounded-3xl relative overflow-hidden">
+<div class="bg-custom-burgundy neo-brutal-border p-8 flex flex-col h-full text-white shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative overflow-hidden">
 <div class="mb-6 relative z-10">
 <h3 class="font-display-lg text-custom-butter mb-3 font-black">Boost</h3>
-<div class="mb-4">
-<p class="font-headline-md text-custom-butter font-bold">From ₪10,000/month</p>
-<p class="font-body-md text-white/90 text-sm">Includes Launch package + 4 contents per month with stories</p>
-</div>
 <p class="font-body-md text-white/90 font-medium">{{ c.packages['items'][1].description }}</p>
 {% if c.packages['items'][1].minimumCommitment %}
 <p class="font-label-mono text-sm text-custom-butter mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
@@ -556,7 +548,7 @@ async function deployCampaign(product) {
 </section>
 <!-- Footer -->
 <footer class="w-full mt-stack-xl bg-custom-brown text-white border-t-4 border-custom-burgundy">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-margin-desktop py-stack-lg max-w-container-max mx-auto w-full">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-gutter md:px-margin-desktop py-stack-lg w-full">
 <div>
 <div class="font-headline-lg text-headline-lg font-black text-custom-butter">
 <span class="text-white text-lg font-normal">the</span> Studio
