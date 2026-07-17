@@ -77,22 +77,10 @@ def healthz():
 def webhook():
     started = time.monotonic()
 
-    # DIAG: dump the FULL raw inbound BEFORE the signature check, so button-reply
-    # POSTs that fail signature are still visible (flat=False shows duplicate keys,
-    # which would break HMAC). Shows To (sandbox vs prod), ButtonPayload, quoted-reply
-    # params, everything. Temporary — remove after diagnosis.
-    logger.warning("wa RX form: %s", dict(request.form.to_dict(flat=False)))
-    logger.warning("wa RX hdr sig=%s ua=%s", request.headers.get("X-Twilio-Signature"),
-                   request.headers.get("User-Agent"))
-
     # 1. Verify signature (fail closed) before doing anything else.
     if not _verify_twilio_signature(request):
-        logger.warning("wa webhook: SIGNATURE REJECT sid=%s from=%s to=%s payload=%r btntext=%r "
-                       "pinned_url=%s", request.form.get("MessageSid"), request.form.get("From"),
-                       request.form.get("To"), request.form.get("ButtonPayload"),
-                       request.form.get("ButtonText"), WaConfig.TWILIO_WEBHOOK_URL)
+        logger.warning("wa webhook: rejected request with invalid Twilio signature")
         return Response("Forbidden", status=403)
-    logger.warning("wa SIG OK sid=%s to=%s", request.form.get("MessageSid"), request.form.get("To"))
 
     form = request.form
     message_sid = form.get("MessageSid", "")
@@ -118,7 +106,7 @@ def webhook():
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        logger.warning("wa webhook: duplicate MessageSid %s — skipping", message_sid)
+        logger.info("wa webhook: duplicate MessageSid %s — skipping", message_sid)
         return _twiml("")  # already handled on the first delivery; stay silent
 
     # 3. Route to the conversation state machine. Replies are sent via REST
@@ -135,12 +123,6 @@ def webhook():
             "media_url": form.get("MediaUrl0"),
             "media_content_type": form.get("MediaContentType0"),
         }
-        # ponytail: temp diagnostic at WARNING so it surfaces (app logs default to
-        # WARNING). The audit table doesn't store the button payload/text; log them
-        # to pin down button-tap routing. Remove once done.
-        logger.warning("wa webhook in: sid=%s from=%s payload=%r btntext=%r body=%r",
-                       message_sid, from_phone, form.get("ButtonPayload"),
-                       form.get("ButtonText"), body[:80])
         parsed_command = router.handle(inbound)
     except Exception as exc:
         db.session.rollback()  # clear any aborted transaction so we can log + reply
@@ -157,8 +139,6 @@ def webhook():
         audit.response_summary = (parsed_command or "")[:200]
         audit.processing_ms = int((time.monotonic() - started) * 1000)
         audit.error = error_text
-        logger.warning("wa webhook out: sid=%s cmd=%s ms=%s err=%s",
-                       message_sid, parsed_command, audit.processing_ms, error_text)
         try:
             db.session.commit()
         except Exception:

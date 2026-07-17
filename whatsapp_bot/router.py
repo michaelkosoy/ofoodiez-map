@@ -57,20 +57,14 @@ def handle(inbound):
     payload = inbound.get("button_payload")
     text = (inbound.get("body") or "").strip()
 
-    # DIAG: full router entry state — compare a button tap vs a typed word here.
-    logger.warning("wa ROUTE in: phone=%s registered=%s blocked=%s stale=%s flow=%r step=%r "
-                   "payload=%r text=%r", user.phone, user.is_registered, user.is_blocked,
-                   _is_stale(conv), conv.flow, conv.step, payload, text)
-
     # Blocked users (flagged in the admin) are silently ignored — no reply.
     if user.is_blocked:
-        logger.warning("wa ROUTE branch=blocked")
+        logger.info("wa: ignoring message from blocked user %s", user.phone)
         return "blocked"
 
     # Idle timeout: a long-idle message starts fresh — sign-up if needed, else
     # the personalised Welcome.
     if _is_stale(conv):
-        logger.warning("wa ROUTE branch=stale_entry")
         return _entry(user, conv)
 
     # Mid sign-up: finish it first. A registered phone never reaches here again.
@@ -78,48 +72,38 @@ def handle(inbound):
     # phone is still unregistered.
     if conv.flow == "registration":
         if _wants_menu(payload, text):
-            logger.warning("wa ROUTE branch=registration_reset")
             return _entry(user, conv)
-        logger.warning("wa ROUTE branch=registration")
         return registration.handle(user, conv, payload, text)
 
     # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
     if _wants_menu(payload, text):
-        logger.warning("wa ROUTE branch=menu_reset")
         return _entry(user, conv)
 
     # Editing your own details is a later feature — point them to Contact Us.
     if user.is_registered and text.lower() in PROFILE_WORDS:
-        logger.warning("wa ROUTE branch=profile_coming_soon")
         return _profile_coming_soon(user, conv)
 
     # Path selection from the Welcome menu.
     if payload in _PATHS:
-        logger.warning("wa ROUTE branch=path_by_payload -> %s", _PATHS[payload])
         return _enter_path(user, conv, _PATHS[payload])
 
-    # Typed equivalent of a Welcome button (for clients that drop the tap). Only
-    # at the menu (no active flow) so it can't eat a mid-flow answer.
+    # Typed equivalent of a Welcome button (for clients that drop the tap — e.g.
+    # WhatsApp Web/Desktop never sends quick-reply taps). Only at the menu (no
+    # active flow) so it can't eat a mid-flow answer.
     if not conv.flow and text.lower() in PATH_WORDS:
-        logger.warning("wa ROUTE branch=path_by_text -> %s", PATH_WORDS[text.lower()])
         return _enter_path(user, conv, PATH_WORDS[text.lower()])
 
     # In-flow dispatch.
     if conv.flow == "candidate" and conv.step and conv.step.startswith("cand_"):
-        logger.warning("wa ROUTE branch=inflow_candidate step=%s", conv.step)
         return candidate.handle(user, conv, inbound)
     if conv.flow == "employee" and conv.step and conv.step.startswith("emp_"):
-        logger.warning("wa ROUTE branch=inflow_employee step=%s", conv.step)
         return employee.handle(user, conv, payload, text)
     if conv.flow == "contact" and conv.step and conv.step.startswith("contact_"):
-        logger.warning("wa ROUTE branch=inflow_contact step=%s", conv.step)
         return contact.handle(user, conv, payload, text)
     if conv.flow == "profile" and conv.step and conv.step.startswith("prof_"):
-        logger.warning("wa ROUTE branch=inflow_profile step=%s", conv.step)
         return profile.handle(user, conv, payload, text)  # dormant — editing deferred
 
     # No active flow / anything unrecognized → sign-up (if needed) or Welcome.
-    logger.warning("wa ROUTE branch=fallthrough_entry")
     return _entry(user, conv)
 
 
