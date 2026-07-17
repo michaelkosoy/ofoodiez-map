@@ -318,6 +318,11 @@ CAND_RESUME_BAD_TYPE = (
     "I need your CV as a *PDF* file 🙏 — attach it and send again."
 )
 CAND_RESUME_FAILED = "Hmm, I couldn't read that file 😕 — please try sending it again."
+CAND_ALREADY_APPLIED = (
+    "You already applied to *{company}* recently 📌\n"
+    "Your CV is already with their advocate — no need to send it again. 🙌\n\n"
+    "Want a referral somewhere else? Send another *company name*, or type *menu*."
+)
 CAND_SUBMITTED = (
     "Done! ✅ I've forwarded your application to *{advocate}* at *{company}* — "
     "fingers crossed! 🤞🎉\n"

@@ -10,7 +10,7 @@ import logging
 import random
 import re
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from database.models import db
 
@@ -436,6 +436,14 @@ def _handle_resume(user, conv, data, inbound):
         messaging.send_prompt(user.phone, copy.CAND_RESUME_BAD_TYPE)
         return "cand_resume_bad_type"
 
+    # Already applied to THIS company recently? Don't create a duplicate or re-ping
+    # its advocate. Applying to a *different* company is unaffected.
+    if _recent_duplicate_application(user.id, data.get("company_id")):
+        conversation.set_state(conv, "candidate", "cand_company", {})
+        messaging.send_prompt(user.phone, copy.CAND_ALREADY_APPLIED.format(
+            company=data.get("company_name", "that company")))
+        return "cand_already_applied"
+
     content, _ = storage.download_twilio_media(media_url)
     if content is None:
         messaging.send_prompt(user.phone, copy.CAND_RESUME_FAILED)
@@ -472,6 +480,19 @@ def _handle_explore(user, conv, payload, text=""):
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.CAND_FINISHED)
     return "cand_finished"
+
+
+def _recent_duplicate_application(candidate_user_id, company_id, days=30):
+    """A prior application by this candidate to the SAME company within `days`.
+    Used to skip a duplicate submission + advocate re-ping. Applying to a
+    different company is unaffected (company_id must match)."""
+    if not company_id:
+        return None
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    return (WaApplication.query
+            .filter_by(candidate_user_id=candidate_user_id, company_id=company_id)
+            .filter(WaApplication.created_at >= cutoff)
+            .first())
 
 
 def _create_application(user, data, resume_path, resume_filename):
