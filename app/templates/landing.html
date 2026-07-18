@@ -145,12 +145,32 @@
             .lp-scrim { opacity:1; }
             .lp-tech .lp-scrim { background:linear-gradient(rgba(18,18,18,.62), rgba(18,18,18,.88)); }
             .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.68), rgba(253,245,230,.9)); }
+            /* Tap-to-focus — the mobile equivalent of the desktop hover: JS adds .active
+               to the tapped panel and .has-active to the split. The panel grows, its
+               persona fully reveals, the other shrinks, and the welcome card fades. */
+            .lp-panel.active { flex-basis:66%; }
+            .lp-split.has-active .lp-panel:not(.active) { flex-basis:34%; }
+            .lp-split.has-active .lp-card { opacity:0; }
+            .lp-panel.active .lp-bg { opacity:1; }
+            .lp-tech.active .lp-scrim { background:rgba(18,18,18,.42); }
+            .lp-food.active .lp-scrim { background:rgba(253,245,230,.48); }
             .lp-nav-links .lp-desktop-link { display:none; }
             /* compact welcome card, centred over the seam (stays fixed + glass) */
-            .lp-card { width:min(90vw,430px); padding:15px 22px; background:rgba(253,245,230,.62); }
+            .lp-card { width:min(90vw,430px); padding:15px 22px; background:rgba(253,245,230,.62); transition:opacity .4s ease; }
             .lp-eyebrow { margin-bottom:8px; font-size:11px; }
             .lp-card h2 { font-size:19px; line-height:1.28; margin-bottom:0; }
             .lp-rule, .lp-q, .lp-sub { display:none; }
+        }
+
+        /* Narrow width but hover-capable (e.g. a resized desktop window with a mouse):
+           drive the same expand + reveal on :hover, exactly like the full desktop. */
+        @media (max-width:860px) and (hover:hover) {
+            .lp-split:hover .lp-panel { flex-basis:34%; }
+            .lp-split .lp-panel:hover { flex-basis:66%; }
+            .lp-split:hover .lp-card { opacity:0; }
+            .lp-panel:hover .lp-bg { opacity:1; }
+            .lp-tech:hover .lp-scrim { background:rgba(18,18,18,.42); }
+            .lp-food:hover .lp-scrim { background:rgba(253,245,230,.48); }
         }
     </style>
 </head>
@@ -223,6 +243,27 @@
             if (!btn || !menu) return;
             btn.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
             document.addEventListener('click', function () { menu.classList.remove('open'); });
+        })();
+
+        // Mobile: tap a side to expand it and reveal its persona — the touch equivalent
+        // of the desktop hover (which is CSS-only). Taps on the Enter button navigate.
+        (function () {
+            // Hover-capable devices (desktop AND resized/narrow windows with a mouse)
+            // use the CSS :hover behaviour. Only pure-touch devices — which physically
+            // can't hover — fall back to tap-to-focus.
+            if (window.matchMedia('(hover:hover)').matches) return;
+            var split = document.querySelector('.lp-split');
+            var panels = Array.prototype.slice.call(document.querySelectorAll('.lp-panel'));
+            if (!split) return;
+            panels.forEach(function (panel) {
+                panel.addEventListener('click', function (e) {
+                    if (e.target.closest('a')) return;    // let the Enter button / links navigate
+                    var activate = !panel.classList.contains('active');
+                    panels.forEach(function (p) { p.classList.remove('active'); });
+                    if (activate) panel.classList.add('active');
+                    split.classList.toggle('has-active', activate);
+                });
+            });
         })();
     </script>
 </body>
