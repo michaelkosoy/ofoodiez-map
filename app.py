@@ -809,6 +809,19 @@ def fetch_all_ig_posts():
             mock_posts[2]["thumbnail_url"] = "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=600&auto=format&fit=crop"
             return mock_posts
 
+        # Keep the long-lived token alive without any manual re-auth: when it's
+        # within ~2 weeks of the 60-day expiry, refresh it here (server-side, so it
+        # never depends on an external cron or a machine being on). Meta only
+        # refreshes tokens >24h old and not yet expired — the window guarantees both.
+        # Best-effort; an ALREADY-expired token (0 days) can't be refreshed and
+        # still needs a manual /ig/auth/login.
+        try:
+            if 0 < user.token_days_remaining() < 14:
+                from instagram_automation.auth import refresh_user_token
+                refresh_user_token(user)
+        except Exception as e:
+            print(f"⚠️ IG token auto-refresh skipped: {e}")
+
         posts = []
         url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/media"
         params = {
