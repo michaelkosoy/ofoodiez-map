@@ -265,6 +265,42 @@
                 });
             });
         })();
+
+        // Mobile: scrolling / swiping toward a side expands it. The page is a fixed
+        // 100dvh split (no real scroll), so we capture the wheel/swipe and focus the
+        // panel in that direction instead — down → Food (bottom), up → Tech (top).
+        (function () {
+            var desktop = window.matchMedia('(min-width:861px)');
+            var split = document.querySelector('.lp-split');
+            var tech = document.querySelector('.lp-tech');
+            var food = document.querySelector('.lp-food');
+            if (!split || !tech || !food) return;
+
+            function focus(target) {
+                [tech, food].forEach(function (p) { p.classList.remove('active'); });
+                target.classList.add('active');
+                split.classList.add('has-active');
+            }
+            function onDir(dy) {
+                if (desktop.matches || !dy) return;
+                focus(dy > 0 ? food : tech);   // scroll down → bottom (Food); up → Tech
+            }
+
+            split.addEventListener('wheel', function (e) {
+                if (desktop.matches) return;
+                e.preventDefault();
+                onDir(e.deltaY);
+            }, { passive: false });
+
+            var startY = null;
+            split.addEventListener('touchstart', function (e) { startY = e.touches[0].clientY; }, { passive: true });
+            split.addEventListener('touchmove', function (e) {
+                if (startY === null || desktop.matches) return;
+                var dy = startY - e.touches[0].clientY;   // finger up = scroll down = Food
+                if (Math.abs(dy) > 24) { e.preventDefault(); onDir(dy); startY = null; }
+            }, { passive: false });
+            split.addEventListener('touchend', function () { startY = null; }, { passive: true });
+        })();
     </script>
 </body>
 </html>
