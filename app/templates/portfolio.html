@@ -215,6 +215,10 @@
         .marquee-content {
             animation: marquee 30s linear infinite;
         }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        html { scroll-behavior: smooth; }
+        .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-white text-on-surface font-body-md selection:bg-custom-butter selection:text-custom-brown overflow-x-hidden">
@@ -230,6 +234,7 @@
 <div class="hidden md:flex items-center gap-8">
 <ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
 <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
+<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#content-series">Series</a></li>
 <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
 <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
 </ul>
@@ -251,6 +256,7 @@
     </button>
     <ul class="flex flex-col gap-6 font-label-bold text-label-bold uppercase tracking-widest">
       <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
+      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#content-series">Series</a></li>
       <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
       <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
     </ul>
@@ -425,8 +431,81 @@ async function deployCampaign(product) {
 </div>
 </div>
 </section>
+<!-- Content Series Section -->
+<section class="scroll-mt-32" id="content-series">
+<div class="mb-12">
+<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-headline-md text-custom-brown font-black">Content Series</h2>
+<p class="font-body-lg text-custom-brown font-medium mt-2 max-w-2xl border-l-4 border-custom-burgundy pl-4">Ongoing series, not one-off clips. Each client gets their own recurring format.</p>
+</div>
+<div class="relative">
+<button id="series-prev" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212] hover:bg-custom-brown hover:text-white transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<button id="series-next" aria-label="Next" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212] hover:bg-custom-brown hover:text-white transition-colors">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<div id="series-track" class="flex gap-bento-gap overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-2 -mx-gutter px-gutter md:mx-0 md:px-0">
+<!-- Series Card (duplicated placeholder x5 — real videos to follow) -->
+<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 1.2M views
+</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">DataShield AI</h3>
+<p class="font-body-md text-custom-butter font-mono">Founder-led cybersecurity series</p>
+</div>
+</div>
+<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 860K views
+</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">DevFlow Launch</h3>
+<p class="font-body-md text-custom-butter font-mono">Product storytelling series</p>
+</div>
+</div>
+<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">visibility</span> 430K views
+</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">Employer Branding</h3>
+<p class="font-body-md text-custom-butter font-mono">Hiring top-tier devs series</p>
+</div>
+</div>
+<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-white text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Coming soon
+</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">Series 04</h3>
+<p class="font-body-md text-custom-butter font-mono">Coming soon</p>
+</div>
+</div>
+<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
+<div class="absolute top-4 left-4 bg-white text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px]">schedule</span> Coming soon
+</div>
+<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
+<h3 class="font-headline-md text-white mb-1 font-bold">Series 05</h3>
+<p class="font-body-md text-custom-butter font-mono">Coming soon</p>
+</div>
+</div>
+</div>
+</div>
+</section>
 <!-- Process Timeline Section -->
-<section id="process" class="py-12">
+<section id="process" class="py-12 scroll-mt-32">
 <div class="mx-auto">
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
@@ -492,62 +571,65 @@ async function deployCampaign(product) {
 </div>
 </section>
 <!-- Pricing Section -->
-<section class="py-12" id="pricing">
+<section class="py-12 scroll-mt-32" id="pricing">
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">Pricing</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-<div class="bg-yellow-50 neo-brutal-border p-4 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
-<div class="mb-4">
-<h3 class="font-display-lg text-custom-brown mb-2 font-black">Launch</h3>
-<p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][0].description }}</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+<div class="bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
+<div class="mb-3">
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Launch</h3>
+<p class="font-body-md text-custom-brown font-medium text-sm">{{ c.packages['items'][0].description }}</p>
 </div>
-<div class="border-t-2 border-custom-brown pt-4 flex-grow">
-<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-sm tracking-wider">Includes:</h4>
-<ul class="space-y-2 font-body-md text-custom-brown mb-6 font-medium text-sm">
+<div class="border-t-2 border-custom-brown pt-3 flex-grow">
+<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
+<ul class="space-y-1.5 font-body-md text-custom-brown mb-3 font-medium text-sm">
 {% for item in c.packages['items'][0].includes %}
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-xl">check_circle</span> {{ item }}</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
 </ul>
-<div class="bg-custom-butter/20 p-3 rounded-2xl border-l-4 border-custom-burgundy mb-4">
-<p class="font-body-md text-custom-brown text-sm"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
+<div class="bg-white/50 p-2.5 rounded-2xl border-l-4 border-custom-burgundy mb-3">
+<p class="font-body-md text-custom-brown text-xs"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
 </div>
 </div>
-<div class="mt-auto pt-3 border-t-2 border-yellow-200">
-<div class="text-center mb-2">
-<p class="font-body-md text-custom-brown font-bold text-sm">₪7,000</p>
-<p class="text-xs text-custom-brown">+ ₪2K success fee</p>
-</div>
-<button class="w-full bg-yellow-100 text-custom-brown neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
+<div class="mt-auto pt-3 border-t-2 border-custom-brown/20">
+<button class="w-full bg-white text-custom-brown neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
 <span>Initialize Launch</span> <span class="material-symbols-outlined text-base">rocket_launch</span>
 </button>
+<div class="text-center mt-2">
+<p class="font-body-md text-custom-brown font-bold text-base">₪7,000</p>
+<p class="text-xs text-custom-brown">+ ₪2K success fee</p>
 </div>
 </div>
-<div class="bg-red-50 neo-brutal-border p-4 flex flex-col h-full text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative overflow-hidden">
-<div class="mb-4 relative z-10">
-<h3 class="font-display-lg text-custom-brown mb-2 font-black">Boost</h3>
-<p class="font-body-md text-custom-brown font-medium">{{ c.packages['items'][1].description }}</p>
-<p class="text-sm text-custom-burgundy font-bold mt-2">✓ Includes Launch package</p>
+</div>
+<div class="bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col h-full text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative overflow-hidden">
+<div class="mb-3 relative z-10">
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Boost</h3>
+<p class="font-body-md text-custom-brown font-medium text-sm">{{ c.packages['items'][1].description }}</p>
+<div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
+<span class="material-symbols-outlined text-xl">local_fire_department</span>
+<p class="font-black text-sm leading-tight">Includes the full Launch package — <span class="text-custom-butter">free</span></p>
+</div>
 {% if c.packages['items'][1].minimumCommitment %}
 <p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
 {% endif %}
 </div>
-<div class="border-t-2 border-red-200 pt-4 flex-grow relative z-10">
-<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-sm tracking-wider">Includes:</h4>
-<ul class="space-y-2 font-body-md text-custom-brown mb-6 text-sm">
+<div class="border-t-2 border-custom-brown/20 pt-3 flex-grow relative z-10">
+<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
+<ul class="space-y-1.5 font-body-md text-custom-brown mb-3 text-sm">
 {% for item in c.packages['items'][1].includes %}
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-xl">check_circle</span> {{ item }}</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
 </ul>
-<div class="bg-red-100 p-3 rounded-2xl border-l-4 border-custom-burgundy mb-4">
-<p class="font-body-md text-custom-brown text-sm"><strong class="text-custom-burgundy font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
+<div class="bg-white/50 p-2.5 rounded-2xl border-l-4 border-custom-burgundy mb-3">
+<p class="font-body-md text-custom-brown text-xs"><strong class="text-custom-burgundy font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
 </div>
 </div>
-<div class="mt-auto relative z-10 pt-3 border-t-2 border-red-200">
-<div class="text-center mb-2">
-<p class="font-body-md text-custom-brown font-bold text-sm">From ₪10,000/month</p>
-</div>
-<button class="w-full bg-red-200 text-custom-brown neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-burgundy hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
+<div class="mt-auto relative z-10 pt-3 border-t-2 border-custom-brown/20">
+<button class="w-full bg-custom-burgundy text-white neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
 <span>Deploy Boost</span> <span class="material-symbols-outlined text-base">bolt</span>
 </button>
+<div class="text-center mt-2">
+<p class="font-body-md text-custom-brown font-bold text-base">From ₪10,000/month</p>
+</div>
 </div>
 </div>
 </div>
@@ -563,7 +645,7 @@ async function deployCampaign(product) {
         by Ofoodiez
       </div>
 <div class="mt-4 text-white/70 font-mono text-sm">
-        // ©2024 STUDIO_CD — BORN IN TECH.<br/>// ENGINEERED FOR CREATIVES.
+        // ©2024 ENGINEERED FOR CREATIVES.
       </div>
 </div>
 </div>
@@ -595,6 +677,21 @@ async function deployCampaign(product) {
     menuLinks.forEach(link => {
       link.addEventListener('click', closeMenu);
     });
+
+    // Content Series carousel arrows
+    const seriesTrack = document.getElementById('series-track');
+    const seriesPrev = document.getElementById('series-prev');
+    const seriesNext = document.getElementById('series-next');
+    if (seriesTrack && seriesPrev && seriesNext) {
+      const scrollByCard = (direction) => {
+        const card = seriesTrack.querySelector('.series-card');
+        const gap = 16;
+        const amount = card ? card.offsetWidth + gap : seriesTrack.clientWidth * 0.3;
+        seriesTrack.scrollBy({ left: direction * amount, behavior: 'smooth' });
+      };
+      seriesPrev.addEventListener('click', () => scrollByCard(-1));
+      seriesNext.addEventListener('click', () => scrollByCard(1));
+    }
   });
 </script>
 </body></html>
