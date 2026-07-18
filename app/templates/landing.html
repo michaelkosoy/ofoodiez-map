@@ -37,7 +37,7 @@
 
         /* ── Top nav ─────────────────────────────────────────── */
         .lp-nav { position:fixed; top:0; left:0; width:100%; z-index:50;
-            display:flex; justify-content:space-between; align-items:center;
+            display:flex; justify-content:flex-start; align-items:center; gap:14px;
             padding:22px clamp(20px,5vw,64px); }
         .lp-brand { font-size:24px; font-weight:800; letter-spacing:-0.02em; color:var(--burgundy-bright); }
         .lp-nav-links { display:flex; gap:26px; align-items:center; }
@@ -45,12 +45,34 @@
         .lp-nav-links a:hover { color:var(--burgundy-bright); }
         .lp-menu-btn { background:none; border:none; color:var(--secondary); font-size:20px; cursor:pointer; line-height:0; }
         .lp-menu-btn:hover { color:var(--burgundy-bright); }
-        .lp-menu { position:fixed; top:66px; right:clamp(20px,5vw,64px); z-index:60;
-            background:#1b1a1a; border:1px solid rgba(253,245,230,0.15); border-radius:16px;
-            padding:8px; display:none; min-width:180px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
-        .lp-menu.open { display:block; }
-        .lp-menu a { display:block; padding:11px 16px; color:var(--butter); font-size:15px; border-radius:10px; }
-        .lp-menu a:hover { background:rgba(128,0,32,.4); }
+        /* Left slide-out drawer (matches the internal blog/tech drawers) */
+        .lp-drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:60;
+            opacity:0; visibility:hidden; transition:opacity .3s, visibility .3s; }
+        .lp-drawer-overlay.open { opacity:1; visibility:visible; }
+        .lp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(82vw,290px); z-index:61;
+            background:#faf5e6; color:var(--rich-brown); transform:translateX(-100%);
+            transition:transform .32s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column;
+            box-shadow:2px 0 40px rgba(0,0,0,.35); border-right:1px solid #ece1cb; }
+        .lp-drawer.open { transform:translateX(0); }
+        .lp-drawer-head { display:flex; align-items:center; justify-content:space-between; padding:22px 22px 14px; }
+        .lp-drawer-title { font-weight:800; font-size:1.3rem; color:var(--burgundy); }
+        .lp-drawer-close { background:none; border:none; color:var(--rich-brown); font-size:20px; cursor:pointer; padding:4px; line-height:0; }
+        .lp-drawer-close:hover { color:var(--burgundy); }
+        .lp-drawer-links { display:flex; flex-direction:column; gap:2px; padding:8px 12px; flex:1; }
+        .lp-drawer-links a { display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:12px;
+            color:var(--rich-brown); text-decoration:none; font-weight:600; font-size:1rem; transition:background .18s, color .18s; }
+        .lp-drawer-links a i { width:20px; text-align:center; font-size:15px; color:var(--burgundy); }
+        .lp-drawer-links a:hover { background:rgba(128,0,32,.08); color:var(--burgundy); }
+        .lp-drawer-foot { border-top:1px solid #ece1cb; padding:14px 16px 20px; margin-top:8px; }
+        .lp-drawer-contact { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;
+            padding:12px; border-radius:12px; background:var(--burgundy); color:var(--butter);
+            text-decoration:none; font-weight:700; font-size:.95rem; transition:filter .2s; }
+        .lp-drawer-contact:hover { filter:brightness(1.15); }
+        .lp-drawer-social { display:flex; gap:10px; justify-content:center; }
+        .lp-drawer-social a { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+            background:rgba(62,39,35,.06); border:1px solid rgba(62,39,35,.2); color:var(--rich-brown); font-size:17px;
+            text-decoration:none; transition:all .2s; }
+        .lp-drawer-social a:hover { background:var(--burgundy); color:var(--butter); border-color:transparent; transform:translateY(-2px); }
 
         /* ── Split ───────────────────────────────────────────── */
         .lp-split { display:flex; height:100vh; width:100vw; }
@@ -179,19 +201,31 @@
 </head>
 <body>
     <nav class="lp-nav">
+        <button class="lp-menu-btn" id="lp-menu-btn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
         <a href="/" class="lp-brand">Ofoodiez</a>
-        <div class="lp-nav-links">
-            <a href="/about" class="lp-desktop-link">About</a>
-            <a href="https://instagram.com/ofoodiez" target="_blank" rel="noopener" class="lp-desktop-link">Social</a>
-            <button class="lp-menu-btn" id="lp-menu-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
-        </div>
     </nav>
-    <div class="lp-menu" id="lp-menu">
-        <a href="/hitech">Tech</a>
-        <a href="/blog">Food &amp; Life</a>
-        <a href="/about">About</a>
-        <a href="https://instagram.com/ofoodiez" target="_blank" rel="noopener">Social</a>
-    </div>
+
+    <div class="lp-drawer-overlay" id="lp-drawer-overlay"></div>
+    <aside class="lp-drawer" id="lp-drawer">
+        <div class="lp-drawer-head">
+            <span class="lp-drawer-title">Ofoodiez</span>
+            <button class="lp-drawer-close" id="lp-drawer-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="lp-drawer-links">
+            <a href="/hitech"><i class="fas fa-microchip"></i> Tech World</a>
+            <a href="/blog"><i class="fas fa-utensils"></i> Food &amp; Lifestyle World</a>
+            <a href="/portfolio"><i class="fas fa-briefcase"></i> Services</a>
+            <a href="/about"><i class="fas fa-user"></i> About Me</a>
+        </nav>
+        <div class="lp-drawer-foot">
+            <a class="lp-drawer-contact" href="mailto:info@ofoodiez.com"><i class="fas fa-envelope"></i> Contact Me</a>
+            <div class="lp-drawer-social">
+                <a href="https://instagram.com/ofoodiez" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://tiktok.com/@ofoodiez" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.facebook.com/share/1AQDUqhNoK/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+    </aside>
 
     <!-- Center welcome (DOM-first so it stacks on top on mobile) -->
     <div class="lp-card">
@@ -208,7 +242,7 @@
             <div class="lp-bg lp-bg-food"></div>
             <div class="lp-scrim"></div>
             <div class="lp-inner">
-                <h1 class="lp-h1">Food &amp; Life</h1>
+                <h1 class="lp-h1">Food &amp; Lifestyle</h1>
                 <p class="lp-tag">Food, Tel Aviv, travel and guides worth saving.</p>
                 <div class="lp-pills">
                     <a class="lp-pill" href="/map">Happy Hour Map</a>
@@ -217,7 +251,7 @@
                     <a class="lp-pill" href="https://chat.whatsapp.com/KC3Dxo3Y9xZFHBUuI0WeAp?s=cl&amp;p=i&amp;ilr=1" target="_blank" rel="noopener">WhatsApp Community</a>
                     <a class="lp-pill" href="/blog/bachelorette">Bachelorette Guide</a>
                 </div>
-                <a class="lp-enter" href="/blog">Enter Food &amp; Life <i class="fas fa-arrow-right"></i></a>
+                <a class="lp-enter" href="/blog">Enter Food &amp; Lifestyle <i class="fas fa-arrow-right"></i></a>
             </div>
         </section>
 
@@ -242,10 +276,16 @@
 
     <script>
         (function () {
-            var btn = document.getElementById('lp-menu-btn'), menu = document.getElementById('lp-menu');
-            if (!btn || !menu) return;
-            btn.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
-            document.addEventListener('click', function () { menu.classList.remove('open'); });
+            var btn = document.getElementById('lp-menu-btn');
+            var drawer = document.getElementById('lp-drawer'), overlay = document.getElementById('lp-drawer-overlay');
+            var closeBtn = document.getElementById('lp-drawer-close');
+            if (!btn || !drawer) return;
+            function open() { drawer.classList.add('open'); overlay.classList.add('open'); }
+            function shut() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+            btn.addEventListener('click', function (e) { e.stopPropagation(); open(); });
+            closeBtn && closeBtn.addEventListener('click', shut);
+            overlay && overlay.addEventListener('click', shut);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shut(); });
         })();
 
         // Mobile: tap a side to expand it and reveal its persona — the touch equivalent

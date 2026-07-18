@@ -39,12 +39,11 @@ LISTING_SUBMISSION_CONFIGS = {
         'kinds': {
             'supplier': {
                 'array_key': 'suppliers',
-                'label_he': 'ספק',
-                'categories': ["כתיבת קורות חיים", "ליווי קריירה", "הכנה לראיונות",
-                               "מנטורינג", "קורסים ובוטקאמפים", "לינקדאין ופורטפוליו", "אחר"],
+                'label_he': 'Vendor',
+                'categories': ["Happy Hours", "Career Mentors", "Other"],
             },
         },
-        'listing_title_he': 'ספקי הקריירה בהייטק',
+        'listing_title_he': 'Vendors in Tech',
         'listing_url': 'https://ofoodiez.com/hitech/suppliers',
     },
 }

@@ -1849,7 +1849,7 @@ input:checked~.toggle-label {
     /* Quick Filters Bar */
     .map-filters-card {
         position: fixed !important;
-        top: 70px !important;
+        top: 64px !important;
         left: 0 !important;
         width: 100vw !important;
         background: transparent !important;
@@ -1941,7 +1941,8 @@ input:checked~.toggle-label {
         color: var(--primary-color);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         position: fixed !important;
-        top: 24px !important;
+        top: auto !important;
+        bottom: 398px !important;
         right: 16px !important;
         font-size: 0.9rem;
         z-index: 2000 !important;

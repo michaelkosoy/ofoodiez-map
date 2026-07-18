@@ -56,11 +56,8 @@
 
 <body>
     {% set active_page = 'map' %}
-    <!-- Floating Back Button for Map Page -->
-    <a href="/" class="floating-back-btn">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
-    </a>
+    {% include 'components/blog_menu.html' %}
+    <!-- Back button removed — navigation lives in the left drawer (slim bar ☰). -->
 
     <div id="map"></div>
 

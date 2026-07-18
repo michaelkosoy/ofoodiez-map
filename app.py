@@ -481,7 +481,7 @@ def hitech_cv_full():
         guide_md = f.read()
     # ponytail: counts both tech+business tracks, so the tech reader's estimate is a
     # touch high; fine for a ~X-min heuristic. Compute per-track in JS if it matters.
-    return render_template('hitech_cv_full.html', active_hitech_page='cv-guide',
+    return render_template('hitech_cv_full.html', active_hitech_page='cv-guide-full',
                            active_page='hitech', guide_md=guide_md, error=error,
                            read_time=_reading_minutes(guide_md))
 

@@ -72,31 +72,7 @@
 </head>
 
 <body>
-    <!-- Splash Screen -->
-    <div id="splash-screen">
-        <div class="splash-animation-container">
-            <div class="splash-drinks">
-                <img src="{{ url_for('static', filename='img/splash_1.png') }}" class="splash-frame frame-1" alt="Drink 1">
-                <img src="{{ url_for('static', filename='img/splash_2.png') }}" class="splash-frame frame-2" alt="Drink 2">
-                <img src="{{ url_for('static', filename='img/splash_3.png') }}" class="splash-frame frame-3" alt="Drink 3">
-                <div class="splash-frame frame-4">
-                    <img src="{{ url_for('static', filename='img/splash_4.png') }}" class="splash-drink-img" alt="Drink 4">
-                </div>
-            </div>
-            <div class="splash-final-brand">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" class="splash-site-icon" alt="Ofoodiez Logo">
-                <div class="splash-logo">Ofoodiez</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        if (sessionStorage.getItem('splashShown')) {
-            document.getElementById('splash-screen').style.display = 'none';
-        } else {
-            sessionStorage.setItem('splashShown', 'true');
-        }
-    </script>
+    <!-- Splash / entering animation removed. -->
 
     <!-- =========================================
          HERO
@@ -230,7 +206,7 @@
     <!-- =========================================
          POP-UPS CALENDAR
          ========================================= -->
-    <section class="calendar-section-wrap" id="popups-section">
+    <section class="calendar-section-wrap" id="popups-section" style="scroll-margin-top:64px;">
         <div class="calendar-header-block">
             <div class="section-eyebrow">Pop-ups · TLV</div>
             <h2 class="section-title">Pop-ups<br>this month</h2>

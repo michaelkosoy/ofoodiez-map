@@ -264,10 +264,10 @@
     "page_title": "Ofoodiez HiTech — For People With Good Taste"
   },
   "suppliers": {
-    "cta": "נותנים שירות לקריירה? הוסיפו את עצמכם",
-    "empty_state": "עדיין אין ספקים ברשימה — היו הראשונים להצטרף 👆",
-    "eyebrow": "כלים לקריירה",
-    "headline": "נותני שירות ל<em>קריירה בהייטק</em>",
-    "hero_sub": "כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד. מכירים מישהו מעולה? הוסיפו אותו לרשימה."
+    "cta": "Are you a tech vendor? Add yourself",
+    "empty_state": "No vendors listed yet — be the first to join 👇",
+    "eyebrow": "HiTech Community",
+    "headline": "Vendors in <em>Tech</em>",
+    "hero_sub": "Happy hours, career mentors and more — the people & services the tech community actually uses, in one place. Know a great one? Add them."
   }
 }
