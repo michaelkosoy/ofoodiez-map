@@ -123,19 +123,34 @@
 
         /* ── Mobile: stack Tech (top) / Food (bottom) ────────── */
         @media (max-width:860px) {
-            body { overflow:auto; }
-            .lp-split { flex-direction:column; height:auto; min-height:100vh; width:100%; }
-            .lp-panel { flex:none; width:100%; min-height:56vh; padding:40px clamp(20px,6vw,32px) 48px; justify-content:center; }
-            .lp-food { align-items:flex-start; text-align:left; }
+            /* No scroll: the split fills the screen (Tech top / Food bottom), mirroring
+               desktop. Tech content hugs the top, Food the bottom, so the compact
+               welcome card sits in the empty middle. Pills are hidden here to keep it to
+               one clean screen — every tool still lives inside each section. */
+            html, body { overflow:hidden; height:100%; }
+            .lp-nav { padding:13px clamp(16px,5vw,22px); }
+            .lp-split { flex-direction:column; height:100dvh; width:100%; }
+            .lp-panel { flex:1 1 50%; min-height:0; padding:0 clamp(22px,6vw,30px); }
+            .lp-tech { justify-content:flex-start; padding-top:82px; }
+            .lp-food { justify-content:flex-end; padding-bottom:40px; align-items:flex-start; text-align:left; }
             .lp-food .lp-inner, .lp-food .lp-tag { margin-left:0; }
-            .lp-food .lp-pills { justify-content:flex-start; }
-            /* no hover on mobile — show the persona subtly behind the content */
-            .lp-bg { opacity:.5; }
+            .lp-inner { max-width:none; }
+            .lp-h1 { font-size:clamp(40px,12vw,56px); margin-bottom:10px; }
+            .lp-tag { font-size:clamp(15px,4vw,18px); line-height:1.4; margin-bottom:20px; max-width:22em; }
+            .lp-pills { display:none; }
+            .lp-enter { padding:13px 26px; font-size:16px; }
+            /* persona = faint, clean backdrop (no hover on mobile); strong scrim keeps
+               each panel reading as its theme colour and the text crisp */
+            .lp-bg { opacity:.32; background-position:center top; }
             .lp-scrim { opacity:1; }
+            .lp-tech .lp-scrim { background:linear-gradient(rgba(18,18,18,.62), rgba(18,18,18,.88)); }
+            .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.68), rgba(253,245,230,.9)); }
             .lp-nav-links .lp-desktop-link { display:none; }
-            /* welcome card sits as a banner above the panels */
-            .lp-card { position:static; transform:none; width:auto; margin:86px clamp(16px,5vw,28px) 0;
-                pointer-events:auto; background:rgba(253,245,230,.94); backdrop-filter:none; -webkit-backdrop-filter:none; }
+            /* compact welcome card, centred over the seam (stays fixed + glass) */
+            .lp-card { width:min(90vw,430px); padding:15px 22px; background:rgba(253,245,230,.62); }
+            .lp-eyebrow { margin-bottom:8px; font-size:11px; }
+            .lp-card h2 { font-size:19px; line-height:1.28; margin-bottom:0; }
+            .lp-rule, .lp-q, .lp-sub { display:none; }
         }
     </style>
 </head>
