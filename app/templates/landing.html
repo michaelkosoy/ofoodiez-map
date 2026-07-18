@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ofoodiez — Tech &amp; Food. Two sides of everything I create.</title>
-    <meta name="description" content="Software engineer by day, food content creator by night. Ofoodiez: tech career tools &amp; communities on one side; Tel Aviv food, travel and guides on the other. Choose your world.">
+    <meta name="description" content="Software engineer by day, content creator by night. Ofoodiez: tech career tools &amp; communities on one side; Tel Aviv food, travel and guides on the other. Choose your world.">
     <link rel="canonical" href="https://ofoodiez.com/">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Ofoodiez">
     <meta property="og:url" content="https://ofoodiez.com/">
     <meta property="og:title" content="Ofoodiez — Tech &amp; Food">
-    <meta property="og:description" content="Software engineer by day, food content creator by night. Choose your world.">
+    <meta property="og:description" content="Software engineer by day, content creator by night. Choose your world.">
     <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
 
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
@@ -67,7 +67,10 @@
         .lp-tech { background:var(--charcoal); color:var(--butter); }
         .lp-tech::before { content:""; position:absolute; inset:0; pointer-events:none;
             background:radial-gradient(circle at 30% 35%, var(--tech-glow), transparent 60%); }
-        .lp-food { background:var(--butter); color:var(--rich-brown); align-items:flex-end; text-align:right; }
+        .lp-food { background:var(--butter); color:var(--rich-brown); }
+        /* The right/bottom panel hugs the outer edge — position-based, not theme-based,
+           so the two sides can be reordered in the HTML without touching this. */
+        .lp-panel:last-child { align-items:flex-end; text-align:right; }
 
         /* Persona images — revealed on hover (desktop), subtle on mobile. Saved locally
            in static/img so they don't expire like the original Stitch CDN URLs. */
@@ -80,15 +83,15 @@
         .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.3), rgba(253,245,230,.66)); }
 
         .lp-inner { position:relative; z-index:2; max-width:520px; width:100%; }
-        .lp-food .lp-inner { margin-left:auto; }
+        .lp-panel:last-child .lp-inner { margin-left:auto; }
         .lp-h1 { font-size:clamp(40px,7vw,64px); font-weight:800; line-height:1.1; letter-spacing:-0.04em; margin-bottom:20px; }
         .lp-food .lp-h1 { color:var(--burgundy); }
         .lp-tag { font-weight:300; font-size:clamp(18px,2.3vw,24px); line-height:1.4; margin-bottom:36px; max-width:420px; }
         .lp-tech .lp-tag { color:var(--butter); opacity:.85; }
-        .lp-food .lp-tag { margin-left:auto; }
+        .lp-panel:last-child .lp-tag { margin-left:auto; }
 
         .lp-pills { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px; }
-        .lp-food .lp-pills { justify-content:flex-end; }
+        .lp-panel:last-child .lp-pills { justify-content:flex-end; }
         .lp-pill { font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.05em;
             padding:8px 16px; border-radius:999px; transition:all .25s; }
         .lp-tech .lp-pill { border:1px solid rgba(253,245,230,.3); color:var(--butter); background:var(--tech-glow); }
@@ -131,9 +134,9 @@
             .lp-nav { padding:13px clamp(16px,5vw,22px); }
             .lp-split { flex-direction:column; height:100dvh; width:100%; }
             .lp-panel { flex:1 1 50%; min-height:0; padding:0 clamp(22px,6vw,30px); }
-            .lp-tech { justify-content:flex-start; padding-top:82px; }
-            .lp-food { justify-content:flex-end; padding-bottom:40px; align-items:flex-start; text-align:left; }
-            .lp-food .lp-inner, .lp-food .lp-tag { margin-left:0; }
+            .lp-panel:first-child { justify-content:flex-start; padding-top:82px; }
+            .lp-panel:last-child { justify-content:flex-end; padding-bottom:40px; align-items:flex-start; text-align:left; }
+            .lp-panel:last-child .lp-inner, .lp-panel:last-child .lp-tag { margin-left:0; }
             .lp-inner { max-width:none; }
             .lp-h1 { font-size:clamp(40px,12vw,56px); margin-bottom:10px; }
             .lp-tag { font-size:clamp(15px,4vw,18px); line-height:1.4; margin-bottom:20px; max-width:22em; }
@@ -193,32 +196,14 @@
     <!-- Center welcome (DOM-first so it stacks on top on mobile) -->
     <div class="lp-card">
         <p class="lp-eyebrow">Welcome to Ofoodiez</p>
-        <h2><b>software engineer</b> <i>by day,</i><br><b class="b2">food content creator</b> <i>by night.</i></h2>
+        <h2><b>software engineer</b> <i>by day,</i><br><b class="b2">content creator</b> <i>by night.</i></h2>
         <div class="lp-rule"></div>
         <p class="lp-q">What are you in for today?</p>
         <p class="lp-sub">Two sides of everything I create. Choose your world.</p>
     </div>
 
     <main class="lp-split">
-        <!-- Left: Tech -->
-        <section class="lp-panel lp-tech">
-            <div class="lp-bg lp-bg-tech"></div>
-            <div class="lp-scrim"></div>
-            <div class="lp-inner">
-                <h1 class="lp-h1">Tech</h1>
-                <p class="lp-tag">Engineering, career resources, communities and digital products.</p>
-                <div class="lp-pills">
-                    <a class="lp-pill" href="/hitech/referrals-bot">Referrals WhatsApp Bot</a>
-                    <a class="lp-pill" href="/hitech/cv-guide">CV Guide</a>
-                    <a class="lp-pill" href="/hitech/cv-guide/full">Preparing for Interviews</a>
-                    <a class="lp-pill" href="/hitech/cv-review">CV AI Reviewer</a>
-                    <a class="lp-pill" href="/hitech/community">Community</a>
-                </div>
-                <a class="lp-enter" href="/hitech">Enter Tech <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </section>
-
-        <!-- Right: Food & Life -->
+        <!-- Left: Food & Life -->
         <section class="lp-panel lp-food">
             <div class="lp-bg lp-bg-food"></div>
             <div class="lp-scrim"></div>
@@ -233,6 +218,24 @@
                     <a class="lp-pill" href="/blog/bachelorette">Bachelorette Guide</a>
                 </div>
                 <a class="lp-enter" href="/blog">Enter Food &amp; Life <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </section>
+
+        <!-- Right: Tech -->
+        <section class="lp-panel lp-tech">
+            <div class="lp-bg lp-bg-tech"></div>
+            <div class="lp-scrim"></div>
+            <div class="lp-inner">
+                <h1 class="lp-h1">Tech</h1>
+                <p class="lp-tag">Engineering, career resources, communities and digital products.</p>
+                <div class="lp-pills">
+                    <a class="lp-pill" href="/hitech/referrals-bot">Referrals WhatsApp Bot</a>
+                    <a class="lp-pill" href="/hitech/cv-guide">CV Guide</a>
+                    <a class="lp-pill" href="/hitech/cv-guide/full">Preparing for Interviews</a>
+                    <a class="lp-pill" href="/hitech/cv-review">CV AI Reviewer</a>
+                    <a class="lp-pill" href="/hitech/community">Community</a>
+                </div>
+                <a class="lp-enter" href="/hitech">Enter Tech <i class="fas fa-arrow-right"></i></a>
             </div>
         </section>
     </main>
@@ -272,18 +275,18 @@
         (function () {
             var desktop = window.matchMedia('(min-width:861px)');
             var split = document.querySelector('.lp-split');
-            var tech = document.querySelector('.lp-tech');
-            var food = document.querySelector('.lp-food');
-            if (!split || !tech || !food) return;
+            var panels = split ? split.querySelectorAll('.lp-panel') : [];
+            var top = panels[0], bottom = panels[1];
+            if (!split || !top || !bottom) return;
 
             function focus(target) {
-                [tech, food].forEach(function (p) { p.classList.remove('active'); });
+                [top, bottom].forEach(function (p) { p.classList.remove('active'); });
                 target.classList.add('active');
                 split.classList.add('has-active');
             }
             function onDir(dy) {
                 if (desktop.matches || !dy) return;
-                focus(dy > 0 ? food : tech);   // scroll down → bottom (Food); up → Tech
+                focus(dy > 0 ? bottom : top);   // scroll down → bottom panel; up → top
             }
 
             split.addEventListener('wheel', function (e) {
