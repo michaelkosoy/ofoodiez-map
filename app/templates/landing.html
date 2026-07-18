@@ -73,8 +73,8 @@
            in static/img so they don't expire like the original Stitch CDN URLs. */
         .lp-bg { position:absolute; inset:0; z-index:0; opacity:0; transition:opacity .7s ease;
             background-size:cover; background-position:center 15%; }
-        .lp-bg-tech { background-image:url("{{ url_for('static', filename='img/landing-tech.png') }}"); }
-        .lp-bg-food { background-image:url("{{ url_for('static', filename='img/landing-food.png') }}"); }
+        .lp-bg-tech { background-image:url("{{ url_for('static', filename='img/landing-tech.png') }}?v=1"); }
+        .lp-bg-food { background-image:url("{{ url_for('static', filename='img/landing-food.png') }}?v=1"); }
         .lp-scrim { position:absolute; inset:0; z-index:1; opacity:0; transition:opacity .7s ease; pointer-events:none; }
         .lp-tech .lp-scrim { background:linear-gradient(rgba(18,18,18,.35), rgba(18,18,18,.72)); }
         .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.3), rgba(253,245,230,.66)); }
