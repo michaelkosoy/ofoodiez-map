@@ -219,6 +219,29 @@
         html { scroll-behavior: smooth; }
         .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .package-card { transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease; }
+        .package-card.is-active { transform: scale(1.02); box-shadow: 10px 10px 0px 0px #121212; z-index: 10; }
+        .package-card.is-inactive { opacity: 0.55; transform: scale(0.97); }
+        /* Side panels: collapsed to zero width, slide open beside the cards */
+        .side-panel {
+            flex-shrink: 0;
+            overflow: hidden;
+            max-height: 0;
+            max-width: 100%;
+            opacity: 0;
+            transition: max-height 0.4s ease, max-width 0.4s ease, opacity 0.3s ease, margin 0.4s ease;
+        }
+        .side-panel:not(.open) { margin-top: -1.5rem; }
+        .side-panel.open { max-height: 1200px; opacity: 1; }
+        .side-panel-inner { width: 100%; }
+        @media (min-width: 768px) {
+            .side-panel { max-height: none; max-width: 0; }
+            .side-panel:not(.open) { margin-top: 0; }
+            #side-panel-launch:not(.open) { margin-right: -1.5rem; }
+            #side-panel-boost:not(.open) { margin-left: -1.5rem; }
+            .side-panel.open { max-height: none; max-width: 320px; }
+            .side-panel-inner { width: 300px; }
+        }
     </style>
 </head>
 <body class="bg-white text-on-surface font-body-md selection:bg-custom-butter selection:text-custom-brown overflow-x-hidden">
@@ -233,10 +256,9 @@
     </div>
 <div class="hidden md:flex items-center gap-8">
 <ul class="flex items-center gap-8 font-label-bold text-label-bold uppercase tracking-widest">
-<li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
-<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#content-series">Series</a></li>
+<li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#content-series">Series</a></li>
 <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
-<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
+<li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Packages</a></li>
 </ul>
 <button class="bg-custom-burgundy text-white neo-brutal-border px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full rounded-2xl">
       Connect
@@ -255,10 +277,9 @@
       <span class="material-symbols-outlined text-custom-burgundy">close</span>
     </button>
     <ul class="flex flex-col gap-6 font-label-bold text-label-bold uppercase tracking-widest">
-      <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#work">Work</a></li>
-      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#content-series">Series</a></li>
+      <li class=""><a class="text-custom-burgundy border-b-2 border-custom-burgundy pb-1" href="#content-series">Series</a></li>
       <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#process">Process</a></li>
-      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Pricing</a></li>
+      <li class=""><a class="text-custom-brown hover:text-custom-burgundy transition-colors" href="#pricing">Packages</a></li>
     </ul>
     <button class="mt-auto bg-custom-burgundy text-white neo-brutal-border px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full w-full">
       Connect
@@ -284,14 +305,28 @@
 <p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mb-10 border-l-4 border-custom-burgundy pl-4">
                     {{ c.hero.subheadline }}
                 </p>
-<div class="relative">
+<div class="relative mb-10">
 <button class="bg-custom-burgundy text-white neo-brutal-border px-8 py-4 font-label-mono text-label-mono uppercase text-lg hover:-translate-y-1 hover:-translate-x-1 shadow-[6px_6px_0px_0px_#121212] transition-all flex items-center gap-3 z-20 relative rounded-xl rounded-2xl">
                         Deploy Creative <span class="material-symbols-outlined">terminal</span>
 </button>
 </div>
+<div class="flex flex-wrap items-center gap-x-8 gap-y-3 font-label-mono text-custom-brown">
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-custom-burgundy">30K+</span>
+<span class="text-xs uppercase tracking-wider">Tech community</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-custom-burgundy">70%+</span>
+<span class="text-xs uppercase tracking-wider">Tech audience</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-custom-burgundy">1.2M+</span>
+<span class="text-xs uppercase tracking-wider">Views generated</span>
+</div>
+</div>
 </div>
 <!-- Hero Visual (Showreel Frame) -->
-<div class="lg:col-span-5 relative mt-16 lg:mt-0">
+<div class="hidden md:block lg:col-span-5 relative mt-16 lg:mt-0">
 <div class="aspect-[3/4] w-full max-w-sm mx-auto bg-custom-brown neo-brutal-border shadow-[12px_12px_0px_0px_#800020] overflow-hidden relative group rounded-3xl">
 <!-- Placeholder for video -->
 <div class="bg-cover bg-center w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="A dynamic, brightly lit vertical video frame showing a fast-paced tech montage. The scene features a young diverse team working excitedly around a glowing laptop in a modern industrial loft office. The lighting is high-contrast, cinematic, and saturated with electric blue and bright white tones, conveying a sense of urgent, creative energy typical of a modern TikTok or Reels showreel." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKJbDxtD-qX9TfnsJ_sPa4beFndkF4U2vHa85Cn4yC6G-jRypOfcVbRjt54UF4PJXI4FzCGF-3xR2poBaOx68hY7Y6LufypE6ApHpjoTc6Jyq4Vkls9nCsiLExrBFEkdOgloh7IrMWW_YGrOz5xBMpaVSgVnH9ltmLmjlJgwb4t1QqGRotUf0JGppz-aXvNVWOHe69pLQ4N8bpWOGX4akT9rI7JmqZ9-RLLeVsHBk_WeDzjAsADJsHzWiDyiPbc0FWP7GSr-GjHuo')"></div>
@@ -314,28 +349,18 @@
 </div>
 </header>
 <!-- Client Marquee -->
-<div class="border-b-2 border-custom-brown bg-custom-butter py-4 marquee-container">
-<div class="marquee-content font-display-2xl text-[40px] leading-none uppercase tracking-tight text-custom-brown font-black flex items-center gap-8">
-<span class="">Cybersecurity startup</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">AI platform</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">Developer tool</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">Fintech</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">SaaS</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<!-- Repeat for seamless loop -->
-<span class="">Cybersecurity startup</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">AI platform</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">Developer tool</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">Fintech</span>
-<span class="material-symbols-outlined text-custom-burgundy">code</span>
-<span class="">SaaS</span>
+<div class="border-b-2 border-custom-brown bg-custom-butter py-6 marquee-container overflow-hidden">
+<div class="marquee-content flex items-center w-max">
+{% for i in range(6) %}
+<div class="flex items-center gap-12 pr-12 flex-shrink-0">
+<span class="font-label-mono text-sm md:text-base uppercase tracking-widest text-custom-brown font-bold flex-shrink-0">Trusted by</span>
+<img src="{{ url_for('static', filename='img/logos/cyera.svg') }}" alt="Cyera" class="h-6 md:h-8 w-auto flex-shrink-0 grayscale brightness-0">
+<img src="{{ url_for('static', filename='img/logos/scaleops.svg') }}" alt="ScaleOps" class="h-6 md:h-8 w-auto flex-shrink-0 grayscale brightness-0">
+<img src="{{ url_for('static', filename='img/logos/matesecurity.svg') }}" alt="Mate Security" class="h-5 md:h-7 w-auto flex-shrink-0 grayscale brightness-0">
+<img src="{{ url_for('static', filename='img/logos/appcharge.svg') }}" alt="Appcharge" class="h-5 md:h-7 w-auto flex-shrink-0 grayscale brightness-0">
+<span class="material-symbols-outlined text-custom-burgundy flex-shrink-0">code</span>
+</div>
+{% endfor %}
 </div>
 </div>
 <!-- The Engineer's Edge Section -->
@@ -362,80 +387,40 @@ async function deployCampaign(product) {
     </div>
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop relative z-10 text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-full rounded-xl">Built by an Engineer, not an Agency</span>
-<h2 class="font-display-lg-mobile md:font-display-lg text-custom-butter mb-8 font-black">The Engineer's Edge.</h2>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-butter mb-8 font-black text-center">The Engineer's Edge.</h2>
 <p class="font-body-lg text-white/90 max-w-3xl mx-auto text-xl leading-relaxed font-medium">
-            I was a software engineer in cybersecurity. I don't just 'make videos'; <span class="text-custom-butter bg-custom-burgundy px-2 rounded-lg rounded-xl">I understand your architecture, your users, and why your product actually matters.</span> Stop wasting time explaining APIs to ad agencies.
+            I worked as a software engineer at cybersecurity companies — and built a content career alongside my full-time job. I don't just 'make videos'; <span class="text-custom-butter bg-custom-burgundy px-2 rounded-lg rounded-xl">I understand your architecture, your users, and why your product actually matters.</span> Stop wasting time explaining APIs to ad agencies.
         </p>
+</div>
+</section>
+<!-- Problem Section -->
+<section class="py-24 bg-white" id="problem">
+<div class="max-w-4xl mx-auto px-gutter md:px-margin-desktop text-center">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Problem</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">Nobody owns your company's story.</h2>
+<p class="font-body-lg text-custom-brown font-medium mb-10 max-w-2xl mx-auto">
+It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work.
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-custom-burgundy text-white px-6 py-5 rounded-2xl neo-brutal-border shadow-[4px_4px_0px_0px_#121212] flex items-start gap-3 text-left">
+<span class="material-symbols-outlined flex-shrink-0">visibility</span>
+<p class="font-body-md text-sm leading-relaxed"><strong class="text-custom-butter">80% of candidates</strong> check a company's LinkedIn and Instagram. No presence, and they reject you before you even meet them.</p>
+</div>
+<div class="bg-custom-butter/40 border-2 border-custom-brown px-6 py-5 rounded-2xl flex items-start gap-3 text-left">
+<span class="material-symbols-outlined text-custom-burgundy flex-shrink-0">work_outline</span>
+<p class="font-body-md text-custom-brown text-sm leading-relaxed"><strong class="font-bold">The good news:</strong> you don't need to hire a full-time social media manager to fix this. You just need me.</p>
+</div>
+</div>
 </div>
 </section>
 <!-- Main Content Canvas -->
 <main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
-<!-- Trusted By Section -->
-<section class="py-12 text-center" id="trusted">
-<h3 class="font-label-mono uppercase text-custom-brown mb-8 tracking-widest font-bold">Trusted by Technical Teams</h3>
-<div class="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-80 hover:opacity-100 transition-all duration-300"><img src="{{ url_for('static', filename='img/logos/cyera.svg') }}" alt="Cyera" class="h-7 md:h-9 w-auto"><img src="{{ url_for('static', filename='img/logos/scaleops.svg') }}" alt="ScaleOps" class="h-7 md:h-9 w-auto"><img src="{{ url_for('static', filename='img/logos/matesecurity.svg') }}" alt="Mate Security" class="h-6 md:h-7 w-auto"><img src="{{ url_for('static', filename='img/logos/appcharge.svg') }}" alt="Appcharge" class="h-6 md:h-7 w-auto"></div>
-</section>
-<!-- Portfolio Grid Section -->
-<section class="scroll-mt-32" id="work">
-<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-<div>
-<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-headline-md text-custom-brown font-black">The work, in motion.</h2>
-<p class="font-body-lg text-custom-brown font-medium mt-2 max-w-2xl border-l-4 border-custom-burgundy pl-4">High-performing creative designed specifically for the timeline. I'm not a social agency—I'm a tech</p>
-</div>
-<button class="font-label-mono uppercase flex items-center gap-2 text-custom-brown hover:text-custom-burgundy transition-colors border-b-4 border-custom-brown hover:border-custom-burgundy pb-1 font-bold">
-                    View all projects <span class="material-symbols-outlined">arrow_outward</span>
-</button>
-</div>
-<!-- Bento Grid Portfolio -->
-<div class="grid grid-cols-1 md:grid-cols-12 auto-rows-[300px] gap-bento-gap">
-<!-- Large Vertical Tile -->
-<div class="md:col-span-4 md:row-span-2 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
-<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A stylized portrait layout of a dynamic tech founder speaking animatedly into a microphone. The background is a vibrant, neon-lit server room. The image has a heavy neo-brutalism aesthetic with thick black outlines, stark contrast, and electric blue highlights. The lighting is dramatic and colorful, emphasizing a modern internet-native vlog style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIqWun4sCHlGUKv0USHdKE769eKd_B7lj6yiWfzY3pdLyw5UqiNd2wc_gMo_u1YrrQKMRMJIZvwkAGGDxuHtm6ZAopJkA4vbbpqLcTtmNO2qHBNU1K9AoUqr7t5N7xjB6-0n1FzDh99pHFUOzVw1eMQzrbprGjzkbqPedS_JYr88sTz0sN_pTkHuSZr2T2_XWqQEpGLchAropiVI-_b7O3tSjyo-Q0qXsvJbggrHYlpxDFg-Q61XYlZwIOp_BYw68lyl5HYMjY1s')"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
-<div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
-<span class="material-symbols-outlined text-[16px]">visibility</span> 1.2M views
-                    </div>
-<div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
-<h3 class="font-headline-md text-white mb-1 font-bold">DataShield AI</h3>
-<p class="font-body-md text-custom-butter font-mono">Founder-led cybersecurity series</p>
-</div>
-</div>
-<!-- Horizontal Tile -->
-<div class="md:col-span-8 md:row-span-1 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
-<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A wide landscape image showcasing a sleek, dark-mode dashboard interface floating in a 3D isometric perspective. Bright coral and electric blue data visualization charts pop against the dark background. The scene includes abstract geometric shapes and subtle motion blur to suggest speed and data processing. The aesthetic is clean, modern, and highly technical." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArUMMRp6bbcOAicQ-5fyUJSd9YowUmi0pWaIt8ThsegU_m86rTIBjQa16LNo5dDlorv2cfnUrZ-SDkNui4o53ybSOlwwsOqS1hoicQ9Amav77fESp6HCnOHGddqqQDywRNu8lJHsAYlCQ75e1ZbiPg2h-7Yccp0xO9JDG040o4iqt0txnolTQHK2Iam4kiH7PIJgEPCD-GwmMUxKcJHkEIJNx5cjzJzOlSnOksgNim5biPRgVRtV8OfwJYKsk9Jhb8vnqVZrsQ_r8')"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
-<div class="absolute top-4 right-4 bg-white text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border sticker-rotate-3 shadow-[2px_2px_0px_0px_#121212] rounded-full">
-                        Product Storytelling
-                    </div>
-<div class="absolute bottom-6 left-6 border-l-4 border-custom-butter pl-4">
-<h3 class="font-headline-md text-white mb-1 font-bold">DevFlow Launch</h3>
-<p class="font-body-md text-white/80 font-mono">Making CI/CD pipelines cinematic.</p>
-</div>
-</div>
-<!-- Square Tile 1 -->
-<div class="md:col-span-4 md:row-span-1 relative group bg-custom-butter neo-brutal-border p-6 flex flex-col justify-between neo-brutal-shadow-hover transition-all duration-300 shadow-[6px_6px_0px_0px_#121212] rounded-3xl">
-<span class="material-symbols-outlined text-[48px] text-custom-burgundy">monitoring</span>
-<div class="border-l-4 border-custom-burgundy pl-4">
-<h3 class="font-headline-md text-custom-brown mb-2 font-black">+340%</h3>
-<p class="font-body-md text-custom-brown font-bold">Increase in inbound demos for SecOps client.</p>
-</div>
-</div>
-<!-- Square Tile 2 -->
-<div class="md:col-span-4 md:row-span-1 relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
-<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" data-alt="A close up, high-contrast shot of a mechanical keyboard and hands typing rapidly. The lighting is low-key with intense electric blue under-glow from the keys. The style mimics an energetic, fast-paced 'day in the life of a developer' TikTok aesthetic, with subtle motion blur on the hands." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAT3zsffb7H0l6JhXfYOtOiomsX_AfGp8hH3lx7RWKma-kRt_3OHt_Rw4EtVIqAyQ5Nad3RpxzuzdDd1D066n3zX7rbF3DCEEgc02aiU1t2B-UvCBTwWAwoQXltk1GD5jKbq6zGRAUBCljBG1WmbYSfsQCrPZkWDrZ3vcpm-0l1bQ9ed9b663TCQB3iU4y3FtxSkuShWgsZxUWDPUAmN9reTNTSgf5nVru4iElYdFpHrOGvujqWMQtPcuDwsFB4CqAJaHwugTCX7So')"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-custom-brown to-transparent"></div>
-<div class="absolute bottom-6 left-6 border-l-4 border-white pl-4">
-<h3 class="font-body-lg font-black text-white mb-1">Employer Branding</h3>
-<p class="font-body-md text-white/80 font-mono">Hiring top-tier devs.</p>
-</div>
-</div>
-</div>
-</section>
 <!-- Content Series Section -->
 <section class="scroll-mt-32" id="content-series">
-<div class="mb-12">
-<h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-headline-md text-custom-brown font-black">Content Series</h2>
-<p class="font-body-lg text-custom-brown font-medium mt-2 max-w-2xl border-l-4 border-custom-burgundy pl-4">Ongoing series, not one-off clips. Each client gets their own recurring format.</p>
+<div class="mb-12 text-center">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Work</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black text-center">Content Series</h2>
+<p class="font-body-lg text-custom-brown font-medium mt-4 max-w-2xl mx-auto">Ongoing series, not one-off clips — built to keep your audience coming back for the next episode.</p>
 </div>
 <div class="relative">
 <button id="series-prev" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212] hover:bg-custom-brown hover:text-white transition-colors">
@@ -455,6 +440,7 @@ async function deployCampaign(product) {
 <div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
 <h3 class="font-headline-md text-white mb-1 font-bold">DataShield AI</h3>
 <p class="font-body-md text-custom-butter font-mono">Founder-led cybersecurity series</p>
+<p class="font-label-mono text-xs text-white/80 mt-1">→ 12 inbound senior candidates in 60 days</p>
 </div>
 </div>
 <div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
@@ -466,6 +452,7 @@ async function deployCampaign(product) {
 <div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
 <h3 class="font-headline-md text-white mb-1 font-bold">DevFlow Launch</h3>
 <p class="font-body-md text-custom-butter font-mono">Product storytelling series</p>
+<p class="font-label-mono text-xs text-white/80 mt-1">→ 340% increase in inbound demos</p>
 </div>
 </div>
 <div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
@@ -477,6 +464,7 @@ async function deployCampaign(product) {
 <div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
 <h3 class="font-headline-md text-white mb-1 font-bold">Employer Branding</h3>
 <p class="font-body-md text-custom-butter font-mono">Hiring top-tier devs series</p>
+<p class="font-label-mono text-xs text-white/80 mt-1">→ 3 senior engineering hires sourced organically</p>
 </div>
 </div>
 <div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-3xl">
@@ -507,6 +495,9 @@ async function deployCampaign(product) {
 <!-- Process Timeline Section -->
 <section id="process" class="py-12 scroll-mt-32">
 <div class="mx-auto">
+<div class="text-center mb-6">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">The Process</span>
+</div>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
 <!-- Timeline Grid -->
@@ -518,7 +509,7 @@ async function deployCampaign(product) {
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">1</span>
 </div>
-<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Discovery</h3>
+<h3 class="font-headline-md lg:text-[22px] text-custom-brown font-bold min-w-0 break-words">Discovery</h3>
 </div>
 <p class="font-body-md text-custom-brown text-sm">Understand your company, culture, hiring goals and audience.</p>
 </div>
@@ -529,7 +520,7 @@ async function deployCampaign(product) {
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">2</span>
 </div>
-<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Strategy</h3>
+<h3 class="font-headline-md lg:text-[22px] text-custom-brown font-bold min-w-0 break-words">Strategy</h3>
 </div>
 <p class="font-body-md text-custom-brown text-sm">Build content pillars, formats, calendar and KPIs.</p>
 </div>
@@ -540,7 +531,7 @@ async function deployCampaign(product) {
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">3</span>
 </div>
-<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Production</h3>
+<h3 class="font-headline-md lg:text-[22px] text-custom-brown font-bold min-w-0 break-words">Production</h3>
 </div>
 <p class="font-body-md text-custom-brown text-sm">Filming days at your offices. Creating authentic content.</p>
 </div>
@@ -551,7 +542,7 @@ async function deployCampaign(product) {
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">4</span>
 </div>
-<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Distribution</h3>
+<h3 class="font-headline-md lg:text-[22px] text-custom-brown font-bold min-w-0 break-words">Distribution</h3>
 </div>
 <p class="font-body-md text-custom-brown text-sm">Publish through your channels and amplify through my tech community.</p>
 </div>
@@ -562,7 +553,7 @@ async function deployCampaign(product) {
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">5</span>
 </div>
-<h3 class="font-headline-md text-headline-md text-custom-brown font-bold">Growth</h3>
+<h3 class="font-headline-md lg:text-[22px] text-custom-brown font-bold min-w-0 break-words">Growth</h3>
 </div>
 <p class="font-body-md text-custom-brown text-sm">Analyze performance. Improve formats. Scale what works.</p>
 </div>
@@ -572,38 +563,63 @@ async function deployCampaign(product) {
 </section>
 <!-- Pricing Section -->
 <section class="py-12 scroll-mt-32" id="pricing">
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">Pricing</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-<div class="bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col h-full rounded-3xl shadow-[8px_8px_0px_0px_#121212]">
+<div class="text-center mb-6">
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">Pricing</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">Packages</h2>
+<p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold text-center mb-3 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-base">bolt</span> Limited monthly availability — book a discovery call to check open slots
+</p>
+<div class="w-screen relative left-1/2 -translate-x-1/2 px-gutter md:px-margin-desktop">
+<div id="packages-row" class="flex flex-col md:flex-row gap-6 md:items-stretch md:justify-center max-w-[1400px] mx-auto">
+<!-- Launch side panel (slides open on the left) -->
+<div id="side-panel-launch" data-side-panel="launch" class="side-panel order-2 md:order-1">
+<div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
+<span class="bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">Launch</span>
+<h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">One reel. Real impact.</h5>
+<div class="space-y-4">
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">mail</span> Hundreds of applications</h6>
+<p class="text-xs text-custom-brown leading-relaxed">Expect hundreds of quality CVs from candidates who found you through the video.</p>
+</div>
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">favorite</span> Team morale</h6>
+<p class="text-xs text-custom-brown leading-relaxed">Employees share it with their network — friends and family get to see, and get excited, about where they work.</p>
+</div>
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">badge</span> A memorable name</h6>
+<p class="text-xs text-custom-brown leading-relaxed">Your company sticks in people's minds, and the buzz starts spreading.</p>
+</div>
+</div>
+</div>
+</div>
+<div data-package-card="launch" class="package-card w-full md:w-96 md:flex-shrink-0 order-1 md:order-2 bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col rounded-3xl shadow-[8px_8px_0px_0px_#121212] cursor-pointer">
 <div class="mb-3">
 <h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Launch</h3>
-<p class="font-body-md text-custom-brown font-medium text-sm">{{ c.packages['items'][0].description }}</p>
+<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ c.packages['items'][0].goal }}</p>
 </div>
-<div class="border-t-2 border-custom-brown pt-3 flex-grow">
+<div class="border-t-2 border-custom-brown pt-3 flex-grow flex flex-col">
 <h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
 <ul class="space-y-1.5 font-body-md text-custom-brown mb-3 font-medium text-sm">
 {% for item in c.packages['items'][0].includes %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
 </ul>
-<div class="bg-white/50 p-2.5 rounded-2xl border-l-4 border-custom-burgundy mb-3">
-<p class="font-body-md text-custom-brown text-xs"><strong class="font-bold">Goal:</strong> {{ c.packages['items'][0].goal }}</p>
+<div class="mt-auto pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy">
+<span class="material-symbols-outlined text-sm">arrow_back</span> <span>What you get</span>
 </div>
 </div>
 <div class="mt-auto pt-3 border-t-2 border-custom-brown/20">
-<button class="w-full bg-white text-custom-brown neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-brown hover:text-white transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
-<span>Initialize Launch</span> <span class="material-symbols-outlined text-base">rocket_launch</span>
-</button>
-<div class="text-center mt-2">
-<p class="font-body-md text-custom-brown font-bold text-base">₪7,000</p>
-<p class="text-xs text-custom-brown">+ ₪2K success fee</p>
+<div class="text-center">
+<p class="font-body-md text-custom-brown font-bold text-lg">₪7,000 <span class="font-medium text-sm">base</span></p>
+<p class="text-xs text-custom-brown mt-1">+ $2K success fee for every referred employee who signs</p>
 </div>
 </div>
 </div>
-<div class="bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col h-full text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative overflow-hidden">
+<div data-package-card="boost" class="package-card w-full md:w-96 md:flex-shrink-0 order-3 bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
 <div class="mb-3 relative z-10">
 <h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Boost</h3>
-<p class="font-body-md text-custom-brown font-medium text-sm">{{ c.packages['items'][1].description }}</p>
+<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ c.packages['items'][1].goal }}</p>
 <div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
 <span class="material-symbols-outlined text-xl">local_fire_department</span>
 <p class="font-black text-sm leading-tight">Includes the full Launch package — <span class="text-custom-butter">free</span></p>
@@ -612,23 +628,43 @@ async function deployCampaign(product) {
 <p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
 {% endif %}
 </div>
-<div class="border-t-2 border-custom-brown/20 pt-3 flex-grow relative z-10">
+<div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col relative z-10">
 <h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
 <ul class="space-y-1.5 font-body-md text-custom-brown mb-3 text-sm">
 {% for item in c.packages['items'][1].includes %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
+<li class="flex items-start gap-2 text-custom-brown/80"><span class="material-symbols-outlined text-custom-burgundy text-lg">add_circle</span> LinkedIn content — <span class="font-bold">optional add-on</span></li>
 </ul>
-<div class="bg-white/50 p-2.5 rounded-2xl border-l-4 border-custom-burgundy mb-3">
-<p class="font-body-md text-custom-brown text-xs"><strong class="text-custom-burgundy font-bold">Goal:</strong> {{ c.packages['items'][1].goal }}</p>
+<div class="mt-auto pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy">
+<span>What you get</span> <span class="material-symbols-outlined text-sm">arrow_forward</span>
 </div>
 </div>
 <div class="mt-auto relative z-10 pt-3 border-t-2 border-custom-brown/20">
-<button class="w-full bg-custom-burgundy text-white neo-brutal-border py-2 font-label-mono uppercase hover:bg-custom-brown transition-colors font-bold shadow-[4px_4px_0px_0px_#121212] rounded-2xl flex items-center justify-center gap-2 text-sm">
-<span>Deploy Boost</span> <span class="material-symbols-outlined text-base">bolt</span>
-</button>
-<div class="text-center mt-2">
-<p class="font-body-md text-custom-brown font-bold text-base">From ₪10,000/month</p>
+<div class="text-center">
+<p class="font-body-md text-custom-brown font-bold text-lg">From ₪10,000<span class="font-medium text-sm">/month</span></p>
+</div>
+</div>
+</div>
+<!-- Boost side panel (slides open on the right) -->
+<div id="side-panel-boost" data-side-panel="boost" class="side-panel order-4">
+<div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
+<span class="bg-[#f6c9c9] text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">Boost</span>
+<h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">An ongoing employer brand engine</h5>
+<div class="space-y-4">
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">photo_camera</span> Instagram</h6>
+<p class="text-xs text-custom-brown leading-relaxed">A "Life at [Company]" series — the culture, the people, the product, the vibe of actually working there. Not a one-off: content built to grow your employer brand for the long term.</p>
+</div>
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">workspace_premium</span> LinkedIn</h6>
+<p class="text-xs text-custom-brown leading-relaxed">We turn your founders into recognized leaders in your industry — thought-leadership content that builds trust and visibility.</p>
+</div>
+<div>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">groups</span> Community boost</h6>
+<p class="text-xs text-custom-brown leading-relaxed">Working with me puts your company on my tech community's radar — your events and milestones get posted fast and your name gets noticed.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -678,19 +714,95 @@ async function deployCampaign(product) {
       link.addEventListener('click', closeMenu);
     });
 
-    // Content Series carousel arrows
+    // Content Series carousel — true circular loop.
+    // Clone one full viewport's worth of cards on each side; after any scroll
+    // settles outside the canonical band, shift by exactly one real-set width.
+    // That shift lands on pixel-identical content, so it is invisible.
     const seriesTrack = document.getElementById('series-track');
     const seriesPrev = document.getElementById('series-prev');
     const seriesNext = document.getElementById('series-next');
     if (seriesTrack && seriesPrev && seriesNext) {
-      const scrollByCard = (direction) => {
-        const card = seriesTrack.querySelector('.series-card');
+      const realCards = Array.from(seriesTrack.querySelectorAll('.series-card'));
+      const realCount = realCards.length;
+      if (realCount > 1) {
         const gap = 16;
-        const amount = card ? card.offsetWidth + gap : seriesTrack.clientWidth * 0.3;
-        seriesTrack.scrollBy({ left: direction * amount, behavior: 'smooth' });
+        const step = () => realCards[0].offsetWidth + gap;
+        // Enough clones to fill the widest view (3 cards) on each side
+        const cloneCount = Math.min(3, realCount);
+        for (let i = 0; i < cloneCount; i++) {
+          const head = realCards[i].cloneNode(true);
+          head.setAttribute('aria-hidden', 'true');
+          seriesTrack.appendChild(head);
+          const tail = realCards[realCount - 1 - i].cloneNode(true);
+          tail.setAttribute('aria-hidden', 'true');
+          seriesTrack.insertBefore(tail, seriesTrack.firstChild);
+        }
+
+        const jumpBy = (delta) => {
+          seriesTrack.style.scrollBehavior = 'auto';
+          seriesTrack.scrollLeft += delta;
+          void seriesTrack.offsetHeight;
+          seriesTrack.style.scrollBehavior = '';
+        };
+
+        // Start on the first real card (after the prepended clones)
+        seriesTrack.style.scrollBehavior = 'auto';
+        seriesTrack.scrollLeft = cloneCount * step();
+        void seriesTrack.offsetHeight;
+        seriesTrack.style.scrollBehavior = '';
+
+        // Normalize back into the canonical band once scrolling settles.
+        let settleTimer = null;
+        seriesTrack.addEventListener('scroll', () => {
+          if (settleTimer) clearTimeout(settleTimer);
+          settleTimer = setTimeout(() => {
+            const s = step();
+            const span = realCount * s;
+            const low = cloneCount * s;
+            while (seriesTrack.scrollLeft >= low + span - s / 2) jumpBy(-span);
+            while (seriesTrack.scrollLeft < low - s / 2) jumpBy(span);
+          }, 180);
+        });
+
+        seriesPrev.addEventListener('click', () => seriesTrack.scrollBy({ left: -step(), behavior: 'smooth' }));
+        seriesNext.addEventListener('click', () => seriesTrack.scrollBy({ left: step(), behavior: 'smooth' }));
+      }
+    }
+
+    // Package cards — hover (or tap) opens the matching side panel outside the card;
+    // the row re-centers so the packages shift over to make space.
+    const packageCards = document.querySelectorAll('[data-package-card]');
+    const sidePanels = document.querySelectorAll('[data-side-panel]');
+    if (packageCards.length && sidePanels.length) {
+      let activePackage = null;
+      const canHover = window.matchMedia('(hover: hover)').matches;
+      const applyState = () => {
+        sidePanels.forEach(panel => {
+          panel.classList.toggle('open', panel.getAttribute('data-side-panel') === activePackage);
+        });
+        packageCards.forEach(card => {
+          const key = card.getAttribute('data-package-card');
+          card.classList.remove('is-active', 'is-inactive');
+          if (activePackage !== null) {
+            card.classList.add(key === activePackage ? 'is-active' : 'is-inactive');
+          }
+        });
       };
-      seriesPrev.addEventListener('click', () => scrollByCard(-1));
-      seriesNext.addEventListener('click', () => scrollByCard(1));
+      packageCards.forEach(card => {
+        const key = card.getAttribute('data-package-card');
+        if (canHover) {
+          card.addEventListener('mouseenter', () => { activePackage = key; applyState(); });
+        }
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('[data-no-toggle]')) return;
+          activePackage = activePackage === key ? null : key;
+          applyState();
+        });
+      });
+      if (canHover) {
+        const row = document.getElementById('packages-row');
+        if (row) row.addEventListener('mouseleave', () => { activePackage = null; applyState(); });
+      }
     }
   });
 </script>
