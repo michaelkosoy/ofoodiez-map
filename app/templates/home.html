@@ -26,17 +26,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=4">
 
     <!-- Open Graph -->
-    <link rel="canonical" href="https://ofoodiez.com/">
+    <link rel="canonical" href="https://ofoodiez.com/blog">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Ofoodiez">
-    <meta property="og:url" content="https://ofoodiez.com/">
+    <meta property="og:url" content="https://ofoodiez.com/blog">
     <meta property="og:title" content="Ofoodiez - Best Happy Hours & Food Guides">
     <meta property="og:description" content="{{ data.slogan }} | הבלוג של אופיר: המלצות אוכל, מפות שוות, האפי האוור בתל אביב, ומדריכי קולינריה בארץ ובעולם.">
     <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://ofoodiez.com/">
+    <meta property="twitter:url" content="https://ofoodiez.com/blog">
     <meta property="twitter:title" content="Ofoodiez - Best Happy Hours & Food Guides">
     <meta property="twitter:description" content="{{ data.slogan }} | הבלוג של אופיר: המלצות אוכל, מפות שוות, האפי האוור בתל אביב, ומדריכי קולינריה בארץ ובעולם.">
     <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
@@ -72,31 +72,7 @@
 </head>
 
 <body>
-    <!-- Splash Screen -->
-    <div id="splash-screen">
-        <div class="splash-animation-container">
-            <div class="splash-drinks">
-                <img src="{{ url_for('static', filename='img/splash_1.png') }}" class="splash-frame frame-1" alt="Drink 1">
-                <img src="{{ url_for('static', filename='img/splash_2.png') }}" class="splash-frame frame-2" alt="Drink 2">
-                <img src="{{ url_for('static', filename='img/splash_3.png') }}" class="splash-frame frame-3" alt="Drink 3">
-                <div class="splash-frame frame-4">
-                    <img src="{{ url_for('static', filename='img/splash_4.png') }}" class="splash-drink-img" alt="Drink 4">
-                </div>
-            </div>
-            <div class="splash-final-brand">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" class="splash-site-icon" alt="Ofoodiez Logo">
-                <div class="splash-logo">Ofoodiez</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        if (sessionStorage.getItem('splashShown')) {
-            document.getElementById('splash-screen').style.display = 'none';
-        } else {
-            sessionStorage.setItem('splashShown', 'true');
-        }
-    </script>
+    <!-- Splash / entering animation removed. -->
 
     <!-- =========================================
          HERO
@@ -230,7 +206,7 @@
     <!-- =========================================
          POP-UPS CALENDAR
          ========================================= -->
-    <section class="calendar-section-wrap" id="popups-section">
+    <section class="calendar-section-wrap" id="popups-section" style="scroll-margin-top:64px;">
         <div class="calendar-header-block">
             <div class="section-eyebrow">Pop-ups · TLV</div>
             <h2 class="section-title">Pop-ups<br>this month</h2>

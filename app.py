@@ -242,8 +242,14 @@ def get_last_update():
 
 @app.route('/')
 def home():
-    """Render the new homepage with data."""
-    # Load popups from Supabase instead of mock data
+    """Split-screen landing — 'choose your world': Tech (→ /hitech) or Food & Life (→ /blog)."""
+    return render_template('landing.html')
+
+
+@app.route('/blog')
+def blog_home():
+    """Food & Life home (the former homepage): Happy Hour map, guides, pop-ups, community."""
+    # Load popups from the database
     try:
         db_events = PopupEvent.query.order_by(PopupEvent.date.asc()).all()
         popups_list = [event.to_dict() for event in db_events]
@@ -254,7 +260,7 @@ def home():
     except Exception as e:
         print(f"⚠️ Error fetching popups from database: {e}")
         data_to_render = home_data # Fallback to mock data in case of db errors
-        
+
     return render_template('home.html', data=data_to_render)
 
 def _load_blog(slug):
@@ -286,7 +292,7 @@ def blog_instagram():
 
 @app.route('/blog/<category>')
 def blog_category(category):
-    return redirect('/', 302)
+    return redirect('/blog', 302)
 
 @app.route('/map')
 def map_page():
@@ -475,7 +481,7 @@ def hitech_cv_full():
         guide_md = f.read()
     # ponytail: counts both tech+business tracks, so the tech reader's estimate is a
     # touch high; fine for a ~X-min heuristic. Compute per-track in JS if it matters.
-    return render_template('hitech_cv_full.html', active_hitech_page='cv-guide',
+    return render_template('hitech_cv_full.html', active_hitech_page='cv-guide-full',
                            active_page='hitech', guide_md=guide_md, error=error,
                            read_time=_reading_minutes(guide_md))
 
@@ -726,7 +732,7 @@ def health_check():
 
 # ============ SEO ============
 SITE_URL = 'https://ofoodiez.com'
-SITEMAP_PAGES = ['/', '/map', '/about', '/blog/japan', '/blog/bachelorette',
+SITEMAP_PAGES = ['/', '/blog', '/map', '/about', '/blog/japan', '/blog/bachelorette',
                  '/blog/instagram', '/hitech', '/hitech/community',
                  '/hitech/referrals-bot', '/hitech/cv-guide']
 
@@ -808,6 +814,19 @@ def fetch_all_ig_posts():
             mock_posts[2]["media_type"] = "VIDEO"
             mock_posts[2]["thumbnail_url"] = "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=600&auto=format&fit=crop"
             return mock_posts
+
+        # Keep the long-lived token alive without any manual re-auth: when it's
+        # within ~2 weeks of the 60-day expiry, refresh it here (server-side, so it
+        # never depends on an external cron or a machine being on). Meta only
+        # refreshes tokens >24h old and not yet expired — the window guarantees both.
+        # Best-effort; an ALREADY-expired token (0 days) can't be refreshed and
+        # still needs a manual /ig/auth/login.
+        try:
+            if 0 < user.token_days_remaining() < 14:
+                from instagram_automation.auth import refresh_user_token
+                refresh_user_token(user)
+        except Exception as e:
+            print(f"⚠️ IG token auto-refresh skipped: {e}")
 
         posts = []
         url = f"{Config.IG_GRAPH_URL}/{Config.GRAPH_API_VERSION}/{user.ig_user_id}/media"

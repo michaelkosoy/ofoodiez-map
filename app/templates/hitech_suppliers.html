@@ -4,15 +4,15 @@
     {% include 'components/analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספקי קריירה בהייטק — Ofoodiez HiTech</title>
-    <meta name="description" content="נותני שירות לקריירה בהייטק — כותבי קורות חיים, מלווי קריירה, מנטורים וקורסים. מדריך מומלצים של קהילת Ofoodiez, ופתוח להצטרפות.">
+    <title>Vendors in Tech — Ofoodiez HiTech</title>
+    <meta name="description" content="Vendors in Tech — happy hours, career mentors and more. The people and services the Israeli tech community actually uses, curated by Ofoodiez and open to join.">
     <link rel="canonical" href="https://ofoodiez.com/hitech/suppliers">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Ofoodiez">
     <meta property="og:url" content="https://ofoodiez.com/hitech/suppliers">
-    <meta property="og:title" content="ספקי קריירה בהייטק — Ofoodiez HiTech">
-    <meta property="og:description" content="כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד.">
+    <meta property="og:title" content="Vendors in Tech — Ofoodiez HiTech">
+    <meta property="og:description" content="Happy hours, career mentors and more — vendors and services for the tech community, in one place.">
     <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
 
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
@@ -74,28 +74,24 @@
     {% set active_hitech_page = 'suppliers' %}
     {% include 'components/hitech_menu.html' %}
 
-    <div class="hs-page" dir="rtl">
+    <div class="hs-page" dir="ltr">
         <section class="hs-hero">
-            <p class="hs-eyebrow">{{ c.eyebrow | default('כלים לקריירה') | safe }}</p>
-            <h1 class="hs-title">{{ c.headline | default('נותני שירות ל<em>קריירה בהייטק</em>') | safe }}</h1>
+            <p class="hs-eyebrow">{{ c.eyebrow | default('HiTech Community') | safe }}</p>
+            <h1 class="hs-title">{{ c.headline | default('Vendors in <em>Tech</em>') | safe }}</h1>
             <div class="hs-rule"></div>
-            <p class="hs-sub">{{ c.hero_sub | default('כותבי קו״ח, מלווי קריירה, מנטורים וקורסים — האנשים שיעזרו לכם לפרוץ להייטק, במקום אחד. מכירים מישהו מעולה? הוסיפו אותו לרשימה.') | safe }}</p>
+            <p class="hs-sub">{{ c.hero_sub | default('Happy hours, career mentors and more — the people &amp; services the tech community actually uses, in one place. Know a great one? Add them.') | safe }}</p>
         </section>
 
         <section class="hs-directory">
             <div class="hs-filters">
-                <button class="hs-filter-btn active" data-filter="all">הכל</button>
-                <button class="hs-filter-btn" data-filter="כתיבת קורות חיים">📝 קורות חיים</button>
-                <button class="hs-filter-btn" data-filter="ליווי קריירה">🎯 ליווי קריירה</button>
-                <button class="hs-filter-btn" data-filter="הכנה לראיונות">💬 ראיונות</button>
-                <button class="hs-filter-btn" data-filter="מנטורינג">🧭 מנטורינג</button>
-                <button class="hs-filter-btn" data-filter="קורסים ובוטקאמפים">🎓 קורסים</button>
-                <button class="hs-filter-btn" data-filter="לינקדאין ופורטפוליו">💼 לינקדאין</button>
-                <button class="hs-filter-btn" data-filter="אחר">✨ אחר</button>
+                <button class="hs-filter-btn active" data-filter="all">All</button>
+                <button class="hs-filter-btn" data-filter="Happy Hours">🍸 Happy Hours</button>
+                <button class="hs-filter-btn" data-filter="Career Mentors">🎯 Career Mentors</button>
+                <button class="hs-filter-btn" data-filter="Other">✨ Other</button>
             </div>
 
             <button type="button" class="hs-cta" onclick="openBusinessModal()">
-                <i class="fas fa-plus-circle"></i> {{ c.cta | default('נותנים שירות לקריירה? הוסיפו את עצמכם') }}
+                <i class="fas fa-plus-circle"></i> {{ c.cta | default('Are you a tech vendor? Add yourself') }}
             </button>
 
             <div class="hs-grid">
@@ -107,7 +103,7 @@
                             {% if s.category %}<span class="hs-badge">{{ s.category }}</span>{% endif %}
                         </div>
                         <div class="hs-socials">
-                            {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="hs-social" title="לאתר / פרופיל"><i class="fas fa-globe"></i></a>{% endif %}
+                            {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="hs-social" title="Website / Profile"><i class="fas fa-globe"></i></a>{% endif %}
                             {% if s.instagram and s.instagram != "https://instagram.com/" %}<a href="{{ s.instagram }}" target="_blank" rel="noopener" class="hs-social" title="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
                             {% if s.whatsapp %}<a href="https://wa.me/{{ s.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" rel="noopener" class="hs-social hs-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
                         </div>
@@ -118,7 +114,7 @@
             </div>
 
             {% if not suppliers_data.suppliers %}
-            <p class="hs-empty">{{ c.empty_state | default('עדיין אין ספקים ברשימה — היו הראשונים להצטרף 👆') | safe }}</p>
+            <p class="hs-empty">{{ c.empty_state | default('No vendors listed yet — be the first to join 👇') | safe }}</p>
             {% endif %}
         </section>
 

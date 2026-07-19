@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofoodiez — Tech &amp; Food. Two sides of everything I create.</title>
+    <meta name="description" content="Software engineer by day, content creator by night. Ofoodiez: tech career tools &amp; communities on one side; Tel Aviv food, travel and guides on the other. Choose your world.">
+    <link rel="canonical" href="https://ofoodiez.com/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ofoodiez">
+    <meta property="og:url" content="https://ofoodiez.com/">
+    <meta property="og:title" content="Ofoodiez — Tech &amp; Food">
+    <meta property="og:description" content="Software engineer by day, content creator by night. Choose your world.">
+    <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
+
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-192.png') }}">
+    <meta name="theme-color" content="#121212">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,600;0,800;1,300&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <style>
+        :root {
+            --charcoal:#121212; --butter:#FDF5E6; --burgundy:#800020; --burgundy-bright:#af2b3e;
+            --rich-brown:#3E2723; --secondary:#635e53; --tech-glow:rgba(253,245,230,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height:100%; }
+        body { font-family:'Hanken Grotesk', system-ui, sans-serif; background:var(--charcoal); overflow:hidden; }
+        ::selection { background:var(--burgundy); color:var(--butter); }
+        a { text-decoration:none; }
+
+        /* ── Top nav ─────────────────────────────────────────── */
+        .lp-nav { position:fixed; top:0; left:0; width:100%; z-index:50;
+            display:flex; justify-content:flex-start; align-items:center; gap:14px;
+            padding:22px clamp(20px,5vw,64px); }
+        .lp-brand { font-size:24px; font-weight:800; letter-spacing:-0.02em; color:var(--burgundy-bright); }
+        .lp-nav-links { display:flex; gap:26px; align-items:center; }
+        .lp-nav-links a { font-size:16px; color:var(--secondary); transition:color .3s; }
+        .lp-nav-links a:hover { color:var(--burgundy-bright); }
+        .lp-menu-btn { background:none; border:none; color:var(--secondary); font-size:20px; cursor:pointer; line-height:0; }
+        .lp-menu-btn:hover { color:var(--burgundy-bright); }
+        /* Left slide-out drawer (matches the internal blog/tech drawers) */
+        .lp-drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:60;
+            opacity:0; visibility:hidden; transition:opacity .3s, visibility .3s; }
+        .lp-drawer-overlay.open { opacity:1; visibility:visible; }
+        .lp-drawer { position:fixed; top:0; left:0; bottom:0; width:min(82vw,290px); z-index:61;
+            background:#faf5e6; color:var(--rich-brown); transform:translateX(-100%);
+            transition:transform .32s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column;
+            box-shadow:2px 0 40px rgba(0,0,0,.35); border-right:1px solid #ece1cb; }
+        .lp-drawer.open { transform:translateX(0); }
+        .lp-drawer-head { display:flex; align-items:center; justify-content:space-between; padding:22px 22px 14px; }
+        .lp-drawer-title { font-weight:800; font-size:1.3rem; color:var(--burgundy); }
+        .lp-drawer-close { background:none; border:none; color:var(--rich-brown); font-size:20px; cursor:pointer; padding:4px; line-height:0; }
+        .lp-drawer-close:hover { color:var(--burgundy); }
+        .lp-drawer-links { display:flex; flex-direction:column; gap:2px; padding:8px 12px; flex:1; }
+        .lp-drawer-links a { display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:12px;
+            color:var(--rich-brown); text-decoration:none; font-weight:600; font-size:1rem; transition:background .18s, color .18s; }
+        .lp-drawer-links a i { width:20px; text-align:center; font-size:15px; color:var(--burgundy); }
+        .lp-drawer-links a:hover { background:rgba(128,0,32,.08); color:var(--burgundy); }
+        .lp-drawer-foot { border-top:1px solid #ece1cb; padding:14px 16px 20px; margin-top:8px; }
+        .lp-drawer-contact { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;
+            padding:12px; border-radius:12px; background:var(--burgundy); color:var(--butter);
+            text-decoration:none; font-weight:700; font-size:.95rem; transition:filter .2s; }
+        .lp-drawer-contact:hover { filter:brightness(1.15); }
+        .lp-drawer-social { display:flex; gap:10px; justify-content:center; }
+        .lp-drawer-social a { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+            background:rgba(62,39,35,.06); border:1px solid rgba(62,39,35,.2); color:var(--rich-brown); font-size:17px;
+            text-decoration:none; transition:all .2s; }
+        .lp-drawer-social a:hover { background:var(--burgundy); color:var(--butter); border-color:transparent; transform:translateY(-2px); }
+
+        /* ── Split ───────────────────────────────────────────── */
+        .lp-split { display:flex; height:100vh; width:100vw; }
+        .lp-panel { position:relative; flex:1 1 50%; height:100%;
+            display:flex; flex-direction:column; justify-content:center;
+            padding:0 clamp(24px,5vw,64px); overflow:hidden;
+            transition:flex-basis 420ms cubic-bezier(.4,0,.2,1); }
+        /* Hover-to-expand — desktop pointer only */
+        @media (hover:hover) and (min-width:861px) {
+            .lp-split:hover .lp-panel { flex-basis:35%; }
+            .lp-split .lp-panel:hover { flex-basis:65%; }
+            .lp-panel:hover .lp-bg, .lp-panel:hover .lp-scrim { opacity:1; }
+        }
+        .lp-tech { background:var(--charcoal); color:var(--butter); }
+        .lp-tech::before { content:""; position:absolute; inset:0; pointer-events:none;
+            background:radial-gradient(circle at 30% 35%, var(--tech-glow), transparent 60%); }
+        .lp-food { background:var(--butter); color:var(--rich-brown); }
+        /* The right/bottom panel hugs the outer edge — position-based, not theme-based,
+           so the two sides can be reordered in the HTML without touching this. */
+        .lp-panel:last-child { align-items:flex-end; text-align:right; }
+
+        /* Persona images — revealed on hover (desktop), subtle on mobile. Saved locally
+           in static/img so they don't expire like the original Stitch CDN URLs. */
+        .lp-bg { position:absolute; inset:0; z-index:0; opacity:0; transition:opacity .7s ease;
+            background-size:cover; background-position:center 15%; }
+        .lp-bg-tech { background-image:url("{{ url_for('static', filename='img/landing-tech.png') }}?v=1"); }
+        .lp-bg-food { background-image:url("{{ url_for('static', filename='img/landing-food.png') }}?v=1"); }
+        .lp-scrim { position:absolute; inset:0; z-index:1; opacity:0; transition:opacity .7s ease; pointer-events:none; }
+        .lp-tech .lp-scrim { background:linear-gradient(rgba(18,18,18,.35), rgba(18,18,18,.72)); }
+        .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.3), rgba(253,245,230,.66)); }
+
+        .lp-inner { position:relative; z-index:2; max-width:520px; width:100%; }
+        .lp-panel:last-child .lp-inner { margin-left:auto; }
+        .lp-h1 { font-size:clamp(40px,7vw,64px); font-weight:800; line-height:1.1; letter-spacing:-0.04em; margin-bottom:20px; }
+        .lp-food .lp-h1 { color:var(--burgundy); }
+        .lp-tag { font-weight:300; font-size:clamp(18px,2.3vw,24px); line-height:1.4; margin-bottom:36px; max-width:420px; }
+        .lp-tech .lp-tag { color:var(--butter); opacity:.85; }
+        .lp-panel:last-child .lp-tag { margin-left:auto; }
+
+        .lp-pills { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px; }
+        .lp-panel:last-child .lp-pills { justify-content:flex-end; }
+        .lp-pill { font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.05em;
+            padding:8px 16px; border-radius:999px; transition:all .25s; }
+        .lp-tech .lp-pill { border:1px solid rgba(253,245,230,.3); color:var(--butter); background:var(--tech-glow); }
+        .lp-tech .lp-pill:hover { background:rgba(128,0,32,.35); border-color:var(--burgundy-bright); }
+        .lp-food .lp-pill { border:1px solid rgba(62,39,35,.5); color:var(--rich-brown); background:rgba(255,255,255,.4); }
+        .lp-food .lp-pill:hover { background:#fff; border-color:var(--burgundy); }
+
+        .lp-enter { display:inline-flex; align-items:center; gap:10px; padding:15px 30px; border-radius:999px;
+            font-size:18px; font-weight:600; transition:transform .3s, box-shadow .3s; }
+        .lp-enter i { transition:transform .3s; }
+        .lp-enter:hover { transform:scale(1.03); }
+        .lp-enter:hover i { transform:translateX(4px); }
+        .lp-tech .lp-enter { background:var(--burgundy); color:var(--butter); }
+        .lp-tech .lp-enter:hover { box-shadow:0 0 24px rgba(128,0,32,.55); }
+        .lp-food .lp-enter { background:var(--rich-brown); color:var(--butter); }
+
+        /* ── Center welcome card ─────────────────────────────── */
+        .lp-card { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:40;
+            width:min(92vw,640px); text-align:center; pointer-events:none;
+            backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+            background:rgba(253,245,230,.32); border:1px solid rgba(255,255,255,.35);
+            border-radius:32px; padding:clamp(28px,4vw,48px); box-shadow:0 20px 60px rgba(0,0,0,.25); }
+        .lp-eyebrow { font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:600;
+            letter-spacing:.2em; text-transform:uppercase; color:var(--burgundy); margin-bottom:20px; }
+        .lp-card h2 { font-size:clamp(22px,3.6vw,40px); line-height:1.25; color:var(--charcoal); margin-bottom:24px; font-weight:400; }
+        .lp-card h2 b { font-weight:800; letter-spacing:-0.02em; }
+        .lp-card h2 .b2 { color:var(--burgundy); }
+        .lp-card h2 i { font-weight:300; color:var(--secondary); font-size:.72em; }
+        .lp-rule { width:64px; height:1px; background:rgba(128,0,32,.3); margin:0 auto 20px; }
+        .lp-q { font-weight:300; font-size:clamp(22px,3.2vw,34px); color:var(--charcoal); margin-bottom:14px; }
+        .lp-sub { font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--secondary); }
+
+        /* ── Mobile: stack Tech (top) / Food (bottom) ────────── */
+        @media (max-width:860px) {
+            /* No scroll: the split fills the screen (Tech top / Food bottom), mirroring
+               desktop. Tech content hugs the top, Food the bottom, so the compact
+               welcome card sits in the empty middle. Pills are hidden here to keep it to
+               one clean screen — every tool still lives inside each section. */
+            html, body { overflow:hidden; height:100%; }
+            .lp-nav { padding:13px clamp(16px,5vw,22px); }
+            .lp-split { flex-direction:column; height:100dvh; width:100%; }
+            .lp-panel { flex:1 1 50%; min-height:0; padding:0 clamp(22px,6vw,30px); }
+            .lp-panel:first-child { justify-content:flex-start; padding-top:82px; }
+            .lp-panel:last-child { justify-content:flex-end; padding-bottom:40px; align-items:flex-start; text-align:left; }
+            .lp-panel:last-child .lp-inner, .lp-panel:last-child .lp-tag { margin-left:0; }
+            .lp-inner { max-width:none; }
+            .lp-h1 { font-size:clamp(40px,12vw,56px); margin-bottom:10px; }
+            .lp-tag { font-size:clamp(15px,4vw,18px); line-height:1.4; margin-bottom:20px; max-width:22em; }
+            .lp-pills { display:none; }
+            .lp-enter { padding:13px 26px; font-size:16px; }
+            /* persona = faint, clean backdrop (no hover on mobile); strong scrim keeps
+               each panel reading as its theme colour and the text crisp */
+            .lp-bg { opacity:.32; background-position:center top; }
+            .lp-scrim { opacity:1; }
+            .lp-tech .lp-scrim { background:linear-gradient(rgba(18,18,18,.62), rgba(18,18,18,.88)); }
+            .lp-food .lp-scrim { background:linear-gradient(rgba(253,245,230,.68), rgba(253,245,230,.9)); }
+            /* Tap-to-focus — the mobile equivalent of the desktop hover: JS adds .active
+               to the tapped panel and .has-active to the split. The panel grows, its
+               persona fully reveals, the other shrinks, and the welcome card fades. */
+            .lp-panel.active { flex-basis:66%; }
+            .lp-split.has-active .lp-panel:not(.active) { flex-basis:34%; }
+            .lp-split.has-active .lp-card { opacity:0; }
+            .lp-panel.active .lp-bg { opacity:1; }
+            .lp-tech.active .lp-scrim { background:rgba(18,18,18,.42); }
+            .lp-food.active .lp-scrim { background:rgba(253,245,230,.48); }
+            .lp-nav-links .lp-desktop-link { display:none; }
+            /* compact welcome card, centred over the seam (stays fixed + glass) */
+            .lp-card { width:min(90vw,430px); padding:15px 22px; background:rgba(253,245,230,.62); transition:opacity .4s ease; }
+            .lp-eyebrow { margin-bottom:8px; font-size:11px; }
+            .lp-card h2 { font-size:19px; line-height:1.28; margin-bottom:0; }
+            .lp-rule, .lp-q, .lp-sub { display:none; }
+        }
+
+        /* Narrow width but hover-capable (e.g. a resized desktop window with a mouse):
+           drive the same expand + reveal on :hover, exactly like the full desktop. */
+        @media (max-width:860px) and (hover:hover) {
+            .lp-split:hover .lp-panel { flex-basis:34%; }
+            .lp-split .lp-panel:hover { flex-basis:66%; }
+            .lp-split:hover .lp-card { opacity:0; }
+            .lp-panel:hover .lp-bg { opacity:1; }
+            .lp-tech:hover .lp-scrim { background:rgba(18,18,18,.42); }
+            .lp-food:hover .lp-scrim { background:rgba(253,245,230,.48); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="lp-nav">
+        <button class="lp-menu-btn" id="lp-menu-btn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+        <a href="/" class="lp-brand">Ofoodiez</a>
+    </nav>
+
+    <div class="lp-drawer-overlay" id="lp-drawer-overlay"></div>
+    <aside class="lp-drawer" id="lp-drawer">
+        <div class="lp-drawer-head">
+            <span class="lp-drawer-title">Ofoodiez</span>
+            <button class="lp-drawer-close" id="lp-drawer-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="lp-drawer-links">
+            <a href="/hitech"><i class="fas fa-microchip"></i> Tech World</a>
+            <a href="/blog"><i class="fas fa-utensils"></i> Food &amp; Lifestyle World</a>
+            <a href="/portfolio"><i class="fas fa-briefcase"></i> Services</a>
+            <a href="/about"><i class="fas fa-user"></i> About Me</a>
+        </nav>
+        <div class="lp-drawer-foot">
+            <a class="lp-drawer-contact" href="mailto:info@ofoodiez.com"><i class="fas fa-envelope"></i> Contact Me</a>
+            <div class="lp-drawer-social">
+                <a href="https://instagram.com/ofoodiez" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://tiktok.com/@ofoodiez" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.facebook.com/share/1AQDUqhNoK/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center welcome (DOM-first so it stacks on top on mobile) -->
+    <div class="lp-card">
+        <p class="lp-eyebrow">Welcome to Ofoodiez</p>
+        <h2><b>software engineer</b> <i>by day,</i><br><b class="b2">content creator</b> <i>by night.</i></h2>
+        <div class="lp-rule"></div>
+        <p class="lp-q">What are you in for today?</p>
+        <p class="lp-sub">Two sides of everything I create. Choose your world.</p>
+    </div>
+
+    <main class="lp-split">
+        <!-- Left: Food & Life -->
+        <section class="lp-panel lp-food">
+            <div class="lp-bg lp-bg-food"></div>
+            <div class="lp-scrim"></div>
+            <div class="lp-inner">
+                <h1 class="lp-h1">Food &amp; Lifestyle</h1>
+                <p class="lp-tag">Food, Tel Aviv, travel and guides worth saving.</p>
+                <div class="lp-pills">
+                    <a class="lp-pill" href="/map">Happy Hour Map</a>
+                    <a class="lp-pill" href="/blog/japan">Japan Guide</a>
+                    <a class="lp-pill" href="/blog#popups">Tel Aviv Pop Ups</a>
+                    <a class="lp-pill" href="https://chat.whatsapp.com/KC3Dxo3Y9xZFHBUuI0WeAp?s=cl&amp;p=i&amp;ilr=1" target="_blank" rel="noopener">WhatsApp Community</a>
+                    <a class="lp-pill" href="/blog/bachelorette">Bachelorette Guide</a>
+                </div>
+                <a class="lp-enter" href="/blog">Enter Food &amp; Lifestyle <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </section>
+
+        <!-- Right: Tech -->
+        <section class="lp-panel lp-tech">
+            <div class="lp-bg lp-bg-tech"></div>
+            <div class="lp-scrim"></div>
+            <div class="lp-inner">
+                <h1 class="lp-h1">Tech</h1>
+                <p class="lp-tag">Engineering, career resources, communities and digital products.</p>
+                <div class="lp-pills">
+                    <a class="lp-pill" href="/hitech/referrals-bot">Referrals WhatsApp Bot</a>
+                    <a class="lp-pill" href="/hitech/cv-guide">CV Guide</a>
+                    <a class="lp-pill" href="/hitech/cv-guide/full">Preparing for Interviews</a>
+                    <a class="lp-pill" href="/hitech/cv-review">CV AI Reviewer</a>
+                    <a class="lp-pill" href="/hitech/community">Community</a>
+                </div>
+                <a class="lp-enter" href="/hitech">Enter Tech <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('lp-menu-btn');
+            var drawer = document.getElementById('lp-drawer'), overlay = document.getElementById('lp-drawer-overlay');
+            var closeBtn = document.getElementById('lp-drawer-close');
+            if (!btn || !drawer) return;
+            function open() { drawer.classList.add('open'); overlay.classList.add('open'); }
+            function shut() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+            btn.addEventListener('click', function (e) { e.stopPropagation(); open(); });
+            closeBtn && closeBtn.addEventListener('click', shut);
+            overlay && overlay.addEventListener('click', shut);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shut(); });
+        })();
+
+        // Mobile: tap a side to expand it and reveal its persona — the touch equivalent
+        // of the desktop hover (which is CSS-only). Taps on the Enter button navigate.
+        (function () {
+            // Hover-capable devices (desktop AND resized/narrow windows with a mouse)
+            // use the CSS :hover behaviour. Only pure-touch devices — which physically
+            // can't hover — fall back to tap-to-focus.
+            if (window.matchMedia('(hover:hover)').matches) return;
+            var split = document.querySelector('.lp-split');
+            var panels = Array.prototype.slice.call(document.querySelectorAll('.lp-panel'));
+            if (!split) return;
+            panels.forEach(function (panel) {
+                panel.addEventListener('click', function (e) {
+                    if (e.target.closest('a')) return;    // let the Enter button / links navigate
+                    var activate = !panel.classList.contains('active');
+                    panels.forEach(function (p) { p.classList.remove('active'); });
+                    if (activate) panel.classList.add('active');
+                    split.classList.toggle('has-active', activate);
+                });
+            });
+        })();
+
+        // Mobile: scrolling / swiping toward a side expands it. The page is a fixed
+        // 100dvh split (no real scroll), so we capture the wheel/swipe and focus the
+        // panel in that direction instead — down → Food (bottom), up → Tech (top).
+        (function () {
+            var desktop = window.matchMedia('(min-width:861px)');
+            var split = document.querySelector('.lp-split');
+            var panels = split ? split.querySelectorAll('.lp-panel') : [];
+            var top = panels[0], bottom = panels[1];
+            if (!split || !top || !bottom) return;
+
+            function focus(target) {
+                [top, bottom].forEach(function (p) { p.classList.remove('active'); });
+                target.classList.add('active');
+                split.classList.add('has-active');
+            }
+            function onDir(dy) {
+                if (desktop.matches || !dy) return;
+                focus(dy > 0 ? bottom : top);   // scroll down → bottom panel; up → top
+            }
+
+            split.addEventListener('wheel', function (e) {
+                if (desktop.matches) return;
+                e.preventDefault();
+                onDir(e.deltaY);
+            }, { passive: false });
+
+            var startY = null;
+            split.addEventListener('touchstart', function (e) { startY = e.touches[0].clientY; }, { passive: true });
+            split.addEventListener('touchmove', function (e) {
+                if (startY === null || desktop.matches) return;
+                var dy = startY - e.touches[0].clientY;   // finger up = scroll down = Food
+                if (Math.abs(dy) > 24) { e.preventDefault(); onDir(dy); startY = null; }
+            }, { passive: false });
+            split.addEventListener('touchend', function () { startY = null; }, { passive: true });
+        })();
+    </script>
+</body>
+</html>
