@@ -218,6 +218,11 @@
         html, body { max-width: 100%; overflow-x: hidden; }
         html { scroll-behavior: smooth; }
         .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        /* Fix text wrapping in wide sections — allow full width on desktop */
+        @media (min-width: 768px) {
+            .prose-no-wrap { white-space: normal; max-width: none; }
+            #engineers-edge p, #problem p, #content-series p { white-space: normal; }
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .package-card { transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease; }
         .package-card.is-active { transform: scale(1.02); box-shadow: 10px 10px 0px 0px #121212; z-index: 10; }
@@ -385,20 +390,20 @@ async function deployCampaign(product) {
 // &gt; Mapping CI/CD pipelines...
 // &gt; Synthesizing value prop...
     </div>
-<div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop relative z-10 text-center">
+<div class="w-full px-gutter md:px-margin-desktop relative z-10 text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-full rounded-xl">Built by an Engineer, not an Agency</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-butter mb-8 font-black text-center">The Engineer's Edge.</h2>
-<p class="font-body-lg text-white/90 max-w-3xl mx-auto text-xl leading-relaxed font-medium">
+<p class="font-body-lg text-white/90 text-xl leading-relaxed font-medium max-w-none">
             I worked as a software engineer at cybersecurity companies — and built a content career alongside my full-time job. I don't just 'make videos'; <span class="text-custom-butter bg-custom-burgundy px-2 rounded-lg rounded-xl">I understand your architecture, your users, and why your product actually matters.</span> Stop wasting time explaining APIs to ad agencies.
         </p>
 </div>
 </section>
 <!-- Problem Section -->
 <section class="py-24 bg-white" id="problem">
-<div class="max-w-4xl mx-auto px-gutter md:px-margin-desktop text-center">
+<div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Problem</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">Nobody owns your company's story.</h2>
-<p class="font-body-lg text-custom-brown font-medium mb-10 max-w-2xl mx-auto">
+<p class="font-body-lg text-custom-brown font-medium mb-10 max-w-none">
 It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work.
 </p>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -420,7 +425,7 @@ It falls between marketing, HR, and operations — without the experience, strat
 <div class="mb-12 text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Work</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black text-center">Content Series</h2>
-<p class="font-body-lg text-custom-brown font-medium mt-4 max-w-2xl mx-auto">Ongoing series, not one-off clips — built to keep your audience coming back for the next episode.</p>
+<p class="font-body-lg text-custom-brown font-medium mt-4 max-w-none">Ongoing series, not one-off clips — built to keep your audience coming back for the next episode.</p>
 </div>
 <div class="relative">
 <button id="series-prev" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212] hover:bg-custom-brown hover:text-white transition-colors">
@@ -566,7 +571,7 @@ It falls between marketing, HR, and operations — without the experience, strat
 <div class="text-center mb-6">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">Pricing</span>
 </div>
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">Packages</h2>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">the pricing</h2>
 <p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold text-center mb-3 flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-base">bolt</span> Limited monthly availability — book a discovery call to check open slots
 </p>
@@ -600,16 +605,16 @@ It falls between marketing, HR, and operations — without the experience, strat
 </div>
 <div class="border-t-2 border-custom-brown pt-3 flex-grow flex flex-col">
 <h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
-<ul class="space-y-1.5 font-body-md text-custom-brown mb-3 font-medium text-sm">
+<ul class="space-y-1.5 font-body-md text-custom-brown font-medium text-sm flex-grow">
 {% for item in c.packages['items'][0].includes %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
 </ul>
-<div class="mt-auto pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy">
+<div class="pt-3 pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy border-t-2 border-custom-brown/20 mt-3">
 <span class="material-symbols-outlined text-sm">arrow_back</span> <span>What you get</span>
 </div>
 </div>
-<div class="mt-auto pt-3 border-t-2 border-custom-brown/20">
+<div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">₪7,000 <span class="font-medium text-sm">base</span></p>
 <p class="text-xs text-custom-brown mt-1">+ $2K success fee for every referred employee who signs</p>
@@ -630,17 +635,19 @@ It falls between marketing, HR, and operations — without the experience, strat
 </div>
 <div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col relative z-10">
 <h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
-<ul class="space-y-1.5 font-body-md text-custom-brown mb-3 text-sm">
-{% for item in c.packages['items'][1].includes %}
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
-{% endfor %}
-<li class="flex items-start gap-2 text-custom-brown/80"><span class="material-symbols-outlined text-custom-burgundy text-lg">add_circle</span> LinkedIn content — <span class="font-bold">optional add-on</span></li>
+<ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> 2–3 filming days/month</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Employer branding strategy</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Content calendar &amp; KPI planning</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Instagram content — <span class="font-bold">included</span></li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Analytics &amp; optimization</li>
+<li class="flex items-start gap-2 text-custom-brown/80 mt-1"><span class="bg-custom-brown/10 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-custom-brown/30">extra</span> <span>LinkedIn content — <span class="font-bold">optional add-on</span></span></li>
 </ul>
-<div class="mt-auto pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy">
+<div class="pt-3 pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy border-t-2 border-custom-brown/20 mt-3">
 <span>What you get</span> <span class="material-symbols-outlined text-sm">arrow_forward</span>
 </div>
 </div>
-<div class="mt-auto relative z-10 pt-3 border-t-2 border-custom-brown/20">
+<div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">From ₪10,000<span class="font-medium text-sm">/month</span></p>
 </div>
@@ -653,11 +660,11 @@ It falls between marketing, HR, and operations — without the experience, strat
 <h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">An ongoing employer brand engine</h5>
 <div class="space-y-4">
 <div>
-<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">photo_camera</span> Instagram</h6>
-<p class="text-xs text-custom-brown leading-relaxed">A "Life at [Company]" series — the culture, the people, the product, the vibe of actually working there. Not a one-off: content built to grow your employer brand for the long term.</p>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">photo_camera</span> Instagram <span class="ml-1 bg-custom-burgundy text-white font-label-mono text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full">included</span></h6>
+<p class="text-xs text-custom-brown leading-relaxed">2–3 filming days at your offices every month. We build a "Life at [Company]" series — a continuous employer brand presence that attracts the right talent over time.</p>
 </div>
 <div>
-<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">workspace_premium</span> LinkedIn</h6>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">workspace_premium</span> LinkedIn <span class="ml-1 bg-custom-brown/10 text-custom-brown font-label-mono text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full border border-custom-brown/30">extra</span></h6>
 <p class="text-xs text-custom-brown leading-relaxed">We turn your founders into recognized leaders in your industry — thought-leadership content that builds trust and visibility.</p>
 </div>
 <div>
@@ -672,7 +679,8 @@ It falls between marketing, HR, and operations — without the experience, strat
 </section>
 </main>
 <footer class="w-full bg-custom-brown text-white border-t-4 border-custom-burgundy">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter px-gutter md:px-margin-desktop py-stack-lg w-full">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-gutter md:px-margin-desktop py-stack-lg w-full">
+<!-- Brand -->
 <div>
 <div class="font-headline-lg text-headline-lg font-black text-custom-butter">
 <span class="text-white text-lg font-normal">the</span> Studio
@@ -681,8 +689,31 @@ It falls between marketing, HR, and operations — without the experience, strat
         by Ofoodiez
       </div>
 <div class="mt-4 text-white/70 font-mono text-sm">
-        // ©2024 ENGINEERED FOR CREATIVES.
+        // ©2025 ENGINEERED FOR CREATIVES.
       </div>
+</div>
+<!-- Social Links -->
+<div>
+<p class="font-label-mono uppercase text-xs text-custom-butter tracking-widest mb-4">Follow</p>
+<ul class="space-y-3">
+<li><a href="https://www.instagram.com/ofoodiez" target="_blank" rel="noopener" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
+<span class="material-symbols-outlined text-base">photo_camera</span> @ofoodiez
+</a></li>
+<li><a href="https://www.linkedin.com/in/ofirlazarov" target="_blank" rel="noopener" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
+<span class="material-symbols-outlined text-base">work</span> linkedin.com/in/ofirlazarov
+</a></li>
+<li><a href="https://www.tiktok.com/@ofoodiez" target="_blank" rel="noopener" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
+<span class="material-symbols-outlined text-base">music_video</span> @ofoodiez
+</a></li>
+</ul>
+</div>
+<!-- Contact -->
+<div>
+<p class="font-label-mono uppercase text-xs text-custom-butter tracking-widest mb-4">Get in touch</p>
+<a href="mailto:ofir@ofoodiez.com" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
+<span class="material-symbols-outlined text-base">mail</span> ofir@ofoodiez.com
+</a>
+<p class="mt-6 text-white/40 font-mono text-xs">Ready to make your startup impossible to scroll past?</p>
 </div>
 </div>
 </footer>
