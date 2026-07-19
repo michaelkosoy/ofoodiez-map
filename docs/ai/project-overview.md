@@ -36,6 +36,14 @@ A Flask web app and food blog. Main features:
 - `GROW_API_KEY`, `GROW_USER_ID`, `GROW_PAGE_CODE`, `GROW_API_BASE` — direct Grow Light API access (same effect as the Make webhook; only if Grow support issues credentials). Without either transport the guide falls back to the static link + manual activation.
 - `GROW_JAPAN_PAY_LINK` — the Japan guide's public Grow payment-page URL (has a default in `billing.py`). Item price **and name** are managed **in the Grow dashboard only**: the site reads them live from each item's page (`grow_page_item()`), shows the price on the locked page, and charges it at checkout. Never hardcode prices. All sellable items live in `billing.GROW_ITEMS` (slug → page_url/catalog/path); per-user purchases in the `site_purchases` table. See docs/ai/blog-pages.md § Paid (gated) pages.
 
+## Private portfolio (/portfolio)
+`/portfolio` is gated: clients unlock it with a per-company access code (created in
+admin → Portfolio Access, `portfolio_access` table, valid 7 days, renewable) or with
+`ADMIN_SECRET`. `/portfolio/lock` re-locks the current browser (gate preview). Grants are
+re-checked in the DB per visit, so deleting a code revokes access. The locked screen is
+`app/templates/portfolio_gate.html` (terminal-boot design); its copy lives in
+`portfolio_content.json` under `portfolio.gate` (editable at /admin/portfolio/content).
+
 ## Content conventions — text must be editable, not hardcoded
 Any user-facing copy added to the site (headlines, button labels, descriptions, FAQ
 entries, etc.) must live in an editable JSON content file under `app/data/`, not

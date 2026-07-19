@@ -229,3 +229,26 @@ class Purchase(db.Model):
     paid_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'item', name='uq_purchase_user_item'),)
+
+
+class PortfolioAccess(db.Model):
+    """A per-company access code for the private /portfolio page.
+
+    Created from the admin 'Portfolio Access' page when a proposal is sent;
+    valid for 7 days (renewable). The code is stored in plain text on purpose:
+    the admin has to read it back to send it to the client, and it's a
+    low-value, short-lived, shared code — not a user credential.
+    Table auto-creates via init_db()'s db.create_all() at startup."""
+    __tablename__ = 'portfolio_access'
+
+    id = db.Column(db.Integer, primary_key=True)
+    company = db.Column(db.String(128), nullable=False)
+    code = db.Column(db.String(128), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+
+    def is_active(self):
+        return bool(self.expires_at and self.expires_at > datetime.utcnow())
+
+    def __repr__(self):
+        return f'<PortfolioAccess {self.company} ({self.code})>'

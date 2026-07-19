@@ -1,4 +1,5 @@
-from flask import render_template, redirect, url_for
+from datetime import datetime, timedelta
+from flask import render_template, redirect, url_for, request, flash
 from . import admin_bp
 from .auth import login_required
 
@@ -52,3 +53,52 @@ def blog():
 @login_required
 def hitech_suppliers():
     return render_template('admin/hitech_suppliers.html')
+
+
+# ---- Portfolio access codes (client codes for the private /portfolio page) ----
+
+@admin_bp.route('/portfolio/access')
+@login_required
+def portfolio_access():
+    from database.models import PortfolioAccess
+    codes = PortfolioAccess.query.order_by(PortfolioAccess.created_at.desc()).all()
+    return render_template('admin/portfolio_access.html', codes=codes, now=datetime.utcnow())
+
+@admin_bp.route('/portfolio/access/create', methods=['POST'])
+@login_required
+def portfolio_access_create():
+    from database.models import db, PortfolioAccess
+    company = request.form.get('company', '').strip()
+    code = request.form.get('code', '').strip() or company.lower().replace(' ', '')
+    if not company:
+        flash('Company name is required', 'error')
+    elif PortfolioAccess.query.filter(db.func.lower(PortfolioAccess.code) == code.lower()).first():
+        flash(f'Code "{code}" already exists — pick another', 'error')
+    else:
+        db.session.add(PortfolioAccess(company=company, code=code,
+                                       expires_at=datetime.utcnow() + timedelta(days=7)))
+        db.session.commit()
+        flash(f'Access for {company} created — code "{code}", valid 7 days', 'success')
+    return redirect(url_for('admin.portfolio_access'))
+
+@admin_bp.route('/portfolio/access/<int:code_id>/renew', methods=['POST'])
+@login_required
+def portfolio_access_renew(code_id):
+    from database.models import db, PortfolioAccess
+    row = db.session.get(PortfolioAccess, code_id)
+    if row:
+        row.expires_at = datetime.utcnow() + timedelta(days=7)
+        db.session.commit()
+        flash(f'{row.company} renewed — 7 days from now', 'success')
+    return redirect(url_for('admin.portfolio_access'))
+
+@admin_bp.route('/portfolio/access/<int:code_id>/delete', methods=['POST'])
+@login_required
+def portfolio_access_delete(code_id):
+    from database.models import db, PortfolioAccess
+    row = db.session.get(PortfolioAccess, code_id)
+    if row:
+        db.session.delete(row)
+        db.session.commit()
+        flash(f'Access for {row.company} revoked', 'success')
+    return redirect(url_for('admin.portfolio_access'))

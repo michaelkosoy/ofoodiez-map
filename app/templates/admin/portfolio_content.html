@@ -508,6 +508,83 @@ function renderEditor() {
     </div>
   `;
 
+  // Access Gate (the locked screen on /portfolio)
+  html += `
+    <div class="section-title">Access Gate (locked screen)</div>
+    <div class="editor-field">
+      <label>Browser Tab Title</label>
+      <input type="text" id="gate-meta-title" value="${escapeHtml(c.gate?.meta_title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Meta Description</label>
+      <input type="text" id="gate-meta-description" value="${escapeHtml(c.gate?.meta_description || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Terminal Boot Lines</div>
+  `;
+  if (c.gate?.boot_lines) {
+    c.gate.boot_lines.forEach((line, i) => {
+      html += `
+        <div class="sub-card">
+          <input type="text" id="gate-line-${i}" value="${escapeHtml(line)}" placeholder="Boot line text">
+          <div class="item-controls">
+            <button class="btn btn-small" onclick="removeGateLine(${i})">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  html += `
+    <button class="btn btn-small" onclick="addGateLine()">+ Add Boot Line</button>
+    <div class="editor-field" style="margin-top: 16px;">
+      <label>Prompt Label</label>
+      <input type="text" id="gate-prompt" value="${escapeHtml(c.gate?.prompt || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Input Placeholder</label>
+      <input type="text" id="gate-placeholder" value="${escapeHtml(c.gate?.placeholder || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Button Text</label>
+      <input type="text" id="gate-button" value="${escapeHtml(c.gate?.button || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Hint (below button)</label>
+      <input type="text" id="gate-hint" value="${escapeHtml(c.gate?.hint || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Wrong Code — Title</label>
+      <input type="text" id="gate-denied-title" value="${escapeHtml(c.gate?.denied_title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Wrong Code — Hint</label>
+      <input type="text" id="gate-denied-hint" value="${escapeHtml(c.gate?.denied_hint || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Expired — Title</label>
+      <input type="text" id="gate-expired-title" value="${escapeHtml(c.gate?.expired_title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Expired — Body</label>
+      <textarea id="gate-expired-body">${escapeHtml(c.gate?.expired_body || '')}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>Expired — CTA Button Text</label>
+      <input type="text" id="gate-expired-cta" value="${escapeHtml(c.gate?.expired_cta || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Expired — Contact Email (CTA target)</label>
+      <input type="text" id="gate-expired-email" value="${escapeHtml(c.gate?.expired_email || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Granted — Title</label>
+      <input type="text" id="gate-granted-title" value="${escapeHtml(c.gate?.granted_title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Granted — Loading Line</label>
+      <input type="text" id="gate-granted-line" value="${escapeHtml(c.gate?.granted_line || '')}">
+    </div>
+  `;
+
   document.getElementById('content-editor').innerHTML = html;
 }
 
@@ -692,6 +769,30 @@ function collectData() {
     highlight: document.getElementById('credibility-highlight').value,
   };
 
+  // Access Gate
+  c.gate = {
+    meta_title: document.getElementById('gate-meta-title').value,
+    meta_description: document.getElementById('gate-meta-description').value,
+    boot_lines: [],
+    prompt: document.getElementById('gate-prompt').value,
+    placeholder: document.getElementById('gate-placeholder').value,
+    button: document.getElementById('gate-button').value,
+    hint: document.getElementById('gate-hint').value,
+    denied_title: document.getElementById('gate-denied-title').value,
+    denied_hint: document.getElementById('gate-denied-hint').value,
+    expired_title: document.getElementById('gate-expired-title').value,
+    expired_body: document.getElementById('gate-expired-body').value,
+    expired_cta: document.getElementById('gate-expired-cta').value,
+    expired_email: document.getElementById('gate-expired-email').value,
+    granted_title: document.getElementById('gate-granted-title').value,
+    granted_line: document.getElementById('gate-granted-line').value,
+  };
+  i = 0;
+  while (document.getElementById(`gate-line-${i}`)) {
+    c.gate.boot_lines.push(document.getElementById(`gate-line-${i}`).value);
+    i++;
+  }
+
   portfolioContent.portfolio = c;
   return portfolioContent;
 }
@@ -851,6 +952,20 @@ function addCompany() {
 function removeCompany(i) {
   const data = collectData();
   data.portfolio.companies.items.splice(i, 1);
+  portfolioContent = data;
+  renderEditor();
+}
+
+function addGateLine() {
+  const data = collectData();
+  data.portfolio.gate.boot_lines.push('');
+  portfolioContent = data;
+  renderEditor();
+}
+
+function removeGateLine(i) {
+  const data = collectData();
+  data.portfolio.gate.boot_lines.splice(i, 1);
   portfolioContent = data;
   renderEditor();
 }

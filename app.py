@@ -319,11 +319,65 @@ def about_page():
     return render_template('about.html', data=home_data)
 
 
-@app.route('/portfolio')
+@app.route('/portfolio', methods=['GET', 'POST'])
 def portfolio_page():
-    """Employer Branding & Founder-Led Content Studio portfolio."""
+    """Employer Branding & Founder-Led Content Studio portfolio.
+
+    Private: unlocked by a per-company access code (created in admin →
+    Portfolio Access, valid 7 days), by the admin password (ADMIN_SECRET),
+    or by an active admin session. Gate copy lives in portfolio_content.json
+    under portfolio.gate (editable at /admin/portfolio/content)."""
     content = _load_portfolio_content()
-    return render_template('portfolio.html', c=content.get('portfolio', {}))
+    c = content.get('portfolio', {})
+    gate_c = c.get('gate', {})
+
+    if request.method == 'POST':
+        from database.models import db, PortfolioAccess
+        code = request.form.get('code', '').strip()
+        row = None
+        if code and code == os.environ.get('ADMIN_SECRET', 'ofoodiez2025'):
+            grant = 'admin'
+        else:
+            if code:
+                row = PortfolioAccess.query.filter(
+                    db.func.lower(PortfolioAccess.code) == code.lower()).first()
+            grant = row.id if row and row.is_active() else None
+        if grant is not None:
+            session.permanent = True  # survive browser restarts; the DB expiry is the real cutoff
+            session['portfolio_access'] = grant
+            state = 'granted'
+        else:
+            state = 'expired' if row else 'denied'
+        return render_template('portfolio_gate.html', c=gate_c, state=state)
+
+    if _portfolio_unlocked():
+        return render_template('portfolio.html', c=c)
+    return render_template('portfolio_gate.html', c=gate_c, state=None)
+
+
+@app.route('/portfolio/lock')
+def portfolio_lock():
+    """Re-lock this browser and show the gate again (handy for previewing it)."""
+    session.pop('portfolio_access', None)
+    return redirect(url_for('portfolio_page'))
+
+
+def _portfolio_unlocked():
+    """True when this browser session may view the private portfolio.
+
+    Client grants are re-checked against the DB on every visit, so deleting
+    a code in the admin panel (or its 7-day expiry) locks the client out
+    on their next page load."""
+    grant = session.get('portfolio_access')
+    if grant == 'admin':
+        return True
+    if grant is not None:
+        from database.models import db, PortfolioAccess
+        row = db.session.get(PortfolioAccess, grant)
+        if row and row.is_active():
+            return True
+        session.pop('portfolio_access', None)  # code deleted or expired → re-lock
+    return False
 
 
 def _load_portfolio_content():

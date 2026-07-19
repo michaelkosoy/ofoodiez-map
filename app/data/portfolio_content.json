@@ -272,6 +272,28 @@
     },
     "credibility": {
       "highlight": "Built a 30K+ tech community through Ofoodiez"
+    },
+    "gate": {
+      "meta_title": "Private Portfolio — Ofoodiez Content Studio",
+      "meta_description": "By invitation only. Enter your access code.",
+      "boot_lines": [
+        "OFOODIEZ CONTENT STUDIO",
+        "PRIVATE PORTFOLIO / 2026",
+        "EMPLOYER BRANDING · FOUNDER-LED CONTENT",
+        "STATUS: LOCKED"
+      ],
+      "prompt": "ENTER ACCESS CODE:",
+      "placeholder": "access code",
+      "button": "UNLOCK",
+      "hint": "Your access code was sent to you with the proposal — codes are valid for 1 week.",
+      "denied_title": "ACCESS DENIED",
+      "denied_hint": "Wrong code. Check your proposal and try again.",
+      "expired_title": "ACCESS EXPIRED",
+      "expired_body": "This code's one-week window has closed. Proposals don't wait forever — ping me and I'll reopen your access.",
+      "expired_cta": "REQUEST NEW ACCESS",
+      "expired_email": "info@ofoodiez.com",
+      "granted_title": "ACCESS GRANTED",
+      "granted_line": "LOADING PORTFOLIO"
     }
   }
 }

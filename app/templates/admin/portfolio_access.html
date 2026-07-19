@@ -1,0 +1,157 @@
+{% extends "admin/base.html" %}
+{% block title %}Portfolio Access{% endblock %}
+
+{% block extra_css %}
+<style>
+  .flash { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; }
+  .flash.success { background: #e8f5e9; color: var(--success-color); }
+  .flash.error { background: #fdecea; color: var(--danger-color); }
+
+  .create-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 24px;
+    max-width: 700px;
+  }
+  .create-card form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .create-card .form-group { flex: 1; min-width: 180px; }
+
+  .codes-table {
+    width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-collapse: collapse;
+    overflow: hidden;
+  }
+  .codes-table th {
+    background: var(--sidebar-bg);
+    color: #fff;
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+  }
+  .codes-table td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+  .codes-table tr:last-child td { border-bottom: none; }
+
+  .code-chip {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    background: #f4f0ea;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge.active { background: #e8f5e9; color: var(--success-color); }
+  .badge.expired { background: #fdecea; color: var(--danger-color); }
+
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row-actions form { display: inline; }
+  .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 6px; display: inline-flex; }
+  .btn-ghost { background: #eee; color: #333; }
+
+  .page-note { color: #777; font-size: 14px; margin: -10px 0 20px; max-width: 700px; }
+  .empty { text-align: center; color: #999; padding: 30px !important; }
+
+  @media (max-width: 768px) {
+    .codes-table { display: block; overflow-x: auto; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+  <h2><i class="fas fa-key"></i> Portfolio Access</h2>
+</div>
+<p class="page-note">
+  <a href="/portfolio" target="_blank">/portfolio</a> is private. Create a code per company when you send a
+  proposal — it works for <strong>7 days</strong>, then they see the "access expired" screen.
+  Your admin password always unlocks the page too. Already unlocked and want to see the gate again?
+  Open <a href="/portfolio/lock" target="_blank">/portfolio/lock</a>.
+</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="create-card">
+  <form method="post" action="{{ url_for('admin.portfolio_access_create') }}">
+    <div class="form-group">
+      <label>Company <span class="required">*</span></label>
+      <input type="text" name="company" id="company-input" class="form-control" placeholder="e.g. Wix" required>
+    </div>
+    <div class="form-group">
+      <label>Access code</label>
+      <input type="text" name="code" id="code-input" class="form-control" placeholder="auto: company name">
+    </div>
+    <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Create 7-day code</button>
+  </form>
+</div>
+
+<table class="codes-table">
+  <thead>
+    <tr><th>Company</th><th>Code</th><th>Created</th><th>Expires</th><th>Status</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for row in codes %}
+    <tr>
+      <td><strong>{{ row.company }}</strong></td>
+      <td><span class="code-chip">{{ row.code }}</span></td>
+      <td>{{ row.created_at.strftime('%d/%m/%Y') if row.created_at }}</td>
+      <td>{{ row.expires_at.strftime('%d/%m/%Y %H:%M') if row.expires_at }}</td>
+      <td>
+        {% if row.expires_at and row.expires_at > now %}
+          {% set left = row.expires_at - now %}
+          <span class="badge active">ACTIVE · {{ left.days }}d {{ (left.seconds // 3600) }}h left</span>
+        {% else %}
+          <span class="badge expired">EXPIRED</span>
+        {% endif %}
+      </td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn btn-sm btn-ghost" data-code="{{ row.code }}" onclick="copyInvite(this)">
+            <i class="fas fa-copy"></i>&nbsp;Copy invite
+          </button>
+          <form method="post" action="{{ url_for('admin.portfolio_access_renew', code_id=row.id) }}">
+            <button type="submit" class="btn btn-sm"><i class="fas fa-rotate-right"></i>&nbsp;+7 days</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.portfolio_access_delete', code_id=row.id) }}"
+                onsubmit="return confirm('Revoke this access code?');">
+            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty">No access codes yet — create the first one above.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Prefill the code from the company name until the code field is touched by hand.
+  var companyInput = document.getElementById('company-input');
+  var codeInput = document.getElementById('code-input');
+  var codeTouched = false;
+  codeInput.addEventListener('input', function () { codeTouched = this.value.length > 0; });
+  companyInput.addEventListener('input', function () {
+    if (!codeTouched) codeInput.value = this.value.toLowerCase().replace(/\s+/g, '');
+  });
+
+  function copyInvite(btn) {
+    var text = 'My portfolio: https://ofoodiez.com/portfolio\nYour access code (valid 7 days): ' + btn.dataset.code;
+    navigator.clipboard.writeText(text).then(function () {
+      var old = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i>&nbsp;Copied!';
+      setTimeout(function () { btn.innerHTML = old; }, 1500);
+    });
+  }
+</script>
+{% endblock %}
