@@ -68,7 +68,7 @@
             color: var(--butter-dim);
         }
         .ht-track-btn.active { background: var(--burgundy); color: var(--butter); }
-        .ht-read-time { text-align: right; font-size: 0.78rem; letter-spacing: 0.04em; color: var(--butter-dim); margin: 0 0 26px; }
+        .ht-read-time { margin: 16px 0 32px; font-size: 0.75rem; letter-spacing: 0.04em; color: var(--butter-dim); opacity: 0.85; text-align: center; }
         .ht-guide { color: var(--butter-dim); font-weight: 300; line-height: 1.78; font-size: 0.95rem; }
         .ht-guide h1 { font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.7rem, 4.5vw, 2.5rem); font-weight: 700; line-height: 1.15; color: var(--butter); margin: 0 0 16px; }
         .ht-guide h2 { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--butter); margin: 46px 0 14px; line-height: 1.25; }
@@ -128,7 +128,7 @@
                 <button type="button" class="ht-track-btn" data-track="tech">משרה טכנית</button>
                 <button type="button" class="ht-track-btn" data-track="business">משרה לא טכנית</button>
             </div>
-            <p class="ht-read-time">📖 {{ read_time }} דקות קריאה</p>
+            <p class="ht-read-time" dir="rtl">📖 {{ read_time }} דקות קריאה</p>
             <div class="ht-guide" id="ht-guide"></div>
         </div>
         {% else %}

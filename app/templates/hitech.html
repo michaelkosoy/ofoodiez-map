@@ -42,62 +42,108 @@
         /* ── Hub layout ── */
         .ht-hub { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; }
 
-        /* ── Hero ── */
+        /* ── Hero (Food Blog Style) ── */
         .ht-hero {
+            position: relative;
+            min-height: 600px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             text-align: center;
-            padding: 80px 24px 48px;
-            position: relative;
+            padding: 90px 30px 60px;
             overflow: hidden;
+            background: radial-gradient(125% 80% at 50% 4%, rgba(114, 8, 21, 0.15) 0%, #08060a 45%, #040305 100%);
+            margin-bottom: 0;
         }
-        /* Watermark logo behind the headline — mirrors the food blog hero */
         .ht-hero-watermark {
-            position: absolute;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 360px;
-            max-width: 80vw;
-            opacity: 0.18;
+            position: relative;
+            width: 320px;
+            margin: 0 auto;
+            opacity: 1;
             pointer-events: none;
         }
-        .ht-hero > :not(.ht-hero-watermark) { position: relative; z-index: 1; }
+        .ht-hero-content {
+            position: relative;
+            z-index: 2;
+            margin-top: -60px; /* Pulls text up to overlap the image */
+            padding-bottom: 60px; /* Prevents text from overlapping the scroll cue */
+        }
         .ht-eyebrow {
-            font-size: 0.68rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
             font-weight: 600;
-            letter-spacing: 0.32em;
+            letter-spacing: 4px;
             text-transform: uppercase;
             color: var(--burgundy-mid);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+        }
+        .ht-hero-divider {
+            width: 34px;
+            height: 1.5px;
+            background: var(--butter-dim);
+            margin: 0 auto 22px;
         }
         .ht-headline {
-            font-family: 'Bodoni Moda', Georgia, serif;
-            font-size: clamp(2.4rem, 7vw, 4.6rem);
-            font-weight: 700;
-            line-height: 1.08;
+            font-family: 'Bodoni Moda', 'Frank Ruhl Libre', Georgia, serif;
+            font-weight: 800;
+            font-size: clamp(2.8rem, 7vw, 4.6rem);
+            line-height: .96;
+            letter-spacing: -2px;
             color: var(--butter);
-            margin-bottom: 10px;
-            letter-spacing: -0.01em;
+            text-shadow: none;
+            margin-bottom: 0;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.1s forwards;
         }
         .ht-headline em {
             font-style: italic;
             color: var(--burgundy-mid);
             text-shadow: 0 0 40px rgba(114, 8, 21, 0.6);
         }
-        .ht-hero-rule {
-            width: 48px; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--burgundy), transparent);
-            margin: 24px auto;
-        }
         .ht-hero-sub {
-            font-size: clamp(0.9rem, 2vw, 1.05rem);
-            font-weight: 300;
-            color: var(--butter-dim);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 400;
             max-width: 460px;
-            line-height: 1.7;
+            margin: 24px auto 0;
+            line-height: 1.6;
+            color: var(--butter-dim);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+        .ht-hero-scroll-cue {
+            position: absolute;
+            bottom: 26px;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            color: var(--butter-dim);
+            z-index: 2;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+        .ht-hero-scroll-cue span {
+            font-family: 'Outfit', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+        }
+        .ht-hero-scroll-cue i {
+            font-size: 13px;
+            animation: htBob 1.8s ease-in-out infinite;
+        }
+        @keyframes htBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(7px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         /* ── Feature cards ── */
@@ -207,9 +253,10 @@
             padding: 0 20px 16px;
         }
         .ht-companies-title {
-            font-family: 'Bodoni Moda', Georgia, serif;
-            font-size: 1.5rem;
-            font-style: italic;
+            font-family: 'Bodoni Moda', 'Frank Ruhl Libre', Georgia, serif;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
             color: var(--butter);
         }
         .ht-carousel-nav {
@@ -316,6 +363,11 @@
             color: var(--butter);
         }
         .ht-video-btn.careers:hover { background: var(--burgundy-mid); }
+        .ht-video-btn.linkedin {
+            background: #0A66C2;
+            color: #fff;
+        }
+        .ht-video-btn.linkedin:hover { background: #084e96; }
         .ht-video-btn.email {
             background: rgba(249,246,235,0.1);
             border: 1px solid rgba(249,246,235,0.15);
@@ -363,15 +415,23 @@
         <!-- Hero -->
         <section class="ht-hero">
             <img src="{{ url_for('static', filename='img/techLogowhiteTranspaerent.png') }}"
-                 class="ht-hero-watermark" alt="">
-            <p class="ht-eyebrow">{{ c.eyebrow | default('Ofoodiez × HiTech') | safe }}</p>
-            <h1 class="ht-headline">
-                {{ c.headline | default('Tech. Careers.<br><em>Community.</em>') | safe }}
-            </h1>
-            <div class="ht-hero-rule"></div>
-            <p class="ht-hero-sub">
-                {{ c.hero_sub | default('The home base for tech people who take food seriously. Exclusive events, real referrals inside top companies, a CV guide that actually works — and the right people around the table.') | safe }}
-            </p>
+                 class="ht-hero-watermark" alt="" id="ht-hero-watermark">
+
+            <div class="ht-hero-content" id="ht-hero-content">
+                <div class="ht-eyebrow">{{ c.eyebrow | default('Ofoodiez × HiTech') | safe }}</div>
+                <div class="ht-hero-divider"></div>
+                <h1 class="ht-headline">
+                    {{ c.headline | default('Tech. Careers.<br><em>Community.</em>') | safe }}
+                </h1>
+                <p class="ht-hero-sub">
+                    {{ c.hero_sub | default('The home base for tech people who take food seriously. Exclusive events, real referrals inside top companies, a CV guide that actually works — and the right people around the table.') | safe }}
+                </p>
+            </div>
+
+            <div class="ht-hero-scroll-cue" id="ht-hero-scroll-cue">
+                <span>Scroll</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
         </section>
 
         <!-- Feature Cards -->
@@ -408,11 +468,11 @@
                     <span class="ht-card-cta">Read the guide <i class="fas fa-arrow-right"></i></span>
                 </a>
 
-                <a href="https://api.whatsapp.com/send?phone=972559218943" target="_blank" rel="noopener" class="ht-card">
-                    <div class="ht-card-icon"><i class="fab fa-whatsapp"></i></div>
-                    <div class="ht-card-title">Chat with Me</div>
-                    <div class="ht-card-desc">Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.</div>
-                    <span class="ht-card-cta">Open WhatsApp <i class="fas fa-arrow-right"></i></span>
+                <a href="/hitech/cv-reviewer" class="ht-card">
+                    <div class="ht-card-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                    <div class="ht-card-title">AI CV Reviewer</div>
+                    <div class="ht-card-desc">Upload your CV and a job description. Get instant, AI-generated feedback tailored to that specific role.</div>
+                    <span class="ht-card-cta">Try the reviewer <i class="fas fa-arrow-right"></i></span>
                 </a>
                 {% endfor %}
             </div>
@@ -463,6 +523,11 @@
                             <div class="ht-video-overlay">
                                 <div class="ht-company-name-overlay">{{ co.name }}</div>
                                 <div class="ht-video-action-btns">
+                                    {% if co.linkedin_url %}
+                                    <a href="{{ co.linkedin_url }}" target="_blank" rel="noopener" class="ht-video-btn linkedin">
+                                        <i class="fab fa-linkedin"></i> Explore on LinkedIn
+                                    </a>
+                                    {% else %}
                                     {% if co.careers_url %}
                                     <a href="{{ co.careers_url }}" target="_blank" rel="noopener" class="ht-video-btn careers">
                                         <i class="fas fa-briefcase"></i> Careers
@@ -472,6 +537,7 @@
                                        class="ht-video-btn email">
                                         <i class="fas fa-envelope"></i> Refer me
                                     </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -532,6 +598,23 @@
                     track.style.transform = 'translateX(-' + offset + 'px)';
                 }
             }, {passive: true});
+        })();
+
+        // Hero fade on scroll
+        (function () {
+            const heroContent = document.getElementById('ht-hero-content');
+            const scrollCue = document.getElementById('ht-hero-scroll-cue');
+            const watermark = document.getElementById('ht-hero-watermark');
+
+            function onScroll() {
+                const st = window.pageYOffset;
+                const fade = Math.max(0, 1 - st / 460);
+                if (heroContent) heroContent.style.opacity = fade;
+                if (scrollCue) scrollCue.style.opacity = fade;
+                if (watermark) watermark.style.opacity = fade;
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
         })();
     </script>
 

@@ -1,0 +1,101 @@
+{#
+  Generic "add your business" submission modal. Include from any page that
+  passes `listing_slug` (a key in listing_submissions.LISTING_SUBMISSION_CONFIGS)
+  and `listing_config` (that same config dict) into its render_template() call.
+  Pair with app/static/css/business-submission-form.css and
+  app/static/js/business-submission-form.js — nothing here is page-specific.
+#}
+<script>
+    window.BUSINESS_SUBMISSION_CONFIG = {
+        slug: {{ listing_slug | tojson }},
+        kinds: {{ listing_config.kinds | tojson }}
+    };
+</script>
+
+<div id="business-modal" class="biz-modal" dir="ltr" onclick="closeBusinessModalOnOutside(event)">
+    <div class="biz-modal-content">
+        <div class="biz-modal-header">
+            <div>
+                <h2>Add your business</h2>
+                <p class="biz-modal-subtitle">Submissions will be reviewed before publishing</p>
+            </div>
+            <button type="button" class="biz-modal-close" onclick="closeBusinessModal()">&times;</button>
+        </div>
+        <form id="business-form" onsubmit="submitBusinessForm(event)">
+            <input type="hidden" id="biz-kind" name="kind">
+
+            <!-- Honeypot: real users never see this, kept off-screen (not display:none, which some bots skip). -->
+            <div class="biz-form-group" style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                <label for="biz-website">Website</label>
+                <input type="text" id="biz-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="biz-form-group">
+                <label>What would you like to add? <span class="required-star">*</span></label>
+                <div class="biz-kind-toggle" id="biz-kind-toggle"></div>
+            </div>
+
+            <div class="biz-form-group">
+                <label for="biz-name">Business Name <span class="required-star">*</span></label>
+                <input type="text" id="biz-name" required>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-category">Category <span class="required-star">*</span></label>
+                <select id="biz-category" required disabled></select>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-description">Description</label>
+                <textarea id="biz-description" rows="3" placeholder="Tell us about your business..."></textarea>
+            </div>
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-location">Location</label>
+                    <input type="text" id="biz-location">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-price">Price</label>
+                    <input type="text" id="biz-price" placeholder="e.g. 350₪ per person">
+                </div>
+            </div>
+            <div class="biz-form-group biz-discount-group">
+                <label for="biz-discount">🎁 What discount will you offer the Ofoodiez community? <span class="biz-hint">(Optional)</span></label>
+                <input type="text" id="biz-discount" placeholder="e.g. 10% off with code OFOODIEZ">
+            </div>
+
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-link">Website / Booking Link</label>
+                    <input type="url" id="biz-link" placeholder="https://">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-instagram">Instagram</label>
+                    <input type="url" id="biz-instagram" placeholder="https://instagram.com/...">
+                </div>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-whatsapp">WhatsApp</label>
+                <input type="text" id="biz-whatsapp" placeholder="e.g. 0521234567">
+            </div>
+
+            <p class="biz-form-section-label">Contact Details <span style="font-weight:400;">(For internal use only)</span></p>
+            <div class="biz-form-row">
+                <div class="biz-form-group">
+                    <label for="biz-contact-name">Contact Name</label>
+                    <input type="text" id="biz-contact-name">
+                </div>
+                <div class="biz-form-group">
+                    <label for="biz-contact-email">Email</label>
+                    <input type="email" id="biz-contact-email">
+                </div>
+            </div>
+            <div class="biz-form-group">
+                <label for="biz-contact-phone">Phone <span class="biz-hint">(Email or Phone is required)</span></label>
+                <input type="text" id="biz-contact-phone">
+            </div>
+
+            <button type="submit" class="biz-form-submit-btn">
+                <i class="fas fa-paper-plane"></i> Submit Request
+            </button>
+        </form>
+    </div>
+</div>

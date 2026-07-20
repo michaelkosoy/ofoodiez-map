@@ -247,11 +247,11 @@
         "url": "/hitech/cv-guide"
       },
       {
-        "cta": "Open WhatsApp",
-        "desc": "Want to chat directly? Ask me anything about referrals, companies, or the community. I'm on WhatsApp.",
+        "cta": "Try the reviewer",
+        "desc": "Upload your CV and a job description. Get instant, AI-generated feedback tailored to that specific role.",
         "icon": "fas fa-wand-magic-sparkles",
-        "title": "Chat with Me",
-        "url": "https://api.whatsapp.com/send?phone=972559218943"
+        "title": "AI CV Reviewer",
+        "url": "/hitech/cv-reviewer"
       }
     ],
     "cards_label": "Explore",
