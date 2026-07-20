@@ -412,26 +412,50 @@ async function deployCampaign(product) {
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Problem</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">Who owns your company's story?</h2>
-<p class="font-body-lg text-custom-brown font-medium mb-10 max-w-none">
+<p class="font-body-lg text-custom-brown font-medium mb-16 max-w-none">
 It falls between marketing, HR, and operations, without the experience, strategy, or KPIs to make it work.
 </p>
-<div class="max-w-xl mx-auto">
-<div class="bg-custom-butter/40 border-2 border-custom-brown px-6 py-5 rounded-2xl flex items-start gap-3 text-left">
-<span class="material-symbols-outlined text-custom-burgundy flex-shrink-0">work_outline</span>
-<p class="font-body-md text-custom-brown text-sm leading-relaxed"><strong class="font-bold">The good news:</strong> you don't need to hire a full-time social media manager to fix this. You just need me.</p>
+
+<p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold mb-6">The good news</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="neo-brutal-border rounded-2xl p-6 text-left bg-white shadow-[4px_4px_0px_0px_#121212]">
+    <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-custom-burgundy">savings</span>
+    </div>
+    <h3 class="font-headline-md text-lg text-custom-brown font-black mb-2">Cheaper</h3>
+    <p class="font-body-md text-custom-brown text-sm leading-relaxed">A fraction of a full-time social media manager's salary — with professional results.</p>
+  </div>
+  <div class="neo-brutal-border rounded-2xl p-6 text-left bg-custom-burgundy shadow-[4px_4px_0px_0px_#121212]">
+    <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-custom-burgundy">military_tech</span>
+    </div>
+    <h3 class="font-headline-md text-lg text-white font-black mb-2">More Professional</h3>
+    <p class="font-body-md text-white/80 text-sm leading-relaxed">Years of experience in tech + gen z social expert.</p>
+  </div>
+  <div class="neo-brutal-border rounded-2xl p-6 text-left bg-white shadow-[4px_4px_0px_0px_#121212]">
+    <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-custom-burgundy">person</span>
+    </div>
+    <h3 class="font-headline-md text-lg text-custom-brown font-black mb-2">One (wo)man show</h3>
+    <p class="font-body-md text-custom-brown text-sm leading-relaxed">Strategy → filming → editing → publishing. One expert, end-to-end, fully dedicated.</p>
+  </div>
 </div>
-</div>
+
 </div>
 </section>
 <!-- Field Quote -->
-<section class="py-16 bg-custom-butter border-y-2 border-custom-brown" id="field-quote">
-<div class="max-w-4xl mx-auto px-gutter md:px-margin-desktop text-center">
-<span class="bg-white text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform rotate-1 rounded-full rounded-xl mb-8">{{ c.quote.label | default('Heard in the field') }}</span>
+<section class="py-12 bg-white" id="field-quote">
+<div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
+<div class="px-8 py-8">
+<span class="bg-custom-brown text-white px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[3px_3px_0px_0px_#800020] transform -rotate-1 rounded-full rounded-xl mb-6">{{ c.quote.label | default('Heard in the field') }}</span>
 <blockquote>
-<span class="material-symbols-outlined text-5xl text-custom-burgundy block mb-4" style="font-variation-settings: 'FILL' 1;">format_quote</span>
-<p class="font-headline-md text-2xl md:text-3xl text-custom-brown font-black leading-snug">"{{ c.quote.text | default("80% of candidates check a company's LinkedIn and Instagram before applying. If nothing's there, they reject you before you even meet.") }}"</p>
+<span class="material-symbols-outlined text-4xl text-custom-burgundy block mb-3" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<p class="font-headline-md text-xl md:text-2xl text-custom-brown font-black leading-snug">
+  <span class="bg-custom-butter px-2 py-1 leading-relaxed box-decoration-clone rounded-sm">"{{ c.quote.text | default("60% of candidates check a company's LinkedIn and Instagram before applying. If nothing's there, they reject you before you even meet.") }}"</span>
+</p>
 <footer class="mt-6 font-label-mono text-xs md:text-sm uppercase tracking-widest text-custom-burgundy font-bold">{{ c.quote.attribution | default('Employee Experience Manager, cybersecurity startup') }}</footer>
 </blockquote>
+</div>
 </div>
 </section>
 <!-- Main Content Canvas -->
