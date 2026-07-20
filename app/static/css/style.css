@@ -147,13 +147,13 @@ nav.bottom-nav.map-bottom-nav .bottom-nav-item span {
    DESKTOP SIDEBAR - Flush Left Layout
    ========================================= */
 .sidebar {
-    /* Positioning: Flush to left edge, full height minus nav */
+    /* Positioning: Flush to left edge, below the fixed 52px site bar (.sn-bar),
+       down to the viewport bottom (the old bottom nav is gone) */
     position: fixed;
 
-    top: 0;
+    top: 52px;
     left: 0;
-    bottom: 80px;
-    /* Stops exactly at top of bottom nav */
+    bottom: 0;
     width: 480px;
 
     /* Appearance */
@@ -174,7 +174,7 @@ nav.bottom-nav.map-bottom-nav .bottom-nav-item span {
 /* Adjust map to account for sidebar width on desktop */
 #map {
     margin-left: 480px;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 52px); /* viewport minus the fixed site bar */
 }
 
 /* =========================================
@@ -1929,22 +1929,24 @@ input:checked~.toggle-label {
     }
 
     .mobile-more-filters-btn {
+        /* Same 48px round FAB design as .locate-btn / .add-btn */
         display: flex !important;
         align-items: center;
         justify-content: center;
         background: white;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 20px;
-        height: 36px;
-        padding: 0 14px;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        padding: 0;
         cursor: pointer;
         color: var(--primary-color);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         position: fixed !important;
         top: auto !important;
         bottom: 398px !important;
         right: 16px !important;
-        font-size: 0.9rem;
+        font-size: 1.2rem;
         z-index: 2000 !important;
     }
 

@@ -51,7 +51,20 @@
             text-align: center;
             padding: 80px 24px 48px;
             position: relative;
+            overflow: hidden;
         }
+        /* Watermark logo behind the headline — mirrors the food blog hero */
+        .ht-hero-watermark {
+            position: absolute;
+            top: 46px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 330px;
+            max-width: 80vw;
+            opacity: 0.14;
+            pointer-events: none;
+        }
+        .ht-hero > :not(.ht-hero-watermark) { position: relative; z-index: 1; }
         .ht-eyebrow {
             font-size: 0.68rem;
             font-weight: 600;
@@ -139,12 +152,12 @@
         }
         .ht-card:hover::before { opacity: 1.5; }
         .ht-card-icon {
-            width: 44px; height: 44px;
+            width: 48px; height: 48px;
             border-radius: 12px;
-            background: rgba(114, 8, 21, 0.18);
-            border: 1px solid rgba(114, 8, 21, 0.25);
+            background: rgba(194, 58, 73, 0.16);
+            border: 1px solid rgba(194, 58, 73, 0.35);
             display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
+            font-size: 21px;
             color: var(--burgundy-mid);
             flex-shrink: 0;
             transition: background 0.2s;
@@ -349,6 +362,8 @@
 
         <!-- Hero -->
         <section class="ht-hero">
+            <img src="{{ url_for('static', filename='img/ofoodiezHitechLogoTransperent.png') }}"
+                 class="ht-hero-watermark" alt="">
             <p class="ht-eyebrow">{{ c.eyebrow | default('Ofoodiez × HiTech') | safe }}</p>
             <h1 class="ht-headline">
                 {{ c.headline | default('Tech. Careers.<br><em>Community.</em>') | safe }}

@@ -32,11 +32,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,800&family=Outfit:wght@300;400;600;700;800&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=9">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/instagram_feed.css') }}?v=5">
 
     <style>
@@ -68,7 +68,6 @@
 
     <div class="blog-page-content">
         <div class="container">
-            <h1 class="page-title">Instagram</h1>
             {% include 'components/instagram_feed.html' %}
             <div class="legal-footer">
                 <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a>

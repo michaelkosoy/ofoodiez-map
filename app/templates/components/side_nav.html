@@ -14,7 +14,8 @@
     .sn-bar { position:fixed; top:0; left:0; right:0; z-index:9000; height:52px; box-sizing:border-box;
         display:flex; align-items:center; gap:14px; padding:0 16px;
         background:var(--sn-bg); border-bottom:1px solid var(--sn-border); color:var(--sn-fg);
-        font-family:'Outfit', system-ui, sans-serif; }
+        font-family:'Outfit', system-ui, sans-serif;
+        direction:ltr; /* hamburger + logo stay left even on dir="rtl" pages (Hebrew guides) */ }
     .sn-toggle { background:none; border:none; cursor:pointer; color:var(--sn-fg); font-size:20px;
         line-height:0; padding:8px; margin-left:-4px; display:flex; align-items:center; }
     .sn-toggle:hover { color:var(--sn-accent); }
@@ -27,7 +28,8 @@
     .sn-drawer { position:fixed; top:0; left:0; bottom:0; width:min(84vw,300px); z-index:9999; box-sizing:border-box;
         transform:translateX(-100%); transition:transform .32s cubic-bezier(.4,0,.2,1);
         background:var(--sn-bg); color:var(--sn-fg); font-family:'Outfit', system-ui, sans-serif;
-        display:flex; flex-direction:column; box-shadow:2px 0 40px rgba(0,0,0,.35); overflow-y:auto; }
+        display:flex; flex-direction:column; box-shadow:2px 0 40px rgba(0,0,0,.35); overflow-y:auto;
+        direction:ltr; /* drawer labels are English; keep layout LTR on RTL pages too */ }
     .sn-drawer.open { transform:translateX(0); }
     .sn-head { display:flex; align-items:center; justify-content:space-between; padding:20px 20px 12px; }
     .sn-head .sn-title { font-weight:800; font-size:1.15rem; color:var(--sn-accent); }

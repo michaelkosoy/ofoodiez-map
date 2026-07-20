@@ -145,6 +145,17 @@
         .lp-rule { width:64px; height:1px; background:rgba(128,0,32,.3); margin:0 auto 20px; }
         .lp-q { font-weight:300; font-size:clamp(22px,3.2vw,34px); color:var(--charcoal); margin-bottom:14px; }
         .lp-sub { font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--secondary); }
+        /* Desktop: compact card so it doesn't blanket the screen or the side badges */
+        @media (min-width:861px) {
+            .lp-card { width:min(28vw,420px); padding:24px 28px; border-radius:26px;
+                background:rgba(253,245,230,.62); /* opaque enough to read over the dark half */ }
+            .lp-eyebrow { font-size:11px; margin-bottom:12px; }
+            .lp-card h2 { font-size:clamp(17px,1.6vw,23px); margin-bottom:14px; }
+            .lp-card h2 i { font-size:.85em; }
+            .lp-rule { margin:0 auto 14px; }
+            .lp-q { font-size:clamp(16px,1.5vw,21px); margin-bottom:10px; }
+            .lp-sub { font-size:10px; letter-spacing:.18em; }
+        }
 
         /* ── Mobile: stack Tech (top) / Food (bottom) ────────── */
         @media (max-width:860px) {
@@ -175,16 +186,41 @@
                persona fully reveals, the other shrinks, and the welcome card fades. */
             .lp-panel.active { flex-basis:66%; }
             .lp-split.has-active .lp-panel:not(.active) { flex-basis:34%; }
-            .lp-split.has-active .lp-card { opacity:0; }
             .lp-panel.active .lp-bg { opacity:1; }
+            .lp-inner { transition: transform .42s cubic-bezier(.4,0,.2,1); }
+            /* Food (top) focused: its header + tagline + button drop down so the
+               persona's face shows; the welcome card fades away downward. */
+            .lp-food.active .lp-inner { transform: translateY(12vh); }
+            body:has(.lp-food.active) .lp-card { transform:translate(-50%, calc(-50% + 10vh));
+                padding:12px 20px; }
+            body:has(.lp-food.active) .lp-card h2 { font-size:17px; }
+            body:has(.lp-food.active) .lp-q { font-size:14px; }
+            /* Tech (bottom) focused: the welcome card stays visible and slides down
+               to sit just above the Tech header, clearing the persona's face. */
+            body:has(.lp-tech.active) .lp-card { transform:translate(-50%, calc(-50% + 18vh)); }
             .lp-tech.active .lp-scrim { background:rgba(18,18,18,.42); }
             .lp-food.active .lp-scrim { background:rgba(253,245,230,.48); }
             .lp-nav-links .lp-desktop-link { display:none; }
-            /* compact welcome card, centred over the seam (stays fixed + glass) */
-            .lp-card { width:min(90vw,430px); padding:15px 22px; background:rgba(253,245,230,.62); transition:opacity .4s ease; }
+            /* compact welcome card over the seam (stays fixed + glass); sits slightly
+               above center so it clears the tech persona's face below the seam */
+            .lp-card { width:min(90vw,430px); top:46%; padding:15px 22px; background:rgba(253,245,230,.62);
+                transition:opacity .4s ease, transform .4s ease; }
             .lp-eyebrow { margin-bottom:8px; font-size:11px; }
-            .lp-card h2 { font-size:19px; line-height:1.28; margin-bottom:0; }
-            .lp-rule, .lp-q, .lp-sub { display:none; }
+            .lp-card h2 { font-size:19px; line-height:1.28; margin-bottom:10px; }
+            .lp-q { font-size:15px; font-weight:400; margin-bottom:0; }
+            .lp-rule, .lp-sub { display:none; }
+        }
+
+        @media (max-width:860px) and (max-height:720px) {
+            .lp-food.active .lp-inner, .lp-food:hover .lp-inner { transform: translateY(5vh); }
+            body:has(.lp-food.active) .lp-q, body:has(.lp-food:hover) .lp-q { display:none; }
+        }
+
+        /* Mobile landing only: the accessibility button sits over the Tech text on the
+           left — move it (and its panel) to the free right side */
+        @media (max-width:860px) {
+            .a11y-fab { left:auto !important; right:14px !important; }
+            .a11y-panel { left:auto !important; right:14px !important; }
         }
 
         /* Narrow width but hover-capable (e.g. a resized desktop window with a mouse):
@@ -192,10 +228,16 @@
         @media (max-width:860px) and (hover:hover) {
             .lp-split:hover .lp-panel { flex-basis:34%; }
             .lp-split .lp-panel:hover { flex-basis:66%; }
-            .lp-split:hover .lp-card { opacity:0; }
             .lp-panel:hover .lp-bg { opacity:1; }
             .lp-tech:hover .lp-scrim { background:rgba(18,18,18,.42); }
             .lp-food:hover .lp-scrim { background:rgba(253,245,230,.48); }
+            /* same moves as the touch version */
+            .lp-food:hover .lp-inner { transform: translateY(12vh); }
+            body:has(.lp-food:hover) .lp-card { transform:translate(-50%, calc(-50% + 10vh));
+                padding:12px 20px; }
+            body:has(.lp-food:hover) .lp-card h2 { font-size:17px; }
+            body:has(.lp-food:hover) .lp-q { font-size:14px; }
+            body:has(.lp-tech:hover) .lp-card { transform:translate(-50%, calc(-50% + 18vh)); }
         }
     </style>
 </head>
@@ -243,7 +285,7 @@
             <div class="lp-scrim"></div>
             <div class="lp-inner">
                 <h1 class="lp-h1">Food &amp; Lifestyle</h1>
-                <p class="lp-tag">Food, Tel Aviv, travel and guides worth saving.</p>
+                <p class="lp-tag">Your shortcut to the best happy hours, food guides and the TLV insider community.</p>
                 <div class="lp-pills">
                     <a class="lp-pill" href="/map">Happy Hour Map</a>
                     <a class="lp-pill" href="/blog/japan">Japan Guide</a>
@@ -261,7 +303,7 @@
             <div class="lp-scrim"></div>
             <div class="lp-inner">
                 <h1 class="lp-h1">Tech</h1>
-                <p class="lp-tag">Engineering, career resources, communities and digital products.</p>
+                <p class="lp-tag">Land your next role: real referrals, CV tools, interview prep and a tech community.</p>
                 <div class="lp-pills">
                     <a class="lp-pill" href="/hitech/referrals-bot">Referrals WhatsApp Bot</a>
                     <a class="lp-pill" href="/hitech/cv-guide">CV Guide</a>
