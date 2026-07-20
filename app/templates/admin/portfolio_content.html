@@ -508,6 +508,23 @@ function renderEditor() {
     </div>
   `;
 
+  // Field Quote (testimonial band after The Problem)
+  html += `
+    <div class="section-title">Field Quote</div>
+    <div class="editor-field">
+      <label>Sticker Label</label>
+      <input type="text" id="quote-label" value="${escapeHtml(c.quote?.label || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Quote Text</label>
+      <textarea id="quote-text">${escapeHtml(c.quote?.text || '')}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>Attribution</label>
+      <input type="text" id="quote-attribution" value="${escapeHtml(c.quote?.attribution || '')}">
+    </div>
+  `;
+
   // Access Gate (the locked screen on /portfolio)
   html += `
     <div class="section-title">Access Gate (locked screen)</div>
@@ -767,6 +784,13 @@ function collectData() {
   // Credibility
   c.credibility = {
     highlight: document.getElementById('credibility-highlight').value,
+  };
+
+  // Field Quote
+  c.quote = {
+    label: document.getElementById('quote-label').value,
+    text: document.getElementById('quote-text').value,
+    attribution: document.getElementById('quote-attribution').value,
   };
 
   // Access Gate

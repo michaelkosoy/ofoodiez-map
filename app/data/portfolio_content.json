@@ -294,6 +294,11 @@
       "expired_email": "info@ofoodiez.com",
       "granted_title": "ACCESS GRANTED",
       "granted_line": "LOADING PORTFOLIO"
+    },
+    "quote": {
+      "label": "Heard in the field",
+      "text": "80% of candidates check a company's LinkedIn and Instagram before applying. If nothing's there, they reject you before you even meet.",
+      "attribution": "Employee Experience Manager, cybersecurity startup"
     }
   }
 }
