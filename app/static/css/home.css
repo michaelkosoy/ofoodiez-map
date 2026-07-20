@@ -699,7 +699,9 @@ a { text-decoration: none; color: inherit; }
     display: flex;
     gap: 16px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    /* proximity, not mandatory: mandatory x-snap captures vertical pans on iOS
+       WebKit, freezing page scroll when the swipe starts on the carousel */
+    scroll-snap-type: x proximity;
     padding: 20px 30px 16px;
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
