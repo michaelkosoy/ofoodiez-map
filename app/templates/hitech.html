@@ -56,12 +56,12 @@
         /* Watermark logo behind the headline — mirrors the food blog hero */
         .ht-hero-watermark {
             position: absolute;
-            top: 46px;
+            top: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 330px;
+            width: 360px;
             max-width: 80vw;
-            opacity: 0.14;
+            opacity: 0.18;
             pointer-events: none;
         }
         .ht-hero > :not(.ht-hero-watermark) { position: relative; z-index: 1; }
@@ -362,7 +362,7 @@
 
         <!-- Hero -->
         <section class="ht-hero">
-            <img src="{{ url_for('static', filename='img/ofoodiezHitechLogoTransperent.png') }}"
+            <img src="{{ url_for('static', filename='img/techLogowhiteTranspaerent.png') }}"
                  class="ht-hero-watermark" alt="">
             <p class="ht-eyebrow">{{ c.eyebrow | default('Ofoodiez × HiTech') | safe }}</p>
             <h1 class="ht-headline">
