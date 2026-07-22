@@ -362,6 +362,24 @@ def portfolio_lock():
     return redirect(url_for('portfolio_page'))
 
 
+@app.route('/portfolio/work')
+def portfolio_work():
+    """Portfolio work examples (content series). Same gate as /portfolio."""
+    if not _portfolio_unlocked():
+        return redirect(url_for('portfolio_page'))
+    content = _load_portfolio_content()
+    return render_template('portfolio_work.html', c=content.get('portfolio', {}))
+
+
+@app.route('/portfolio/pricing')
+def portfolio_pricing():
+    """Portfolio packages & pricing. Same gate as /portfolio."""
+    if not _portfolio_unlocked():
+        return redirect(url_for('portfolio_page'))
+    content = _load_portfolio_content()
+    return render_template('portfolio_pricing.html', c=content.get('portfolio', {}))
+
+
 def _portfolio_unlocked():
     """True when this browser session may view the private portfolio.
 

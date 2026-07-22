@@ -37,6 +37,10 @@ A Flask web app and food blog. Main features:
 - `GROW_JAPAN_PAY_LINK` — the Japan guide's public Grow payment-page URL (has a default in `billing.py`). Item price **and name** are managed **in the Grow dashboard only**: the site reads them live from each item's page (`grow_page_item()`), shows the price on the locked page, and charges it at checkout. Never hardcode prices. All sellable items live in `billing.GROW_ITEMS` (slug → page_url/catalog/path); per-user purchases in the `site_purchases` table. See docs/ai/blog-pages.md § Paid (gated) pages.
 
 ## Private portfolio (/portfolio)
+The portfolio is three pages sharing one gate and one layout (`portfolio_base.html`:
+head/nav/footer/JS): `/portfolio` (About — hero, Engineer's Edge, problem, quote,
+process), `/portfolio/work` (content series), `/portfolio/pricing` (packages).
+Locked visitors hitting a subpage are redirected to `/portfolio` to enter their code.
 `/portfolio` is gated: clients unlock it with a per-company access code (created in
 admin → Portfolio Access, `portfolio_access` table, valid 7 days, renewable) or with
 `ADMIN_SECRET`. `/portfolio/lock` re-locks the current browser (gate preview). Grants are

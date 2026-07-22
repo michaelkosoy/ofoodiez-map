@@ -154,24 +154,71 @@ function renderEditor() {
       <label>Body Text</label>
       <textarea id="problem-body">${escapeHtml(c.problem?.body || '')}</textarea>
     </div>
-    <div class="section-title" style="margin-top: 16px;">Challenges List</div>
-    <div class="array-items" id="challenges-list"></div>
-    <button class="btn btn-small" onclick="addChallenge()">+ Add Challenge</button>
+    <div class="editor-field">
+      <label>"Good News" Label</label>
+      <input type="text" id="problem-goodnews" value="${escapeHtml(c.problem?.goodNews || '')}">
+    </div>
+    <div class="section-title" style="margin-top: 16px;">Good News Cards (card 2 is the highlighted one)</div>
   `;
 
-  // Render challenges
-  if (c.problem?.challenges) {
-    c.problem.challenges.forEach((ch, i) => {
-      html += `
-        <div class="sub-card">
-          <input type="text" id="challenge-${i}" value="${escapeHtml(ch)}" placeholder="Challenge text">
-          <div class="item-controls">
-            <button class="btn btn-small" onclick="removeChallenge(${i})">Remove</button>
-          </div>
+  // Render the good-news cards (fixed set of 3)
+  (c.problem?.cards || []).forEach((card, i) => {
+    html += `
+      <div class="sub-card">
+        <div class="editor-field">
+          <label>Card ${i + 1} Icon (Material Symbols name)</label>
+          <input type="text" id="problem-card-icon-${i}" value="${escapeHtml(card.icon || '')}">
         </div>
-      `;
-    });
-  }
+        <div class="editor-field">
+          <label>Card ${i + 1} Title</label>
+          <input type="text" id="problem-card-title-${i}" value="${escapeHtml(card.title || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Card ${i + 1} Body</label>
+          <textarea id="problem-card-body-${i}">${escapeHtml(card.body || '')}</textarea>
+        </div>
+      </div>
+    `;
+  });
+
+  // Content Series (work page videos)
+  html += `
+    <div class="section-title">Content Series (Work page videos)</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="series-title" value="${escapeHtml(c.series?.title || '')}">
+    </div>
+    <div class="editor-field">
+      <label>Subtitle</label>
+      <textarea id="series-subtitle">${escapeHtml(c.series?.subtitle || '')}</textarea>
+    </div>
+    <button class="btn btn-small" onclick="addSeriesItem()">+ Add Video</button>
+  `;
+  (c.series?.items || []).forEach((item, i) => {
+    html += `
+      <div class="sub-card">
+        <div class="editor-field">
+          <label>YouTube Video ID (the part after /shorts/ or v=)</label>
+          <input type="text" id="series-video-${i}" value="${escapeHtml(item.videoId || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Series Name (badge — the content type)</label>
+          <input type="text" id="series-series-${i}" value="${escapeHtml(item.series || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Title (company / subject)</label>
+          <input type="text" id="series-item-title-${i}" value="${escapeHtml(item.title || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Description</label>
+          <input type="text" id="series-desc-${i}" value="${escapeHtml(item.description || '')}">
+        </div>
+        <div class="item-controls">
+          <button class="btn btn-small" onclick="removeSeriesItem(${i})">Remove</button>
+        </div>
+      </div>
+    `;
+  });
 
   // Difference
   html += `
@@ -632,11 +679,33 @@ function collectData() {
   c.problem = {
     title: document.getElementById('problem-title').value,
     body: document.getElementById('problem-body').value,
-    challenges: [],
+    goodNews: document.getElementById('problem-goodnews').value,
+    cards: [],
   };
   let i = 0;
-  while (document.getElementById(`challenge-${i}`)) {
-    c.problem.challenges.push(document.getElementById(`challenge-${i}`).value);
+  while (document.getElementById(`problem-card-title-${i}`)) {
+    c.problem.cards.push({
+      icon: document.getElementById(`problem-card-icon-${i}`).value,
+      title: document.getElementById(`problem-card-title-${i}`).value,
+      body: document.getElementById(`problem-card-body-${i}`).value,
+    });
+    i++;
+  }
+
+  // Content Series (work page videos)
+  c.series = {
+    title: document.getElementById('series-title').value,
+    subtitle: document.getElementById('series-subtitle').value,
+    items: [],
+  };
+  i = 0;
+  while (document.getElementById(`series-video-${i}`)) {
+    c.series.items.push({
+      videoId: document.getElementById(`series-video-${i}`).value.trim(),
+      series: document.getElementById(`series-series-${i}`).value,
+      title: document.getElementById(`series-item-title-${i}`).value,
+      description: document.getElementById(`series-desc-${i}`).value,
+    });
     i++;
   }
 
@@ -839,16 +908,16 @@ function saveContent() {
 }
 
 // Helper functions for adding/removing items
-function addChallenge() {
+function addSeriesItem() {
   const data = collectData();
-  data.portfolio.problem.challenges.push('');
+  data.portfolio.series.items.push({videoId: '', series: '', title: '', description: ''});
   portfolioContent = data;
   renderEditor();
 }
 
-function removeChallenge(i) {
+function removeSeriesItem(i) {
   const data = collectData();
-  data.portfolio.problem.challenges.splice(i, 1);
+  data.portfolio.series.items.splice(i, 1);
   portfolioContent = data;
   renderEditor();
 }

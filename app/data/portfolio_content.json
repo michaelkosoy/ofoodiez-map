@@ -12,14 +12,55 @@
       "cta": "Build your employer brand"
     },
     "problem": {
-      "title": "Great startups are being ignored.",
-      "body": "Startups invest millions in building amazing products.\n\nBut too many struggle to tell their story.",
-      "challenges": [
-        "Employer branding has no clear owner",
-        "HR teams don't have time to create content consistently",
-        "Employees are expected to create content without strategy",
-        "Companies don't know which stories are worth sharing",
-        "LinkedIn updates alone don't create a memorable brand"
+      "title": "Who owns your company's story?",
+      "body": "It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.",
+      "goodNews": "The good news: now it has an owner",
+      "cards": [
+        {
+          "icon": "person",
+          "title": "One dedicated owner",
+          "body": "One (wo)man show: strategy → filming → editing → publishing, end-to-end. Your story stops falling between departments."
+        },
+        {
+          "icon": "military_tech",
+          "title": "The missing expertise",
+          "body": "Years inside tech companies + gen z social expertise — with a real strategy and KPIs behind every post."
+        },
+        {
+          "icon": "savings",
+          "title": "A fraction of the cost",
+          "body": "Professional results at a fraction of a full-time social media manager's salary."
+        }
+      ]
+    },
+    "series": {
+      "title": "Content Series",
+      "subtitle": "Ongoing series, not one-off clips, built to keep your audience coming back for the next episode.",
+      "items": [
+        {
+          "videoId": "zdGx4VtVQaw",
+          "series": "Startups Series",
+          "title": "Mate Security",
+          "description": "Startup spotlight"
+        },
+        {
+          "videoId": "Y-W7XyyYKlo",
+          "series": "Day in a Life",
+          "title": "CEO & Entrepreneur",
+          "description": "A founder who's living the dream"
+        },
+        {
+          "videoId": "SfkXRtB5ZzY",
+          "series": "Office Tour",
+          "title": "Cato Networks",
+          "description": "Culture, people and workspace"
+        },
+        {
+          "videoId": "bpAs1eVYM0M",
+          "series": "Startups Series",
+          "title": "Appcharge",
+          "description": "Startup spotlight"
+        }
       ]
     },
     "difference": {
