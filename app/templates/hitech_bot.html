@@ -266,6 +266,9 @@
                     <i class="fab fa-whatsapp"></i> {{ c.whatsapp_btn_text | default('Chat with the Referrals Bot') | safe }}
                 </a>
                 <p class="ht-bot-note">{{ c.whatsapp_btn_sub | default('Opens WhatsApp · Free · Takes 2 minutes') | safe }}</p>
+                <p class="ht-bot-note" style="margin-top:4px;">
+                    <a href="{{ url_for('hitech_bot_terms') }}" style="color:inherit;text-decoration:underline;">{{ c.terms_link_text | default('By using the bot you agree to the Referral Bot Terms') | safe }}</a>
+                </p>
             </div>
         </section>
 

@@ -53,9 +53,11 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
         if approval_url else ""
     )
     deny_html = (
-        f'<p style="margin:8px 0 0;font-size:13px;">'
-        f'<a href="{html.escape(deny_url)}" style="color:#999;">'
-        f'I didn\'t submit this</a></p>'
+        f'<p style="margin:12px 0 0;">'
+        f'<a href="{html.escape(deny_url)}" '
+        f'style="background:#dc3545;color:#fff;text-decoration:none;padding:12px 22px;'
+        f'border-radius:8px;font-weight:bold;display:inline-block;">'
+        f'✋ I didn\'t submit this</a></p>'
         if deny_url else ""
     )
     confirm_html = (

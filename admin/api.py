@@ -259,7 +259,8 @@ def get_whatsapp_companies():
         if adv.referral_link:
             a["link"] += 1
     out = []
-    for c in WaCompany.query.order_by(WaCompany.name).all():
+    for c in WaCompany.query.order_by(
+            WaCompany.created_at.desc().nullslast(), WaCompany.name).all():
         a = agg.get(c.id, {"email": 0, "link": 0, "total": 0})
         out.append({
             "id": c.id, "name": c.name,

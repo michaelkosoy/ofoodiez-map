@@ -167,6 +167,7 @@ function renderEditor() {
     html += '<p class="section-title">Call To Action & Directory</p>';
     html += inputField('whatsapp_btn_text', 'WhatsApp Button Title', sectionData.whatsapp_btn_text);
     html += inputField('whatsapp_btn_sub', 'WhatsApp Button Footer Note', sectionData.whatsapp_btn_sub);
+    html += inputField('terms_link_text', 'Terms Link Label (under the CTA)', sectionData.terms_link_text);
     html += inputField('directory_title', 'Directory Section Header', sectionData.directory_title);
     html += textareaField('directory_desc', 'Directory Section Description', sectionData.directory_desc);
     html += inputField('search_placeholder', 'Search Box Placeholder Text', sectionData.search_placeholder);
@@ -349,6 +350,7 @@ function collectData() {
       hero_sub: document.querySelector('[data-key="hero_sub"]').value,
       whatsapp_btn_text: document.querySelector('[data-key="whatsapp_btn_text"]').value,
       whatsapp_btn_sub: document.querySelector('[data-key="whatsapp_btn_sub"]').value,
+      terms_link_text: document.querySelector('[data-key="terms_link_text"]').value,
       directory_title: document.querySelector('[data-key="directory_title"]').value,
       directory_desc: document.querySelector('[data-key="directory_desc"]').value,
       search_placeholder: document.querySelector('[data-key="search_placeholder"]').value,

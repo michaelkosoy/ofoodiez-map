@@ -523,6 +523,13 @@ def hitech_bot():
                            c=content.get('bot', {}))
 
 
+@app.route('/hitech/referrals-bot/terms')
+def hitech_bot_terms():
+    """Terms of service for the referrals WhatsApp bot. Linked from the
+    referrals page; the WhatsApp registration flow will link here too."""
+    return render_template('legal/referrals_terms.html')
+
+
 @app.route('/hitech/cv-guide')
 def hitech_cv():
     """HiTech interactive CV guide."""
