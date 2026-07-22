@@ -214,6 +214,21 @@
         @media (max-width:860px) and (max-height:720px) {
             .lp-food.active .lp-inner, .lp-food:hover .lp-inner { transform: translateY(5vh); }
             body:has(.lp-food.active) .lp-q, body:has(.lp-food:hover) .lp-q { display:none; }
+            /* Short viewports (Chrome device emulation, browsers with URL bar):
+               tighten the top panel and shrink the fixed welcome card so its text
+               never sits on the Enter buttons. */
+            .lp-panel:first-child { padding-top:60px; }
+            .lp-h1 { font-size:clamp(30px,9vw,40px); }
+            .lp-tag { margin-bottom:14px; }
+            .lp-card { top:48%; padding:10px 18px; }
+            .lp-eyebrow { display:none; }
+            .lp-card h2 { font-size:16px; margin-bottom:6px; }
+            .lp-q { font-size:13px; }
+        }
+        /* Too short for the floating card at all (e.g. landscape phones) — the
+           panels and their buttons are the content that matters; drop the card. */
+        @media (max-width:860px) and (max-height:560px) {
+            .lp-card { display:none; }
         }
 
         /* Mobile landing only: the accessibility button sits over the Tech text on the
@@ -272,7 +287,7 @@
     <!-- Center welcome (DOM-first so it stacks on top on mobile) -->
     <div class="lp-card">
         <p class="lp-eyebrow">Welcome to Ofoodiez</p>
-        <h2><b>software engineer</b> <i>by day,</i><br><b class="b2">content creator</b> <i>by night.</i></h2>
+        <h2><b>Software engineer</b> <i>by day,</i><br><b class="b2">content creator</b> <i>by night.</i></h2>
         <div class="lp-rule"></div>
         <p class="lp-q">What are you in for today?</p>
         <p class="lp-sub">Two sides of everything I create. Choose your world.</p>
