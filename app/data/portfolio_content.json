@@ -320,13 +320,13 @@
       "boot_lines": [
         "OFOODIEZ CONTENT STUDIO",
         "PRIVATE PORTFOLIO / 2026",
-        "EMPLOYER BRANDING · FOUNDER-LED CONTENT",
-        "STATUS: LOCKED"
+        "EMPLOYER BRANDING · FOUNDER-LED CONTENT"
       ],
       "prompt": "ENTER ACCESS CODE:",
       "placeholder": "access code",
       "button": "UNLOCK",
       "hint": "Your access code was sent to you with the proposal — codes are valid for 1 week.",
+      "tooltip_hint": "Hint: it's your company name in small letters.",
       "denied_title": "ACCESS DENIED",
       "denied_hint": "Wrong code. Check your proposal and try again.",
       "expired_title": "ACCESS EXPIRED",

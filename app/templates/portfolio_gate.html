@@ -242,6 +242,50 @@
             .js .booting .line .txt { visibility: visible; }
             .js .booting #gate-form { opacity: 1; }
         }
+
+        /* Tooltip */
+        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; margin-left: 6px; }
+        .tooltip-icon { 
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--butter-dim);
+            color: var(--butter-dim); font-size: 10px; font-weight: bold; font-family: sans-serif;
+        }
+        .tooltip-wrapper:hover .tooltip-icon { color: var(--butter); border-color: var(--butter); }
+        .tooltip-text {
+            visibility: hidden;
+            width: max-content;
+            max-width: 220px;
+            background-color: var(--ink);
+            color: var(--fg);
+            text-align: center;
+            border: 1px solid var(--butter-dim);
+            padding: 8px 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 11px;
+            line-height: 1.4;
+            box-shadow: 2px 2px 0 0 var(--butter-dim);
+            pointer-events: none;
+        }
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--butter-dim) transparent transparent transparent;
+        }
+        .tooltip-wrapper:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -286,7 +330,12 @@
 
             {% if state != 'granted' %}
             <form id="gate-form" method="post" action="{{ url_for('portfolio_page') }}" autocomplete="off">
-                <label class="prompt-label" for="code"><span class="pfx">&gt; </span>{{ c.prompt | default('ENTER ACCESS CODE:') }}<span class="cursor" aria-hidden="true"></span></label>
+                <label class="prompt-label" for="code"><span class="pfx">&gt; </span>{{ c.prompt | default('ENTER ACCESS CODE:') }}
+                    <div class="tooltip-wrapper" tabindex="0">
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">{{ c.tooltip_hint | default("Hint: it's your company name in small letters.") }}</span>
+                    </div>
+                </label>
                 <div class="input-row">
                     <span class="pfx" aria-hidden="true">&gt;</span>
                     <input type="password" id="code" name="code" placeholder="{{ c.placeholder | default('access code') }}"
