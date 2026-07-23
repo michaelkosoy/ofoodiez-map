@@ -90,18 +90,58 @@
       <input type="text" name="code" id="code-input" class="form-control" placeholder="auto: company name">
     </div>
     <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Create 7-day code</button>
+    <details style="flex-basis:100%;margin-top:4px;">
+      <summary style="cursor:pointer;font-weight:600;color:#555;">
+        <i class="fas fa-sliders"></i> Customize packages &amp; pricing for this company
+        <span style="font-weight:400;color:#999;">(optional — default: both packages, standard prices)</span>
+      </summary>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin:14px 0 10px;">
+        <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
+          <input type="checkbox" name="show_launch" checked> Show Launch
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
+          <input type="checkbox" name="show_boost" checked> Show Boost
+        </label>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="form-group">
+          <label>Launch price</label>
+          <input type="text" name="launch_price" class="form-control" placeholder="default: ₪7,000 base">
+        </div>
+        <div class="form-group">
+          <label>Launch price note</label>
+          <input type="text" name="launch_price_note" class="form-control"
+                 placeholder="with custom price · empty = no fee line">
+        </div>
+        <div class="form-group">
+          <label>Boost price (per month)</label>
+          <input type="text" name="boost_price" class="form-control" placeholder="default: From ₪10,000">
+        </div>
+      </div>
+    </details>
   </form>
 </div>
 
 <table class="codes-table">
   <thead>
-    <tr><th>Company</th><th>Code</th><th>Created</th><th>Expires</th><th>Status</th><th>Actions</th></tr>
+    <tr><th>Company</th><th>Code</th><th>Packages</th><th>Created</th><th>Expires</th><th>Status</th><th>Actions</th></tr>
   </thead>
   <tbody>
     {% for row in codes %}
+    {% set sl = row.show_launch is none or row.show_launch %}
+    {% set sb = row.show_boost is none or row.show_boost %}
     <tr>
       <td><strong>{{ row.company }}</strong></td>
       <td><span class="code-chip">{{ row.code }}</span></td>
+      <td>
+        {{ 'Launch + Boost' if sl and sb else ('Launch only' if sl else 'Boost only') }}
+        {% if (sl and row.launch_price) or (sb and row.boost_price) %}
+        <div style="font-size:12px;color:#888;">
+          {% if sl and row.launch_price %}L: {{ row.launch_price }}{% endif %}
+          {% if sb and row.boost_price %}B: {{ row.boost_price }}/mo{% endif %}
+        </div>
+        {% endif %}
+      </td>
       <td>{{ row.created_at.strftime('%d/%m/%Y') if row.created_at }}</td>
       <td>{{ row.expires_at.strftime('%d/%m/%Y %H:%M') if row.expires_at }}</td>
       <td>
@@ -128,7 +168,7 @@
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="6" class="empty">No access codes yet — create the first one above.</td></tr>
+    <tr><td colspan="7" class="empty">No access codes yet — create the first one above.</td></tr>
     {% endfor %}
   </tbody>
 </table>

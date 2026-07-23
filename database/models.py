@@ -25,6 +25,13 @@ def _run_migrations():
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS gender TEXT",
         "ALTER TABLE hitech_emails ADD COLUMN IF NOT EXISTS name TEXT",
+        # Plain ADD COLUMN (no IF NOT EXISTS) so these also run on local sqlite;
+        # reruns fail with "duplicate column" and are swallowed below.
+        "ALTER TABLE portfolio_access ADD COLUMN show_launch BOOLEAN DEFAULT TRUE",
+        "ALTER TABLE portfolio_access ADD COLUMN show_boost BOOLEAN DEFAULT TRUE",
+        "ALTER TABLE portfolio_access ADD COLUMN launch_price VARCHAR(64)",
+        "ALTER TABLE portfolio_access ADD COLUMN launch_price_note VARCHAR(256)",
+        "ALTER TABLE portfolio_access ADD COLUMN boost_price VARCHAR(64)",
     ]
     for stmt in migrations:
         try:
@@ -246,6 +253,13 @@ class PortfolioAccess(db.Model):
     code = db.Column(db.String(128), nullable=False, unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=False)
+    # Per-company pricing page: which packages this client sees and optional
+    # price-text overrides (NULL → the page's standard price/copy).
+    show_launch = db.Column(db.Boolean, default=True)
+    show_boost = db.Column(db.Boolean, default=True)
+    launch_price = db.Column(db.String(64))
+    launch_price_note = db.Column(db.String(256))
+    boost_price = db.Column(db.String(64))
 
     def is_active(self):
         return bool(self.expires_at and self.expires_at > datetime.utcnow())

@@ -70,13 +70,24 @@ def portfolio_access_create():
     from database.models import db, PortfolioAccess
     company = request.form.get('company', '').strip()
     code = request.form.get('code', '').strip() or company.lower().replace(' ', '')
+    show_launch = bool(request.form.get('show_launch'))
+    show_boost = bool(request.form.get('show_boost'))
+    launch_price = request.form.get('launch_price', '').strip() or None
+    launch_price_note = request.form.get('launch_price_note', '').strip() or None
+    boost_price = request.form.get('boost_price', '').strip() or None
     if not company:
         flash('Company name is required', 'error')
+    elif not show_launch and not show_boost:
+        flash('Pick at least one package to show', 'error')
     elif PortfolioAccess.query.filter(db.func.lower(PortfolioAccess.code) == code.lower()).first():
         flash(f'Code "{code}" already exists — pick another', 'error')
     else:
         db.session.add(PortfolioAccess(company=company, code=code,
-                                       expires_at=datetime.utcnow() + timedelta(days=7)))
+                                       expires_at=datetime.utcnow() + timedelta(days=7),
+                                       show_launch=show_launch, show_boost=show_boost,
+                                       launch_price=launch_price,
+                                       launch_price_note=launch_price_note,
+                                       boost_price=boost_price))
         db.session.commit()
         flash(f'Access for {company} created — code "{code}", valid 7 days', 'success')
     return redirect(url_for('admin.portfolio_access'))

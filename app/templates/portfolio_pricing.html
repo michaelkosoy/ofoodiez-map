@@ -1,5 +1,9 @@
 {% extends 'portfolio_base.html' %}
 {% set active_page = 'pricing' %}
+{# Per-access-code display options; missing (e.g. direct render) → defaults #}
+{% set pricing = pricing | default({'show_launch': True, 'show_boost': True,
+                                    'launch_price': None, 'launch_note': None,
+                                    'boost_price': None}) %}
 {% block content %}
 <!-- Main Content Canvas -->
 <main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
@@ -14,6 +18,7 @@
 </p>
 <div class="w-screen relative left-1/2 -translate-x-1/2 px-gutter md:px-margin-desktop">
 <div id="packages-row" class="flex flex-col md:flex-row gap-6 md:items-stretch md:justify-center max-w-[1400px] mx-auto">
+{% if pricing.show_launch %}
 <!-- Launch side panel (slides open on the left) -->
 <div id="side-panel-launch" data-side-panel="launch" class="side-panel order-2 md:order-1">
 <div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
@@ -53,11 +58,18 @@
 </div>
 <div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
+{% if pricing.launch_price %}
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.launch_price }}</p>
+{% if pricing.launch_note %}<p class="text-xs text-custom-brown mt-1">{{ pricing.launch_note }}</p>{% endif %}
+{% else %}
 <p class="font-body-md text-custom-brown font-bold text-lg">₪7,000 <span class="font-medium text-sm">base</span></p>
 <p class="text-xs text-custom-brown mt-1">+ $2K success fee for every referred employee who signs</p>
+{% endif %}
 </div>
 </div>
 </div>
+{% endif %}
+{% if pricing.show_boost %}
 <div data-package-card="boost" class="package-card w-full md:w-96 md:flex-shrink-0 order-3 bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
 <div class="mb-3 relative z-10">
 <h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Boost</h3>
@@ -91,7 +103,7 @@
 </div>
 <div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
-<p class="font-body-md text-custom-brown font-bold text-lg">From ₪10,000<span class="font-medium text-sm">/month</span></p>
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or 'From ₪10,000' }}<span class="font-medium text-sm">/month</span></p>
 </div>
 </div>
 </div>
@@ -120,6 +132,7 @@
 </div>
 </div>
 </div>
+{% endif %}
 </div>
 </div>
 </section>

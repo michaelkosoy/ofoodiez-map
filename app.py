@@ -373,11 +373,35 @@ def portfolio_work():
 
 @app.route('/portfolio/pricing')
 def portfolio_pricing():
-    """Portfolio packages & pricing. Same gate as /portfolio."""
+    """Portfolio packages & pricing. Same gate as /portfolio.
+
+    Which packages show and their price text can be customized per access code
+    (admin → Portfolio Access). The admin grant and untouched codes see the
+    defaults. launch_note: None → default success-fee line, '' → no line."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
     content = _load_portfolio_content()
-    return render_template('portfolio_pricing.html', c=content.get('portfolio', {}))
+    row = _portfolio_grant()
+    pricing = {
+        'show_launch': row.show_launch is not False if row else True,
+        'show_boost': row.show_boost is not False if row else True,
+        'launch_price': (row.launch_price or None) if row else None,
+        'launch_note': ((row.launch_price_note or '')
+                        if row and row.launch_price else None),
+        'boost_price': (row.boost_price or None) if row else None,
+    }
+    return render_template('portfolio_pricing.html', c=content.get('portfolio', {}),
+                           pricing=pricing)
+
+
+def _portfolio_grant():
+    """The PortfolioAccess row behind this session's unlock, or None for the
+    admin grant (or no grant) — callers treat None as 'use the defaults'."""
+    grant = session.get('portfolio_access')
+    if grant in (None, 'admin'):
+        return None
+    from database.models import db, PortfolioAccess
+    return db.session.get(PortfolioAccess, grant)
 
 
 def _portfolio_unlocked():
