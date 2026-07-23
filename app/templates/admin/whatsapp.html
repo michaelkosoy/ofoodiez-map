@@ -118,7 +118,10 @@
 <div class="tab-section" id="section-candidates" style="display:none;">
     <h3 style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
         <span>Candidates</span>
-        <button class="btn btn-success" id="add-candidate-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add candidate</button>
+        <span style="display:flex;gap:8px;">
+            <button class="btn" id="status-check-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-envelope"></i> Email status check</button>
+            <button class="btn btn-success" id="add-candidate-btn" style="font-size:.82rem;padding:7px 14px;font-weight:600;white-space:nowrap;"><i class="fas fa-plus"></i> Add candidate</button>
+        </span>
     </h3>
     <div id="t-candidates"></div>
 </div>
@@ -405,6 +408,7 @@ var COLS = {
         { title: "Email", field: "email", headerFilter: "input", minWidth: 180 },
         { title: "WhatsApp", field: "number", headerFilter: "input", minWidth: 130 },
         { title: "Applications", field: "applications", width: 120 },
+        { title: "Job status", field: "job_status", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
         { title: "Advocate?", field: "is_advocate", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
         { title: "Blocked", field: "blocked", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
         { title: "Joined", field: "joined", width: 150 },
@@ -919,6 +923,28 @@ document.getElementById('add-advocate-btn').addEventListener('click', function()
             if (TABLES['companies']) TABLES['companies'].replaceData();
             Swal.fire({ icon: 'success', title: 'Advocate added', timer: 1000, showConfirmButton: false });
         });
+    });
+});
+
+// ---- Email status check (monthly "did you get hired?" sweep via the bot) ----
+document.getElementById('status-check-btn').addEventListener('click', function() {
+    Swal.fire({
+        title: 'Email status check?',
+        text: 'Emails every candidate with an application ("Got hired? In process? No response?"). Skips anyone asked in the last 25 days or already hired.',
+        icon: 'question', showCancelButton: true, confirmButtonText: 'Send emails'
+    }).then(function(res) {
+        if (!res.isConfirmed) return;
+        Swal.fire({ title: 'Sending…', text: 'This can take a while for many candidates.', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+        fetch('/admin/api/whatsapp/status-check', { method: 'POST' })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+            .then(function(res2) {
+                if (!res2.ok) { Swal.fire('Error', res2.body.error || 'Failed', 'error'); return; }
+                var b = res2.body;
+                Swal.fire({ icon: 'success', title: 'Status check sent',
+                    text: 'Sent ' + (b.sent || 0) + ' · failed ' + (b.failed || 0) + ' · eligible ' + (b.eligible || 0) });
+                if (TABLES['candidates']) TABLES['candidates'].replaceData();
+            })
+            .catch(function() { Swal.fire('Error', 'Request failed', 'error'); });
     });
 });
 

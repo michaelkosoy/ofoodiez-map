@@ -131,6 +131,63 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
     return _post(payload)
 
 
+def send_status_check_email(to_email, candidate_name, hired_url, pending_url,
+                            no_response_url):
+    """Monthly status check-in for a candidate with applications: three
+    one-click answer buttons (hired / still in process / no response), each a
+    signed link to /wa/status/update. Returns True if sent."""
+    api_key = WaConfig.SENDGRID_API_KEY
+    from_email = WaConfig.WA_FROM_EMAIL
+    if not api_key or not from_email or not to_email:
+        return False
+
+    name = candidate_name or "there"
+    text_body = (
+        f"Hey {name}! 🧡\n\n"
+        f"You asked for a referral through Ofoodiez Referrals a little while ago — "
+        f"how's the job hunt going? Tap the one that fits (takes a second):\n\n"
+        f"🎉 I got hired!\n{hired_url}\n\n"
+        f"⏳ Still in process\n{pending_url}\n\n"
+        f"😶 No response yet\n{no_response_url}\n\n"
+        f"Whatever the answer, we're rooting for you — and you can always ask us "
+        f"for another referral on WhatsApp.\n\n"
+        f"— The Ofoodiez team"
+    )
+
+    def _btn(url, color, label):
+        return (
+            f'<p style="margin:14px 0 0;">'
+            f'<a href="{html.escape(url)}" '
+            f'style="background:{color};color:#fff;text-decoration:none;padding:12px 22px;'
+            f'border-radius:8px;font-weight:bold;display:inline-block;">'
+            f'{label}</a></p>'
+        )
+
+    html_body = (
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;line-height:1.55;">'
+        f"<p>Hey {html.escape(name)}! 🧡</p>"
+        "<p>You asked for a referral through <b>Ofoodiez Referrals</b> a little "
+        "while ago — how's the job hunt going?</p>"
+        "<p>Tap the one that fits (takes a second):</p>"
+        f'{_btn(hired_url, "#ff7a59", "🎉 I got hired!")}'
+        f'{_btn(pending_url, "#5a6b7a", "⏳ Still in process")}'
+        f'{_btn(no_response_url, "#5a6b7a", "😶 No response yet")}'
+        '<p style="margin-top:20px;">Whatever the answer, we\'re rooting for you — '
+        "and you can always ask us for another referral on WhatsApp.</p>"
+        "<p>— The Ofoodiez team</p>"
+        "</div>"
+    )
+    return _post({
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": from_email, "name": "Ofoodiez Referrals"},
+        "subject": "Quick check-in — how's the job hunt going?",
+        "content": [
+            {"type": "text/plain", "value": text_body},
+            {"type": "text/html", "value": html_body},
+        ],
+    })
+
+
 def send_referral_confirmed_email(to_email, candidate_name, advocate_name, company, role,
                                   share_contact=False, linkedin_url=""):
     """Tell the candidate an advocate confirmed their referral. Best-effort.

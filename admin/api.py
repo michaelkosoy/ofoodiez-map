@@ -328,6 +328,7 @@ def get_whatsapp_candidates():
             "email": u.email or "",
             "number": u.phone,
             "applications": app_counts.get(u.id, 0),
+            "job_status": (u.job_status or "").replace("_", " "),
             "is_advocate": "Yes" if u.id in advocate_uids else "No",
             "blocked": "Yes" if u.is_blocked else "No",
             "joined": _fmt(u.created_at),
@@ -983,6 +984,24 @@ def update_portfolio_content():
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route('/api/whatsapp/status-check', methods=['POST'])
+@login_required
+def trigger_whatsapp_status_check():
+    """Proxy the 'email every candidate a status check-in' sweep to the BOT
+    service (which has the SendGrid env vars). Long timeout: the bot sends the
+    emails sequentially inside this one request."""
+    base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
+    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
+    try:
+        resp = requests.post(f"{base}/wa/status-check", params={"key": secret}, timeout=120)
+        if resp.ok:
+            return jsonify(resp.json())
+        return jsonify({"error": f"bot returned {resp.status_code}"}), 502
+    except Exception:
+        logger.exception("admin: status-check via bot failed")
+        return jsonify({"error": "unreachable"}), 502
 
 
 def _notify_via_bot(request_id):

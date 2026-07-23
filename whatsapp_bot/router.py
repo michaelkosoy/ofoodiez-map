@@ -33,8 +33,8 @@ PATH_WORDS = {
     "contact": "contact", "contact us": "contact",
 }
 
-# Registered users can jump to their profile editor by keyword (the Welcome
-# "Contact" button routes there too); multi-word so it won't eat a company name.
+# Registered users can jump to their profile editor by keyword (WA_CT_WELCOME_BACK's
+# "Edit my details" button routes there too); multi-word so it won't eat a company name.
 PROFILE_WORDS = {
     "my details", "my info", "my profile", "edit profile", "edit my details",
     "edit my info", "edit info", "update my details", "update my info",
@@ -63,9 +63,10 @@ def handle(inbound):
         return "blocked"
 
     # Idle timeout: a long-idle message starts fresh — sign-up if needed, else
-    # the personalised Welcome.
+    # the personalised Welcome. An explicit "menu" still gets the real menu
+    # (this branch runs before the _wants_menu one below).
     if _is_stale(conv):
-        return _entry(user, conv)
+        return _entry(user, conv, force_menu=_wants_menu(payload, text))
 
     # Mid sign-up: finish it first. A registered phone never reaches here again.
     # Back-to-Menu / reset still escape, but just re-trigger sign-up while the
@@ -77,11 +78,11 @@ def handle(inbound):
 
     # Hard reset always wins (Back-to-Menu / Restart buttons + reset words).
     if _wants_menu(payload, text):
-        return _entry(user, conv)
+        return _entry(user, conv, force_menu=True)
 
-    # Editing your own details is a later feature — point them to Contact Us.
+    # Registered users can jump to the profile editor by keyword, even mid-flow.
     if user.is_registered and text.lower() in PROFILE_WORDS:
-        return _profile_coming_soon(user, conv)
+        return profile.start(user, conv)
 
     # Path selection from the Welcome menu.
     if payload in _PATHS:
@@ -101,22 +102,27 @@ def handle(inbound):
     if conv.flow == "contact" and conv.step and conv.step.startswith("contact_"):
         return contact.handle(user, conv, payload, text)
     if conv.flow == "profile" and conv.step and conv.step.startswith("prof_"):
-        return profile.handle(user, conv, payload, text)  # dormant — editing deferred
+        return profile.handle(user, conv, payload, text)
 
     # No active flow / anything unrecognized → sign-up (if needed) or Welcome.
     return _entry(user, conv)
 
 
-def _entry(user, conv):
-    """The single front door — everyone lands on the Welcome + route menu.
-    Sign-up now happens only once a route (candidate/employee) is chosen."""
+def _entry(user, conv, force_menu=False):
+    """The single front door. Returning candidates (registered, no active
+    advocate rows) skip the "pick a lane" menu and land straight in the
+    candidate flow; an explicit menu request (force_menu) always shows the menu.
+    Sign-up happens only once a route (candidate/employee) is chosen."""
+    if (not force_menu and user.is_registered
+            and not employee._advocate_company_ids(user)):
+        return candidate.start(user, conv)
     return _welcome(user, conv)
 
 
 def _enter_path(user, conv, flow):
-    # "Edit my details" button — profile editing is deferred; show a coming-soon note.
+    # "Edit my details" button (WA_CT_WELCOME_BACK) / typed profile keyword.
     if flow == "profile":
-        return _profile_coming_soon(user, conv)
+        return profile.start(user, conv)
     # Contact Us → let everyone send us a message (forwarded to ops by email).
     if flow == "contact":
         return contact.start(user, conv)
@@ -128,13 +134,6 @@ def _enter_path(user, conv, flow):
     if not user.is_registered:
         return registration.start(user, conv, pending_flow="candidate")
     return candidate.start(user, conv)
-
-
-def _profile_coming_soon(user, conv):
-    """Editing your own details is a later feature; for now nudge to Contact Us."""
-    conversation.reset_state(conv)
-    messaging.send_prompt(user.phone, copy.PROFILE_COMING_SOON)
-    return "profile_coming_soon"
 
 
 def _welcome(user, conv):

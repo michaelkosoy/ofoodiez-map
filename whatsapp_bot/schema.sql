@@ -27,6 +27,9 @@ create table if not exists public.wa_users (
     terms_accepted_at timestamptz,
     last_language     text not null default 'en' check (last_language in ('en','he')),
     is_blocked        boolean not null default false,
+    job_status          text,        -- hired | pending | no_response (status-check email answer)
+    job_status_at       timestamptz, -- when they answered
+    last_status_checked timestamptz, -- when we last emailed the status check
     created_at        timestamptz not null default now(),
     updated_at        timestamptz not null default now()
 );

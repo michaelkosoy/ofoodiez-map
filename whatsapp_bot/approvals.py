@@ -53,6 +53,56 @@ def _verify_cv_token(token, application_id):
     return int(signed_id) == int(application_id)
 
 
+# ---------- candidate status check-in (monthly email buttons) ----------
+
+_STATUS_MAX_AGE = 60 * 24 * 3600  # ~2 months: outlives the monthly cadence
+_STATUS_PAGES = {  # answer → (page title, page message)
+    "hired": ("Congrats! 🎉",
+              "Amazing news — we've marked you as hired and won't nag you again. "
+              "So happy for you! 🧡"),
+    "pending": ("Fingers crossed! 🤞",
+                "Got it — still in process. We'll check in again next month. "
+                "Good luck! 🧡"),
+    "no_response": ("Thanks for letting us know 🙏",
+                    "Hang in there — and feel free to ask us for another referral "
+                    "on WhatsApp anytime. 🧡"),
+}
+
+
+def _status_serializer():
+    # NEW salt — never reuse "wa-cv-download": a CV token for application N
+    # would otherwise validate as a status token for user N.
+    secret = os.environ.get("SECRET_KEY", "ofoodiez-dev-secret-change-in-prod")
+    return URLSafeTimedSerializer(secret, salt="wa-status-check")
+
+
+def sign_status_token(user_id):
+    return _status_serializer().dumps(int(user_id))
+
+
+@wa_bp.route("/status/update", methods=["GET"])
+def status_update():
+    """One-click answer from the status-check email. Records the candidate's
+    self-reported status. Re-clicking another button just overwrites it, so a
+    candidate can correct themselves.
+    ponytail: records on GET (per spec) — link-prefetching scanners could
+    auto-answer; upgrade path is this file's approve-flow GET-confirm/POST-commit."""
+    status = (request.args.get("status") or "").strip()
+    try:
+        uid = _status_serializer().loads(request.args.get("t", ""), max_age=_STATUS_MAX_AGE)
+    except (BadSignature, SignatureExpired, ValueError, TypeError):
+        uid = None
+    user = WaUser.query.get(int(uid)) if uid is not None else None
+    if user is None or status not in _STATUS_PAGES:
+        return _page("Link expired",
+                     "This link is invalid or has expired — we'll check in again "
+                     "next month. 🧡")
+    user.job_status = status
+    user.job_status_at = datetime.utcnow()
+    db.session.commit()
+    return _page(*_STATUS_PAGES[status])
+
+
 @wa_bp.route("/referral/approve", methods=["GET"])
 def referral_approve_page():
     rec = _lookup(request.args.get("t", ""))

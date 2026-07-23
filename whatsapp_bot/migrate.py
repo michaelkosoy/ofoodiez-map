@@ -140,6 +140,10 @@ _STATEMENTS = [
     "alter table public.wa_application_recipients add column if not exists approved_at timestamptz",
     "alter table public.wa_application_recipients add column if not exists denied_at timestamptz",
     "alter table public.wa_applications add column if not exists job_description text",
+    # Monthly candidate status check (email): the answer + when we last asked.
+    "alter table public.wa_users add column if not exists job_status text",
+    "alter table public.wa_users add column if not exists job_status_at timestamptz",
+    "alter table public.wa_users add column if not exists last_status_checked timestamptz",
     # ---- seed known careers pages, keyed by normalized_name (fills NULL only,
     # so admin edits via /admin → WhatsApp → Companies are never overwritten;
     # all URLs verified live 2026-07-11, updated 2026-07-13) ----

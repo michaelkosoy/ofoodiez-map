@@ -85,18 +85,15 @@ CONTACT_SENT = (
     "Thanks! 🙌 Your message is on its way to our team — we'll be in touch soon.\n"
     "Type *menu* anytime to do more."
 )
-# Profile editing is a later feature — Contact Us handles change requests for now.
-PROFILE_COMING_SOON = (
-    "✏️ Editing your details from here is coming soon!\n"
-    "For now, tap *Contact us* and send us a message if you'd like to update anything."
-)
 # ---- Signed-in user: edit your own details ----
 PROFILE_MENU = (
     "Your details 👤\n"
     "• Name: {name}\n"
     "• Email: {email}\n\n"
-    "Reply *name* or *email* to update one · *menu* to go back."
+    "Reply *name* or *email* to update one{company_hint} · *menu* to go back."
 )
+# Extra option shown only to advocates — hands off to the employee edit flow.
+PROFILE_COMPANY_HINT = ", *company* to edit your referral companies"
 PROFILE_NAME_PROMPT = "What should I set your *name* to? (first + last)"
 PROFILE_EMAIL_PROMPT = "What's your *email*?"
 PROFILE_EMAIL_INVALID = (
@@ -223,7 +220,8 @@ CAND_COMPANY = (
 CAND_WELCOME_BACK = (
     "Hey {first}, welcome back! 👋🧡\n"
     "Which company are you aiming for?\n"
-    + _COMPANIES_LIST_LINE
+    + _COMPANIES_LIST_LINE + "\n"
+    "(type *menu* for all options)"
 )
 CAND_REFERRAL_LINK = (
     "Great news — *{advocate}* from *{company}* shared a referral link with you! 🔗🎉\n"

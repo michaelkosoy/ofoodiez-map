@@ -1,7 +1,7 @@
 """Candidate backfill notifications — served by the BOT service (which has the
 SendGrid env vars; the main-site admin does not).
 
-Two secret-gated endpoints (no admin session, so they check ?key= against
+Secret-gated endpoints (no admin session, so they check ?key= against
 WA_CRON_SECRET / ADMIN_SECRET — the SAME value must be set on this service, on
 the main app, and on the external cron):
 
@@ -9,17 +9,20 @@ the main app, and on the external cron):
                                   one candidate their company is now available.
   GET/POST /wa/backfill-cron      sweep: email every open request whose company
                                   now has an active advocate, then mark handled.
+  GET/POST /wa/status-check       admin button: email every candidate with an
+                                  application the "did you get hired?" check-in.
 """
 import logging
 import os
+from datetime import datetime, timedelta
 
 from flask import jsonify, request
 
 from database.models import db
 
-from . import copy, emailer, messaging, wa_bp
+from . import approvals, copy, emailer, messaging, wa_bp
 from .config import WaConfig
-from .models import WaAdvocate, WaCompany, WaCompanyRequest, WaUser
+from .models import WaAdvocate, WaApplication, WaCompany, WaCompanyRequest, WaUser
 
 logger = logging.getLogger("whatsapp_bot")
 
@@ -149,3 +152,49 @@ def backfill_cron():
             notified += 1
     logger.info("wa backfill-cron: handled=%d notified=%d", handled, notified)
     return jsonify({"handled": handled, "notified": notified})
+
+
+_STATUS_RECHECK_DAYS = 25  # don't re-ask a candidate more often than ~monthly
+
+
+@wa_bp.route("/status-check", methods=["GET", "POST"])
+def status_check():
+    """Email every candidate with ≥1 application the 'how's the job hunt?'
+    check-in (3 answer buttons → /wa/status/update). Skips: no email, blocked,
+    already answered 'hired', or checked within the last ~25 days.
+    last_status_checked is set ONLY on a successful send, so failures (incl.
+    the SendGrid daily cap) stay eligible and the next click retries them.
+    ?only=<email> restricts the run to one candidate (safe prod smoke test).
+    ponytail: sequential sends, one per candidate — fine for this community's
+    size; batch via SendGrid personalizations if it ever takes minutes."""
+    if not _authorized():
+        return jsonify({"error": "forbidden"}), 403
+    only = (request.args.get("only") or "").strip().lower()
+    cutoff = datetime.utcnow() - timedelta(days=_STATUS_RECHECK_DAYS)
+    candidates = (
+        WaUser.query
+        .filter(WaUser.id.in_(db.session.query(WaApplication.candidate_user_id)))
+        .filter(WaUser.email.isnot(None), WaUser.is_blocked.is_(False))
+        .filter(db.or_(WaUser.job_status.is_(None), WaUser.job_status != "hired"))
+        .filter(db.or_(WaUser.last_status_checked.is_(None),
+                       WaUser.last_status_checked < cutoff))
+        .all()
+    )
+    base = WaConfig.WA_PUBLIC_BASE_URL
+    sent = failed = 0
+    for user in candidates:
+        if only and (user.email or "").lower() != only:
+            continue
+        token = approvals.sign_status_token(user.id)
+        urls = {s: f"{base}/wa/status/update?t={token}&status={s}"
+                for s in ("hired", "pending", "no_response")}
+        if emailer.send_status_check_email(user.email, user.first_name or "there",
+                                           urls["hired"], urls["pending"],
+                                           urls["no_response"]):
+            user.last_status_checked = datetime.utcnow()
+            db.session.commit()  # per-row, like backfill_cron: a crash mid-run never re-sends
+            sent += 1
+        else:
+            failed += 1
+    logger.info("wa status-check: sent=%d failed=%d eligible=%d", sent, failed, len(candidates))
+    return jsonify({"sent": sent, "failed": failed, "eligible": len(candidates)})

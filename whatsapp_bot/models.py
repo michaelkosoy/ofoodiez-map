@@ -154,6 +154,9 @@ class WaUser(db.Model):
     terms_accepted_at = db.Column(db.DateTime)
     last_language = db.Column(db.Text, nullable=False, default="en")
     is_blocked = db.Column(db.Boolean, nullable=False, default=False)
+    job_status = db.Column(db.Text)                # hired | pending | no_response (status-check email answer)
+    job_status_at = db.Column(db.DateTime)         # when they answered
+    last_status_checked = db.Column(db.DateTime)   # when we last emailed the status check
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

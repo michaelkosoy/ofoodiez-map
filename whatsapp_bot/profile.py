@@ -1,11 +1,12 @@
-"""Signed-in user's self-service profile edit — name + email. (Their WhatsApp
-number is their identity, so it isn't editable here.) Reached from the Welcome
-menu's Contact option when the user is already registered, or by keyword."""
+"""Signed-in user's self-service profile edit — name + email, plus a "company"
+handoff into the employee edit flow for advocates. (Their WhatsApp number is
+their identity, so it isn't editable here.) Reached from the Welcome-back
+menu's "Edit my details" button, or by keyword (router.PROFILE_WORDS)."""
 import re
 
 from database.models import db
 
-from . import conversation, copy, messaging
+from . import conversation, copy, employee, messaging
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -18,8 +19,9 @@ def start(user, conv, prefix=""):
 
 def _send_menu(user, prefix=""):
     name = " ".join(x for x in (user.first_name, user.last_name) if x) or "—"
+    hint = copy.PROFILE_COMPANY_HINT if employee._advocate_company_ids(user) else ""
     messaging.send_prompt(user.phone, prefix + copy.PROFILE_MENU.format(
-        name=name, email=user.email or "—"))
+        name=name, email=user.email or "—", company_hint=hint))
 
 
 def handle(user, conv, payload, text):
@@ -36,6 +38,9 @@ def handle(user, conv, payload, text):
             conversation.set_state(conv, "profile", "prof_email", {})
             messaging.send_prompt(user.phone, copy.PROFILE_EMAIL_PROMPT)
             return "prof_email"
+        # Advocates: hand company/link/work-email edits to the employee edit flow.
+        if low in ("company", "3") and employee._advocate_company_ids(user):
+            return employee.start(user, conv)
         _send_menu(user)  # unrecognized → re-show the menu
         return "prof_menu"
 
