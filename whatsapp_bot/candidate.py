@@ -2,7 +2,7 @@
 
 On résumé (a PDF), the application is recorded and emailed to ONE chosen active
 advocate of the company — the closest role-title match, else a random active one
-(best-effort: Supabase Storage + SendGrid are config-gated, so the flow still
+(best-effort: Supabase Storage + Brevo are config-gated, so the flow still
 completes and the application is recorded even if they're unset).
 """
 import difflib

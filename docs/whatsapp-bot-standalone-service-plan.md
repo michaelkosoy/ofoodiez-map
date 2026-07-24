@@ -41,7 +41,7 @@ targets exactly those.
    (4) return empty TwiML 200  ◀── instant ack (never waits on downstream)
                                          │
    background thread (app context): router.handle → Twilio REST reply,
-        Supabase résumé upload, SendGrid email, audit-row finalize
+        Supabase résumé upload, Brevo email, audit-row finalize
                                          │
  Supabase Postgres (SAME project, via transaction pooler :6543)  ◀── shared state
  + external uptime pinger ──GET /wa/healthz every ~10 min──▶ keeps the instance warm
@@ -93,7 +93,7 @@ later you just raise Render's instance count / plan — no redesign.
 5. **Env vars on the new service** (copy from the current one): `TWILIO_AUTH_TOKEN`,
    `TWILIO_ACCOUNT_SID`, `TWILIO_MESSAGING_SERVICE_SID`, `TWILIO_WHATSAPP_FROM` (if
    used), all `WA_CT_*` template SIDs, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-   `SUPABASE_RESUME_BUCKET`, `SENDGRID_API_KEY`, `WA_FROM_EMAIL`, `WA_OPS_EMAIL`,
+   `SUPABASE_RESUME_BUCKET`, `BREVO_API_KEY`, `WA_FROM_EMAIL`, `WA_OPS_EMAIL`,
    `WA_IDLE_RESET_MINUTES`, the `DATABASE_URL` (pooler), and **critically**
    `TWILIO_WEBHOOK_URL = https://<new-service>.onrender.com/wa/webhook` (signature
    validation is pinned to it — wrong value → every request 403s).
@@ -119,7 +119,7 @@ later you just raise Render's instance count / plan — no redesign.
    - Pass the real app via `current_app._get_current_object()`; Flask-SQLAlchemy's
      scoped session is thread-local, so each worker gets its own clean session.
    - Effect: the webhook returns in ~tens of ms regardless of how slow Supabase or
-     SendGrid are, and the résumé→upload→email path no longer ties up a request
+     Brevo are, and the résumé→upload→email path no longer ties up a request
      thread or risks Twilio's timeout.
 2. **Tighten downstream HTTP timeouts** in `storage.py`/`emailer.py` (currently
    20–30 s) to ~8–10 s so a stuck dependency can't pin a worker for half a minute.

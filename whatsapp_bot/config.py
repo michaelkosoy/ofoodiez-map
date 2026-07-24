@@ -105,7 +105,7 @@ class _WaConfig:
         # candidates outside the 24h window — they usually asked days earlier.
         return os.environ.get("WA_CT_COMPANY_AVAILABLE")
 
-    # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
+    # ---- Résumé storage (Supabase Storage) + advocate emails (Brevo) ----
     @property
     def SUPABASE_URL(self):
         return os.environ.get("SUPABASE_URL")
@@ -119,8 +119,8 @@ class _WaConfig:
         return os.environ.get("SUPABASE_RESUME_BUCKET", "wa-resumes")
 
     @property
-    def SENDGRID_API_KEY(self):
-        return os.environ.get("SENDGRID_API_KEY")
+    def BREVO_API_KEY(self):
+        return os.environ.get("BREVO_API_KEY")
 
     @property
     def WA_FROM_EMAIL(self):

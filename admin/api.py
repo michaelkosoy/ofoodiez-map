@@ -990,7 +990,7 @@ def update_portfolio_content():
 @login_required
 def trigger_whatsapp_status_check():
     """Proxy the 'email every candidate a status check-in' sweep to the BOT
-    service (which has the SendGrid env vars). Long timeout: the bot sends the
+    service (which has the Brevo env vars). Long timeout: the bot sends the
     emails sequentially inside this one request."""
     base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
     secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
@@ -1005,7 +1005,7 @@ def trigger_whatsapp_status_check():
 
 
 def _notify_via_bot(request_id):
-    """Ask the BOT service (which has the SendGrid env vars; this main app does
+    """Ask the BOT service (which has the Brevo env vars; this main app does
     not) to email the candidate that their requested company is now available.
     Best-effort → returns the bot's result string so the admin UI can show WHY a
     candidate wasn't emailed: 'sent' | 'no_email' | 'no_advocate' | 'failed' |
@@ -1175,7 +1175,7 @@ def reject_hitech_email(id):
     sent = send_hitech_rejection_email(entry.email)
     if sent:
         return jsonify({'success': True})
-    return jsonify({'success': False, 'message': 'Email not sent — check SendGrid config.'}), 500
+    return jsonify({'success': False, 'message': 'Email not sent — check Brevo config.'}), 500
 
 @admin_bp.route('/api/hitech-emails/<int:id>', methods=['DELETE'])
 @login_required
@@ -1304,7 +1304,7 @@ def send_hitech_bulk_email():
     app_instance = current_app._get_current_object()
 
     # Campaign identity = the subject. Recipients already marked with it are skipped,
-    # so re-triggering the same campaign RESUMES (after a restart or a SendGrid
+    # so re-triggering the same campaign RESUMES (after a restart or a Brevo
     # daily-quota cutoff) instead of double-sending. New subject = new campaign.
     pending = [(getattr(r, 'id', None), r.email) for r in recipients
                if getattr(r, 'last_campaign', None) != subject]
@@ -1340,7 +1340,7 @@ def send_hitech_bulk_email():
                 except Exception as e:
                     success, e_reason = False, str(e)
                 else:
-                    e_reason = "SendGrid returned False"
+                    e_reason = "Brevo returned False"
                 if success:
                     consecutive_failures = 0
                     _BULK_EMAIL_STATUS['sent'] += 1
@@ -1355,14 +1355,14 @@ def send_hitech_bulk_email():
                     _BULK_EMAIL_STATUS['failed'] += 1
                     consecutive_failures += 1
                     if consecutive_failures >= 8:
-                        # Almost certainly the SendGrid daily quota (100/day on free) —
+                        # Almost certainly the Brevo daily quota (300/day on free) —
                         # stop burning the list; re-trigger with the same subject after
                         # the quota resets and it resumes from here.
                         _BULK_EMAIL_STATUS['aborted'] = ('stopped after 8 consecutive failures '
-                                                         '(SendGrid quota?) — re-send the same '
+                                                         '(Brevo quota?) — re-send the same '
                                                          'subject later to resume')
                         logger.error(f"📧 Bulk email '{subject}': aborting — 8 consecutive "
-                                     f"failures (SendGrid daily quota?).")
+                                     f"failures (Brevo daily quota?).")
                         break
 
             _BULK_EMAIL_STATUS['done'] = True

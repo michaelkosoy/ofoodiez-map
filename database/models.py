@@ -182,7 +182,7 @@ class HitechEmail(db.Model):
     # Bulk-campaign bookkeeping: campaign identity = the email subject. Marked per
     # recipient right after a successful send, so a re-trigger with the SAME subject
     # resumes (skips those already sent) instead of duplicating — survives restarts
-    # and SendGrid daily-quota cutoffs.
+    # and email daily-quota cutoffs.
     last_campaign = db.Column(db.Text)
     last_sent_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

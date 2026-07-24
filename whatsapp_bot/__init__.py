@@ -40,8 +40,8 @@ def init_app(app):
     # email/storage config, so a missing env var isn't an invisible no-op.
     from .config import WaConfig
     logging.getLogger("whatsapp_bot").info(
-        "wa: startup — SendGrid configured=%s (from=%s) · Supabase storage=%s",
-        bool(WaConfig.SENDGRID_API_KEY and WaConfig.WA_FROM_EMAIL),
+        "wa: startup — Brevo email configured=%s (from=%s) · Supabase storage=%s",
+        bool(WaConfig.BREVO_API_KEY and WaConfig.WA_FROM_EMAIL),
         WaConfig.WA_FROM_EMAIL or "(unset)",
         bool(WaConfig.SUPABASE_URL and WaConfig.SUPABASE_SERVICE_ROLE_KEY),
     )

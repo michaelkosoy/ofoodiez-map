@@ -1,5 +1,5 @@
 """Candidate backfill notifications — served by the BOT service (which has the
-SendGrid env vars; the main-site admin does not).
+Brevo env vars; the main-site admin does not).
 
 Secret-gated endpoints (no admin session, so they check ?key= against
 WA_CRON_SECRET / ADMIN_SECRET — the SAME value must be set on this service, on
@@ -144,7 +144,7 @@ def backfill_cron():
             continue  # still no advocate — leave open for next run
         result = _notify(req_row, company)
         if result == "failed":
-            continue  # transient (e.g. SendGrid hiccup) — leave open to retry
+            continue  # transient (e.g. Brevo hiccup) — leave open to retry
         req_row.status = "handled"
         db.session.commit()
         handled += 1
@@ -163,10 +163,10 @@ def status_check():
     check-in (3 answer buttons → /wa/status/update). Skips: no email, blocked,
     already answered 'hired', or checked within the last ~25 days.
     last_status_checked is set ONLY on a successful send, so failures (incl.
-    the SendGrid daily cap) stay eligible and the next click retries them.
+    the Brevo daily cap) stay eligible and the next click retries them.
     ?only=<email> restricts the run to one candidate (safe prod smoke test).
     ponytail: sequential sends, one per candidate — fine for this community's
-    size; batch via SendGrid personalizations if it ever takes minutes."""
+    size; batch via Brevo messageVersions if it ever takes minutes."""
     if not _authorized():
         return jsonify({"error": "forbidden"}), 403
     only = (request.args.get("only") or "").strip().lower()
