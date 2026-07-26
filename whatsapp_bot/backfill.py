@@ -20,9 +20,10 @@ from flask import jsonify, request
 
 from database.models import db
 
-from . import approvals, copy, emailer, messaging, wa_bp
+from . import approvals, copy, emailer, messaging, storage, wa_bp
 from .config import WaConfig
-from .models import WaAdvocate, WaApplication, WaCompany, WaCompanyRequest, WaUser
+from .models import (WaAdvocate, WaApplication, WaApplicationRecipient,
+                     WaCompany, WaCompanyRequest, WaUser)
 
 logger = logging.getLogger("whatsapp_bot")
 
@@ -198,3 +199,116 @@ def status_check():
             failed += 1
     logger.info("wa status-check: sent=%d failed=%d eligible=%d", sent, failed, len(candidates))
     return jsonify({"sent": sent, "failed": failed, "eligible": len(candidates)})
+
+
+@wa_bp.route("/recover-emails", methods=["GET", "POST"])
+def recover_emails():
+    """Re-send emails lost while the email transport was down (sends are
+    best-effort: failures leave DB state behind, there is no queue).
+
+    GET (or POST without ?send=1) = dry-run report of what WOULD be sent;
+    POST ?send=1 actually sends. ?since=ISO (required) and ?until=ISO
+    (default: now), naive UTC, bound the outage window. Idempotent: sent
+    rows flip to email_status='sent' and drop out of the next run.
+
+      - application emails: recipients with email_status='pending' created in
+        the window and never approved/denied — resent with the SAME stored
+        approval_token (buttons identical to the original email); the CV is
+        re-fetched from storage (falls back to the signed CV link alone if
+        the object is gone).
+      - referral-confirmed: recipients with approved_at in the window (this
+        send has no status marker, so the window is the only filter — keep
+        ?until before the transport-restore time to avoid duplicates).
+    """
+    if not _authorized():
+        return jsonify({"error": "forbidden"}), 403
+    try:
+        since = datetime.fromisoformat(request.args["since"])
+        until = (datetime.fromisoformat(request.args["until"])
+                 if request.args.get("until") else datetime.utcnow())
+    except (KeyError, ValueError):
+        return jsonify({"error": "?since= (and optional ?until=) must be ISO"
+                                 " timestamps, naive UTC"}), 400
+    send = request.method == "POST" and request.args.get("send") == "1"
+    report = {"dry_run": not send, "since": str(since), "until": str(until),
+              "application_emails": [], "referral_confirmed": []}
+    base = WaConfig.WA_PUBLIC_BASE_URL
+
+    pending = (WaApplicationRecipient.query
+               .filter(WaApplicationRecipient.email_status == "pending",
+                       WaApplicationRecipient.created_at >= since,
+                       WaApplicationRecipient.created_at <= until,
+                       WaApplicationRecipient.approved_at.is_(None),
+                       WaApplicationRecipient.denied_at.is_(None))
+               .all())
+    for rec in pending:
+        application = WaApplication.query.get(rec.application_id)
+        cand = WaUser.query.get(application.candidate_user_id) if application else None
+        company = WaCompany.query.get(application.company_id) if application else None
+        adv = WaAdvocate.query.get(rec.advocate_id)
+        adv_user = WaUser.query.get(adv.user_id) if adv else None
+        item = {"recipient_id": rec.id, "application_id": rec.application_id,
+                "to": rec.email, "candidate": (cand.first_name if cand else None),
+                "company": (company.name if company else None),
+                "created_at": str(rec.created_at), "result": "would send"}
+        if send and application and rec.email:
+            resume_bytes = ctype = None
+            path = application.resume_path or ""
+            if path:
+                resume_bytes, ctype = (storage.download_twilio_media(path)
+                                       if path.startswith("http")
+                                       else storage.download_object(path))
+                if resume_bytes is None:
+                    item["note"] = "cv object unavailable — sent with CV link only"
+            cand_name = (f"{cand.first_name or ''} {cand.last_name or ''}".strip()
+                         if cand else "") or "A candidate"
+            ok = emailer.send_application_email(
+                rec.email,
+                (adv_user.first_name if adv_user else None) or "",
+                cand_name,
+                (cand.email if cand else "") or "",
+                application.role_query or "",
+                (company.name if company else "") or "",
+                application.job_posting_url or "",
+                job_description=application.job_description or "",
+                approval_url=f"{base}/wa/referral/approve?t={rec.approval_token}",
+                deny_url=f"{base}/wa/referral/deny?t={rec.approval_token}",
+                cv_url=f"{base}/wa/applications/{application.id}/cv"
+                       f"?t={approvals.sign_cv_token(application.id)}",
+                resume_bytes=resume_bytes,
+                resume_filename=application.resume_filename or "resume.pdf",
+                resume_content_type=ctype or "application/pdf",
+            )
+            if ok:
+                rec.email_status = "sent"
+                rec.emailed_at = datetime.utcnow()
+                db.session.commit()  # per-row: a crash mid-run never double-sends
+            item["result"] = "sent" if ok else "send failed"
+        report["application_emails"].append(item)
+
+    confirmed = (WaApplicationRecipient.query
+                 .filter(WaApplicationRecipient.approved_at >= since,
+                         WaApplicationRecipient.approved_at <= until)
+                 .all())
+    for rec in confirmed:
+        ctx = approvals._context(rec)
+        item = {"recipient_id": rec.id, "to": ctx["candidate_email"],
+                "company": ctx["company"], "approved_at": str(rec.approved_at),
+                "result": ("would send" if ctx["candidate_email"]
+                           else "no candidate email")}
+        if send and ctx["candidate_email"]:
+            ok = emailer.send_referral_confirmed_email(
+                to_email=ctx["candidate_email"],
+                candidate_name=ctx["candidate_name"] or "there",
+                advocate_name=ctx["advocate"],
+                company=ctx["company"],
+                role=ctx["role"],
+                share_contact=ctx["share_contact"],
+                linkedin_url=ctx["linkedin"],
+            )
+            item["result"] = "sent" if ok else "send failed"
+        report["referral_confirmed"].append(item)
+
+    logger.info("wa recover-emails: dry_run=%s app=%d confirmed=%d", not send,
+                len(report["application_emails"]), len(report["referral_confirmed"]))
+    return jsonify(report)
