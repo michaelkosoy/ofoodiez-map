@@ -59,6 +59,8 @@
       padding: 5px 13px;
       border-radius: 999px;
       white-space: nowrap;
+      background: #fff;
+      border: 1px solid #ece1cb;
       transition: background .15s;
     }
 
@@ -102,12 +104,22 @@
     <section class="ofz-section" id="cities">
       <h2 class="ofz-h2"><span>02</span> ערים · מסלולים יומיים</h2>
       <p class="ofz-lead">{{ c.cities_lead }}</p>
-      <section class="ofz-city" id="city-0">
-        <div class="ofz-city-head">
-          <h3 class="ofz-cname">Tokyo</h3>
+      <nav class="ofz-subnav" aria-label="קפיצה לעיר">
+        <a href="#city-0">טוקיו</a>
+        <a href="#city-1">ימאנאשי</a>
+        <a href="#city-2">קיוטו</a>
+        <a href="#city-3">אוסקה</a>
+        <a href="#city-4">אישיגקי · אוקינאווה</a>
+      </nav>
+      <details class="ofz-city" id="city-0">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Tokyo</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
           <p class="ofz-cintro">{{ c.cities.tokyo.intro }}</p>
           {% if c.cities.tokyo.accom %}<div class="ofz-accom"><span class="ofz-accom-label">🏨 Where to stay</span>{{ c.cities.tokyo.accom }}</div>{% endif %}
-        </div>
+        </summary>
         <div class="ofz-days">
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
@@ -311,7 +323,7 @@
         <div class="ofz-extras">
           <article class="ofz-day ofz-day-extra">
             <div class="ofz-dhead"><span class="ofz-dnum">＋</span>
-              <h4 class="ofz-darea">Bonus Picks</h4>
+              <h4 class="ofz-darea">עוד לראות ולעשות</h4>
             </div>
             <ul class="ofz-dlist">
               <li class="ofz-stop"><a
@@ -346,12 +358,15 @@
             </ul>
           </article>
         </div>
-      </section>
-      <section class="ofz-city" id="city-1">
-        <div class="ofz-city-head">
-          <h3 class="ofz-cname">Yamanashi</h3>
+      </details>
+      <details class="ofz-city" id="city-1">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Yamanashi</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
           <p class="ofz-cintro">{{ c.cities.yamanashi.intro }}</p>
-        </div>
+        </summary>
         <div class="ofz-days">
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
@@ -369,7 +384,7 @@
         <div class="ofz-extras">
           <article class="ofz-day ofz-day-extra">
             <div class="ofz-dhead"><span class="ofz-dnum">＋</span>
-              <h4 class="ofz-darea">Bonus Picks</h4>
+              <h4 class="ofz-darea">עוד לראות ולעשות</h4>
             </div>
             <ul class="ofz-dlist">
               <li class="ofz-stop"><a
@@ -381,13 +396,16 @@
             </ul>
           </article>
         </div>
-      </section>
-      <section class="ofz-city" id="city-2">
-        <div class="ofz-city-head">
-          <h3 class="ofz-cname">Kyoto</h3>
+      </details>
+      <details class="ofz-city" id="city-2">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Kyoto</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
           <p class="ofz-cintro">{{ c.cities.kyoto.intro }}</p>
           {% if c.cities.kyoto.accom %}<div class="ofz-accom"><span class="ofz-accom-label">🏨 Where to stay</span>{{ c.cities.kyoto.accom }}</div>{% endif %}
-        </div>
+        </summary>
         <div class="ofz-days">
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
@@ -472,98 +490,25 @@
           </article>
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
-              <h4 class="ofz-darea">Kyoto · Part 3</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
+              <h4 class="ofz-darea">Higashiyama &amp; Gion</h4>
             </div>
             <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=mochico%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
-                    class="ofz-sname">mochico<span class="arr">↗</span></span><span class="ofz-rain"
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kiyomizu-dera%20Kyoto"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span
+                    class="ofz-sname">Kiyomizu-dera<span class="arr">↗</span></span></a></li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Gion%20Kagai%20Art%20Museum%20Kyoto"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Gion Kagai
+                    Art Museum<span class="arr">↗</span></span><span class="ofz-rain"
                     title="מתאים ליום גשום">☂</span></a></li>
               <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Cafe%20Bibliotic%20Hello%21%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Cafe
-                    Bibliotic Hello!<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=WIFE%20%26%20HUSBAND%20Kyoto" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">WIFE &amp; HUSBAND<span
+                  href="https://www.google.com/maps/search/?api=1&query=Gion%20Unagi%20Kawato%20Kyoto" target="_blank"
+                  rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Gion Unagi Kawato<span
                       class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Hoo%20Kyoto" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Hoo<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=cit%C3%A9%20coffee%20roastery%20%26%20vintage%20shop%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">cité
-                    coffee roastery &amp; vintage shop<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Inahiko%20Coffee%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Inahiko
-                    Coffee<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=HARIO%20CAFE%20Kyoto%20Kyoto" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">HARIO CAFE Kyoto<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=M%20stand%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">M
-                    stand<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
             </ul>
           </article>
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 4</span>
-              <h4 class="ofz-darea">Kyoto · Part 4</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sugari%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Sugari<span
-                      class="arr">↗</span></span></a><span class="ofz-snote">חובה ופשוט מגיעים</span></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Noodle%20shop%20Rennosuke%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Noodle shop
-                    Rennosuke<span class="arr">↗</span></span></a><span class="ofz-snote">מומלץ Bib Gourmet. חובה
-                  ולהזמין מקום יומיים לפני!!!</span></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Ramen%20Hiwamatanoboru%20Kyoto" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Ramen Hiwamatanoboru<span
-                      class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Men-ya%20Inoichi%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Men-ya
-                    Inoichi<span class="arr">↗</span></span></a><span class="ofz-snote">מומלץ Bib Gourmet, ויש המתנה
-                  בתור</span></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Ichiryu%20Manbai%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Ichiryu
-                    Manbai<span class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sushitetsu%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span
-                    class="ofz-sname">Sushitetsu<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">חובה וזול ברמות!! להגיע ולהמתין</span>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=MOTOI%20Gyoza%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">MOTOI
-                    Gyoza<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Chao%20Chao%20Gyoza%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Chao Chao
-                    Gyoza<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 5</span>
-              <h4 class="ofz-darea">Kyoto · Part 5</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Maruman%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Maruman<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 6</span>
               <h4 class="ofz-darea">Arashiyama</h4>
             </div>
             <ul class="ofz-dlist">
@@ -595,24 +540,7 @@
             </ul>
           </article>
           <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 7</span>
-              <h4 class="ofz-darea">Gion</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Gion%20Kagai%20Art%20Museum%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Gion Kagai
-                    Art Museum<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Gion%20Unagi%20Kawato%20Kyoto" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Gion Unagi Kawato<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 8</span>
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 5</span>
               <h4 class="ofz-darea">Fushimi</h4>
             </div>
             <ul class="ofz-dlist">
@@ -633,17 +561,7 @@
             </ul>
           </article>
           <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 9</span>
-              <h4 class="ofz-darea">Higashiyama</h4>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kiyomizu-dera%20Kyoto"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span
-                    class="ofz-sname">Kiyomizu-dera<span class="arr">↗</span></span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 10</span>
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 6</span>
               <h4 class="ofz-darea">Nara</h4>
             </div>
             <ul class="ofz-dlist">
@@ -674,7 +592,7 @@
             </ul>
           </article>
           <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 11</span>
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 7</span>
               <h4 class="ofz-darea">Uji</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
                 גשום</span>
             </div>
@@ -714,18 +632,354 @@
             </ul>
           </article>
         </div>
-      </section>
-      <section class="ofz-city" id="city-3">
-        <div class="ofz-city-head">
-          <h3 class="ofz-cname">Osaka</h3>
-          <p class="ofz-cintro">{{ c.cities.osaka.intro }}</p>
+        <div class="ofz-foodrecs">
+          <h4 class="ofz-foodrecs-title">🗂️ עוד מקומות בקיוטו — לפי קטגוריה</h4>
+          <div class="ofz-days">
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">בתי קפה</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Amam%20Dacotan%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Amam
+                      Dacotan<span class="arr">↗</span></span></a><span class="ofz-snote">להגיע לפני 9 כדי להימנע
+                    מהתור</span></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Here%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                      class="ofz-sname">Here<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Actual%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                      class="ofz-sname">Actual<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Archi%20coffee%20and%20wine%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Archi
+                      coffee and wine<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=2050%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                      class="ofz-sname">2050<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Uru%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Uru<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=WEEKENDERS%20COFFEE%20TOMINOKOJI%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                      class="ofz-sname">WEEKENDERS COFFEE TOMINOKOJI<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Panel%20cafe%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Panel
+                      cafe<span class="arr">↗</span></span></a><span class="ofz-snote">להזמין מקום חודש
+                    מראש</span></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=mochico%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                      class="ofz-sname">mochico<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Cafe%20Bibliotic%20Hello%21%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Cafe
+                      Bibliotic Hello!<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=%25%20ARABICA%20Kyoto%20Arashiyama%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">%
+                      ARABICA Kyoto Arashiyama<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=WIFE%20%26%20HUSBAND%20Kyoto" target="_blank"
+                    rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">WIFE &amp; HUSBAND<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Hoo%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Hoo<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=cit%C3%A9%20coffee%20roastery%20%26%20vintage%20shop%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">cité
+                      coffee roastery &amp; vintage shop<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Inahiko%20Coffee%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Inahiko
+                      Coffee<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=HARIO%20CAFE%20Kyoto%20Kyoto" target="_blank"
+                    rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">HARIO CAFE Kyoto<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=M%20stand%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">M
+                      stand<span class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">ראמן</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sugari%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Sugari<span
+                        class="arr">↗</span></span></a><span class="ofz-snote">חובה ופשוט מגיעים</span></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Noodle%20shop%20Rennosuke%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Noodle shop
+                      Rennosuke<span class="arr">↗</span></span></a><span class="ofz-snote">מומלץ Bib Gourmet. חובה
+                    ולהזמין מקום יומיים לפני!!!</span></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Ramen%20Hiwamatanoboru%20Kyoto" target="_blank"
+                    rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Ramen Hiwamatanoboru<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Men-ya%20Inoichi%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Men-ya
+                      Inoichi<span class="arr">↗</span></span></a><span class="ofz-snote">מומלץ Bib Gourmet, ויש המתנה
+                    בתור</span></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Ichiryu%20Manbai%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">ראמן</span><span class="ofz-sname">Ichiryu
+                      Manbai<span class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">מסעדות</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sushitetsu%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span
+                      class="ofz-sname">Sushitetsu<span class="arr">↗</span></span></a><span class="ofz-snote">חובה וזול
+                    ברמות!! להגיע ולהמתין</span></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=MOTOI%20Gyoza%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">MOTOI
+                      Gyoza<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Chao%20Chao%20Gyoza%20Kyoto" target="_blank"
+                    rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Chao Chao Gyoza<span
+                        class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Maruman%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span
+                      class="ofz-sname">Maruman<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Gion%20Unagi%20Kawato%20Kyoto" target="_blank"
+                    rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Gion Unagi Kawato<span
+                        class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">מקדשים</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Otagi%20Nenbutsuji%20Temple%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Otagi
+                      Nenbutsuji Temple<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kinkaku-ji%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span
+                      class="ofz-sname">Kinkaku-ji<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Fushimi%20Inari%20Taisha%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Fushimi
+                      Inari Taisha<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kiyomizu-dera%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span
+                      class="ofz-sname">Kiyomizu-dera<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Adashino%20Nenbutsuji%20Temple%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Adashino
+                      Nenbutsuji Temple<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=To-ji%20Temple%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">To-ji
+                      Temple<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Saih%C5%8Dji%20%28Kokedera%29%20Temple%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Saihōji
+                      (Kokedera) Temple<span class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">מוזיאונים</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Gion%20Kagai%20Art%20Museum%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Gion
+                      Kagai Art Museum<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=teamLab%20Biovortex%20Kyoto%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">teamLab
+                      Biovortex Kyoto<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=SAMURAI%20NINJA%20MUSEUM%20Kyoto%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">SAMURAI
+                      NINJA MUSEUM Kyoto<span class="arr">↗</span></span></a><span class="ofz-snote">אהבנו ממש, מתאים
+                    ליום גשום / ילדים</span></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Gekkeikan%20%C5%8Ckura%20Sake%20Museum%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Gekkeikan
+                      Ōkura Sake Museum<span class="arr">↗</span></span></a><span class="ofz-snote">מוזיאון סאקה חמוד
+                    וקליל, חצי שעה</span></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Garden%20of%20Fine%20Arts%20Kyoto%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Garden of
+                      Fine Arts Kyoto<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Arashiyama%20Yusai-Tei%20Gallery%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span
+                      class="ofz-sname">Arashiyama Yusai-Tei Gallery<span class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+            <article class="ofz-day ofz-day-extra">
+              <div class="ofz-dhead">
+                <h4 class="ofz-darea">אתרים מצולמים וגנים</h4>
+              </div>
+              <ul class="ofz-dlist">
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Fushimi%20Jukkoku-bune%20Boats%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">Fushimi
+                      Jukkoku-bune Boats<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kimono%20Forest%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">Kimono
+                      Forest<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Arashiyama%20Bamboo%20Forest%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">גן ונוף</span><span
+                      class="ofz-sname">Arashiyama Bamboo Forest<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Murin-an%20Garden%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">גן ונוף</span><span class="ofz-sname">Murin-an
+                      Garden<span class="arr">↗</span></span></a></li>
+                <li class="ofz-stop"><a
+                    href="https://www.google.com/maps/search/?api=1&query=Kyoto%20Gyoen%20National%20Garden%20Kyoto"
+                    target="_blank" rel="noopener"><span class="ofz-dtag">גן ונוף</span><span class="ofz-sname">Kyoto
+                      Gyoen National Garden<span class="arr">↗</span></span></a></li>
+              </ul>
+            </article>
+          </div>
         </div>
+      </details>
+      <details class="ofz-city" id="city-3">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Osaka</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
+          <p class="ofz-cintro">{{ c.cities.osaka.intro }}</p>
+        </summary>
         <div class="ofz-days">
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
-              <h4 class="ofz-darea">Suburbs</h4>
+              <h4 class="ofz-darea">Nakazakicho</h4>
             </div>
             <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Nakazakicho%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
+                    class="ofz-sname">Nakazakicho<span class="arr">↗</span></span></a><span class="ofz-snote">שכונה
+                  מגניבה להסתובב בה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Il%20Terra%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Il
+                    Terra<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sushi%20nokaze%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Sushi
+                    nokaze<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Pognam%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
+                    class="ofz-sname">Pognam<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a></li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Ourlog%20Coffee%20Roasters%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Ourlog
+                    Coffee Roasters<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Refue%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Refue<span
+                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">כמה תחנות מהמרכז של נקזאקיצ׳ו, אותו אזור.</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 2</span>
+              <h4 class="ofz-darea">Namba · Dotonbori · Shinsaibashi</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
+                גשום</span>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Namba%20Yasaka%20Jinja%20Osaka" target="_blank"
+                  rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Namba Yasaka Jinja<span
+                      class="arr">↗</span></span></a></li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Salmon%20Kat%20Namba%20Osaka" target="_blank"
+                  rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Salmon Kat Namba<span
+                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kitan%20Hibiki%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Kitan
+                    Hibiki<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Sennichimae%20Doguyasuji%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">חנות</span><span class="ofz-sname">Sennichimae
+                    Doguyasuji<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">רחוב חנויות כלי מטבח</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kuromon%20Market%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">שוק</span><span class="ofz-sname">Kuromon
+                    Market<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Amerikamura%20%28American%20Village%29%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
+                    class="ofz-sname">Amerikamura (American Village)<span class="arr">↗</span></span></a></li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Daiki-suisan%20Kaitenzushi%20Dotombori%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Daiki-suisan
+                    Kaitenzushi Dotombori<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">סושי מסוע</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
+              <h4 class="ofz-darea">Umeda · Kitashinchi</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
+                גשום</span>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fukushima%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
+                    class="ofz-sname">Fukushima<span class="arr">↗</span></span></a><span class="ofz-snote">שכונה
+                  להסתובב ולאכול</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Watanabe%20Curry%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Watanabe
+                    Curry<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">מומלץ Bib Gourmet. יש המתנה. חובה לאוהבי
+                  בשר וקארי!</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fukutatei%20Steak%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Fukutatei
+                    Steak<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">הסטייק וואגיו הכי טוב ביפן לכאורה, מעל
+                  600₪ לאדם</span></li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Kitashinchi%20Harami%20Honzenji%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Kitashinchi
+                    Harami Honzenji<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">מסעדת וואגיו</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=wins%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">wins<span
+                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a><span
+                  class="ofz-snote">בר גלידה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Osaka%20Tonkatsu%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Osaka
+                    Tonkatsu<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=uoyaki%20temma%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">uoyaki
+                    temma<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=grenier%20Kitahama%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">אוכל רחוב</span><span class="ofz-sname">grenier
+                    Kitahama<span class="arr">↗</span></span></a></li>
+            </ul>
+          </article>
+        </div>
+        <div class="ofz-extras">
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">＋</span>
+              <h4 class="ofz-darea">עוד לראות ולעשות</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Osaka%20Castle%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">Osaka
+                    Castle<span class="arr">↗</span></span></a></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fujita%20Museum%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Fujita
+                    Museum<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
+              </li>
               <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Katsuoji%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Katsuoji<span
                       class="arr">↗</span></span></a><span class="ofz-snote">מקדש שעה נסיעה מהעיר שהוא חובה!!!!!</span>
@@ -734,100 +988,28 @@
                   target="_blank" rel="noopener"><span class="ofz-dtag">גן ונוף</span><span class="ofz-sname">Minoh
                     Falls<span class="arr">↗</span></span></a><span class="ofz-snote">בדרך למקדש קצואוג׳י — עצירה
                   מהממת</span></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 2</span>
-              <h4 class="ofz-darea">Osaka · Part 1</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Osaka%20Castle%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">Osaka
-                    Castle<span class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Watanabe%20Curry%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Watanabe
-                    Curry<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">מומלץ Bib Gourmet. יש המתנה. חובה לאוהבי
-                  בשר וקארי!</span></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fujita%20Museum%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Fujita
-                    Museum<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kitan%20Hibiki%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Kitan
-                    Hibiki<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
               <li class="ofz-stop"><a
                   href="https://www.google.com/maps/search/?api=1&query=MR.HIRO%20CAR%20STUDIO%20Osaka" target="_blank"
                   rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">MR.HIRO CAR STUDIO<span
                       class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fukutatei%20Steak%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Fukutatei
-                    Steak<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">הסטייק וואגיו הכי טוב ביפן לכאורה, מעל
-                  600₪ לאדם</span></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Nakazakicho%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
-                    class="ofz-sname">Nakazakicho<span class="arr">↗</span></span></a><span class="ofz-snote">שכונה
-                  מגניבה להסתובב בה</span></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sushi%20nokaze%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Sushi
-                    nokaze<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
+              <li class="ofz-stop"><a
+                  href="https://www.google.com/maps/search/?api=1&query=Cup%20Noodles%20Museum%20Osaka%20Ikeda%20Osaka"
+                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Cup
+                    Noodles Museum Osaka Ikeda<span class="arr">↗</span></span><span class="ofz-rain"
+                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">איקדה — פרבר קצת יותר רחוק, לא הכרחי אם חסר זמן.</span></li>
             </ul>
           </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
-              <h4 class="ofz-darea">Osaka · Part 2</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Amerikamura%20%28American%20Village%29%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
-                    class="ofz-sname">Amerikamura (American Village)<span class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Il%20Terra%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Il
-                    Terra<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Kuromon%20Market%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">שוק</span><span class="ofz-sname">Kuromon
-                    Market<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Osaka%20Tonkatsu%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Osaka
-                    Tonkatsu<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=wins%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">wins<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a><span
-                  class="ofz-snote">בר גלידה</span></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Refue%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Refue<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Ourlog%20Coffee%20Roasters%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Ourlog
-                    Coffee Roasters<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Pognam%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span
-                    class="ofz-sname">Pognam<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 4</span>
-              <h4 class="ofz-darea">Osaka · Part 3</h4>
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead">
+              <h4 class="ofz-darea">אוכל רחוב</h4>
             </div>
             <ul class="ofz-dlist">
               <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Neel%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Neel<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
+                      class="arr">↗</span></span></a></li>
               <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Spot%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">בית קפה</span><span class="ofz-sname">Spot<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
+                      class="arr">↗</span></span></a></li>
               <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=TruffleBAKERY%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">אוכל רחוב</span><span
                     class="ofz-sname">TruffleBAKERY<span class="arr">↗</span></span></a></li>
@@ -840,96 +1022,6 @@
               <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=NewBangBurger%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">אוכל רחוב</span><span
                     class="ofz-sname">NewBangBurger<span class="arr">↗</span></span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 5</span>
-              <h4 class="ofz-darea">Namba</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Namba%20Yasaka%20Jinja%20Osaka" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">מקדש</span><span class="ofz-sname">Namba Yasaka Jinja<span
-                      class="arr">↗</span></span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Salmon%20Kat%20Namba%20Osaka" target="_blank"
-                  rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Salmon Kat Namba<span
-                      class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a></li>
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Sennichimae%20Doguyasuji%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">חנות</span><span class="ofz-sname">Sennichimae
-                    Doguyasuji<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">רחוב חנויות כלי מטבח</span></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 6</span>
-              <h4 class="ofz-darea">Ikeda</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Cup%20Noodles%20Museum%20Osaka%20Ikeda%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">Cup
-                    Noodles Museum Osaka Ikeda<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 7</span>
-              <h4 class="ofz-darea">Fukushima</h4>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Fukushima%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span
-                    class="ofz-sname">Fukushima<span class="arr">↗</span></span></a><span class="ofz-snote">שכונה
-                  להסתובב ולאכול</span></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 8</span>
-              <h4 class="ofz-darea">Kitashinchi</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Kitashinchi%20Harami%20Honzenji%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Kitashinchi
-                    Harami Honzenji<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">מסעדת וואגיו</span></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 9</span>
-              <h4 class="ofz-darea">Dotonbori</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a
-                  href="https://www.google.com/maps/search/?api=1&query=Daiki-suisan%20Kaitenzushi%20Dotombori%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה</span><span class="ofz-sname">Daiki-suisan
-                    Kaitenzushi Dotombori<span class="arr">↗</span></span><span class="ofz-rain"
-                    title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">סושי מסוע</span></li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 10</span>
-              <h4 class="ofz-darea">Temma</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים ליום
-                גשום</span>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=uoyaki%20temma%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">uoyaki
-                    temma<span class="arr">↗</span></span><span class="ofz-rain" title="מתאים ליום גשום">☂</span></a>
-              </li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 11</span>
-              <h4 class="ofz-darea">Shinsaibashi</h4>
-            </div>
-            <ul class="ofz-dlist">
               <li class="ofz-stop"><a
                   href="https://www.google.com/maps/search/?api=1&query=Cheese%20Tart%20Pablo%20Shinsaibashi%20Osaka"
                   target="_blank" rel="noopener"><span class="ofz-dtag">אוכל רחוב</span><span class="ofz-sname">Cheese
@@ -941,23 +1033,16 @@
                   Shinsaibashi</span></li>
             </ul>
           </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 12</span>
-              <h4 class="ofz-darea">Kitahama</h4>
-            </div>
-            <ul class="ofz-dlist">
-              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=grenier%20Kitahama%20Osaka"
-                  target="_blank" rel="noopener"><span class="ofz-dtag">אוכל רחוב</span><span class="ofz-sname">grenier
-                    Kitahama<span class="arr">↗</span></span></a></li>
-            </ul>
-          </article>
         </div>
-      </section>
-      <section class="ofz-city" id="city-4">
-        <div class="ofz-city-head">
-          <h3 class="ofz-cname">Okinawa — Ishigaki</h3>
+      </details>
+      <details class="ofz-city" id="city-4">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Okinawa — Ishigaki</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
           <p class="ofz-cintro">{{ c.cities.okinawa.intro }}</p>
-        </div>
+        </summary>
         <div class="ofz-days">
           <article class="ofz-day">
             <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
@@ -1130,14 +1215,6 @@
                     Store<span class="arr">↗</span></span><span class="ofz-rain"
                     title="מתאים ליום גשום">☂</span></a><span class="ofz-snote">חנות דגים סשימי בטייקאוויי — חובה</span>
               </li>
-            </ul>
-          </article>
-          <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 5</span>
-              <h4 class="ofz-darea">Ishigaki · Part 5</h4><span class="ofz-daybadge" title="רוב העצירות מקורות">☂ מתאים
-                ליום גשום</span>
-            </div>
-            <ul class="ofz-dlist">
               <li class="ofz-stop"><a
                   href="https://www.google.com/maps/search/?api=1&query=Ishigaki%20City%20Public%20Market%20Ishigaki%20Okinawa"
                   target="_blank" rel="noopener"><span class="ofz-dtag">שוק</span><span class="ofz-sname">Ishigaki City
@@ -1146,7 +1223,7 @@
             </ul>
           </article>
           <article class="ofz-day">
-            <div class="ofz-dhead"><span class="ofz-dnum">Day 6</span>
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 5</span>
               <h4 class="ofz-darea">Naha</h4>
             </div>
             <ul class="ofz-dlist">
@@ -1183,7 +1260,7 @@
             </ul>
           </article>
         </div>
-      </section>
+      </details>
     </section>
 
     <!-- CALCULATOR -->
@@ -1228,25 +1305,33 @@
     <section class="ofz-section" id="shop">
       <h2 class="ofz-h2"><span>04</span> מה קונים הביתה</h2>
 
+      <div class="ofz-shopfilters">
+        <button type="button" class="ofz-shopfilter active" data-filter="all">הכל</button>
+        <button type="button" class="ofz-shopfilter" data-filter="food">אוכל</button>
+        <button type="button" class="ofz-shopfilter" data-filter="kitchen">כלים למטבח ולבית</button>
+        <button type="button" class="ofz-shopfilter" data-filter="alcohol">אלכוהול</button>
+        <button type="button" class="ofz-shopfilter" data-filter="gifts">מתנות</button>
+      </div>
+
       <div class="ofz-shopgrid">
 
         <!-- Kappabashi Kitchen Street -->
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="kitchen">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/knife.jpg') }}" alt="Japanese kitchen knife" loading="lazy">
           <figcaption><span class="ofz-shop-where"><a href="https://www.google.com/maps/search/?api=1&query=Kappabashi+Kitchen+Town+Tokyo" target="_blank" rel="noopener">Kappabashi St. ↗</a></span><span class="ofz-shop-name">Japanese Kitchen Knife</span>
             <p class="ofz-shop-note">Kiwami — the shop we bought from, and my budget benchmark.</p>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="kitchen">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/ceramics.jpg') }}" alt="Japanese ceramics" loading="lazy">
           <figcaption><span class="ofz-shop-where"><a href="https://www.google.com/maps/search/?api=1&query=Kappabashi+Kitchen+Town+Tokyo" target="_blank" rel="noopener">Kappabashi St. ↗</a></span><span class="ofz-shop-name">Ceramics</span></figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="kitchen">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/ramenBowl.jpg') }}" alt="Ramen bowl and chopsticks" loading="lazy">
           <figcaption><span class="ofz-shop-where"><a href="https://www.google.com/maps/search/?api=1&query=Kappabashi+Kitchen+Town+Tokyo" target="_blank" rel="noopener">Kappabashi St. ↗</a></span><span class="ofz-shop-name">Ramen Bowl &amp; Chopsticks</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="kitchen">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/matcha.jpg') }}" alt="Matcha brush and powder" loading="lazy">
           <figcaption><span class="ofz-shop-where"><a href="https://www.google.com/maps/search/?api=1&query=Kappabashi+Kitchen+Town+Tokyo" target="_blank" rel="noopener">Kappabashi St. ↗</a></span><span class="ofz-shop-name">Matcha Brush &amp; Powder</span>
             <p class="ofz-shop-note">Cheapest whisk I found — ¥1,500.</p>
@@ -1254,79 +1339,79 @@
         </figure>
 
         <!-- Supermarket -->
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/Furikake.jpg') }}" alt="Furikake" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Furikake · Seaweed Seasoning</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/white-miso.png') }}" alt="White miso paste" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">White Miso Paste</span></figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/neri-goma.png') }}" alt="Neri Goma sesame paste" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Neri Goma · Sesame Paste</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/roastedSeasameSuace.jpg') }}" alt="Roasted sesame dressing" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Roasted Sesame Dressing</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/wasabi.jpg') }}" alt="Wasabi paste" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Wasabi Paste</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/kombu-seaweed.png') }}" alt="Kombu seaweed" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Kombu Seaweed</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/yuzu.png') }}" alt="Yuzu juice" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Yuzu Juice</span></figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/protein-bar.png') }}" alt="Japanese protein bars" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Protein Bars</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/kewpie.png') }}" alt="Kewpie mayo" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Kewpie Mayo</span>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/curry.jpg') }}" alt="Japanese curry" loading="lazy">
           <figcaption><span class="ofz-shop-where">Supermarket</span><span class="ofz-shop-name">Japanese Curry</span></figcaption>
         </figure>
 
         <!-- Alcohol -->
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="alcohol">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/Shochu.jpg') }}" alt="Shochu" loading="lazy">
           <figcaption><span class="ofz-shop-where">Alcohol</span><span class="ofz-shop-name">Shochu</span>
             <p class="ofz-shop-note">Smooth Japanese spirit — think vodka's elegant cousin.</p>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="alcohol">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/choya.jpg') }}" alt="Choya umeshu" loading="lazy">
           <figcaption><span class="ofz-shop-where">Alcohol</span><span class="ofz-shop-name">Umeshu · Choya Plum Liqueur</span>
           </figcaption>
         </figure>
 
         <!-- Don Quijote -->
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/ichiran.jpg') }}" alt="Ichiran ramen kit" loading="lazy">
           <figcaption><span class="ofz-shop-where">Don Quijote</span><span class="ofz-shop-name">Ichiran Ramen Kit</span>
             <p class="ofz-shop-note">Large packs, red or green.</p>
           </figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="food">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/dried-strawberry-chocolate.png') }}" alt="Dried strawberry in chocolate" loading="lazy">
           <figcaption><span class="ofz-shop-where">Don Quijote</span><span class="ofz-shop-name">Strawberries in Chocolate</span></figcaption>
         </figure>
-        <figure class="ofz-shop">
+        <figure class="ofz-shop" data-cat="gifts">
           <img class="ofz-shop-img" src="{{ url_for('static', filename='img/blog/japan/shopping/popin.jpg') }}" alt="PopinCookin kit" loading="lazy">
           <figcaption><span class="ofz-shop-where">Don Quijote</span><span class="ofz-shop-name">PopinCookin Kit</span>
             <p class="ofz-shop-note">DIY candy-making — perfect gift for kids.</p>
@@ -1392,11 +1477,11 @@
 
     .ofz-title {
       font-family: "Frank Ruhl Libre", serif;
-      font-weight: 900;
-      font-size: clamp(44px, 10vw, 96px);
-      line-height: .9;
+      font-weight: 800;
+      font-size: clamp(36px, 8vw, 76px);
+      line-height: 1.05;
       margin: 10px 0 16px;
-      letter-spacing: -.01em;
+      letter-spacing: normal;
     }
 
     .ofz-intro {
@@ -1516,29 +1601,79 @@
     /* BONUS PICKS ROW */
     .ofz-extras {
       margin-top: 14px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      align-items: start;
     }
 
-    .ofz-extras .ofz-day-extra {
+    .ofz-extras .ofz-day-extra,
+    .ofz-foodrecs .ofz-day-extra {
       background: #FBF6EC;
       border: 1px dashed var(--line);
       border-radius: 14px;
       padding: 16px 16px 8px;
     }
 
+    /* FOOD RECOMMENDATIONS (not tied to a specific day) */
+    .ofz-foodrecs {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .ofz-foodrecs-title {
+      font-family: "Frank Ruhl Libre", serif;
+      font-weight: 700;
+      font-size: 18px;
+      margin: 0 0 12px;
+      color: var(--ink);
+    }
+
     /* DAY PLANS */
     .ofz-city {
       margin: 30px 0 6px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
     }
 
     .ofz-city-head {
+      display: block;
+      cursor: pointer;
       border-inline-start: 4px solid var(--verm);
       padding-inline-start: 14px;
       margin-bottom: 18px;
     }
 
+    .ofz-city-head::-webkit-details-marker {
+      display: none;
+    }
+
+    .ofz-city-head::marker {
+      content: "";
+    }
+
+    .ofz-city-head-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .ofz-city-chevron {
+      font-size: 14px;
+      color: var(--verm);
+      margin-inline-start: auto;
+      transition: transform .2s;
+      flex: 0 0 auto;
+    }
+
+    .ofz-city[open] .ofz-city-chevron {
+      transform: rotate(180deg);
+    }
+
     .ofz-cname {
       font-family: "Frank Ruhl Libre", serif;
-      font-weight: 900;
+      font-weight: 700;
       font-size: 30px;
       margin: 0 0 6px;
     }
@@ -1865,6 +2000,36 @@
     }
 
     /* SHOPPING */
+    .ofz-shopfilters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 18px;
+    }
+
+    .ofz-shopfilter {
+      font-family: 'Outfit', 'Assistant', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .ofz-shopfilter:hover {
+      border-color: var(--verm);
+    }
+
+    .ofz-shopfilter.active {
+      background: var(--verm);
+      border-color: var(--verm);
+      color: #fff;
+    }
+
     .ofz-shopgrid {
       display: grid;
       gap: 14px;
@@ -2118,6 +2283,30 @@
         });
         tip.addEventListener('mouseleave', hide);
       })();
+
+      // ---- OPEN CITY FROM SUBNAV / HASH LINK ----
+      function openCityFromHash() {
+        var id = location.hash.slice(1);
+        if (!id) return;
+        var el = document.getElementById(id);
+        if (el && el.tagName === 'DETAILS') el.open = true;
+      }
+      window.addEventListener('hashchange', openCityFromHash);
+      openCityFromHash();
+
+      // ---- SHOPPING FILTER ----
+      var shopFilters = document.querySelectorAll('.ofz-shopfilter');
+      var shopItems = document.querySelectorAll('.ofz-shop');
+      shopFilters.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          shopFilters.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var cat = btn.dataset.filter;
+          shopItems.forEach(function (fig) {
+            fig.style.display = (cat === 'all' || fig.dataset.cat === cat) ? '' : 'none';
+          });
+        });
+      });
     })();
   </script>
 
