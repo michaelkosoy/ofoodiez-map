@@ -211,28 +211,78 @@
             "Video production and editing",
             "One premium video published through my community channels"
           ],
-          "goal": "Create awareness and introduce your company to the right audience."
+          "goal": "Create awareness and introduce your company to the right audience.",
+          "price": "₪7,000 base",
+          "priceNote": "+ $2K success fee for every referred employee who signs"
         },
         {
           "name": "BOOST",
-          "subtitle": "Ongoing Employer Branding Partnership",
-          "description": "For companies that want to build visibility and attract talent consistently.",
+          "subtitle": "Build awareness. Stay relevant.",
+          "description": "Move from a one-time introduction to ongoing brand familiarity.",
+          "banner": "Everything in the Launch package, plus:",
           "includes": [
-            "Employer branding strategy",
+            "Additional filming day at the company offices",
+            "Company event coverage through my channels — hackathon, meetup, happy hour or another meaningful company moment",
+            "Event coverage shared through Instagram Stories for extra awareness and authentic exposure",
+            "Additional video for the company's owned channels — LinkedIn, Instagram, career page"
+          ],
+          "goal": "Move from a one-time introduction to ongoing brand familiarity.",
+          "price": "₪11,900"
+        },
+        {
+          "name": "PRESENCE",
+          "subtitle": "Full Employer Branding Content Engine",
+          "description": "For companies that want a strategic content partner to build a recognizable employer brand and attract the right talent before hiring starts.",
+          "banner": "Long-term employer branding partnership",
+          "includes": [
+            "## Brand Foundation",
+            "Profile redesign",
+            "30-day content roadmap",
             "Content calendar",
             "KPI planning",
-            "Filming days",
+            "## Content Creation",
+            "2 filming days/month",
             "Employee stories",
             "Founder content",
             "Behind-the-scenes content",
-            "LinkedIn content",
+            "Culture content",
+            "Hiring-focused content",
+            "\"Life at [Company]\" content",
+            "## Distribution & Growth",
             "Instagram content",
-            "Analytics and optimization"
+            "LinkedIn content",
+            "Career page content",
+            "## Founder Branding",
+            "Founder positioning",
+            "Thought leadership content"
           ],
-          "goal": "Build a recognizable employer brand that attracts the right people before hiring starts.",
-          "minimumCommitment": "3 months"
+          "goal": "For companies that want a strategic content partner to build a recognizable employer brand and attract the right talent before hiring starts.",
+          "minimumCommitment": "3 months",
+          "price": "Starting from ₪9,900",
+          "addonTitle": "Community Activation",
+          "addonText": "Optional paid add-on — company moments that increase visibility and engagement: hackathons, meetups, community events, office experiences."
         }
-      ]
+      ],
+      "presencePanel": {
+        "title": "Not just more posts — a long-term employer brand engine",
+        "sections": [
+          {
+            "icon": "badge",
+            "title": "Who you are",
+            "text": "Candidates get to know your company, your people and your story long before they apply."
+          },
+          {
+            "icon": "trending_up",
+            "title": "Why they should join",
+            "text": "Founder and employee content that shows the mission, the growth and the team behind it."
+          },
+          {
+            "icon": "favorite",
+            "title": "What it feels like",
+            "text": "Culture and behind-the-scenes content that lets people feel what working at your company is really like."
+          }
+        ]
+      }
     },
     "contentTypes": {
       "title": "Content formats I create",

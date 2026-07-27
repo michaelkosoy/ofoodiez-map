@@ -1,9 +1,16 @@
 {% extends 'portfolio_base.html' %}
 {% set active_page = 'pricing' %}
-{# Per-access-code display options; missing (e.g. direct render) → defaults #}
-{% set pricing = pricing | default({'show_launch': True, 'show_boost': True,
+{# Per-access-code display options; missing (e.g. direct render) → defaults.
+   A NULL price override falls back to the package's standard price in
+   portfolio_content.json; pre-revamp codes had their quoted prices frozen
+   onto the access-code row itself, so old offers never change. #}
+{% set pricing = pricing | default({'show_launch': True, 'show_boost': True, 'show_presence': True,
                                     'launch_price': None, 'launch_note': None,
-                                    'boost_price': None}) %}
+                                    'boost_price': None, 'presence_price': None}) %}
+{% set launch = c.packages['items'][0] %}
+{% set boost = c.packages['items'][1] %}
+{% set presence = c.packages['items'][2] %}
+{% set ppanel = c.packages.presencePanel %}
 {% block content %}
 <!-- Main Content Canvas -->
 <main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
@@ -17,7 +24,7 @@
 <span class="material-symbols-outlined text-base">bolt</span> Limited monthly availability. Book a discovery call to check open slots
 </p>
 <div class="w-screen relative left-1/2 -translate-x-1/2 px-gutter md:px-margin-desktop">
-<div id="packages-row" class="flex flex-col md:flex-row gap-6 md:items-stretch md:justify-center max-w-[1400px] mx-auto">
+<div id="packages-row" class="flex flex-col md:flex-row gap-6 md:items-start md:justify-center max-w-[1400px] mx-auto">
 {% if pricing.show_launch %}
 <!-- Launch side panel (slides open on the left) -->
 <div id="side-panel-launch" data-side-panel="launch" class="side-panel order-2 md:order-1">
@@ -40,15 +47,15 @@
 </div>
 </div>
 </div>
-<div data-package-card="launch" class="package-card w-full md:w-96 md:flex-shrink-0 order-1 md:order-2 bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col rounded-3xl shadow-[8px_8px_0px_0px_#121212] cursor-pointer">
+<div data-package-card="launch" class="package-card w-full md:flex-1 md:max-w-96 order-1 md:order-2 bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col rounded-3xl shadow-[8px_8px_0px_0px_#121212] cursor-pointer">
 <div class="mb-3">
-<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Launch</h3>
-<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ c.packages['items'][0].goal }}</p>
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ launch.name | title }}</h3>
+<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ launch.goal }}</p>
 </div>
 <div class="border-t-2 border-custom-brown pt-3 flex-grow flex flex-col">
 <h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
 <ul class="space-y-1.5 font-body-md text-custom-brown font-medium text-sm flex-grow">
-{% for item in c.packages['items'][0].includes %}
+{% for item in launch.includes %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endfor %}
 </ul>
@@ -58,80 +65,110 @@
 </div>
 <div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
-{% if pricing.launch_price %}
-<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.launch_price }}</p>
-{% if pricing.launch_note %}<p class="text-xs text-custom-brown mt-1">{{ pricing.launch_note }}</p>{% endif %}
-{% else %}
-<p class="font-body-md text-custom-brown font-bold text-lg">₪7,000 <span class="font-medium text-sm">base</span></p>
-<p class="text-xs text-custom-brown mt-1">+ $2K success fee for every referred employee who signs</p>
-{% endif %}
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.launch_price or launch.price | default('₪7,000 base') }}</p>
+{% set launch_note = pricing.launch_note if pricing.launch_price else launch.priceNote %}
+{% if launch_note %}<p class="text-xs text-custom-brown mt-1">{{ launch_note }}</p>{% endif %}
 </div>
 </div>
 </div>
 {% endif %}
 {% if pricing.show_boost %}
-<div data-package-card="boost" class="package-card w-full md:w-96 md:flex-shrink-0 order-3 bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
-<div class="mb-3 relative z-10">
-<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">Boost</h3>
-<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ c.packages['items'][1].goal }}</p>
+<!-- Boost (mid-tier, one-time): no side panel — the card tells the whole story -->
+<div data-package-card="boost" class="package-card w-full md:flex-1 md:max-w-96 order-3 bg-green-200 neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative">
+<div class="mb-3">
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ boost.name | title }}</h3>
+<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ boost.subtitle }}</p>
+<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.goal }}</p>
+{% if boost.banner %}
 <div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
 <span class="material-symbols-outlined text-xl">local_fire_department</span>
-<p class="font-black text-sm leading-tight">Includes the full Launch package, <span class="text-custom-butter">free</span></p>
+<p class="font-black text-sm leading-tight">{{ boost.banner }}</p>
 </div>
-{% if c.packages['items'][1].minimumCommitment %}
-<p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ c.packages['items'][1].minimumCommitment }}</p>
+{% endif %}
+</div>
+<div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col">
+<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
+<ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
+{% for item in boost.includes %}
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
+{% endfor %}
+</ul>
+</div>
+<div class="pt-3 border-t-2 border-custom-brown/20 mt-3">
+<div class="text-center">
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or boost.price | default('₪11,900') }}</p>
+</div>
+</div>
+</div>
+{% endif %}
+{% if pricing.show_presence %}
+<div data-package-card="presence" class="package-card w-full md:flex-1 md:max-w-96 order-4 bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
+<div class="mb-3 relative z-10">
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ presence.name | title }}</h3>
+<p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ presence.subtitle }}</p>
+<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ presence.goal }}</p>
+{% if presence.banner %}
+<div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
+<span class="material-symbols-outlined text-xl">handshake</span>
+<p class="font-black text-sm leading-tight">{{ presence.banner }}</p>
+</div>
+{% endif %}
+{% if presence.minimumCommitment %}
+<p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ presence.minimumCommitment }}</p>
 {% endif %}
 </div>
 <div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col relative z-10">
-<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> 2 to 3 filming days/month</li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Employer branding strategy</li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Content calendar &amp; KPI planning</li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Instagram content</li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> Analytics &amp; optimization</li>
+{# Includes lines starting with "## " render as group headers #}
+{% for item in presence.includes %}
+{% if item.startswith('## ') %}
+<li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
+{% else %}
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
+{% endif %}
+{% endfor %}
 </ul>
-<!-- LinkedIn add-on banner -->
-<div class="mt-1.5 flex items-center gap-2 py-1">
-  <span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">workspace_premium</span>
-  <span class="font-body-md text-custom-brown text-sm">LinkedIn content</span>
-  <span class="bg-custom-burgundy text-white font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
+{% if presence.addonTitle %}
+<div class="mt-3 flex items-start gap-2 border-t-2 border-custom-brown/20 pt-3">
+<span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">celebration</span>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-custom-brown text-sm font-bold">{{ presence.addonTitle }}</span>
+<span class="bg-custom-burgundy text-white font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
 </div>
+<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ presence.addonText }}</p>
+</div>
+</div>
+{% endif %}
+{% if ppanel and ppanel.sections %}
 <div class="pt-3 pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy border-t-2 border-custom-brown/20 mt-3">
 <span>What you get</span> <span class="material-symbols-outlined text-sm">arrow_forward</span>
 </div>
+{% endif %}
 </div>
 <div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
-<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or 'From ₪10,000' }}<span class="font-medium text-sm">/month</span></p>
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.presence_price or presence.price | default('Starting from ₪9,900') }}<span class="font-medium text-sm">/month</span></p>
 </div>
 </div>
 </div>
-<!-- Boost side panel (slides open on the right) -->
-<div id="side-panel-boost" data-side-panel="boost" class="side-panel order-4">
+{% if ppanel and ppanel.sections %}
+<!-- Presence side panel (slides open on the right) -->
+<div id="side-panel-presence" data-side-panel="presence" class="side-panel order-5">
 <div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
-<span class="bg-[#f6c9c9] text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">Boost</span>
-<h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">An ongoing employer brand engine</h5>
+<span class="bg-[#f6c9c9] text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">{{ presence.name | title }}</span>
+<h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">{{ ppanel.title }}</h5>
 <div class="space-y-4">
+{% for s in ppanel.sections %}
 <div>
-<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">photo_camera</span> Instagram</h6>
-<p class="text-xs text-custom-brown leading-relaxed">We build a "Life at [Company]" page, a continuous employer brand presence that attracts the right talent.</p>
+<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">{{ s.icon }}</span> {{ s.title }}</h6>
+<p class="text-xs text-custom-brown leading-relaxed">{{ s.text }}</p>
 </div>
-<!-- LinkedIn as a styled add-on -->
-<div>
-<div class="flex items-center gap-2 mb-1">
-<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold flex items-center gap-2"><span class="material-symbols-outlined text-base">workspace_premium</span> LinkedIn</h6>
-<span class="bg-custom-burgundy text-white font-label-mono text-[9px] uppercase font-bold px-2.5 py-1 rounded-full">add-on</span>
-</div>
-<p class="text-xs text-custom-brown leading-relaxed">We turn your founders into recognized thought leaders in your industry, content that builds trust and visibility.</p>
-</div>
-<div>
-<h6 class="font-label-mono uppercase text-xs text-custom-burgundy font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-base">groups</span> Community boost</h6>
-<p class="text-xs text-custom-brown leading-relaxed">Working with me puts your company on my followers' radar. Your events and milestones get noticed and shared.</p>
+{% endfor %}
 </div>
 </div>
 </div>
-</div>
+{% endif %}
 {% endif %}
 </div>
 </div>

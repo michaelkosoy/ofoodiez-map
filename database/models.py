@@ -32,6 +32,15 @@ def _run_migrations():
         "ALTER TABLE portfolio_access ADD COLUMN launch_price VARCHAR(64)",
         "ALTER TABLE portfolio_access ADD COLUMN launch_price_note VARCHAR(256)",
         "ALTER TABLE portfolio_access ADD COLUMN boost_price VARCHAR(64)",
+        # 2026-07 pricing revamp: the old "Boost" package became "Presence" and a
+        # new mid-tier "Boost" reuses the boost_* column names. Rename, then add
+        # the new columns. Codes created before PORTFOLIO_REVAMP_CUTOFF are
+        # served the frozen legacy pricing page (portfolio_pricing_legacy.html),
+        # so already-sent offers change in nothing — no data rewrite needed.
+        "ALTER TABLE portfolio_access RENAME COLUMN show_boost TO show_presence",
+        "ALTER TABLE portfolio_access RENAME COLUMN boost_price TO presence_price",
+        "ALTER TABLE portfolio_access ADD COLUMN show_boost BOOLEAN DEFAULT TRUE",
+        "ALTER TABLE portfolio_access ADD COLUMN boost_price VARCHAR(64)",
     ]
     for stmt in migrations:
         try:
@@ -238,6 +247,12 @@ class Purchase(db.Model):
     __table_args__ = (db.UniqueConstraint('user_id', 'item', name='uq_purchase_user_item'),)
 
 
+# Access codes created before this moment were sent an offer on the OLD
+# pricing (Launch + old Boost) — they get the frozen legacy pricing page and
+# must never see the revamped packages or prices (naive UTC, like created_at).
+PORTFOLIO_REVAMP_CUTOFF = datetime(2026, 7, 27, 11, 0)
+
+
 class PortfolioAccess(db.Model):
     """A per-company access code for the private /portfolio page.
 
@@ -255,14 +270,24 @@ class PortfolioAccess(db.Model):
     expires_at = db.Column(db.DateTime, nullable=False)
     # Per-company pricing page: which packages this client sees and optional
     # price-text overrides (NULL → the page's standard price/copy).
+    # 2026-07 revamp: the old "Boost" package is now "Presence" — its data was
+    # migrated to show_presence/presence_price (see _run_migrations), and the
+    # boost_* columns belong to the NEW mid-tier Boost package.
     show_launch = db.Column(db.Boolean, default=True)
     show_boost = db.Column(db.Boolean, default=True)
+    show_presence = db.Column(db.Boolean, default=True)
     launch_price = db.Column(db.String(64))
     launch_price_note = db.Column(db.String(256))
     boost_price = db.Column(db.String(64))
+    presence_price = db.Column(db.String(64))
 
     def is_active(self):
         return bool(self.expires_at and self.expires_at > datetime.utcnow())
+
+    def is_legacy_pricing(self):
+        """True for codes whose offer predates the 2026-07 pricing revamp —
+        they see the frozen old pricing page, never the new packages."""
+        return bool(self.created_at and self.created_at < PORTFOLIO_REVAMP_CUTOFF)
 
     def __repr__(self):
         return f'<PortfolioAccess {self.company} ({self.code})>'

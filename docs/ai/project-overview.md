@@ -43,7 +43,13 @@ process), `/portfolio/work` (content series), `/portfolio/pricing` (packages).
 Locked visitors hitting a subpage are redirected to `/portfolio` to enter their code.
 `/portfolio` is gated: clients unlock it with a per-company access code (created in
 admin → Portfolio Access, `portfolio_access` table, valid 7 days, renewable) or with
-`ADMIN_SECRET`. `/portfolio/lock` re-locks the current browser (gate preview). Grants are
+`ADMIN_SECRET`. Each code can hide packages and override their price text; an empty
+override shows the page default from `portfolio_content.json`. Already-sent offers
+must never change in ANY way: codes created before `PORTFOLIO_REVAMP_CUTOFF`
+(database/models.py) are served `portfolio_pricing_legacy.html` — a frozen,
+hardcoded snapshot of the pre-2026-07 pricing page (old packages, old prices, old
+design). Repeat that pattern for any future pricing revamp: snapshot the template,
+bump the cutoff, route old codes to it. `/portfolio/lock` re-locks the current browser (gate preview). Grants are
 re-checked in the DB per visit, so deleting a code revokes access. The locked screen is
 `app/templates/portfolio_gate.html` (terminal-boot design); its copy lives in
 `portfolio_content.json` under `portfolio.gate` (editable at /admin/portfolio/content).

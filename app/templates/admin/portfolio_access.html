@@ -102,6 +102,9 @@
         <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
           <input type="checkbox" name="show_boost" checked> Show Boost
         </label>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
+          <input type="checkbox" name="show_presence" checked> Show Presence
+        </label>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
         <div class="form-group">
@@ -114,8 +117,12 @@
                  placeholder="with custom price · empty = no fee line">
         </div>
         <div class="form-group">
-          <label>Boost price (per month)</label>
-          <input type="text" name="boost_price" class="form-control" placeholder="default: From ₪10,000">
+          <label>Boost price (one-time)</label>
+          <input type="text" name="boost_price" class="form-control" placeholder="default: ₪11,900">
+        </div>
+        <div class="form-group">
+          <label>Presence price (per month)</label>
+          <input type="text" name="presence_price" class="form-control" placeholder="default: Starting from ₪9,900">
         </div>
       </div>
     </details>
@@ -130,16 +137,28 @@
     {% for row in codes %}
     {% set sl = row.show_launch is none or row.show_launch %}
     {% set sb = row.show_boost is none or row.show_boost %}
+    {% set sp = row.show_presence is none or row.show_presence %}
     <tr>
       <td><strong>{{ row.company }}</strong></td>
       <td><span class="code-chip">{{ row.code }}</span></td>
       <td>
-        {{ 'Launch + Boost' if sl and sb else ('Launch only' if sl else 'Boost only') }}
-        {% if (sl and row.launch_price) or (sb and row.boost_price) %}
+        {% if row.is_legacy_pricing() %}
+        {# Pre-revamp offer: this code is served the frozen OLD pricing page #}
+        <span class="badge" style="background:#fff3cd;color:#856404;">OLD PAGE</span>
+        <div style="font-size:12px;color:#888;">
+          pre-revamp: Launch + old Boost
+          {% if row.launch_price %} · L: {{ row.launch_price }}{% endif %}
+          {% if row.presence_price %} · B: {{ row.presence_price }}/mo{% endif %}
+        </div>
+        {% else %}
+        {{ ((['Launch'] if sl else []) + (['Boost'] if sb else []) + (['Presence'] if sp else [])) | join(' + ') }}
+        {% if (sl and row.launch_price) or (sb and row.boost_price) or (sp and row.presence_price) %}
         <div style="font-size:12px;color:#888;">
           {% if sl and row.launch_price %}L: {{ row.launch_price }}{% endif %}
-          {% if sb and row.boost_price %}B: {{ row.boost_price }}/mo{% endif %}
+          {% if sb and row.boost_price %}B: {{ row.boost_price }}{% endif %}
+          {% if sp and row.presence_price %}P: {{ row.presence_price }}/mo{% endif %}
         </div>
+        {% endif %}
         {% endif %}
       </td>
       <td>{{ row.created_at.strftime('%d/%m/%Y') if row.created_at }}</td>

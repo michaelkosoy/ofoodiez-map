@@ -416,7 +416,27 @@ function renderEditor() {
             <label>Minimum Commitment</label>
             <input type="text" id="package-commitment-${i}" value="${escapeHtml(pkg.minimumCommitment || '')}">
           </div>
-          <div><strong>Includes:</strong></div>
+          <div class="editor-field">
+            <label>Banner (highlight strip on the card, empty = none)</label>
+            <input type="text" id="package-banner-${i}" value="${escapeHtml(pkg.banner || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Price (default shown when the access code has no custom price)</label>
+            <input type="text" id="package-price-${i}" value="${escapeHtml(pkg.price || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Price note</label>
+            <input type="text" id="package-pricenote-${i}" value="${escapeHtml(pkg.priceNote || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Add-on title (empty = none)</label>
+            <input type="text" id="package-addon-title-${i}" value="${escapeHtml(pkg.addonTitle || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Add-on text</label>
+            <textarea id="package-addon-text-${i}">${escapeHtml(pkg.addonText || '')}</textarea>
+          </div>
+          <div><strong>Includes:</strong> <span style="color:#888;font-size:12px;">lines starting with "## " become group headers</span></div>
           <div id="package-items-${i}"></div>
           <button class="btn btn-small" onclick="addPackageItem(${i})">+ Add Item</button>
           <div class="editor-field">
@@ -441,6 +461,35 @@ function renderEditor() {
     });
   }
   html += `<button class="btn btn-small" onclick="addPackage()">+ Add Package</button>`;
+
+  // Presence side panel (the "what you get" panel next to the Presence card)
+  const ppanel = c.packages?.presencePanel || {};
+  html += `
+    <div class="section-title" style="margin-top: 16px;">Presence Side Panel (pricing page)</div>
+    <div class="editor-field">
+      <label>Title</label>
+      <input type="text" id="ppanel-title" value="${escapeHtml(ppanel.title || '')}">
+    </div>
+  `;
+  [0, 1, 2].forEach(i => {
+    const s = (ppanel.sections || [])[i] || {};
+    html += `
+      <div class="sub-card">
+        <div class="editor-field">
+          <label>Section ${i + 1} icon (Material Symbols name)</label>
+          <input type="text" id="ppanel-icon-${i}" value="${escapeHtml(s.icon || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Section ${i + 1} title</label>
+          <input type="text" id="ppanel-sec-title-${i}" value="${escapeHtml(s.title || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Section ${i + 1} text</label>
+          <textarea id="ppanel-sec-text-${i}">${escapeHtml(s.text || '')}</textarea>
+        </div>
+      </div>
+    `;
+  });
 
   // Social Feed
   html += `
@@ -794,6 +843,11 @@ function collectData() {
       subtitle: document.getElementById(`package-subtitle-${i}`).value,
       description: document.getElementById(`package-desc-${i}`).value,
       minimumCommitment: document.getElementById(`package-commitment-${i}`).value || undefined,
+      banner: document.getElementById(`package-banner-${i}`).value || undefined,
+      price: document.getElementById(`package-price-${i}`).value || undefined,
+      priceNote: document.getElementById(`package-pricenote-${i}`).value || undefined,
+      addonTitle: document.getElementById(`package-addon-title-${i}`).value || undefined,
+      addonText: document.getElementById(`package-addon-text-${i}`).value || undefined,
       includes: [],
       goal: document.getElementById(`package-goal-${i}`).value,
     };
@@ -805,6 +859,14 @@ function collectData() {
     c.packages.items.push(pkg);
     i++;
   }
+  c.packages.presencePanel = {
+    title: document.getElementById('ppanel-title').value,
+    sections: [0, 1, 2].map(j => ({
+      icon: document.getElementById(`ppanel-icon-${j}`).value,
+      title: document.getElementById(`ppanel-sec-title-${j}`).value,
+      text: document.getElementById(`ppanel-sec-text-${j}`).value,
+    })),
+  };
 
   // Social Feed
   c.sociofeed = {

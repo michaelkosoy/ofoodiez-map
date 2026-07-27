@@ -377,18 +377,35 @@ def portfolio_pricing():
 
     Which packages show and their price text can be customized per access code
     (admin → Portfolio Access). The admin grant and untouched codes see the
-    defaults. launch_note: None → default success-fee line, '' → no line."""
+    defaults from portfolio_content.json. Codes created before the 2026-07
+    revamp get the frozen legacy page instead — zero changes for companies
+    that already received an offer (their old Boost data lives in the renamed
+    show_presence/presence_price columns). launch_note: None → default
+    success-fee line, '' → no line."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
     content = _load_portfolio_content()
     row = _portfolio_grant()
+    if row and row.is_legacy_pricing():
+        pricing = {
+            'show_launch': row.show_launch is not False,
+            'show_boost': row.show_presence is not False,
+            'launch_price': row.launch_price or None,
+            'launch_note': ((row.launch_price_note or '')
+                            if row.launch_price else None),
+            'boost_price': row.presence_price or None,
+        }
+        return render_template('portfolio_pricing_legacy.html',
+                               c=content.get('portfolio', {}), pricing=pricing)
     pricing = {
         'show_launch': row.show_launch is not False if row else True,
         'show_boost': row.show_boost is not False if row else True,
+        'show_presence': row.show_presence is not False if row else True,
         'launch_price': (row.launch_price or None) if row else None,
         'launch_note': ((row.launch_price_note or '')
                         if row and row.launch_price else None),
         'boost_price': (row.boost_price or None) if row else None,
+        'presence_price': (row.presence_price or None) if row else None,
     }
     return render_template('portfolio_pricing.html', c=content.get('portfolio', {}),
                            pricing=pricing)
