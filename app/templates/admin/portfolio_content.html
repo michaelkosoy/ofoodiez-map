@@ -421,6 +421,14 @@ function renderEditor() {
             <input type="text" id="package-banner-${i}" value="${escapeHtml(pkg.banner || '')}">
           </div>
           <div class="editor-field">
+            <label>Inherits (tier ladder line, e.g. "Everything in Launch, plus:", empty = none)</label>
+            <input type="text" id="package-inherits-${i}" value="${escapeHtml(pkg.inherits || '')}">
+          </div>
+          <div class="editor-field">
+            <label>Inherits detail (one line naming what's carried over, empty = none)</label>
+            <input type="text" id="package-inherits-detail-${i}" value="${escapeHtml(pkg.inheritsDetail || '')}">
+          </div>
+          <div class="editor-field">
             <label>Price (default shown when the access code has no custom price)</label>
             <input type="text" id="package-price-${i}" value="${escapeHtml(pkg.price || '')}">
           </div>
@@ -844,6 +852,8 @@ function collectData() {
       description: document.getElementById(`package-desc-${i}`).value,
       minimumCommitment: document.getElementById(`package-commitment-${i}`).value || undefined,
       banner: document.getElementById(`package-banner-${i}`).value || undefined,
+      inherits: document.getElementById(`package-inherits-${i}`).value || undefined,
+      inheritsDetail: document.getElementById(`package-inherits-detail-${i}`).value || undefined,
       price: document.getElementById(`package-price-${i}`).value || undefined,
       priceNote: document.getElementById(`package-pricenote-${i}`).value || undefined,
       addonTitle: document.getElementById(`package-addon-title-${i}`).value || undefined,
