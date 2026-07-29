@@ -180,6 +180,30 @@ def debug_messages():
                     mimetype="application/json")
 
 
+@wa_bp.route("/debug/stats", methods=["GET"])
+def debug_stats():
+    """Diagnostics: aggregate bot numbers for the portfolio results page.
+    Keyed like the other debug endpoints. Read-only aggregates — no PII."""
+    from datetime import datetime, timedelta
+    from .backfill import _secret
+    from .models import WaUser, WaConversation
+    if request.args.get("key") != _secret():
+        return Response("forbidden", status=403)
+    now = datetime.utcnow()
+    first = db.session.query(db.func.min(WaUser.created_at)).scalar()
+    since30 = now - timedelta(days=30)
+    active_30d = WaConversation.query.filter(WaConversation.updated_at >= since30).count()
+    return Response(json.dumps({
+        "live_days": (now - first).days if first else 0,
+        "first_user_at": str(first) if first else None,
+        "users_total": WaUser.query.count(),
+        "candidates_registered": WaUser.query.filter(WaUser.first_name.isnot(None)).count(),
+        "conversations_total": WaConversation.query.count(),
+        "chats_active_last_30d": active_30d,
+        "avg_active_chats_per_day_30d": round(active_30d / 30, 1),
+    }, indent=1), mimetype="application/json")
+
+
 @wa_bp.route("/debug/templates", methods=["GET"])
 def debug_templates():
     """Diagnostics: every configured content template + its LIVE WhatsApp approval
