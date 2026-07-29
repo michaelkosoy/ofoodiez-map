@@ -184,13 +184,15 @@ def debug_messages():
 def debug_stats():
     """Diagnostics: aggregate bot numbers for the portfolio results page.
     Keyed like the other debug endpoints. Read-only aggregates — no PII."""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     from .backfill import _secret
     from .models import WaUser, WaConversation
     if request.args.get("key") != _secret():
         return Response("forbidden", status=403)
     now = datetime.utcnow()
     first = db.session.query(db.func.min(WaUser.created_at)).scalar()
+    if first is not None and first.tzinfo is not None:  # timestamptz in prod, naive in sqlite
+        first = first.astimezone(timezone.utc).replace(tzinfo=None)
     since30 = now - timedelta(days=30)
     active_30d = WaConversation.query.filter(WaConversation.updated_at >= since30).count()
     return Response(json.dumps({
