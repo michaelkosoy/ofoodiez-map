@@ -437,12 +437,8 @@ function renderEditor() {
             <input type="text" id="package-pricenote-${i}" value="${escapeHtml(pkg.priceNote || '')}">
           </div>
           <div class="editor-field">
-            <label>Add-on title (empty = none)</label>
-            <input type="text" id="package-addon-title-${i}" value="${escapeHtml(pkg.addonTitle || '')}">
-          </div>
-          <div class="editor-field">
-            <label>Add-on text</label>
-            <textarea id="package-addon-text-${i}">${escapeHtml(pkg.addonText || '')}</textarea>
+            <label>Add-ons (one per line, each shown with an "add-on" badge; empty = none)</label>
+            <textarea id="package-addons-${i}">${escapeHtml((pkg.addons || []).join('\n'))}</textarea>
           </div>
           <div><strong>Includes:</strong> <span style="color:#888;font-size:12px;">lines starting with "## " become group headers</span></div>
           <div id="package-items-${i}"></div>
@@ -856,8 +852,7 @@ function collectData() {
       inheritsDetail: document.getElementById(`package-inherits-detail-${i}`).value || undefined,
       price: document.getElementById(`package-price-${i}`).value || undefined,
       priceNote: document.getElementById(`package-pricenote-${i}`).value || undefined,
-      addonTitle: document.getElementById(`package-addon-title-${i}`).value || undefined,
-      addonText: document.getElementById(`package-addon-text-${i}`).value || undefined,
+      addons: document.getElementById(`package-addons-${i}`).value.split('\n').map(s => s.trim()).filter(Boolean),
       includes: [],
       goal: document.getElementById(`package-goal-${i}`).value,
     };

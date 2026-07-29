@@ -115,12 +115,12 @@ async function deployCampaign(product) {
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Problem</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">{{ c.problem.title | default("Who owns your company's story?") }}</h2>
-<p class="font-body-lg text-custom-brown font-medium mb-16 max-w-none">
+<p class="font-body-lg text-custom-brown font-medium mb-0 md:mb-16 max-w-none">
 {{ c.problem.body | default('It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.') }}
 </p>
 
-<p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold mb-6">{{ c.problem.goodNews | default('The good news: now it has an owner') }}</p>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<p class="hidden md:block font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold mb-6">{{ c.problem.goodNews | default('The good news: now it has an owner') }}</p>
+<div class="hidden md:grid md:grid-cols-3 gap-4">
 {% for card in c.problem.cards | default([]) %}
   <div class="neo-brutal-border rounded-2xl p-6 text-left {{ 'bg-custom-burgundy' if loop.index == 2 else 'bg-white' }} shadow-[4px_4px_0px_0px_#121212]">
     <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
@@ -134,6 +134,7 @@ async function deployCampaign(product) {
 
 </div>
 </section>
+<div class="md:hidden mx-6 border-t-2 border-custom-brown/20"></div>
 <!-- Field Quote -->
 <section class="py-12 bg-white" id="field-quote">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
@@ -152,7 +153,7 @@ async function deployCampaign(product) {
 <!-- Main Content Canvas -->
 <main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
 <!-- Process Timeline Section -->
-<section id="process" class="py-12 scroll-mt-32">
+<section id="process" class="hidden md:block py-12 scroll-mt-32">
 <div class="mx-auto">
 <div class="text-center mb-6">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">The Process</span>

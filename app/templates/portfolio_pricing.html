@@ -17,9 +17,9 @@
 <!-- Pricing Section -->
 <section class="py-12 scroll-mt-32" id="pricing">
 <div class="text-center mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">Pricing</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">The pricing</span>
 </div>
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">the pricing</h2>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">Packages</h2>
 <p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold text-center mb-3 flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-base">bolt</span> Limited monthly availability. Book a discovery call to check open slots
 </p>
@@ -29,7 +29,6 @@
 <!-- Launch side panel (slides open on the left) -->
 <div id="side-panel-launch" data-side-panel="launch" class="side-panel order-2 md:order-1">
 <div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
-<span class="bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">Launch</span>
 <h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">One reel. Real impact.</h5>
 <div class="space-y-4">
 <div>
@@ -47,16 +46,22 @@
 </div>
 </div>
 </div>
-<div data-package-card="launch" class="package-card w-full md:flex-1 md:max-w-96 order-1 md:order-2 bg-yellow-200 neo-brutal-border p-3 neo-brutal-shadow flex flex-col rounded-3xl shadow-[8px_8px_0px_0px_#121212] cursor-pointer">
+<div data-package-card="launch" class="package-card w-full md:flex-1 md:max-w-96 order-1 md:order-2 bg-white border-4 border-[#fef08a] p-3 neo-brutal-shadow flex flex-col rounded-3xl shadow-[8px_8px_0px_0px_#121212] cursor-pointer">
 <div class="mb-3">
-<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ launch.name | title }}</h3>
-<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ launch.goal }}</p>
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-4 font-black"><span class="bg-[#fef08a] px-3 py-1 inline-block -rotate-1 rounded-2xl neo-brutal-border shadow-[4px_4px_0px_0px_#121212]">{{ launch.name | title }}</span></h3>
+<p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ launch.goal }}</p>
 </div>
-<div class="border-t-2 border-custom-brown pt-3 flex-grow flex flex-col">
-<h4 class="font-label-mono uppercase text-custom-brown font-bold mb-2 text-xs tracking-wider">Includes:</h4>
-<ul class="space-y-1.5 font-body-md text-custom-brown font-medium text-sm flex-grow">
+<div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col">
+<ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
+{# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
 {% for item in launch.includes %}
+{% if item.startswith('## ') %}
+<li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
+{% elif item.startswith('**') %}
+<li class="flex items-start gap-2 font-black"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item.strip('*') }}</li>
+{% else %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
+{% endif %}
 {% endfor %}
 </ul>
 <div class="pt-3 pb-3 flex items-center justify-center gap-1 font-label-mono uppercase text-xs font-bold text-custom-burgundy border-t-2 border-custom-brown/20 mt-3">
@@ -74,101 +79,98 @@
 {% endif %}
 {% if pricing.show_boost %}
 <!-- Boost (monthly retainer): no side panel — the card tells the whole story -->
-<div data-package-card="boost" class="package-card w-full md:flex-1 md:max-w-96 order-3 bg-green-200 neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative">
+<div data-package-card="boost" class="package-card w-full md:flex-1 md:max-w-96 order-3 bg-white border-4 border-[#bbf7d0] p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative">
 <div class="mb-3">
-<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ boost.name | title }}</h3>
-<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ boost.subtitle }}</p>
-<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.goal }}</p>
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-4 font-black"><span class="bg-[#bbf7d0] px-3 py-1 inline-block -rotate-1 rounded-2xl neo-brutal-border shadow-[4px_4px_0px_0px_#121212]">{{ boost.name | title }}</span></h3>
+<p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ boost.subtitle }}</p>
+{% if boost.goal %}<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.goal }}</p>{% endif %}
 {% if boost.banner %}
 <div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
-<span class="material-symbols-outlined text-xl">groups</span>
+<span class="material-symbols-outlined text-xl">arrow_upward</span>
 <p class="font-black text-sm leading-tight">{{ boost.banner }}</p>
 </div>
-{% endif %}
-{% if boost.minimumCommitment %}
-<p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ boost.minimumCommitment }}</p>
 {% endif %}
 </div>
 <div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col">
 {% if boost.inherits %}
 <div class="mb-3 px-3 py-2 rounded-xl border-2 border-custom-brown/30 bg-white/50">
-<p class="font-label-mono uppercase text-xs font-bold text-custom-burgundy flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">arrow_upward</span> {{ boost.inherits }}</p>
+<p class="font-label-mono uppercase text-xs font-bold text-red-600 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">arrow_upward</span> {{ boost.inherits }}</p>
 {% if boost.inheritsDetail %}<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.inheritsDetail }}</p>{% endif %}
 </div>
 {% endif %}
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
-{# Includes lines starting with "## " render as group headers #}
+{# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
 {% for item in boost.includes %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
+{% elif item.startswith('**') %}
+<li class="flex items-start gap-2 font-black"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item.strip('*') }}</li>
 {% else %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endif %}
 {% endfor %}
 </ul>
-{% if boost.addonTitle %}
-<div class="mt-3 flex items-start gap-2 border-t-2 border-custom-brown/20 pt-3">
-<span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">celebration</span>
-<div>
+{% if boost.addons %}
+<div class="mt-3 border-t-2 border-custom-brown/20 pt-3 space-y-2">
+{% for addon in boost.addons %}
 <div class="flex items-center gap-2">
-<span class="font-body-md text-custom-brown text-sm font-bold">{{ boost.addonTitle }}</span>
+<span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">celebration</span>
+<span class="font-body-md text-custom-brown text-sm font-bold">{{ addon }}</span>
 <span class="bg-custom-burgundy text-white font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
 </div>
-<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.addonText }}</p>
-</div>
+{% endfor %}
 </div>
 {% endif %}
 </div>
 <div class="pt-3 border-t-2 border-custom-brown/20 mt-3">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or boost.price | default('₪5,000') }}<span class="font-medium text-sm">/month</span></p>
+{% if boost.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">Minimum commitment: {{ boost.minimumCommitment }}</p>{% endif %}
 </div>
 </div>
 </div>
 {% endif %}
 {% if pricing.show_presence %}
-<div data-package-card="presence" class="package-card w-full md:flex-1 md:max-w-96 order-4 bg-[#f6c9c9] neo-brutal-border p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
+<div data-package-card="presence" class="package-card w-full md:flex-1 md:max-w-96 order-4 bg-white border-4 border-[#f6c9c9] p-3 flex flex-col text-custom-brown shadow-[8px_8px_0px_0px_#121212] rounded-3xl relative cursor-pointer">
 <div class="mb-3 relative z-10">
-<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-2 font-black">{{ presence.name | title }}</h3>
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-4 font-black"><span class="bg-[#f6c9c9] px-3 py-1 inline-block -rotate-1 rounded-2xl neo-brutal-border shadow-[4px_4px_0px_0px_#121212]">{{ presence.name | title }}</span></h3>
 <p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ presence.subtitle }}</p>
-<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ presence.goal }}</p>
+{% if presence.goal %}<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ presence.goal }}</p>{% endif %}
 {% if presence.banner %}
 <div class="flex items-center gap-2 mt-3 bg-custom-burgundy text-white px-3 py-2 rounded-xl neo-brutal-border shadow-[3px_3px_0px_0px_#121212]">
-<span class="material-symbols-outlined text-xl">handshake</span>
+<span class="material-symbols-outlined text-xl">arrow_upward</span>
 <p class="font-black text-sm leading-tight">{{ presence.banner }}</p>
 </div>
-{% endif %}
-{% if presence.minimumCommitment %}
-<p class="font-label-mono text-xs text-custom-brown mt-2 uppercase tracking-wider">Minimum commitment: {{ presence.minimumCommitment }}</p>
 {% endif %}
 </div>
 <div class="border-t-2 border-custom-brown/20 pt-3 flex-grow flex flex-col relative z-10">
 {% if presence.inherits %}
 <div class="mb-3 px-3 py-2 rounded-xl border-2 border-custom-brown/30 bg-white/50">
-<p class="font-label-mono uppercase text-xs font-bold text-custom-burgundy flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">arrow_upward</span> {{ presence.inherits }}</p>
+<p class="font-label-mono uppercase text-xs font-bold text-red-600 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">arrow_upward</span> {{ presence.inherits }}</p>
 {% if presence.inheritsDetail %}<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ presence.inheritsDetail }}</p>{% endif %}
 </div>
 {% endif %}
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
-{# Includes lines starting with "## " render as group headers #}
+{# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
 {% for item in presence.includes %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
+{% elif item.startswith('**') %}
+<li class="flex items-start gap-2 font-black"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item.strip('*') }}</li>
 {% else %}
 <li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-burgundy text-lg">check_circle</span> {{ item }}</li>
 {% endif %}
 {% endfor %}
 </ul>
-{% if presence.addonTitle %}
-<div class="mt-3 flex items-start gap-2 border-t-2 border-custom-brown/20 pt-3">
-<span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">celebration</span>
-<div>
+{% if presence.addons %}
+<div class="mt-3 border-t-2 border-custom-brown/20 pt-3 space-y-2">
+{% for addon in presence.addons %}
 <div class="flex items-center gap-2">
-<span class="font-body-md text-custom-brown text-sm font-bold">{{ presence.addonTitle }}</span>
-<span class="bg-custom-burgundy text-white font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
+<span class="material-symbols-outlined text-custom-burgundy text-lg flex-shrink-0">add_circle</span>
+<span class="font-body-md text-custom-brown text-sm font-bold">{{ addon }}</span>
+<span class="ml-auto bg-custom-burgundy text-white font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
 </div>
-<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ presence.addonText }}</p>
-</div>
+{% endfor %}
 </div>
 {% endif %}
 {% if ppanel and ppanel.sections %}
@@ -180,6 +182,7 @@
 <div class="pt-3 border-t-2 border-custom-brown/20">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.presence_price or presence.price | default('Starting from ₪9,900') }}<span class="font-medium text-sm">/month</span></p>
+{% if presence.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">Minimum commitment: {{ presence.minimumCommitment }}</p>{% endif %}
 </div>
 </div>
 </div>
@@ -187,7 +190,6 @@
 <!-- Presence side panel (slides open on the right) -->
 <div id="side-panel-presence" data-side-panel="presence" class="side-panel order-5">
 <div class="side-panel-inner bg-white neo-brutal-border rounded-3xl shadow-[6px_6px_0px_0px_#121212] p-5">
-<span class="bg-[#f6c9c9] text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border inline-block shadow-[2px_2px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-3">{{ presence.name | title }}</span>
 <h5 class="font-headline-md text-lg text-custom-brown font-black mb-4">{{ ppanel.title }}</h5>
 <div class="space-y-4">
 {% for s in ppanel.sections %}

@@ -317,6 +317,30 @@ If nothing new is found, output **exactly** this and nothing else:
 No new food-place signals found for Tel Aviv / center Israel in this run.
 ```
 
+## 13b. Notify (optional — Brevo email)
+
+Deliver the run's output to an inbox via **`scripts/notify.py`** (stdlib only; Brevo HTTP API).
+
+**Setup (once):** add to `~/.env` (git-ignored; the bot already uses Brevo elsewhere):
+```
+BREVO_API_KEY=xkeysib-xxxxx
+FOOD_RADAR_FROM=radar@your-verified-sender.com   # must be a Brevo-verified sender
+FOOD_RADAR_TO=ofir.lazarov@gmail.com             # comma-separate for multiple; this is the default
+```
+
+**Each run (final step):** write the report (or the no-findings sentence) to `runs/<date>.md`, then:
+```
+python3 scripts/notify.py runs/<date>.md "Food Radar TLV — <N> new findings (<date>)"
+```
+- The subject line carries the headline (finding count + date) so an inbox glance is enough.
+- `notify.py` converts Markdown → HTML (proof links stay clickable) and emails it.
+- **Never fails the run:** if creds are missing it prints a notice and exits 0; verify first with
+  `--dry-run`, and `--selftest` checks the Markdown→HTML.
+- Noise control (optional): set `FOOD_RADAR_NOTIFY=on_findings` and **skip the email on empty runs**
+  (still print the no-findings sentence); default is to notify every run.
+- Alternatives if email isn't wanted: a Telegram bot (instant phone push, no sender verification) or
+  the existing WhatsApp bot — same pattern, swap the send call in `notify.py`.
+
 ## 14. Compliance
 
 Public information or authenticated APIs you have permission to use, only. Do not bypass logins,
@@ -350,6 +374,9 @@ Full rules in **`compliance.md`**.
 12. Print the report (§12) — or the exact no-findings sentence (§13).
 13. Write/update `seen-records.json` (set `last_output_at` on items you reported; you may also log
     undated discoveries and out-of-window items as tracked-but-unreported `watch`/`excluded` records).
+14. **Notify (optional, §13b):** write the report to `runs/<date>.md` and run
+    `python3 scripts/notify.py runs/<date>.md "Food Radar TLV — <N> new findings (<date>)"`.
+    No-op if `BREVO_API_KEY` is unset; skip on empty runs if `FOOD_RADAR_NOTIFY=on_findings`.
 
 ## 16. Example output
 
