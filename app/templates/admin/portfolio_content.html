@@ -192,6 +192,14 @@ function renderEditor() {
       <label>Subtitle</label>
       <textarea id="series-subtitle">${escapeHtml(c.series?.subtitle || '')}</textarea>
     </div>
+    <div class="editor-field">
+      <label>Results strip (one per line, format: value | label — shown above the videos)</label>
+      <textarea id="series-strip-stats">${escapeHtml((c.series?.strip?.stats || []).map(s => `${s.value} | ${s.label}`).join('\n'))}</textarea>
+    </div>
+    <div class="editor-field">
+      <label>Results strip — link text (opens Results page)</label>
+      <input type="text" id="series-strip-cta" value="${escapeHtml(c.series?.strip?.cta || '')}">
+    </div>
     <button class="btn btn-small" onclick="addSeriesItem()">+ Add Video</button>
   `;
   (c.series?.items || []).forEach((item, i) => {
@@ -213,12 +221,45 @@ function renderEditor() {
           <label>Description</label>
           <input type="text" id="series-desc-${i}" value="${escapeHtml(item.description || '')}">
         </div>
+        <div class="editor-field">
+          <label>Campaign goal (shown in "View results" sheet; empty = no results button)</label>
+          <input type="text" id="series-goal-${i}" value="${escapeHtml(item.goal || '')}">
+        </div>
+        <div class="editor-field">
+          <label>What I created</label>
+          <input type="text" id="series-created-${i}" value="${escapeHtml(item.created || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Distribution</label>
+          <input type="text" id="series-distribution-${i}" value="${escapeHtml(item.distribution || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Results (one per line, format: value | label)</label>
+          <textarea id="series-results-${i}">${escapeHtml((item.results || []).map(m => `${m.value} | ${m.label}`).join('\n'))}</textarea>
+        </div>
+        <div class="editor-field">
+          <label>Results note (attribution / caveat)</label>
+          <input type="text" id="series-results-note-${i}" value="${escapeHtml(item.resultsNote || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Timeframe & source line</label>
+          <input type="text" id="series-timeframe-${i}" value="${escapeHtml(item.timeframe || '')}">
+        </div>
         <div class="item-controls">
           <button class="btn btn-small" onclick="removeSeriesItem(${i})">Remove</button>
         </div>
       </div>
     `;
   });
+
+  // Results page (deep structure) — raw JSON editor
+  html += `
+    <div class="section-title">Results Page (advanced — full JSON)</div>
+    <div class="editor-field">
+      <label>Hero, audience charts, campaigns, talent network and CTA. Edit values carefully — invalid JSON blocks saving.</label>
+      <textarea id="results-json" style="min-height:320px;font-family:monospace;font-size:12px;">${escapeHtml(JSON.stringify(c.results || {}, null, 2))}</textarea>
+    </div>
+  `;
 
   // Difference
   html += `
@@ -745,21 +786,47 @@ function collectData() {
     i++;
   }
 
+  // "value | label" lines → [{value, label}]
+  const parseValueLabel = (text) => text.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+    const [value, ...rest] = line.split('|');
+    return { value: value.trim(), label: rest.join('|').trim() };
+  });
+
   // Content Series (work page videos)
+  const stripStats = parseValueLabel(document.getElementById('series-strip-stats').value);
   c.series = {
     title: document.getElementById('series-title').value,
     subtitle: document.getElementById('series-subtitle').value,
+    strip: stripStats.length ? {
+      stats: stripStats,
+      cta: document.getElementById('series-strip-cta').value,
+    } : undefined,
     items: [],
   };
   i = 0;
   while (document.getElementById(`series-video-${i}`)) {
+    const results = parseValueLabel(document.getElementById(`series-results-${i}`).value);
     c.series.items.push({
       videoId: document.getElementById(`series-video-${i}`).value.trim(),
       series: document.getElementById(`series-series-${i}`).value,
       title: document.getElementById(`series-item-title-${i}`).value,
       description: document.getElementById(`series-desc-${i}`).value,
+      goal: document.getElementById(`series-goal-${i}`).value || undefined,
+      created: document.getElementById(`series-created-${i}`).value || undefined,
+      distribution: document.getElementById(`series-distribution-${i}`).value || undefined,
+      results: results.length ? results : undefined,
+      resultsNote: document.getElementById(`series-results-note-${i}`).value || undefined,
+      timeframe: document.getElementById(`series-timeframe-${i}`).value || undefined,
     });
     i++;
+  }
+
+  // Results page — raw JSON round-trip (invalid JSON aborts the save)
+  try {
+    c.results = JSON.parse(document.getElementById('results-json').value || '{}');
+  } catch (err) {
+    alert('Results page JSON is invalid — fix it before saving:\n' + err.message);
+    throw err;
   }
 
   // Difference

@@ -10,6 +10,22 @@
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black text-center">{{ c.series.title | default('Content Series') }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mt-4 max-w-none">{{ c.series.subtitle | default('Ongoing series, not one-off clips, built to keep your audience coming back for the next episode.') }}</p>
 </div>
+{% if c.series.strip %}
+<!-- Results summary strip -->
+<div class="mb-12">
+<div class="grid grid-cols-3 gap-3 md:gap-6 max-w-3xl mx-auto">
+{% for s in c.series.strip.stats %}
+<div class="bg-white neo-brutal-border rounded-3xl p-4 md:p-5 text-center shadow-[4px_4px_0px_0px_#121212]">
+<p class="font-headline-md text-xl md:text-3xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
+<p class="font-label-mono text-[9px] md:text-xs uppercase tracking-wider text-custom-brown font-bold mt-2 leading-tight">{{ s.label }}</p>
+</div>
+{% endfor %}
+</div>
+<div class="text-center mt-4">
+<a href="{{ url_for('portfolio_results') }}" class="inline-flex items-center gap-1 font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold underline underline-offset-4">{{ c.series.strip.cta }} <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+</div>
+{% endif %}
 <div class="relative">
 <button id="series-prev" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212] hover:bg-custom-brown hover:text-white transition-colors">
 <span class="material-symbols-outlined">arrow_back</span>
@@ -29,11 +45,23 @@
 <div class="absolute top-4 left-4 bg-custom-butter text-custom-brown px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
 <span class="material-symbols-outlined text-[16px]">movie</span> {{ item.series }}
 </div>
+{% if item.results %}
+<button data-results-idx="{{ loop.index0 }}" class="absolute top-4 right-4 bg-custom-burgundy text-white px-3 py-1 font-label-mono text-xs uppercase neo-brutal-border flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212] rounded-full">
+<span class="material-symbols-outlined text-[16px] pointer-events-none">monitoring</span> View results
+</button>
+{% endif %}
 <div class="absolute inset-0 flex items-center justify-center">
 <div class="w-14 h-14 bg-custom-butter border-2 border-custom-brown flex items-center justify-center shadow-[3px_3px_0px_0px_#121212] text-custom-brown rounded-full group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
 </div>
 </div>
+{% if item.hover %}
+<div class="absolute bottom-24 left-6 right-6 flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+{% if item.hover.views %}<span class="bg-white/95 text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border rounded-full flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212]"><span class="material-symbols-outlined text-[16px]">visibility</span> {{ item.hover.views }}</span>{% endif %}
+{% if item.hover.likes %}<span class="bg-white/95 text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border rounded-full flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212]"><span class="material-symbols-outlined text-[16px]">favorite</span> {{ item.hover.likes }}</span>{% endif %}
+{% if item.hover.sends %}<span class="bg-white/95 text-custom-brown px-3 py-1 font-label-mono text-xs neo-brutal-border rounded-full flex items-center gap-1 shadow-[2px_2px_0px_0px_#121212]"><span class="material-symbols-outlined text-[16px]">send</span> {{ item.hover.sends }}</span>{% endif %}
+</div>
+{% endif %}
 <div class="absolute bottom-6 left-6 right-6 border-l-4 border-custom-burgundy pl-4">
 <h3 class="font-headline-md text-white mb-1 font-bold">{{ item.title }}</h3>
 {% if item.description %}<p class="font-body-md text-custom-butter font-label-mono">{{ item.description }}</p>{% endif %}
@@ -55,6 +83,24 @@
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 </div>
+<!-- Project results bottom sheet -->
+<div id="results-sheet" class="hidden fixed inset-0 z-[70]">
+<div class="absolute inset-0 bg-black/50" data-sheet-close></div>
+<div class="absolute bottom-0 left-0 right-0 md:top-1/2 md:left-1/2 md:right-auto md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] bg-white neo-brutal-border rounded-t-3xl md:rounded-3xl p-6 shadow-[0_-6px_0_0_#121212] md:shadow-[8px_8px_0px_0px_#121212] max-h-[80vh] overflow-y-auto">
+<div class="flex justify-between items-center mb-4">
+<h3 id="rs-title" class="font-headline-md text-xl text-custom-brown font-black"></h3>
+<button data-sheet-close aria-label="Close" class="w-10 h-10 flex items-center justify-center bg-custom-butter neo-brutal-border rounded-full shadow-[2px_2px_0px_0px_#121212]"><span class="material-symbols-outlined pointer-events-none">close</span></button>
+</div>
+<div class="space-y-2 mb-4">
+<p class="font-body-md text-sm text-custom-brown"><span class="font-label-mono text-xs uppercase text-custom-burgundy font-bold">Goal:</span> <span id="rs-goal"></span></p>
+<p class="font-body-md text-sm text-custom-brown"><span class="font-label-mono text-xs uppercase text-custom-burgundy font-bold">What I created:</span> <span id="rs-created"></span></p>
+<p class="font-body-md text-sm text-custom-brown"><span class="font-label-mono text-xs uppercase text-custom-burgundy font-bold">Distribution:</span> <span id="rs-distribution"></span></p>
+</div>
+<div id="rs-metrics" class="grid grid-cols-2 gap-3"></div>
+<p id="rs-note" class="font-body-md text-[11px] text-custom-brown/70 italic mt-4"></p>
+<p id="rs-timeframe" class="font-label-mono text-[10px] uppercase tracking-wider text-custom-brown/60 mt-2"></p>
+</div>
+</div>
 <script>
 (function () {
   const box = document.getElementById('video-lightbox');
@@ -69,6 +115,8 @@
   };
   // Delegated so it also works on the clones the carousel loop creates
   track.addEventListener('click', (e) => {
+    const resultsBtn = e.target.closest('[data-results-idx]');
+    if (resultsBtn) { openResultsSheet(parseInt(resultsBtn.dataset.resultsIdx, 10)); return; }
     const card = e.target.closest('[data-video-id]');
     if (!card) return;
     frame.title = card.getAttribute('data-video-title') || 'Video';
@@ -81,6 +129,29 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !box.classList.contains('hidden')) close();
   });
+
+  /* Per-project results bottom sheet */
+  const seriesItems = {{ c.series['items'] | tojson }};
+  const sheet = document.getElementById('results-sheet');
+  window.openResultsSheet = function (i) {
+    const item = seriesItems[i];
+    if (!item || !item.results) return;
+    document.getElementById('rs-title').textContent = item.title;
+    document.getElementById('rs-goal').textContent = item.goal || '';
+    document.getElementById('rs-created').textContent = item.created || '';
+    document.getElementById('rs-distribution').textContent = item.distribution || '';
+    document.getElementById('rs-metrics').innerHTML = item.results.map(m =>
+      '<div class="bg-custom-brown/5 rounded-2xl p-3 text-center">' +
+      '<p class="font-headline-md text-lg text-custom-burgundy font-black leading-none">' + m.value + '</p>' +
+      '<p class="font-label-mono text-[9px] uppercase tracking-wider text-custom-brown font-bold mt-1 leading-tight">' + m.label + '</p></div>').join('');
+    document.getElementById('rs-note').textContent = item.resultsNote || '';
+    document.getElementById('rs-timeframe').textContent = item.timeframe || '';
+    sheet.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeSheet = () => { sheet.classList.add('hidden'); document.body.style.overflow = ''; };
+  sheet.querySelectorAll('[data-sheet-close]').forEach(el => el.addEventListener('click', closeSheet));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.classList.contains('hidden')) closeSheet(); });
 })();
 </script>
 {% endblock %}

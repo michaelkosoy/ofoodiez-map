@@ -73,13 +73,14 @@ def portfolio_access_create():
     show_launch = bool(request.form.get('show_launch'))
     show_boost = bool(request.form.get('show_boost'))
     show_presence = bool(request.form.get('show_presence'))
+    show_pricing = bool(request.form.get('show_pricing'))
     launch_price = request.form.get('launch_price', '').strip() or None
     launch_price_note = request.form.get('launch_price_note', '').strip() or None
     boost_price = request.form.get('boost_price', '').strip() or None
     presence_price = request.form.get('presence_price', '').strip() or None
     if not company:
         flash('Company name is required', 'error')
-    elif not (show_launch or show_boost or show_presence):
+    elif show_pricing and not (show_launch or show_boost or show_presence):
         flash('Pick at least one package to show', 'error')
     elif PortfolioAccess.query.filter(db.func.lower(PortfolioAccess.code) == code.lower()).first():
         flash(f'Code "{code}" already exists — pick another', 'error')
@@ -88,6 +89,7 @@ def portfolio_access_create():
                                        expires_at=datetime.utcnow() + timedelta(days=7),
                                        show_launch=show_launch, show_boost=show_boost,
                                        show_presence=show_presence,
+                                       show_pricing=show_pricing,
                                        launch_price=launch_price,
                                        launch_price_note=launch_price_note,
                                        boost_price=boost_price,

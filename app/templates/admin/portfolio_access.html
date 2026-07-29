@@ -105,6 +105,9 @@
         <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
           <input type="checkbox" name="show_presence" checked> Show Presence
         </label>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
+          <input type="checkbox" name="show_pricing" checked> Show Pricing page
+        </label>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
         <div class="form-group">
@@ -150,6 +153,8 @@
           {% if row.launch_price %} · L: {{ row.launch_price }}{% endif %}
           {% if row.presence_price %} · B: {{ row.presence_price }}/mo{% endif %}
         </div>
+        {% elif row.show_pricing is sameas false %}
+        <span class="badge" style="background:#f8d7da;color:#721c24;">NO PRICING PAGE</span>
         {% else %}
         {{ ((['Launch'] if sl else []) + (['Boost'] if sb else []) + (['Presence'] if sp else [])) | join(' + ') }}
         {% if (sl and row.launch_price) or (sb and row.boost_price) or (sp and row.presence_price) %}

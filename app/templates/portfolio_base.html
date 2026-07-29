@@ -259,8 +259,9 @@
 {% set nav_links = [
   ('about', url_for('portfolio_page'), 'About'),
   ('work', url_for('portfolio_work'), 'Work'),
-  ('pricing', url_for('portfolio_pricing'), 'Pricing'),
+  ('results', url_for('portfolio_results'), 'Results'),
 ] %}
+{% if not hide_pricing %}{% set nav_links = nav_links + [('pricing', url_for('portfolio_pricing'), 'Pricing')] %}{% endif %}
 <!-- TopNavBar -->
 <nav class="site-nav w-full top-0 sticky md:sticky bg-white border-b-2 border-custom-brown z-50">
 <div class="flex justify-between items-center px-gutter md:px-margin-desktop py-stack-xs max-w-container-max mx-auto">

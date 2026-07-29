@@ -351,7 +351,7 @@ def portfolio_page():
         return render_template('portfolio_gate.html', c=gate_c, state=state)
 
     if _portfolio_unlocked():
-        return render_template('portfolio.html', c=c)
+        return render_template('portfolio.html', c=c, hide_pricing=_portfolio_pricing_hidden())
     return render_template('portfolio_gate.html', c=gate_c, state=None)
 
 
@@ -368,7 +368,18 @@ def portfolio_work():
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
     content = _load_portfolio_content()
-    return render_template('portfolio_work.html', c=content.get('portfolio', {}))
+    return render_template('portfolio_work.html', c=content.get('portfolio', {}),
+                           hide_pricing=_portfolio_pricing_hidden())
+
+
+@app.route('/portfolio/results')
+def portfolio_results():
+    """Portfolio results (stats + case studies). Same gate as /portfolio."""
+    if not _portfolio_unlocked():
+        return redirect(url_for('portfolio_page'))
+    content = _load_portfolio_content()
+    return render_template('portfolio_results.html', c=content.get('portfolio', {}),
+                           hide_pricing=_portfolio_pricing_hidden())
 
 
 @app.route('/portfolio/pricing')
@@ -383,6 +394,8 @@ def portfolio_pricing():
     show_presence/presence_price columns). launch_note: None → default
     success-fee line, '' → no line."""
     if not _portfolio_unlocked():
+        return redirect(url_for('portfolio_page'))
+    if _portfolio_pricing_hidden():
         return redirect(url_for('portfolio_page'))
     content = _load_portfolio_content()
     row = _portfolio_grant()
@@ -419,6 +432,13 @@ def _portfolio_grant():
         return None
     from database.models import db, PortfolioAccess
     return db.session.get(PortfolioAccess, grant)
+
+
+def _portfolio_pricing_hidden():
+    """True when this session's access code has the pricing page switched off
+    (admin grant and untouched codes → visible)."""
+    row = _portfolio_grant()
+    return bool(row and row.show_pricing is False)
 
 
 def _portfolio_unlocked():
