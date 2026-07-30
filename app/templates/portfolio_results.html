@@ -6,30 +6,86 @@
 
 <!-- ============ Hero ============ -->
 <section id="results-hero" class="reveal text-center scroll-mt-32">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Results</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">The Results</span>
 <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black leading-tight">{{ r.heroTitle }}</h1>
 <p class="font-body-lg text-custom-brown font-medium mt-4 max-w-none">{{ r.heroSubtitle }}</p>
-<div class="grid grid-cols-3 gap-2 md:gap-6 mt-8 md:mt-10">
+<div class="grid grid-cols-2 gap-2 md:gap-6 mt-8 md:mt-10 max-w-sm mx-auto">
 {% for s in r.heroStats %}
-<div class="reveal bg-white neo-brutal-border rounded-2xl md:rounded-3xl p-3 md:p-6 text-center shadow-[3px_3px_0px_0px_#121212] md:shadow-[4px_4px_0px_0px_#121212]">
-<p class="count-up font-headline-lg text-2xl md:text-5xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
+<div class="reveal bg-white rounded-2xl md:rounded-3xl p-2.5 md:p-4 text-center shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+<p class="count-up font-headline-lg text-xl md:text-4xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
 <p class="font-label-mono text-[9px] md:text-xs uppercase tracking-wider text-custom-brown font-bold mt-2 md:mt-3 leading-snug">{{ s.label }}</p>
 </div>
 {% endfor %}
 </div>
 </section>
 
-<!-- ============ Section 1: Audience ============ -->
+<!-- ============ Section 1: Campaigns ============ -->
+<section id="campaigns" class="reveal scroll-mt-32">
+<div class="text-center mb-8">
+{% if r.campaigns.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">{{ r.campaigns.badge }}</span>{% endif %}
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.campaigns.heading }}</h2>
+</div>
+<div id="campaign-track" class="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-gutter px-gutter md:mx-0 md:px-0">
+{% for case in r.campaigns.cases %}
+<div class="reveal campaign-card flex-shrink-0 w-[85%] sm:w-[70%] md:w-auto snap-center bg-white rounded-3xl p-5 flex-col transition-all {{ 'hidden' if case.hidden else 'flex' }} {{ 'neo-brutal-border shadow-[6px_6px_0px_0px_#2A2420] cursor-pointer' if case.details else 'shadow-[0_2px_12px_rgba(0,0,0,0.06)]' }}" {% if case.hidden %}data-hidden-case{% endif %}>
+<div class="flex items-center justify-between mb-3">
+{% if case.logo %}
+<img src="{{ url_for('static', filename='img/logos/' + case.logo) }}" alt="{{ case.company }}" class="h-6 w-auto grayscale brightness-0">
+{% else %}
+<h3 class="font-headline-md text-xl text-custom-brown font-black">{{ case.company }}</h3>
+{% endif %}
+{% if case.format %}<span class="bg-custom-brown text-white px-3 py-1 font-label-mono text-[10px] uppercase font-bold rounded-full flex-shrink-0">{{ case.format }}</span>{% endif %}
+</div>
+<p class="font-label-mono text-[10px] uppercase tracking-wider text-custom-burgundy font-bold mb-2">{{ case.campaign }}</p>
+<p class="font-body-md text-custom-brown text-sm font-black leading-snug mb-4">{{ case.headline }}</p>
+<div class="grid grid-cols-3 gap-2 border-t-2 border-custom-brown/20 pt-4 mt-auto">
+{% for m in case.metrics %}
+<div>
+<p class="font-headline-md text-lg md:text-xl text-custom-burgundy font-black leading-none">{{ m.value }}</p>
+<p class="font-label-mono text-[9px] uppercase tracking-wider text-custom-brown font-bold mt-1 leading-tight">{{ m.label }}</p>
+</div>
+{% endfor %}
+</div>
+{% if case.note %}<p class="font-body-md text-[11px] text-custom-brown/70 italic mt-3">{{ case.note }}</p>{% endif %}
+{% if case.details %}
+<button type="button" class="case-toggle mt-3 self-start font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold inline-flex items-center gap-1" aria-expanded="false">
+  <span class="toggle-label">More details</span>
+  <span class="material-symbols-outlined text-base toggle-icon transition-transform pointer-events-none">expand_more</span>
+</button>
+<div class="case-details hidden mt-4 pt-4 border-t border-custom-brown/10">
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {% for m in case.details %}
+    <div class="text-center">
+      <p class="font-headline-md text-lg text-custom-burgundy font-black leading-none">{{ m.value }}</p>
+      <p class="font-label-mono text-[9px] uppercase tracking-wider text-custom-brown font-bold mt-1">{{ m.label }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% if case.detailsNote %}<p class="font-label-mono text-[10px] uppercase tracking-wider text-custom-brown/60 mt-4">{{ case.detailsNote }}</p>{% endif %}
+</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+<div id="campaign-dots" class="flex md:hidden justify-center gap-2 mt-4"></div>
+{% if r.campaigns.cases | selectattr('hidden') | list %}
+<div class="text-center mt-6">
+<button id="more-results" class="bg-white text-custom-brown btn-soft px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest transition-all rounded-full">{{ r.campaigns.moreLabel }}</button>
+</div>
+{% endif %}
+</section>
+
+<!-- ============ Section 2: Audience ============ -->
 <section id="audience" class="reveal scroll-mt-32">
 <div class="text-center mb-8">
-{% if r.audience.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.audience.badge }}</span>{% endif %}
+{% if r.audience.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">{{ r.audience.badge }}</span>{% endif %}
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.audience.heading }}</h2>
 <p class="font-body-md text-custom-brown/80 text-sm mt-3 max-w-none">{{ r.audience.note }}</p>
 </div>
 <!-- Summary cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-6">
+<div class="grid grid-cols-3 gap-2 md:gap-6 mb-6">
 {% for s in r.audience.summary %}
-<div class="reveal bg-white neo-brutal-border rounded-2xl md:rounded-3xl p-3 md:p-5 text-center shadow-[3px_3px_0px_0px_#121212] md:shadow-[4px_4px_0px_0px_#121212]">
+<div class="reveal bg-white rounded-2xl md:rounded-3xl p-2.5 md:p-4 text-center shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
 <p class="count-up font-headline-md text-lg md:text-3xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
 <p class="font-label-mono text-[9px] md:text-xs uppercase tracking-wider text-custom-brown font-bold mt-1 md:mt-2 leading-snug">{{ s.label }}</p>
 </div>
@@ -38,13 +94,13 @@
 <!-- Graph cards: swipeable on mobile, grid on desktop -->
 <div id="audience-track" class="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-gutter px-gutter md:mx-0 md:px-0">
 {% for chart in r.audience.charts %}
-<div class="reveal audience-card flex-shrink-0 w-[76%] sm:w-[60%] md:w-auto snap-center bg-white neo-brutal-border rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-[4px_4px_0px_0px_#121212] md:shadow-[6px_6px_0px_0px_#121212]">
+<div class="reveal audience-card flex-shrink-0 w-[76%] sm:w-[60%] md:w-auto snap-center bg-white border border-custom-brown/10 rounded-2xl md:rounded-3xl p-4 md:p-6">
 <div class="flex items-center justify-between mb-3 md:mb-5">
 <h3 class="font-headline-md text-base md:text-lg text-custom-brown font-black">{{ chart.title }}</h3>
 {% if chart.info %}
 <button type="button" data-tip-btn class="relative flex items-center" aria-label="About this data">
 <span class="material-symbols-outlined text-custom-burgundy text-xl pointer-events-none">info</span>
-<span data-tip class="hidden absolute right-0 top-8 z-20 w-56 bg-custom-brown text-white text-left font-body-md text-xs leading-relaxed p-3 rounded-2xl neo-brutal-border shadow-[3px_3px_0px_0px_#800020]">{{ chart.info }}</span>
+<span data-tip class="hidden absolute right-0 top-8 z-20 w-56 bg-custom-brown text-white text-left font-body-md text-xs leading-relaxed p-3 rounded-2xl neo-brutal-border shadow-[3px_3px_0px_0px_#FFF200]">{{ chart.info }}</span>
 </button>
 {% elif chart.source %}
 <span class="font-label-mono text-[9px] uppercase text-custom-brown/60">{{ chart.source }}</span>
@@ -102,7 +158,7 @@
 {% if r.audience.sourceData %}
 <details class="mt-6 max-w-xl mx-auto">
 <summary class="cursor-pointer text-center font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold underline underline-offset-4">{{ r.audience.sourceData.linkText }}</summary>
-<ul class="mt-4 space-y-2 bg-white neo-brutal-border rounded-2xl p-5 shadow-[3px_3px_0px_0px_#121212]">
+<ul class="mt-4 space-y-2 bg-white border border-custom-brown/10 rounded-2xl p-5">
 {% for item in r.audience.sourceData['items'] %}
 <li class="font-body-md text-xs text-custom-brown leading-relaxed flex gap-2"><span class="text-custom-burgundy">•</span> {{ item }}</li>
 {% endfor %}
@@ -111,52 +167,10 @@
 {% endif %}
 </section>
 
-<!-- ============ Section 2: Campaigns ============ -->
-<section id="campaigns" class="reveal scroll-mt-32">
-<div class="text-center mb-8">
-{% if r.campaigns.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.campaigns.badge }}</span>{% endif %}
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.campaigns.heading }}</h2>
-</div>
-<div id="campaign-track" class="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-gutter px-gutter md:mx-0 md:px-0">
-{% for case in r.campaigns.cases %}
-<div class="reveal campaign-card flex-shrink-0 w-[85%] sm:w-[70%] md:w-auto snap-center bg-white neo-brutal-border rounded-3xl p-6 flex-col shadow-[6px_6px_0px_0px_#121212] {{ 'hidden' if case.hidden else 'flex' }}" {% if case.hidden %}data-hidden-case{% endif %}>
-<div class="flex items-center justify-between mb-3">
-{% if case.logo %}
-<img src="{{ url_for('static', filename='img/logos/' + case.logo) }}" alt="{{ case.company }}" class="h-6 w-auto grayscale brightness-0">
-{% else %}
-<h3 class="font-headline-md text-xl text-custom-brown font-black">{{ case.company }}</h3>
-{% endif %}
-{% if case.format %}<span class="bg-custom-brown text-white px-3 py-1 font-label-mono text-[10px] uppercase font-bold rounded-full flex-shrink-0">{{ case.format }}</span>{% endif %}
-</div>
-<p class="font-label-mono text-[10px] uppercase tracking-wider text-custom-burgundy font-bold mb-2">{{ case.campaign }}</p>
-<p class="font-body-md text-custom-brown text-sm font-black leading-snug mb-4">{{ case.headline }}</p>
-<div class="grid grid-cols-3 gap-2 border-t-2 border-custom-brown/20 pt-4 mt-auto">
-{% for m in case.metrics %}
-<div>
-<p class="font-headline-md text-lg md:text-xl text-custom-burgundy font-black leading-none">{{ m.value }}</p>
-<p class="font-label-mono text-[9px] uppercase tracking-wider text-custom-brown font-bold mt-1 leading-tight">{{ m.label }}</p>
-</div>
-{% endfor %}
-</div>
-{% if case.note %}<p class="font-body-md text-[11px] text-custom-brown/70 italic mt-3">{{ case.note }}</p>{% endif %}
-{% if case.details %}
-<button class="view-details mt-3 self-start font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold underline underline-offset-4" data-case="{{ loop.index0 }}">View details</button>
-{% endif %}
-</div>
-{% endfor %}
-</div>
-<div id="campaign-dots" class="flex md:hidden justify-center gap-2 mt-4"></div>
-{% if r.campaigns.cases | selectattr('hidden') | list %}
-<div class="text-center mt-6">
-<button id="more-results" class="bg-white text-custom-brown neo-brutal-border px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full">{{ r.campaigns.moreLabel }}</button>
-</div>
-{% endif %}
-</section>
-
 <!-- ============ Section 3: Talent Network ============ -->
 <section id="talent" class="reveal scroll-mt-32">
 <div class="text-center mb-8">
-{% if r.talent.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.talent.badge }}</span>{% endif %}
+{% if r.talent.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">{{ r.talent.badge }}</span>{% endif %}
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.talent.heading }}</h2>
 {% if r.talent.liveLine %}
 <p class="mt-3 inline-flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {{ r.talent.liveLine }}</p>
@@ -170,7 +184,7 @@
 {% if r.talent.metrics %}
 <div class="grid grid-cols-2 gap-3 md:gap-6 mb-8 max-w-xl mx-auto">
 {% for m in r.talent.metrics %}
-<div class="reveal bg-white neo-brutal-border rounded-3xl p-5 text-center shadow-[4px_4px_0px_0px_#121212]">
+<div class="reveal bg-white rounded-3xl p-4 text-center shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
 <p class="count-up font-headline-md text-2xl md:text-3xl text-custom-burgundy font-black leading-none">{{ m.value }}</p>
 <p class="font-label-mono text-[10px] uppercase tracking-wider text-custom-brown font-bold mt-2">{{ m.label }}</p>
 </div>
@@ -182,7 +196,7 @@
 {% endif %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
 {% for cand in r.talent.candidates %}
-<div class="reveal bg-white neo-brutal-border rounded-3xl p-6 shadow-[4px_4px_0px_0px_#121212] {{ 'cursor-pointer neo-brutal-shadow-hover transition-all' if cand.cv }}" {% if cand.cv %}data-cv="{{ url_for('static', filename='cv/' + cand.cv) }}" data-cv-role="{{ cand.role }}"{% endif %}>
+<div class="reveal rounded-3xl p-5 {{ 'bg-white neo-brutal-border shadow-[4px_4px_0px_0px_#2A2420] cursor-pointer neo-brutal-shadow-hover transition-all' if cand.cv else 'bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]' }}" {% if cand.cv %}data-cv="{{ url_for('static', filename='cv/' + cand.cv) }}" data-cv-role="{{ cand.role }}"{% endif %}>
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-outlined text-custom-burgundy">person</span>
 <h3 class="font-headline-md text-lg text-custom-brown font-black">{{ cand.role }}</h3>
@@ -198,7 +212,7 @@
 {% if r.talent.candidatesCaption %}<p class="text-center font-body-md text-[11px] text-custom-brown/60 italic mt-3">{{ r.talent.candidatesCaption }}</p>{% endif %}
 <!-- Private talent feed -->
 {% if r.talent.privateFeed %}
-<div class="reveal mt-10 max-w-4xl mx-auto bg-custom-brown text-white neo-brutal-border rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#800020]">
+<div class="reveal mt-10 max-w-4xl mx-auto bg-custom-brown text-white rounded-3xl p-6 md:p-8">
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-outlined text-custom-butter">lock</span>
 <h3 class="font-headline-md text-xl font-black">{{ r.talent.privateFeed.title }}</h3>
@@ -211,12 +225,11 @@
 
 <!-- ============ Section 4: Final CTA ============ -->
 <section id="results-cta" class="reveal hidden md:block text-center scroll-mt-32">
-{% if r.cta.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.cta.badge }}</span>{% endif %}
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.cta.heading }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mt-3 max-w-none">{{ r.cta.body }}</p>
 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-{% if not hide_pricing %}<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white neo-brutal-border px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full">{{ r.cta.primary }}</a>{% endif %}
-<a href="mailto:info@ofoodiez.com" class="{{ 'bg-custom-burgundy text-white' if hide_pricing else 'bg-white text-custom-brown' }} neo-brutal-border px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full">{{ r.cta.secondary }}</a>
+{% if not hide_pricing %}<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white btn-soft px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest transition-all rounded-full">{{ r.cta.primary }}</a>{% endif %}
+<a href="mailto:info@ofoodiez.com" class="{{ 'bg-custom-burgundy text-white' if hide_pricing else 'bg-white text-custom-brown border border-custom-brown/10' }} btn-soft px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest transition-all rounded-full">{{ r.cta.secondary }}</a>
 </div>
 </section>
 </main>
@@ -224,23 +237,10 @@
 <!-- CV card lightbox -->
 <div id="cv-lightbox" class="hidden fixed inset-0 z-[70] items-center justify-center p-4">
 <div class="absolute inset-0 bg-black/70" data-cv-close></div>
-<button data-cv-close aria-label="Close CV" class="absolute top-4 right-4 z-10 w-12 h-12 flex items-center justify-center bg-custom-butter text-custom-brown neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212]"><span class="material-symbols-outlined pointer-events-none">close</span></button>
+<button data-cv-close aria-label="Close CV" class="absolute top-4 right-4 z-10 w-12 h-12 flex items-center justify-center bg-custom-butter text-custom-brown neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#2A2420]"><span class="material-symbols-outlined pointer-events-none">close</span></button>
 <div class="relative max-w-lg w-full max-h-[85vh] overflow-y-auto bg-white neo-brutal-border rounded-3xl shadow-[8px_8px_0px_0px_#800020]">
 <img id="cv-lightbox-img" alt="CV card" class="w-full h-auto">
 <p id="cv-lightbox-missing" class="hidden p-8 text-center font-body-md text-custom-brown">CV card coming soon.</p>
-</div>
-</div>
-
-<!-- Campaign details bottom sheet -->
-<div id="details-sheet" class="hidden fixed inset-0 z-[70]">
-<div class="absolute inset-0 bg-black/50" data-sheet-close></div>
-<div class="absolute bottom-0 left-0 right-0 md:top-1/2 md:left-1/2 md:right-auto md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] bg-white neo-brutal-border rounded-t-3xl md:rounded-3xl p-6 shadow-[0_-6px_0_0_#121212] md:shadow-[8px_8px_0px_0px_#121212] max-h-[80vh] overflow-y-auto">
-<div class="flex justify-between items-center mb-4">
-<h3 id="sheet-title" class="font-headline-md text-xl text-custom-brown font-black"></h3>
-<button data-sheet-close aria-label="Close" class="w-10 h-10 flex items-center justify-center bg-custom-butter neo-brutal-border rounded-full shadow-[2px_2px_0px_0px_#121212]"><span class="material-symbols-outlined pointer-events-none">close</span></button>
-</div>
-<div id="sheet-metrics" class="grid grid-cols-2 gap-3"></div>
-<p id="sheet-note" class="font-label-mono text-[10px] uppercase tracking-wider text-custom-brown/60 mt-4"></p>
 </div>
 </div>
 
@@ -331,24 +331,21 @@
     moreBtn.remove();
   });
 
-  /* Details bottom sheet */
-  const cases = {{ r.campaigns.cases | tojson }};
-  const sheet = document.getElementById('details-sheet');
-  document.querySelectorAll('.view-details').forEach(btn => btn.addEventListener('click', () => {
-    const cs = cases[parseInt(btn.dataset.case, 10)];
-    if (!cs) return;
-    document.getElementById('sheet-title').textContent = cs.company;
-    document.getElementById('sheet-metrics').innerHTML = (cs.details || []).map(m =>
-      '<div class="bg-custom-brown/5 rounded-2xl p-3 text-center">' +
-      '<p class="font-headline-md text-xl text-custom-burgundy font-black leading-none">' + m.value + '</p>' +
-      '<p class="font-label-mono text-[9px] uppercase tracking-wider text-custom-brown font-bold mt-1">' + m.label + '</p></div>').join('');
-    document.getElementById('sheet-note').textContent = cs.detailsNote || '';
-    sheet.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }));
-  const closeSheet = () => { sheet.classList.add('hidden'); document.body.style.overflow = ''; };
-  sheet.querySelectorAll('[data-sheet-close]').forEach(el => el.addEventListener('click', closeSheet));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.classList.contains('hidden')) closeSheet(); });
+  /* Campaign cards: expand in place instead of opening a modal */
+  document.querySelectorAll('.campaign-card').forEach(card => {
+    const toggle = card.querySelector('.case-toggle');
+    if (!toggle) return;
+    const expand = () => {
+      const details = card.querySelector('.case-details');
+      const expanded = card.classList.toggle('is-expanded');
+      details.classList.toggle('hidden', !expanded);
+      card.classList.toggle('md:col-span-2', expanded);
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      toggle.querySelector('.toggle-label').textContent = expanded ? 'Less details' : 'More details';
+      toggle.querySelector('.toggle-icon').style.transform = expanded ? 'rotate(180deg)' : '';
+    };
+    card.addEventListener('click', expand);
+  });
 
   /* Info tooltips (tap/click to toggle) */
   document.querySelectorAll('[data-tip-btn]').forEach(btn => btn.addEventListener('click', (e) => {
@@ -370,7 +367,7 @@
       cvMissing.classList.add('hidden');
       cvImg.classList.remove('hidden');
       cvImg.src = card.dataset.cv;
-      cvImg.alt = card.dataset.cvRole + ' — CV card';
+      cvImg.alt = card.dataset.cvRole + ' CV card';
       cvBox.classList.remove('hidden');
       cvBox.classList.add('flex');
       document.body.style.overflow = 'hidden';

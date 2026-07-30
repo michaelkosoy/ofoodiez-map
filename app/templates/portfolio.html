@@ -4,62 +4,38 @@
 <!-- Hero Section -->
 <header class="pt-20 md:pt-40 pb-20 px-gutter md:px-margin-desktop min-h-screen flex flex-col justify-center relative overflow-hidden bg-white border-b-2 border-custom-brown">
 <div class="absolute inset-0 code-pattern"></div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-bento-gap max-w-7xl mx-auto w-full relative z-10">
-<!-- Text Content -->
-<div class="lg:col-span-7 flex flex-col justify-center items-start">
+<div class="max-w-3xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
 <div class="relative inline-block mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#121212] rounded-full rounded-xl">Engineered for Tech</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#2A2420] rounded-full">Engineered for Tech</span>
 </div>
 <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-custom-brown mb-6 relative z-10 font-black">
                     Make your startup <br class="hidden md:block"/>
-<span class="text-custom-burgundy relative inline-block bg-custom-butter px-2 transform -skew-x-6 rounded-xl">
+<span class="text-custom-brown relative inline-block bg-custom-butter px-2 transform -skew-x-6 rounded-xl">
                         impossible
 </span>
                     to scroll past.
                 </h1>
-<p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mb-10 border-l-4 border-custom-burgundy pl-4">
+<p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mx-auto mb-10">
                     {{ c.hero.subheadline }}
                 </p>
 <div class="relative mb-10">
-<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white neo-brutal-border px-8 py-4 font-label-mono text-label-mono uppercase text-lg hover:-translate-y-1 hover:-translate-x-1 shadow-[6px_6px_0px_0px_#121212] transition-all inline-flex items-center gap-3 z-20 relative rounded-xl rounded-2xl">
-                        Deploy Creative <span class="material-symbols-outlined">terminal</span>
+<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white btn-soft px-8 py-4 font-label-mono text-label-mono uppercase text-lg transition-all inline-flex items-center gap-3 z-20 relative rounded-full">
+                        {{ c.hero.cta | default('Check packages') }} <span class="material-symbols-outlined">terminal</span>
 </a>
 </div>
-<div class="flex flex-wrap items-center gap-x-8 gap-y-3 font-label-mono text-custom-brown">
+<div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-label-mono text-custom-brown">
 <div class="flex items-baseline gap-2">
 <span class="text-2xl font-black text-custom-burgundy">30K+</span>
 <span class="text-xs uppercase tracking-wider">Tech community</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black text-custom-burgundy">70%+</span>
-<span class="text-xs uppercase tracking-wider">Tech audience</span>
+<span class="text-2xl font-black text-custom-burgundy">2.3×</span>
+<span class="text-xs uppercase tracking-wider">Increase in CV submissions</span>
 </div>
 <div class="flex items-baseline gap-2">
 <span class="text-2xl font-black text-custom-burgundy">1.2M+</span>
-<span class="text-xs uppercase tracking-wider">Views last month · <a href="https://www.instagram.com/ofoodiez" target="_blank" rel="noopener" class="hover:text-custom-burgundy transition-colors underline underline-offset-2">@ofoodiez</a></span>
+<span class="text-xs uppercase tracking-wider">Views last month · <a href="{{ url_for('portfolio_results') }}" class="hover:text-custom-burgundy transition-colors underline underline-offset-2">See more metrics</a></span>
 </div>
-</div>
-</div>
-<!-- Hero Visual (Showreel Frame) -->
-<div class="hidden md:block lg:col-span-5 relative mt-16 lg:mt-0">
-<div class="aspect-[3/4] w-full max-w-sm mx-auto bg-custom-brown neo-brutal-border shadow-[12px_12px_0px_0px_#800020] overflow-hidden relative group rounded-3xl">
-<!-- Placeholder for video -->
-<div class="bg-cover bg-center w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="A dynamic, brightly lit vertical video frame showing a fast-paced tech montage. The scene features a young diverse team working excitedly around a glowing laptop in a modern industrial loft office. The lighting is high-contrast, cinematic, and saturated with electric blue and bright white tones, conveying a sense of urgent, creative energy typical of a modern TikTok or Reels showreel." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKJbDxtD-qX9TfnsJ_sPa4beFndkF4U2vHa85Cn4yC6G-jRypOfcVbRjt54UF4PJXI4FzCGF-3xR2poBaOx68hY7Y6LufypE6ApHpjoTc6Jyq4Vkls9nCsiLExrBFEkdOgloh7IrMWW_YGrOz5xBMpaVSgVnH9ltmLmjlJgwb4t1QqGRotUf0JGppz-aXvNVWOHe69pLQ4N8bpWOGX4akT9rI7JmqZ9-RLLeVsHBk_WeDzjAsADJsHzWiDyiPbc0FWP7GSr-GjHuo')"></div>
-<!-- Play Overlay -->
-<div class="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300">
-<div class="w-20 h-20 bg-custom-butter border-4 border-custom-brown flex items-center justify-center shadow-[4px_4px_0px_0px_#121212] text-custom-brown transform hover:scale-110 transition-transform rounded-full">
-<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
-</div>
-</div>
-<!-- Progress Bar -->
-<div class="absolute bottom-0 left-0 right-0 h-2 bg-custom-brown border-t-2 border-custom-brown">
-<div class="h-full bg-custom-butter w-1/3"></div>
-</div>
-</div>
-<!-- Editing Marker Sticker -->
-<div class="absolute top-1/2 -right-8 bg-custom-butter text-custom-brown px-3 py-1 neo-brutal-border sticker-rotate-2 font-label-mono text-xs z-20 shadow-[4px_4px_0px_0px_#121212] rounded-full">
-                    [init run_sequence]
-                </div>
 </div>
 </div>
 </header>
@@ -101,11 +77,11 @@ async function deployCampaign(product) {
 // &gt; Synthesizing value prop...
     </div>
 <div class="w-full px-gutter md:px-margin-desktop relative z-10 text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-full rounded-xl">Built by an Engineer, not an Agency</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#FFF200] transform -rotate-2 rounded-full">Built by an Engineer, not an Agency</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-butter mb-8 font-black text-center">The Engineer's Edge.</h2>
 <div class="font-body-lg text-white/90 text-xl leading-relaxed font-medium max-w-3xl mx-auto space-y-4">
 <p>I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.</p>
-<p>I don't just make videos, <span class="text-custom-butter bg-custom-burgundy px-2 rounded-lg rounded-xl">I understand your product.</span></p>
+<p class="text-2xl md:text-3xl font-black">I don't just make videos, <span class="text-custom-brown bg-custom-butter px-2 rounded-xl">I understand your product.</span></p>
 <p>Stop struggling to explain it to ad agencies.</p>
 </div>
 </div>
@@ -113,16 +89,16 @@ async function deployCampaign(product) {
 <!-- Problem Section -->
 <section class="py-24 bg-white" id="problem">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Problem</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">The Problem</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">{{ c.problem.title | default("Who owns your company's story?") }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mb-0 md:mb-16 max-w-none">
-{{ c.problem.body | default('It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.') }}
+{{ c.problem.body | default('It falls between marketing, HR, and operations, without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.') }}
 </p>
 
 <p class="hidden md:block font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold mb-6">{{ c.problem.goodNews | default('The good news: now it has an owner') }}</p>
 <div class="hidden md:grid md:grid-cols-3 gap-4">
 {% for card in c.problem.cards | default([]) %}
-  <div class="neo-brutal-border rounded-2xl p-6 text-left {{ 'bg-custom-burgundy' if loop.index == 2 else 'bg-white' }} shadow-[4px_4px_0px_0px_#121212]">
+  <div class="rounded-2xl p-6 text-left {{ 'bg-custom-burgundy' if loop.index == 2 else 'bg-white' }} shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
     <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
       <span class="material-symbols-outlined text-custom-burgundy">{{ card.icon | default('check_circle') }}</span>
     </div>
@@ -139,7 +115,7 @@ async function deployCampaign(product) {
 <section class="py-12 bg-white" id="field-quote">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
 <div class="px-8 py-8">
-<span class="bg-custom-brown text-white px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[3px_3px_0px_0px_#800020] transform -rotate-1 rounded-full rounded-xl mb-6">{{ c.quote.label | default('Heard in the field') }}</span>
+<span class="bg-custom-brown text-white px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[3px_3px_0px_0px_#FFF200] transform -rotate-1 rounded-full mb-6">{{ c.quote.label | default('Heard in the field') }}</span>
 <blockquote>
 <span class="material-symbols-outlined text-4xl text-custom-burgundy block mb-3" style="font-variation-settings: 'FILL' 1;">format_quote</span>
 <p class="font-headline-md text-xl md:text-2xl text-custom-brown font-black leading-snug">
@@ -156,7 +132,7 @@ async function deployCampaign(product) {
 <section id="process" class="hidden md:block py-12 scroll-mt-32">
 <div class="mx-auto">
 <div class="text-center mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl">The Process</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full">The Process</span>
 </div>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
@@ -164,7 +140,7 @@ async function deployCampaign(product) {
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
 
 <!-- Step 1 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[200px]">
+<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">1</span>
@@ -175,7 +151,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 2 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[200px]">
+<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">2</span>
@@ -186,7 +162,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 3 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[200px]">
+<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">3</span>
@@ -197,7 +173,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 4 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[200px]">
+<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">4</span>
@@ -208,7 +184,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 5 -->
-<div class="bg-white neo-brutal-border p-4 rounded-3xl shadow-[4px_4px_0px_0px_#121212] lg:min-w-[200px]">
+<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">5</span>

@@ -9,11 +9,11 @@
       "headline": "Not another social agency.",
       "headlineEmphasis": "A tech insider who knows how to tell your story.",
       "subheadline": "I help technology companies turn their people, culture and technology into stories that attract talent, build trust and create brands people want to be part of.",
-      "cta": "Build your employer brand"
+      "cta": "Check packages"
     },
     "problem": {
       "title": "Who owns your company's story?",
-      "body": "It falls between marketing, HR, and operations — without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.",
+      "body": "It falls between marketing, HR, and operations, without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.",
       "goodNews": "The good news: now it has an owner",
       "cards": [
         {
@@ -24,7 +24,7 @@
         {
           "icon": "military_tech",
           "title": "The missing expertise",
-          "body": "Years inside tech companies + gen z social expertise — with a real strategy and KPIs behind every post."
+          "body": "Years inside tech companies + gen z social expertise, with a real strategy and KPIs behind every post."
         },
         {
           "icon": "savings",
@@ -169,10 +169,6 @@
           "label": "Of surveyed community members work in tech"
         },
         {
-          "value": "2.3×",
-          "label": "Increase in CV submissions following one campaign"
-        },
-        {
           "value": "500+",
           "label": "Story link clicks to career pages and links"
         }
@@ -181,10 +177,6 @@
         "heading": "A tech-focused audience backed by real data",
         "note": "Audience information is based on Instagram Insights, community registrations, surveys, and direct audience feedback.",
         "summary": [
-          {
-            "value": "70%+",
-            "label": "Work in tech (community survey)"
-          },
           {
             "value": "25–34",
             "label": "Top age range (31.9% of audience)"
@@ -278,14 +270,14 @@
               "Investors & venture capital",
               "Marketing & business roles"
             ],
-            "info": "Based on community surveys and registrations — members of my tech community register with their LinkedIn profiles."
+            "info": "Based on community surveys and registrations. Members of my tech community register with their LinkedIn profiles."
           }
         ],
         "sourceData": {
           "linkText": "View source data",
           "items": [
             "Age and location data: Instagram Insights audience report, collected July 2026.",
-            "Tech-audience share: community survey of members — more than 70% of respondents work in tech. Survey wording and respondent count available on request.",
+            "Tech-audience share: community survey of members, more than 70% of respondents work in tech. Survey wording and respondent count available on request.",
             "Community size: registration count of the community and referral bot, July 2026.",
             "Campaign metrics: Instagram Insights per post/story; CV submission data provided by the companies."
           ]
@@ -450,10 +442,10 @@
         "badge": "Campaign Results"
       },
       "talent": {
-        "heading": "My referral bot — another way to reach talent",
+        "heading": "My referral bot: another way to reach talent",
         "paragraphs": [
           "I built a WhatsApp referral bot for my community: people in tech register, share their CV and what they are looking for, and get matched with referral opportunities at companies they want to join.",
-          "For partner companies it is a direct channel to relevant, interested candidates — on top of what the content itself brings."
+          "For partner companies it is a direct channel to relevant, interested candidates, on top of what the content itself brings."
         ],
         "metrics": [
           {
@@ -465,7 +457,7 @@
             "label": "Average active chats (30-day avg)"
           }
         ],
-        "candidatesCaption": "Real candidates, anonymized — full CVs are shared with permission through the private talent feed.",
+        "candidatesCaption": "Real candidates, anonymized. Full CVs are shared with permission through the private talent feed.",
         "candidates": [
           {
             "role": "Software Engineer",
@@ -494,7 +486,7 @@
         ],
         "privateFeed": {
           "title": "Your Private Talent Feed",
-          "body": "Partner companies can receive access to a private page containing selected candidates relevant to their open roles — role and seniority, skills, anonymized summaries, CV access where permission has been provided, referral status, and newly added candidates.",
+          "body": "Partner companies can receive access to a private page containing selected candidates relevant to their open roles: role and seniority, skills, anonymized summaries, CV access where permission has been provided, referral status, and newly added candidates.",
           "note": "Selected candidates, shared with permission and matched to relevant opportunities."
         },
         "badge": "Talent Network",
@@ -505,8 +497,7 @@
         "heading": "Want content that reaches the right people?",
         "body": "Build awareness, generate action, and connect with relevant talent through one partnership.",
         "primary": "View Packages",
-        "secondary": "Let's Talk",
-        "badge": "Next Step"
+        "secondary": "Let's Talk"
       }
     },
     "difference": {
@@ -669,19 +660,13 @@
           "banner": "\"Launch\" package included",
           "includes": [
             "## Kickoff",
-            "1 video published on my channels",
-            "2 reels created for your company's channels",
-            "A practical content strategy based on your goals",
-            "Reorganization and improvement of your social media profiles",
+            "1 video + 2 reels published on your channels, plus a content strategy and refreshed social profiles",
             "## Monthly Presence",
-            "1 filming session each month at a company event, such as a meetup, hackathon, happy hour, conference, or team activity",
-            "Ongoing content ideas and hands-on consulting",
+            "Monthly filming session at a company event, with ongoing content ideas and consulting",
             "## Community and Events",
-            "Promotion of company events, launches, and important milestones",
-            "Collaborations with tech creators for larger events and campaigns",
+            "Promotion of your events and milestones, plus creator collaborations for bigger campaigns",
             "## Talent",
-            "**Access to candidates from my CV-bot talent pool**",
-            "**Active referrals of relevant candidates to your HR team**"
+            "**CV-bot candidate access and active referrals to your HR team**"
           ],
           "minimumCommitment": "3 months",
           "price": "₪5,500",
@@ -714,7 +699,7 @@
         }
       ],
       "presencePanel": {
-        "title": "Not just more posts — a long-term employer brand engine",
+        "title": "Not just more posts: a long-term employer brand engine",
         "sections": [
           {
             "icon": "badge",

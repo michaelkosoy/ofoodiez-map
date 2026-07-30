@@ -81,14 +81,8 @@
                 "surface-container-low": "#f3f3f4",
                 "on-secondary-fixed": "#28180d",
                 "custom-butter": "#FFF200",
-                "custom-brown": "#121212",
+                "custom-brown": "#2A2420",
                 "custom-burgundy": "#800020"
-        },
-        "borderRadius": {
-                "DEFAULT": "0rem",
-                "lg": "0rem",
-                "xl": "0rem",
-                "full": "0rem"
         },
         "spacing": {
                 "stack-md": "24px",
@@ -203,8 +197,10 @@
   }
 }catch(_e){}</script>
     <style>
-        .neo-brutal-border { border: 2px solid #121212; }
-        .neo-brutal-shadow-hover:hover { box-shadow: 6px 6px 0px 0px #121212; }
+        .neo-brutal-border { border: 2px solid #2A2420; }
+        .neo-brutal-shadow-hover:hover { box-shadow: 6px 6px 0px 0px #2A2420; }
+        .btn-soft { transition: box-shadow .2s ease, transform .2s ease; }
+        .btn-soft:hover { box-shadow: 0 12px 24px -8px rgba(42,36,32,0.25), 0 4px 8px -2px rgba(42,36,32,0.10); transform: translateY(-2px); }
         .sticker-rotate-1 { transform: rotate(-1deg); }
         .sticker-rotate-2 { transform: rotate(2deg); }
         .sticker-rotate-3 { transform: rotate(3deg); }
@@ -229,6 +225,8 @@
             #engineers-edge p, #problem p, #content-series p { white-space: normal; }
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Legacy-only from here: portfolio_pricing.html no longer emits data-package-card/data-side-panel,
+           but portfolio_pricing_legacy.html (frozen, pre-2026-07 offers) still does — keep for it. */
         .package-card { transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease; }
         .package-card.is-active { transform: scale(1.02); box-shadow: 10px 10px 0px 0px #121212; z-index: 10; }
         .package-card.is-inactive { opacity: 0.55; transform: scale(0.97); }
@@ -277,11 +275,11 @@
 <li><a class="{{ 'text-custom-burgundy border-b-2 border-custom-burgundy pb-1' if active_page == slug else 'text-custom-brown hover:text-custom-burgundy transition-colors' }}" href="{{ href }}">{{ label }}</a></li>
 {% endfor %}
 </ul>
-<a href="mailto:info@ofoodiez.com" class="inline-block bg-custom-burgundy text-white neo-brutal-border px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full rounded-2xl">
+<a href="mailto:info@ofoodiez.com" class="inline-block bg-custom-burgundy text-white btn-soft px-6 py-2 font-label-bold text-label-bold uppercase tracking-widest transition-all rounded-full">
       Contact
     </a>
 </div>
-<button id="menu-toggle" class="md:hidden bg-custom-burgundy text-white neo-brutal-border p-2 font-label-bold text-label-bold rounded-full rounded-2xl">
+<button id="menu-toggle" class="md:hidden bg-custom-burgundy text-white btn-soft p-2 font-label-bold text-label-bold rounded-full">
   <span class="material-symbols-outlined">menu</span>
 </button>
 </div>
@@ -289,7 +287,7 @@
 <!-- Mobile Side Menu -->
 <div id="side-menu" class="hidden fixed inset-0 z-[60] md:hidden">
   <div class="absolute inset-0 bg-black/50" id="menu-overlay"></div>
-  <div class="absolute top-0 right-0 h-full w-64 bg-white neo-brutal-border shadow-[4px_4px_0px_0px_#121212] flex flex-col p-6">
+  <div class="absolute top-0 right-0 h-full w-64 bg-white neo-brutal-border shadow-[4px_4px_0px_0px_#2A2420] flex flex-col p-6">
     <button id="menu-close" class="self-end mb-8">
       <span class="material-symbols-outlined text-custom-burgundy">close</span>
     </button>
@@ -298,13 +296,13 @@
       <li><a class="{{ 'text-custom-burgundy border-b-2 border-custom-burgundy pb-1' if active_page == slug else 'text-custom-brown hover:text-custom-burgundy transition-colors' }}" href="{{ href }}">{{ label }}</a></li>
       {% endfor %}
     </ul>
-    <a href="mailto:info@ofoodiez.com" class="mt-auto block text-center bg-custom-burgundy text-white neo-brutal-border px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full w-full">
+    <a href="mailto:info@ofoodiez.com" class="mt-auto block text-center bg-custom-burgundy text-white btn-soft px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest transition-all rounded-full w-full">
       Contact
     </a>
   </div>
 </div>
 {% block content %}{% endblock %}
-<footer class="w-full bg-custom-brown text-white border-t-4 border-custom-burgundy">
+<footer class="w-full bg-custom-brown text-white border-t-4 border-custom-butter">
 <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-gutter md:px-margin-desktop py-stack-lg w-full">
 <!-- Brand -->
 <div>
@@ -315,7 +313,7 @@
         by Ofoodiez
       </div>
 <div class="mt-4 text-white/70 font-label-mono text-sm">
-        // ©2025 ENGINEERED FOR CREATIVES.
+        // ©2026 ENGINEERED FOR CREATIVES.
       </div>
 </div>
 <!-- Social Links -->
@@ -339,10 +337,15 @@
 <!-- Contact -->
 <div>
 <p class="font-label-mono uppercase text-xs text-custom-butter tracking-widest mb-4">Get in touch</p>
+<div class="space-y-3">
 <a href="mailto:info@ofoodiez.com" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
 <span class="material-symbols-outlined text-base">mail</span> info@ofoodiez.com
 </a>
-<p class="mt-6 text-white/40 font-label-mono text-xs">Ready to make your startup impossible to scroll past?</p>
+<a href="https://wa.me/972542471816" target="_blank" rel="noopener" class="flex items-center gap-3 text-white/80 hover:text-custom-butter transition-colors font-body-md text-sm">
+  <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+  WhatsApp
+</a>
+</div>
 </div>
 </div>
 </footer>
