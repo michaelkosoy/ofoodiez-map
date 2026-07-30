@@ -257,6 +257,11 @@ CAND_AFTER_LINK_ROLE = (
     "Sure! Which *role* are you aiming for? "
     "Tell me and I'll grab your CV next. 🎯"
 )
+CAND_LINK_FEEDBACK_ACK = (
+    "Thanks for flagging! 🙏 I've passed this to the team — they'll look into it "
+    "and get back to you.\n"
+    "Meanwhile you can still apply here: just tell me the *role* you're aiming for."
+)
 CAND_ROLE = (
     "Amazing — I found *{advocate}* at *{company}*! 🎉\n"
     "They can refer you in. What role are you aiming for? "

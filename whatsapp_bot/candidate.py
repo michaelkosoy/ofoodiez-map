@@ -331,17 +331,44 @@ def _handle_suggestion(user, conv, data, text):
     return _handle_company(user, conv, data, text)
 
 
+# Replies after a link handover that are complaints, not roles ("the link doesnt
+# have the referral code") — real candidates typed these and they were recorded
+# as the role and even emailed to an advocate. Substring match, lowercase.
+_PROBLEM_MARKERS = (
+    "doesn't", "doesnt", "don't", "dont", "didn't", "didnt", "not work",
+    "no code", "referral code", "ref code", "ref. code", "broken", "error",
+    "issue", "problem", "redirect", "applied but", "applied, but",
+    "לא עובד", "בעיה", "שגיאה",
+)
+
+
+def _looks_like_problem_report(text):
+    t = text.lower()
+    return any(m in t for m in _PROBLEM_MARKERS)
+
+
 def _handle_after_link(user, conv, data, inbound):
     """After we hand over a self-serve referral link, the candidate can still
     apply for a *different* role by CV. menu/restart are intercepted globally, so
     any reply that reaches here means "continue" — treat their text as the target
-    role and drop into the normal role → job link → résumé path.
-    ponytail: any non-empty reply is the role; no extra confirm button to maintain."""
+    role and drop into the normal role → job link → résumé path. Replies that
+    read as a problem report go to ops instead of being swallowed as a role.
+    ponytail: any other non-empty reply is the role; no confirm button to maintain."""
     text = (inbound.get("body") or "").strip()
     if not text:
         # e.g. they sent a CV before naming a role — ask for the role first.
         messaging.send_prompt(user.phone, copy.CAND_AFTER_LINK_ROLE)
         return "cand_after_link"
+    if _looks_like_problem_report(text):
+        name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "A candidate"
+        try:
+            emailer.send_contact_email(
+                name, user.phone, user.email,
+                f"[after referral link — {data.get('company_name', '?')}]\n{text}")
+        except Exception:
+            pass  # inbound audit row still has the text; never break the chat
+        messaging.send_prompt(user.phone, copy.CAND_LINK_FEEDBACK_ACK)
+        return "cand_link_feedback"  # state unchanged — a role reply still works
     data["role_query"] = text
     data.setdefault("advocate_name", "the team")
     conversation.set_state(conv, "candidate", "cand_job_link", data)
