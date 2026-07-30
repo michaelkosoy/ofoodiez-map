@@ -18,11 +18,13 @@
 <p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mx-auto mb-10">
                     {{ c.hero.subheadline }}
                 </p>
+{% if not hide_pricing %}
 <div class="relative mb-10">
 <a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white btn-soft px-8 py-4 font-label-mono text-label-mono uppercase text-lg transition-all inline-flex items-center gap-3 z-20 relative border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">
                         {{ c.hero.cta | default('Check packages') }} <span class="material-symbols-outlined">terminal</span>
 </a>
 </div>
+{% endif %}
 <div class="overflow-x-auto max-w-full no-scrollbar"><div class="flex flex-nowrap items-baseline gap-x-4 md:gap-x-8 font-label-mono text-custom-brown whitespace-nowrap w-max mx-auto px-2">
 <div class="flex items-baseline gap-2">
 <span class="text-lg md:text-2xl font-black text-custom-burgundy">30K+</span>
