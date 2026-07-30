@@ -205,11 +205,13 @@
         .sticker-rotate-2 { transform: rotate(2deg); }
         .sticker-rotate-3 { transform: rotate(3deg); }
         @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
         .marquee-content {
             animation: marquee 30s linear infinite;
+            will-change: transform;
+            backface-visibility: hidden;
         }
         html, body { max-width: 100%; overflow-x: hidden; }
         html { scroll-behavior: smooth; }

@@ -141,20 +141,16 @@
       "strip": {
         "stats": [
           {
-            "value": "400K+",
-            "label": "Total content views",
-            "count": "200000",
-            "suffix": "+"
+            "value": "120K",
+            "label": "Average views"
           },
           {
-            "value": "500+",
-            "label": "Story link clicks",
-            "count": "400",
-            "suffix": "+"
+            "value": "250+",
+            "label": "Average career-page links per story"
           },
           {
-            "value": "2.3×",
-            "label": "CV submission increase in one campaign"
+            "value": "324+",
+            "label": "Rise in applications in one week"
           }
         ],
         "cta": "See all results and audience data"
@@ -162,7 +158,7 @@
     },
     "results": {
       "heroTitle": "The right audience. Measurable action.",
-      "heroSubtitle": "I help tech companies reach people in the industry, generate measurable interest, and connect with potential candidates.",
+      "heroSubtitle": "Content that reaches the industry, drives action, and connects you with top talent.",
       "heroStats": [
         {
           "value": "70%+",
@@ -301,7 +297,7 @@
                 "label": "The previous number of CVs"
               }
             ],
-            "note": "CV submission data provided by Appcharge.",
+            "note": "CV submission data provided by Appcharge — measured one week after the video upload only; the full effect is usually wider.",
             "details": [
               {
                 "value": "103K",
@@ -440,7 +436,7 @@
         ],
         "metrics": [
           {
-            "value": "400+",
+            "value": "404+",
             "label": "Registered candidates"
           },
           {

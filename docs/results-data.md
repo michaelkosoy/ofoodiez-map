@@ -36,6 +36,8 @@ Added 2026-07-30 (numbers provided by Ofir, Instagram Insights):
 - **BeyondTrust** — 1 story with link: 3,653 views · 98 link clicks (❓ screenshot + permission)
 - Reel refresh: Cato 204K views / 2,508 likes / 5,847 shares · Mate Security 107K / 902 / 910 · Appcharge 103K / 662 / 945
 - Totals shown on site now: 400K+ content views · 500+ story link clicks (304+109+98)
+- Work strip (2026-07-31, provided by Ofir): 120K average views · 250+ average
+  career-page links per story · 324+ rise in applications in one week
 
 ## Audience (Instagram Insights, collected 2026-07)
 
