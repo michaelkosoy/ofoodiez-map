@@ -43,12 +43,16 @@ def _run_migrations():
         "ALTER TABLE portfolio_access ADD COLUMN show_boost BOOLEAN DEFAULT TRUE",
         "ALTER TABLE portfolio_access ADD COLUMN boost_price VARCHAR(64)",
     ]
+    # Commit per statement: on Postgres a later failure's rollback would other-
+    # wise wipe earlier uncommitted successes in the same transaction (sqlite
+    # was immune — pysqlite implicitly commits before DDL), which silently
+    # dropped new columns in prod.
     for stmt in migrations:
         try:
             db.session.execute(sa.text(stmt))
+            db.session.commit()
         except Exception:
             db.session.rollback()
-    db.session.commit()
 
 
 def init_db(app):
