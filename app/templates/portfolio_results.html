@@ -225,8 +225,9 @@
 <div id="cv-lightbox" class="hidden fixed inset-0 z-[70] items-center justify-center p-4">
 <div class="absolute inset-0 bg-black/70" data-cv-close></div>
 <button data-cv-close aria-label="Close CV" class="absolute top-4 right-4 z-10 w-12 h-12 flex items-center justify-center bg-custom-butter text-custom-brown neo-brutal-border rounded-full shadow-[3px_3px_0px_0px_#121212]"><span class="material-symbols-outlined pointer-events-none">close</span></button>
-<div class="relative max-w-lg w-full bg-white neo-brutal-border rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_#800020]">
-<img id="cv-lightbox-img" src="" alt="CV card" class="w-full h-auto" onerror="this.outerHTML='<p class=&quot;p-8 text-center font-body-md text-custom-brown&quot;>CV card coming soon.</p>'">
+<div class="relative max-w-lg w-full max-h-[85vh] overflow-y-auto bg-white neo-brutal-border rounded-3xl shadow-[8px_8px_0px_0px_#800020]">
+<img id="cv-lightbox-img" alt="CV card" class="w-full h-auto">
+<p id="cv-lightbox-missing" class="hidden p-8 text-center font-body-md text-custom-brown">CV card coming soon.</p>
 </div>
 </div>
 
@@ -359,20 +360,25 @@
   /* Candidate CV card lightbox */
   const cvBox = document.getElementById('cv-lightbox');
   const cvImg = document.getElementById('cv-lightbox-img');
-  const cvImgHtml = cvImg.outerHTML;
-  document.querySelectorAll('[data-cv]').forEach(card => card.addEventListener('click', () => {
-    const holder = cvBox.querySelector('.relative');
-    holder.innerHTML = cvImgHtml;   /* reset in case a previous miss replaced the img */
-    const img = holder.querySelector('img');
-    img.src = card.dataset.cv;
-    img.alt = card.dataset.cvRole + ' — CV card';
-    cvBox.classList.remove('hidden');
-    cvBox.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-  }));
-  const closeCv = () => { cvBox.classList.add('hidden'); cvBox.classList.remove('flex'); document.body.style.overflow = ''; };
-  cvBox.querySelectorAll('[data-cv-close]').forEach(el => el.addEventListener('click', closeCv));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !cvBox.classList.contains('hidden')) closeCv(); });
+  const cvMissing = document.getElementById('cv-lightbox-missing');
+  if (cvBox && cvImg) {
+    cvImg.addEventListener('error', () => {   /* file not uploaded yet */
+      cvImg.classList.add('hidden');
+      cvMissing.classList.remove('hidden');
+    });
+    document.querySelectorAll('[data-cv]').forEach(card => card.addEventListener('click', () => {
+      cvMissing.classList.add('hidden');
+      cvImg.classList.remove('hidden');
+      cvImg.src = card.dataset.cv;
+      cvImg.alt = card.dataset.cvRole + ' — CV card';
+      cvBox.classList.remove('hidden');
+      cvBox.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }));
+    const closeCv = () => { cvBox.classList.add('hidden'); cvBox.classList.remove('flex'); document.body.style.overflow = ''; };
+    cvBox.querySelectorAll('[data-cv-close]').forEach(el => el.addEventListener('click', closeCv));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !cvBox.classList.contains('hidden')) closeCv(); });
+  }
 })();
 </script>
 {% endblock %}
