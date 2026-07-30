@@ -57,12 +57,28 @@ def hitech_suppliers():
 
 # ---- Portfolio access codes (client codes for the private /portfolio page) ----
 
+def _package_price_defaults():
+    """Current default price texts from portfolio_content.json (launch/boost/presence)."""
+    import os, json
+    path = os.path.join(os.path.dirname(__file__), '..', 'app', 'data', 'portfolio_content.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            items = json.load(f)['portfolio']['packages']['items']
+        return {
+            'launch': items[0].get('price'), 'launch_note': items[0].get('priceNote'),
+            'boost': items[1].get('price'), 'presence': items[2].get('price'),
+        }
+    except Exception:
+        return {'launch': None, 'launch_note': None, 'boost': None, 'presence': None}
+
+
 @admin_bp.route('/portfolio/access')
 @login_required
 def portfolio_access():
     from database.models import PortfolioAccess
     codes = PortfolioAccess.query.order_by(PortfolioAccess.created_at.desc()).all()
-    return render_template('admin/portfolio_access.html', codes=codes, now=datetime.utcnow())
+    return render_template('admin/portfolio_access.html', codes=codes, now=datetime.utcnow(),
+                           price_defaults=_package_price_defaults())
 
 @admin_bp.route('/portfolio/access/create', methods=['POST'])
 @login_required
@@ -78,6 +94,17 @@ def portfolio_access_create():
     launch_price_note = request.form.get('launch_price_note', '').strip() or None
     boost_price = request.form.get('boost_price', '').strip() or None
     presence_price = request.form.get('presence_price', '').strip() or None
+    # Snapshot the current defaults for anything not customized, so the row
+    # always records exactly the prices this company was sent — future default
+    # changes won't rewrite an already-sent offer.
+    defaults = _package_price_defaults()
+    if launch_price is None:
+        launch_price = defaults['launch']
+        launch_price_note = defaults['launch_note']
+    if boost_price is None:
+        boost_price = defaults['boost']
+    if presence_price is None:
+        presence_price = defaults['presence']
     if not company:
         flash('Company name is required', 'error')
     elif show_pricing and not (show_launch or show_boost or show_presence):

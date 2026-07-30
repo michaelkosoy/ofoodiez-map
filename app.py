@@ -327,7 +327,9 @@ def portfolio_page():
     Portfolio Access, valid 7 days), by the admin password (ADMIN_SECRET),
     or by an active admin session. Gate copy lives in portfolio_content.json
     under portfolio.gate (editable at /admin/portfolio/content)."""
-    content = _load_portfolio_content()
+    lang = _portfolio_lang()
+    ui = PORTFOLIO_UI[lang]
+    content = _load_portfolio_content(lang)
     c = content.get('portfolio', {})
     gate_c = c.get('gate', {})
 
@@ -348,11 +350,18 @@ def portfolio_page():
             state = 'granted'
         else:
             state = 'expired' if row else 'denied'
-        return render_template('portfolio_gate.html', c=gate_c, state=state)
+        return render_template('portfolio_gate.html', c=gate_c, state=state, ui=ui, lang=lang)
 
     if _portfolio_unlocked():
-        return render_template('portfolio.html', c=c, hide_pricing=_portfolio_pricing_hidden())
-    return render_template('portfolio_gate.html', c=gate_c, state=None)
+        return render_template('portfolio.html', c=c, hide_pricing=_portfolio_pricing_hidden(), ui=ui, lang=lang)
+    return render_template('portfolio_gate.html', c=gate_c, state=None, ui=ui, lang=lang)
+
+
+@app.route('/portfolio/lang/<code>')
+def portfolio_lang(code):
+    """Switch the portfolio language for this session (en/he)."""
+    session['portfolio_lang'] = 'he' if code == 'he' else 'en'
+    return redirect(request.referrer or url_for('portfolio_page'))
 
 
 @app.route('/portfolio/lock')
@@ -367,9 +376,11 @@ def portfolio_work():
     """Portfolio work examples (content series). Same gate as /portfolio."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    lang = _portfolio_lang()
+    content = _load_portfolio_content(lang)
     return render_template('portfolio_work.html', c=content.get('portfolio', {}),
-                           hide_pricing=_portfolio_pricing_hidden())
+                           hide_pricing=_portfolio_pricing_hidden(),
+                           ui=PORTFOLIO_UI[lang], lang=lang)
 
 
 @app.route('/portfolio/results')
@@ -377,9 +388,11 @@ def portfolio_results():
     """Portfolio results (stats + case studies). Same gate as /portfolio."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    lang = _portfolio_lang()
+    content = _load_portfolio_content(lang)
     return render_template('portfolio_results.html', c=content.get('portfolio', {}),
-                           hide_pricing=_portfolio_pricing_hidden())
+                           hide_pricing=_portfolio_pricing_hidden(),
+                           ui=PORTFOLIO_UI[lang], lang=lang)
 
 
 @app.route('/portfolio/pricing')
@@ -397,7 +410,9 @@ def portfolio_pricing():
         return redirect(url_for('portfolio_page'))
     if _portfolio_pricing_hidden():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    lang = _portfolio_lang()
+    ui = PORTFOLIO_UI[lang]
+    content = _load_portfolio_content(lang)
     row = _portfolio_grant()
     if row and row.is_legacy_pricing():
         pricing = {
@@ -408,8 +423,10 @@ def portfolio_pricing():
                             if row.launch_price else None),
             'boost_price': row.presence_price or None,
         }
+        # Frozen offers stay exactly as sent — always English
         return render_template('portfolio_pricing_legacy.html',
-                               c=content.get('portfolio', {}), pricing=pricing)
+                               c=_load_portfolio_content().get('portfolio', {}),
+                               pricing=pricing, ui=PORTFOLIO_UI['en'], lang='en')
     pricing = {
         'show_launch': row.show_launch is not False if row else True,
         'show_boost': row.show_boost is not False if row else True,
@@ -421,7 +438,7 @@ def portfolio_pricing():
         'presence_price': (row.presence_price or None) if row else None,
     }
     return render_template('portfolio_pricing.html', c=content.get('portfolio', {}),
-                           pricing=pricing)
+                           pricing=pricing, ui=ui, lang=lang)
 
 
 def _portfolio_grant():
@@ -459,14 +476,85 @@ def _portfolio_unlocked():
     return False
 
 
-def _load_portfolio_content():
-    """Load portfolio content from portfolio_content.json."""
-    path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'portfolio_content.json')
+# Small template labels that live in the templates rather than the content
+# JSON (badges, buttons, nav). Body copy is translated via
+# portfolio_content_he.json, deep-merged over the English content.
+PORTFOLIO_UI = {
+    'en': {
+        'dir': 'ltr', 'toggle': 'עברית', 'toggle_code': 'he',
+        'nav_about': 'About', 'nav_work': 'Work', 'nav_results': 'Results', 'nav_pricing': 'Pricing',
+        'contact': 'Contact', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'Email',
+        'hero_badge': 'Engineered for Tech',
+        'hero_h1_pre': 'Make your startup', 'hero_h1_mark': 'impossible', 'hero_h1_post': 'to scroll past.',
+        'metric_community': 'Tech community', 'metric_cv': 'Increase in CV submissions',
+        'metric_views': 'Views last month', 'see_more_metrics': 'See more metrics',
+        'trusted_by': 'Trusted by',
+        'edge_badge': 'Built by an Engineer, not an Agency', 'edge_title': "The Engineer's Edge.",
+        'edge_p1': 'I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.',
+        'edge_p2_pre': "I don't just make videos,", 'edge_p2_mark': 'I understand your product.',
+        'problem_badge': 'The Problem',
+        'work_badge': 'The Work', 'see_full_results': 'See full results',
+        'pricing_badge': 'The pricing', 'pricing_title': 'Packages',
+        'availability': 'Limited monthly availability',
+        'recommended': 'Recommended', 'get_started': 'Get Started', 'per_month': '/month',
+        'min_commitment': 'Minimum commitment:', 'addon': 'add-on',
+    },
+    'he': {
+        'dir': 'rtl', 'toggle': 'English', 'toggle_code': 'en',
+        'nav_about': 'אודות', 'nav_work': 'עבודות', 'nav_results': 'תוצאות', 'nav_pricing': 'תמחור',
+        'contact': 'צרו קשר', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'אימייל',
+        'hero_badge': 'מהונדס להייטק',
+        'hero_h1_pre': 'הופכים את הסטארטאפ שלכם', 'hero_h1_mark': 'לבלתי אפשרי', 'hero_h1_post': 'לגלילה הלאה.',
+        'metric_community': 'קהילת הייטק', 'metric_cv': 'עלייה בהגשות קורות חיים',
+        'metric_views': 'צפיות בחודש האחרון', 'see_more_metrics': 'לכל המדדים',
+        'trusted_by': 'סומכים עליי',
+        'edge_badge': 'נבנה על ידי מהנדס, לא סוכנות', 'edge_title': 'היתרון של מהנדס.',
+        'edge_p1': 'עבדתי כמהנדס תוכנה בחברות סייבר ובניתי קריירת תוכן לצד משרה מלאה.',
+        'edge_p2_pre': 'אני לא רק מצלם סרטונים,', 'edge_p2_mark': 'אני מבין את המוצר שלכם.',
+        'problem_badge': 'הבעיה',
+        'work_badge': 'העבודות', 'see_full_results': 'לכל התוצאות',
+        'pricing_badge': 'התמחור', 'pricing_title': 'חבילות',
+        'availability': 'זמינות חודשית מוגבלת',
+        'recommended': 'מומלץ', 'get_started': 'בואו נתחיל', 'per_month': '/לחודש',
+        'min_commitment': 'התחייבות מינימלית:', 'addon': 'תוספת',
+    },
+}
+
+
+def _portfolio_lang():
+    return 'he' if session.get('portfolio_lang') == 'he' else 'en'
+
+
+def _pf_merge(base, over):
+    """Deep-merge translated content over the English content. Dicts merge by
+    key; lists merge element-wise by index (so the Hebrew file only carries the
+    text fields — videoIds, metric values, icons etc. fall through from EN)."""
+    if isinstance(base, dict) and isinstance(over, dict):
+        out = dict(base)
+        for k, v in over.items():
+            out[k] = _pf_merge(base[k], v) if k in base else v
+        return out
+    if isinstance(base, list) and isinstance(over, list):
+        merged = [_pf_merge(b, over[i]) if i < len(over) else b for i, b in enumerate(base)]
+        return merged + over[len(base):]
+    return base if over is None else over
+
+
+def _load_portfolio_content(lang='en'):
+    """Load portfolio content; Hebrew is portfolio_content_he.json merged over EN."""
+    base_dir = os.path.join(os.path.dirname(__file__), 'app', 'data')
     try:
-        with open(path, encoding='utf-8') as f:
-            return json.load(f)
+        with open(os.path.join(base_dir, 'portfolio_content.json'), encoding='utf-8') as f:
+            content = json.load(f)
     except Exception:
         return {}
+    if lang == 'he':
+        try:
+            with open(os.path.join(base_dir, 'portfolio_content_he.json'), encoding='utf-8') as f:
+                content = _pf_merge(content, json.load(f))
+        except Exception:
+            pass  # missing/broken translation → English
+    return content
 
 
 def _load_hitech_data(filename):

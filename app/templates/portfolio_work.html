@@ -6,7 +6,7 @@
 <!-- Content Series Section -->
 <section class="scroll-mt-32" id="content-series">
 <div class="mb-12 text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg mb-6">The Work</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg mb-6">{{ ui.work_badge | default('The Work') }}</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black text-center">{{ c.series.title | default('Content Series') }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mt-4 max-w-none">{{ c.series.subtitle | default('Ongoing series, not one-off clips, built to keep your audience coming back for the next episode.') }}</p>
 </div>
@@ -56,7 +56,7 @@
 {% if item.hover.likes %}<span class="bg-white/95 text-custom-brown px-3 py-1 font-label-mono text-xs rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> {{ item.hover.likes }}</span>{% endif %}
 {% if item.hover.sends %}<span class="bg-white/95 text-custom-brown px-3 py-1 font-label-mono text-xs rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">send</span> {{ item.hover.sends }}</span>{% endif %}
 {% if item.results %}
-<a href="{{ url_for('portfolio_results') }}" onclick="event.stopPropagation()" class="bg-custom-brown/90 text-white px-3 py-1 font-label-mono text-xs rounded-full flex items-center gap-1">See full results <span class="material-symbols-outlined text-[14px]">arrow_forward</span></a>
+<a href="{{ url_for('portfolio_results') }}" onclick="event.stopPropagation()" class="bg-custom-brown/90 text-white px-3 py-1 font-label-mono text-xs rounded-full flex items-center gap-1">{{ ui.see_full_results | default('See full results') }} <span class="material-symbols-outlined text-[14px]">arrow_forward</span></a>
 {% endif %}
 </div>
 {% endif %}

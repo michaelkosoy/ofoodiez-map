@@ -6,14 +6,14 @@
 <div class="absolute inset-0 code-pattern"></div>
 <div class="max-w-3xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
 <div class="relative inline-block mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#2A2420] rounded-lg">Engineered for Tech</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#2A2420] rounded-lg">{{ ui.hero_badge | default('Engineered for Tech') }}</span>
 </div>
 <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-custom-brown mb-6 relative z-10 font-black">
-                    Make your startup <br class="hidden md:block"/>
+                    {{ ui.hero_h1_pre | default('Make your startup') }} <br class="hidden md:block"/>
 <span class="text-custom-brown relative inline-block bg-custom-butter px-2 transform -skew-x-6 rounded-xl">
-                        impossible
+                        {{ ui.hero_h1_mark | default('impossible') }}
 </span>
-                    to scroll past.
+                    {{ ui.hero_h1_post | default('to scroll past.') }}
                 </h1>
 <p class="font-body-lg text-body-lg text-custom-brown font-medium max-w-xl mx-auto mb-10">
                     {{ c.hero.subheadline }}
@@ -28,18 +28,18 @@
 <div class="flex flex-col md:flex-row items-center md:items-baseline justify-center gap-y-2 gap-x-8 font-label-mono text-custom-brown">
 <div class="flex items-baseline gap-2">
 <span class="text-lg md:text-2xl font-black text-custom-burgundy">30K+</span>
-<span class="text-[9px] md:text-xs uppercase tracking-wider">Tech community</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">{{ ui.metric_community | default('Tech community') }}</span>
 </div>
 <div class="flex items-baseline gap-2">
 <span class="text-lg md:text-2xl font-black text-custom-burgundy">2.3×</span>
-<span class="text-[9px] md:text-xs uppercase tracking-wider">Increase in CV submissions</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">{{ ui.metric_cv | default('Increase in CV submissions') }}</span>
 </div>
 <div class="flex items-baseline gap-2">
 <span class="text-lg md:text-2xl font-black text-custom-burgundy">1.2M+</span>
-<span class="text-[9px] md:text-xs uppercase tracking-wider">Views last month</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">{{ ui.metric_views | default('Views last month') }}</span>
 </div>
 </div>
-<a href="{{ url_for('portfolio_results') }}" class="mt-3 inline-flex items-center gap-1 font-label-mono text-[10px] md:text-xs uppercase tracking-wider text-custom-burgundy font-bold border-b border-custom-burgundy pb-0.5">See more metrics <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+<a href="{{ url_for('portfolio_results') }}" class="mt-3 inline-flex items-center gap-1 font-label-mono text-[10px] md:text-xs uppercase tracking-wider text-custom-burgundy font-bold border-b border-custom-burgundy pb-0.5">{{ ui.see_more_metrics | default('See more metrics') }} <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
 </div>
 </header>
 <!-- Client Marquee -->
@@ -47,7 +47,7 @@
 <div class="marquee-content flex items-center w-max">
 {% for i in range(6) %}
 <div class="flex items-center gap-12 pr-12 flex-shrink-0">
-<span class="font-label-mono text-sm md:text-base uppercase tracking-widest text-custom-brown font-bold flex-shrink-0">Trusted by</span>
+<span class="font-label-mono text-sm md:text-base uppercase tracking-widest text-custom-brown font-bold flex-shrink-0">{{ ui.trusted_by | default('Trusted by') }}</span>
 <img src="{{ url_for('static', filename='img/logos/cyera.svg') }}" alt="Cyera" class="h-6 md:h-8 w-auto flex-shrink-0 grayscale brightness-0">
 <img src="{{ url_for('static', filename='img/logos/scaleops.svg') }}" alt="ScaleOps" class="h-6 md:h-8 w-auto flex-shrink-0 grayscale brightness-0">
 <img src="{{ url_for('static', filename='img/logos/matesecurity.svg') }}" alt="Mate Security" class="h-5 md:h-7 w-auto flex-shrink-0 grayscale brightness-0">
@@ -80,18 +80,18 @@ async function deployCampaign(product) {
 // &gt; Synthesizing value prop...
     </div>
 <div class="w-full px-gutter md:px-margin-desktop relative z-10 text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-lg">Built by an Engineer, not an Agency</span>
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-8 font-black text-center">The Engineer's Edge.</h2>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-lg">{{ ui.edge_badge | default('Built by an Engineer, not an Agency') }}</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-8 font-black text-center">{{ ui.edge_title | default("The Engineer's Edge.") }}</h2>
 <div class="font-body-lg text-white/90 text-xl leading-relaxed font-medium max-w-3xl mx-auto space-y-4">
-<p>I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.</p>
-<p class="text-xl md:text-3xl font-black">I don't just make videos, <span class="text-custom-brown bg-custom-butter px-2 inline-block">I understand your product.</span></p>
+<p>{{ ui.edge_p1 | default('I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.') }}</p>
+<p class="text-xl md:text-3xl font-black">{{ ui.edge_p2_pre | default("I don't just make videos,") }} <span class="text-custom-brown bg-custom-butter px-2 inline-block">{{ ui.edge_p2_mark | default('I understand your product.') }}</span></p>
 </div>
 </div>
 </section>
 <!-- Problem Section -->
 <section class="py-24 bg-white" id="problem">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg mb-6">The Problem</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg mb-6">{{ ui.problem_badge | default('The Problem') }}</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">{{ c.problem.title | default("Who owns your company's story?") }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mb-0 md:mb-16 max-w-none">
 {{ c.problem.body | default('It falls between marketing, HR, and operations, without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.') }}

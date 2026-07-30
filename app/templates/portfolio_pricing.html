@@ -19,11 +19,11 @@
 <!-- Pricing Section -->
 <section class="py-12 scroll-mt-32" id="pricing">
 <div class="text-center mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg">The pricing</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg">{{ ui.pricing_badge | default('The pricing') }}</span>
 </div>
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">Packages</h2>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-3 text-center">{{ ui.pricing_title | default('Packages') }}</h2>
 <p class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold text-center mb-3 flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-base">bolt</span> Limited monthly availability
+<span class="material-symbols-outlined text-base">bolt</span> {{ ui.availability | default('Limited monthly availability') }}
 </p>
 <div class="w-screen relative left-1/2 -translate-x-1/2 px-gutter md:px-margin-desktop">
 <div id="packages-row" class="flex flex-col md:flex-row gap-6 md:items-stretch md:justify-center max-w-[1400px] mx-auto">
@@ -53,7 +53,7 @@
 {% set launch_note = pricing.launch_note if pricing.launch_price else launch.priceNote %}
 {% if launch_note %}<p class="text-xs text-custom-brown mt-1">{{ launch_note }}</p>{% endif %}
 </div>
-<a href="https://wa.me/972542471816?text={{ launch_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">Get Started</a>
+<a href="https://wa.me/972542471816?text={{ launch_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
 </div>
 </div>
 {% endif %}
@@ -62,7 +62,7 @@
 <div class="mb-3">
 <div class="flex items-center justify-between mb-4">
 <h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown font-black">{{ boost.name | title }}</h3>
-<span class="bg-custom-burgundy text-white text-xs font-label-mono uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0">Recommended</span>
+<span class="bg-custom-burgundy text-white text-xs font-label-mono uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0">{{ ui.recommended | default('Recommended') }}</span>
 </div>
 <p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ boost.subtitle }}</p>
 {% if boost.goal %}<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ boost.goal }}</p>{% endif %}
@@ -93,7 +93,7 @@
 <div class="flex items-center gap-2">
 <span class="material-symbols-outlined text-custom-brown text-lg flex-shrink-0">add_circle</span>
 <span class="font-body-md text-custom-brown text-sm font-bold">{{ addon }}</span>
-<span class="ml-auto border border-custom-brown/30 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
+<span class="ml-auto border border-custom-brown/30 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ ui.addon | default('add-on') }}</span>
 </div>
 {% endfor %}
 </div>
@@ -101,10 +101,10 @@
 </div>
 <div class="pt-3 mt-3">
 <div class="text-center">
-<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or boost.price | default('₪5,000') }}<span class="font-medium text-sm">/month</span></p>
-{% if boost.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">Minimum commitment: {{ boost.minimumCommitment }}</p>{% endif %}
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or boost.price | default('₪5,000') }}<span class="font-medium text-sm">{{ ui.per_month | default('/month') }}</span></p>
+{% if boost.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">{{ ui.min_commitment | default('Minimum commitment:') }} {{ boost.minimumCommitment }}</p>{% endif %}
 </div>
-<a href="https://wa.me/972542471816?text={{ boost_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-burgundy text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">Get Started</a>
+<a href="https://wa.me/972542471816?text={{ boost_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-burgundy text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
 </div>
 </div>
 {% endif %}
@@ -141,7 +141,7 @@
 <div class="flex items-center gap-2">
 <span class="material-symbols-outlined text-custom-brown text-lg flex-shrink-0">add_circle</span>
 <span class="font-body-md text-custom-brown text-sm font-bold">{{ addon }}</span>
-<span class="ml-auto border border-custom-brown/30 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">add-on</span>
+<span class="ml-auto border border-custom-brown/30 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ ui.addon | default('add-on') }}</span>
 </div>
 {% endfor %}
 </div>
@@ -149,10 +149,10 @@
 </div>
 <div class="pt-3">
 <div class="text-center">
-<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.presence_price or presence.price | default('Starting from ₪9,900') }}<span class="font-medium text-sm">/month</span></p>
-{% if presence.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">Minimum commitment: {{ presence.minimumCommitment }}</p>{% endif %}
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.presence_price or presence.price | default('Starting from ₪9,900') }}<span class="font-medium text-sm">{{ ui.per_month | default('/month') }}</span></p>
+{% if presence.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">{{ ui.min_commitment | default('Minimum commitment:') }} {{ presence.minimumCommitment }}</p>{% endif %}
 </div>
-<a href="https://wa.me/972542471816?text={{ presence_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">Get Started</a>
+<a href="https://wa.me/972542471816?text={{ presence_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
 </div>
 </div>
 {% endif %}
