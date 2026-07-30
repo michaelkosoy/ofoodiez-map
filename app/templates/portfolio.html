@@ -6,7 +6,7 @@
 <div class="absolute inset-0 code-pattern"></div>
 <div class="max-w-3xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
 <div class="relative inline-block mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#2A2420] rounded-full">Engineered for Tech</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-label-mono uppercase neo-brutal-border sticker-rotate-1 inline-block shadow-[4px_4px_0px_0px_#2A2420] rounded-lg">Engineered for Tech</span>
 </div>
 <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-custom-brown mb-6 relative z-10 font-black">
                     Make your startup <br class="hidden md:block"/>
@@ -19,24 +19,26 @@
                     {{ c.hero.subheadline }}
                 </p>
 <div class="relative mb-10">
-<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white btn-soft px-8 py-4 font-label-mono text-label-mono uppercase text-lg transition-all inline-flex items-center gap-3 z-20 relative rounded-full">
+<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white btn-soft px-8 py-4 font-label-mono text-label-mono uppercase text-lg transition-all inline-flex items-center gap-3 z-20 relative border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">
                         {{ c.hero.cta | default('Check packages') }} <span class="material-symbols-outlined">terminal</span>
 </a>
 </div>
-<div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-label-mono text-custom-brown">
+<div class="overflow-x-auto max-w-full no-scrollbar"><div class="flex flex-nowrap items-baseline gap-x-4 md:gap-x-8 font-label-mono text-custom-brown whitespace-nowrap w-max mx-auto px-2">
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black text-custom-burgundy">30K+</span>
-<span class="text-xs uppercase tracking-wider">Tech community</span>
-</div>
-<div class="flex items-baseline gap-2">
-<span class="text-2xl font-black text-custom-burgundy">2.3×</span>
-<span class="text-xs uppercase tracking-wider">Increase in CV submissions</span>
+<span class="text-lg md:text-2xl font-black text-custom-burgundy">30K+</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">Tech community</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black text-custom-burgundy">1.2M+</span>
-<span class="text-xs uppercase tracking-wider">Views last month · <a href="{{ url_for('portfolio_results') }}" class="hover:text-custom-burgundy transition-colors underline underline-offset-2">See more metrics</a></span>
+<span class="text-lg md:text-2xl font-black text-custom-burgundy">2.3×</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">Increase in CV submissions</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-lg md:text-2xl font-black text-custom-burgundy">1.2M+</span>
+<span class="text-[9px] md:text-xs uppercase tracking-wider">Views last month</span>
 </div>
 </div>
+</div>
+<a href="{{ url_for('portfolio_results') }}" class="mt-3 inline-flex items-center gap-1 font-label-mono text-[10px] md:text-xs uppercase tracking-wider text-custom-burgundy font-bold underline underline-offset-4">See more metrics <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
 </div>
 </header>
 <!-- Client Marquee -->
@@ -77,11 +79,11 @@ async function deployCampaign(product) {
 // &gt; Synthesizing value prop...
     </div>
 <div class="w-full px-gutter md:px-margin-desktop relative z-10 text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#FFF200] transform -rotate-2 rounded-full">Built by an Engineer, not an Agency</span>
-<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-butter mb-8 font-black text-center">The Engineer's Edge.</h2>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border mb-8 inline-block shadow-[4px_4px_0px_0px_#800020] transform -rotate-2 rounded-lg">Built by an Engineer, not an Agency</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-8 font-black text-center">The Engineer's Edge.</h2>
 <div class="font-body-lg text-white/90 text-xl leading-relaxed font-medium max-w-3xl mx-auto space-y-4">
 <p>I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.</p>
-<p class="text-2xl md:text-3xl font-black">I don't just make videos, <span class="text-custom-brown bg-custom-butter px-2 rounded-xl">I understand your product.</span></p>
+<p class="text-xl md:text-3xl font-black">I don't just make videos, <span class="text-custom-brown bg-custom-butter px-2 inline-block">I understand your product.</span></p>
 <p>Stop struggling to explain it to ad agencies.</p>
 </div>
 </div>
@@ -89,7 +91,7 @@ async function deployCampaign(product) {
 <!-- Problem Section -->
 <section class="py-24 bg-white" id="problem">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full mb-6">The Problem</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg mb-6">The Problem</span>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown mb-4 font-black text-center">{{ c.problem.title | default("Who owns your company's story?") }}</h2>
 <p class="font-body-lg text-custom-brown font-medium mb-0 md:mb-16 max-w-none">
 {{ c.problem.body | default('It falls between marketing, HR, and operations, without the experience, strategy, or KPIs to make it work. And hiring a full-time owner is expensive.') }}
@@ -98,7 +100,7 @@ async function deployCampaign(product) {
 <p class="hidden md:block font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold mb-6">{{ c.problem.goodNews | default('The good news: now it has an owner') }}</p>
 <div class="hidden md:grid md:grid-cols-3 gap-4">
 {% for card in c.problem.cards | default([]) %}
-  <div class="rounded-2xl p-6 text-left {{ 'bg-custom-burgundy' if loop.index == 2 else 'bg-white' }} shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+  <div class="rounded-xl p-6 text-left {{ 'bg-custom-burgundy' if loop.index == 2 else 'bg-white' }} shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
     <div class="w-12 h-12 rounded-full bg-custom-butter border-2 border-custom-brown flex items-center justify-center mb-4">
       <span class="material-symbols-outlined text-custom-burgundy">{{ card.icon | default('check_circle') }}</span>
     </div>
@@ -115,7 +117,7 @@ async function deployCampaign(product) {
 <section class="py-12 bg-white" id="field-quote">
 <div class="max-w-5xl mx-auto px-gutter md:px-margin-desktop text-center">
 <div class="px-8 py-8">
-<span class="bg-custom-brown text-white px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[3px_3px_0px_0px_#FFF200] transform -rotate-1 rounded-full mb-6">{{ c.quote.label | default('Heard in the field') }}</span>
+<span class="bg-custom-brown text-white px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[3px_3px_0px_0px_#FFF200] transform -rotate-1 rounded-lg mb-6">{{ c.quote.label | default('Heard in the field') }}</span>
 <blockquote>
 <span class="material-symbols-outlined text-4xl text-custom-burgundy block mb-3" style="font-variation-settings: 'FILL' 1;">format_quote</span>
 <p class="font-headline-md text-xl md:text-2xl text-custom-brown font-black leading-snug">
@@ -132,7 +134,7 @@ async function deployCampaign(product) {
 <section id="process" class="hidden md:block py-12 scroll-mt-32">
 <div class="mx-auto">
 <div class="text-center mb-6">
-<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-full">The Process</span>
+<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#2A2420] transform -rotate-1 rounded-lg">The Process</span>
 </div>
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black mb-12 text-center">From company story to content engine</h2>
 
@@ -140,7 +142,7 @@ async function deployCampaign(product) {
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
 
 <!-- Step 1 -->
-<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
+<div class="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">1</span>
@@ -151,7 +153,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 2 -->
-<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
+<div class="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">2</span>
@@ -162,7 +164,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 3 -->
-<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
+<div class="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">3</span>
@@ -173,7 +175,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 4 -->
-<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
+<div class="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">4</span>
@@ -184,7 +186,7 @@ async function deployCampaign(product) {
 </div>
 
 <!-- Step 5 -->
-<div class="bg-white rounded-3xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
+<div class="bg-white rounded-xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] lg:min-w-[200px]">
 <div class="flex items-start gap-2 mb-4">
 <div class="w-10 h-10 rounded-full bg-custom-butter border-2 border-custom-burgundy flex items-center justify-center flex-shrink-0">
 <span class="font-label-bold text-label-bold text-custom-burgundy font-black">5</span>

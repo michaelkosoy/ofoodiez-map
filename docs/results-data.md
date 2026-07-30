@@ -41,7 +41,7 @@ Added 2026-07-30 (numbers provided by Ofir, Instagram Insights):
 
 - Age: 13-17: 0.2% · 18-24: 4.7% · **25-34: 31.9%** · 35-44: 21.7% · 45-54: 20.6% · 55-64: 14.5% · 65+: 6.5%
 - Top countries: **Israel 93.8%** · US 1.6% · Palestine 1.1% · Brazil (n/a)
-- Top cities: ❓ not captured (screenshot shows Countries tab) — capture Cities tab for the ranked-city card
+- Top cities (captured 2026-07-30, `cities metricks.jpeg`): **Tel Aviv 23.7%** · Ramat Gan 6.3% · Rishon LeZion 4.1% · Petah Tikva 3.6% · Herzliya 3.4%
 - Gender split: **70.4% female / 29.6% male** (provided by Ofir, 2026-07-30 — Instagram Insights)
 - Followers: 30K+ (whyme section claim)
 
@@ -59,10 +59,9 @@ Live source: `GET /wa/debug/stats?key=<ADMIN_SECRET>` on the bot service
 
 - Bot live since 2026-06-13 → **46 days** (site shows "45+")
 - Users total: **549** · registered candidates (name given): **403** (site shows "400+")
-- Conversations: 548 total; 548 touched in last 30 days → **18.3/day** 30-day average.
-  ⚠️ every conversation row was updated within 30 days — a migration/broadcast may
-  have touched `updated_at`, so treat the daily average as an upper bound; re-check
-  next month when the window is organic.
+- Conversations: 548 total; 548 touched in last 30 days → 18.3/day derived (⚠️ possibly
+  migration-inflated). **Site shows 52/day average active chats — provided by Ofir
+  2026-07-30 (admin panel)**; reconcile with /wa/debug/stats next month.
 - Registered community members: 1,300+ (per Ofir, 2026-07)
 - Monthly registrations / referral totals: ❓
 - Professional categories: currently the 6 generic ones on the Results page — replace with real bot categories
