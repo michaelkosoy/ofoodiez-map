@@ -8,11 +8,11 @@
 <section id="results-hero" class="reveal text-center scroll-mt-32">
 <span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">The Results</span>
 <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black leading-tight">{{ r.heroTitle }}</h1>
-<p class="font-body-lg text-custom-brown font-medium mt-4 max-w-2xl mx-auto">{{ r.heroSubtitle }}</p>
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mt-8 md:mt-10">
+<p class="font-body-lg text-custom-brown font-medium mt-4 max-w-none">{{ r.heroSubtitle }}</p>
+<div class="grid grid-cols-3 gap-2 md:gap-6 mt-8 md:mt-10">
 {% for s in r.heroStats %}
 <div class="reveal bg-white neo-brutal-border rounded-2xl md:rounded-3xl p-3 md:p-6 text-center shadow-[3px_3px_0px_0px_#121212] md:shadow-[4px_4px_0px_0px_#121212]">
-<p class="font-headline-lg text-2xl md:text-5xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
+<p class="count-up font-headline-lg text-2xl md:text-5xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
 <p class="font-label-mono text-[9px] md:text-xs uppercase tracking-wider text-custom-brown font-bold mt-2 md:mt-3 leading-snug">{{ s.label }}</p>
 </div>
 {% endfor %}
@@ -24,13 +24,13 @@
 <div class="text-center mb-8">
 {% if r.audience.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.audience.badge }}</span>{% endif %}
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.audience.heading }}</h2>
-<p class="font-body-md text-custom-brown/80 text-sm mt-3 max-w-xl mx-auto">{{ r.audience.note }}</p>
+<p class="font-body-md text-custom-brown/80 text-sm mt-3 max-w-none">{{ r.audience.note }}</p>
 </div>
 <!-- Summary cards -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-6">
 {% for s in r.audience.summary %}
 <div class="reveal bg-white neo-brutal-border rounded-2xl md:rounded-3xl p-3 md:p-5 text-center shadow-[3px_3px_0px_0px_#121212] md:shadow-[4px_4px_0px_0px_#121212]">
-<p class="font-headline-md text-lg md:text-3xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
+<p class="count-up font-headline-md text-lg md:text-3xl text-custom-burgundy font-black leading-none">{{ s.value }}</p>
 <p class="font-label-mono text-[9px] md:text-xs uppercase tracking-wider text-custom-brown font-bold mt-1 md:mt-2 leading-snug">{{ s.label }}</p>
 </div>
 {% endfor %}
@@ -59,7 +59,7 @@
 <span class="font-body-md text-xs md:text-sm text-custom-brown font-black">{{ b.pct }}%</span>
 </div>
 <div class="h-2 md:h-2.5 bg-custom-brown/10 rounded-full overflow-hidden">
-<div class="chart-bar h-full bg-custom-burgundy rounded-full" data-pct="{{ b.pct }}" style="width:0%"></div>
+<div class="chart-bar h-full rounded-full" data-pct="{{ b.pct }}" style="width:0%;background:{{ chart.color or '#800020' }}"></div>
 </div>
 </div>
 {% endfor %}
@@ -67,24 +67,29 @@
 {% elif chart.type == 'donut' %}
 {% set seg = chart.segments %}
 <div class="flex items-center justify-center gap-4 md:gap-6">
-<div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-custom-brown flex-shrink-0" style="background: conic-gradient(#800020 0% {{ seg[0].pct }}%, #FFF200 {{ seg[0].pct }}% 100%);">
-<div class="absolute inset-3 md:inset-4 bg-white rounded-full border-2 border-custom-brown flex items-center justify-center">
-<span class="font-headline-md text-sm md:text-lg font-black text-custom-brown">{{ seg[0].pct }}%</span>
+<div class="relative w-28 h-28 md:w-36 md:h-36 flex-shrink-0">
+<svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+<circle cx="50" cy="50" r="40" fill="none" stroke="#FFF200" stroke-width="13"/>
+<circle class="donut-seg" cx="50" cy="50" r="40" fill="none" stroke="#ec4899" stroke-width="13" stroke-linecap="round" stroke-dasharray="0 251.33" data-pct="{{ seg[0].pct }}"/>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-headline-md text-base md:text-xl font-black text-custom-brown">{{ seg[0].pct }}%</span>
 </div>
 </div>
 <div class="space-y-2">
 {% for s in seg %}
 <div class="flex items-center gap-2">
-<span class="w-3 h-3 rounded-full border-2 border-custom-brown {{ 'bg-custom-burgundy' if loop.first else 'bg-custom-butter' }}"></span>
+<span class="w-3 h-3 rounded-full border-2 border-custom-brown {{ 'bg-[#ec4899]' if loop.first else 'bg-custom-butter' }}"></span>
 <span class="font-label-mono text-xs text-custom-brown font-bold">{{ s.label }} · {{ s.pct }}%</span>
 </div>
 {% endfor %}
 </div>
 </div>
 {% elif chart.type == 'chips' %}
+{% set chip_colors = ['bg-[#fef08a]', 'bg-[#bbf7d0]', 'bg-[#f6c9c9]', 'bg-[#bfdbfe]'] %}
 <div class="flex flex-wrap gap-1.5 md:gap-2">
 {% for chip in chart.chips %}
-<span class="bg-custom-brown/5 border-2 border-custom-brown/30 text-custom-brown px-2.5 py-1 md:px-3 md:py-1.5 font-label-mono text-[11px] md:text-xs rounded-full">{{ chip }}</span>
+<span class="{{ chip_colors[loop.index0 % 4] }} border-2 border-custom-brown/40 text-custom-brown px-2.5 py-1 md:px-3 md:py-1.5 font-label-mono text-[11px] md:text-xs rounded-full">{{ chip }}</span>
 {% endfor %}
 </div>
 {% endif %}
@@ -156,7 +161,7 @@
 {% if r.talent.liveLine %}
 <p class="mt-3 inline-flex items-center gap-2 font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {{ r.talent.liveLine }}</p>
 {% endif %}
-<div class="mt-4 max-w-2xl mx-auto space-y-2">
+<div class="mt-4 max-w-none space-y-2">
 {% for p in r.talent.paragraphs %}
 <p class="font-body-md text-custom-brown text-sm md:text-base">{{ p }}</p>
 {% endfor %}
@@ -166,7 +171,7 @@
 <div class="grid grid-cols-2 gap-3 md:gap-6 mb-8 max-w-xl mx-auto">
 {% for m in r.talent.metrics %}
 <div class="reveal bg-white neo-brutal-border rounded-3xl p-5 text-center shadow-[4px_4px_0px_0px_#121212]">
-<p class="font-headline-md text-2xl md:text-3xl text-custom-burgundy font-black leading-none">{{ m.value }}</p>
+<p class="count-up font-headline-md text-2xl md:text-3xl text-custom-burgundy font-black leading-none">{{ m.value }}</p>
 <p class="font-label-mono text-[10px] uppercase tracking-wider text-custom-brown font-bold mt-2">{{ m.label }}</p>
 </div>
 {% endfor %}
@@ -193,7 +198,7 @@
 {% if r.talent.candidatesCaption %}<p class="text-center font-body-md text-[11px] text-custom-brown/60 italic mt-3">{{ r.talent.candidatesCaption }}</p>{% endif %}
 <!-- Private talent feed -->
 {% if r.talent.privateFeed %}
-<div class="reveal mt-10 max-w-2xl mx-auto bg-custom-brown text-white neo-brutal-border rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#800020]">
+<div class="reveal mt-10 max-w-4xl mx-auto bg-custom-brown text-white neo-brutal-border rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#800020]">
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-outlined text-custom-butter">lock</span>
 <h3 class="font-headline-md text-xl font-black">{{ r.talent.privateFeed.title }}</h3>
@@ -208,7 +213,7 @@
 <section id="results-cta" class="reveal hidden md:block text-center scroll-mt-32">
 {% if r.cta.badge %}<span class="bg-custom-butter text-custom-brown px-4 py-1 font-label-mono text-sm uppercase neo-brutal-border inline-block shadow-[4px_4px_0px_0px_#121212] transform -rotate-1 rounded-full rounded-xl mb-6">{{ r.cta.badge }}</span>{% endif %}
 <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-custom-brown font-black">{{ r.cta.heading }}</h2>
-<p class="font-body-lg text-custom-brown font-medium mt-3 max-w-xl mx-auto">{{ r.cta.body }}</p>
+<p class="font-body-lg text-custom-brown font-medium mt-3 max-w-none">{{ r.cta.body }}</p>
 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
 {% if not hide_pricing %}<a href="{{ url_for('portfolio_pricing') }}" class="bg-custom-burgundy text-white neo-brutal-border px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full">{{ r.cta.primary }}</a>{% endif %}
 <a href="mailto:info@ofoodiez.com" class="{{ 'bg-custom-burgundy text-white' if hide_pricing else 'bg-white text-custom-brown' }} neo-brutal-border px-8 py-3 font-label-bold text-label-bold uppercase tracking-widest neo-brutal-shadow-hover transition-all rounded-full">{{ r.cta.secondary }}</a>
@@ -243,6 +248,26 @@
   /* Entrance reveal + staggering */
   const revealEls = document.querySelectorAll('.reveal');
   revealEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(16px)'; el.style.transition = 'opacity .5s ease, transform .5s ease'; });
+  /* Animate a "1,234suffix" number from zero (skips values that aren't a plain leading number) */
+  function countUp(el) {
+    const m = el.textContent.trim().match(/^([\d,]+(?:\.\d+)?)([^\d]*)$/);
+    if (!m) return;
+    const target = parseFloat(m[1].replace(/,/g, ''));
+    const decimals = (m[1].split('.')[1] || '').length;
+    const hasComma = m[1].includes(',');
+    const suffix = m[2];
+    const t0 = performance.now(), dur = 900;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      let v = (target * eased).toFixed(decimals);
+      if (hasComma) v = Number(v).toLocaleString('en-US', { minimumFractionDigits: decimals });
+      el.textContent = v + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry, idx) => {
       if (!entry.isIntersecting) return;
@@ -252,6 +277,12 @@
         bar.style.transition = 'width .8s ease';
         requestAnimationFrame(() => { bar.style.width = bar.dataset.pct + '%'; });
       });
+      el.querySelectorAll('.donut-seg').forEach(seg => {
+        const len = (parseFloat(seg.dataset.pct) / 100) * 251.33;
+        seg.style.transition = 'stroke-dasharray 1s ease';
+        requestAnimationFrame(() => { seg.style.strokeDasharray = len + ' ' + (251.33 - len); });
+      });
+      el.querySelectorAll('.count-up').forEach(countUp);
       io.unobserve(el);
     });
   }, { threshold: 0.15 });

@@ -161,7 +161,7 @@
       }
     },
     "results": {
-      "heroTitle": "The right audience. Measurable action. Relevant talent.",
+      "heroTitle": "The right audience. Measurable action.",
       "heroSubtitle": "I help tech companies reach people in the industry, generate measurable interest, and connect with potential candidates.",
       "heroStats": [
         {
@@ -175,10 +175,6 @@
         {
           "value": "500+",
           "label": "Story link clicks to career pages and links"
-        },
-        {
-          "value": "1,300+",
-          "label": "Active community members"
         }
       ],
       "audience": {
@@ -232,7 +228,8 @@
                 "label": "65+",
                 "pct": 6.5
               }
-            ]
+            ],
+            "color": "#800020"
           },
           {
             "type": "bars",
@@ -251,7 +248,8 @@
                 "label": "Other",
                 "pct": 4.6
               }
-            ]
+            ],
+            "color": "#f59e0b"
           },
           {
             "type": "donut",
@@ -467,32 +465,29 @@
             "label": "Average active chats (30-day avg)"
           }
         ],
-        "candidatesCaption": "Illustrative anonymized profiles — tap a card to view the CV card. Real candidates are shared through the private talent feed.",
+        "candidatesCaption": "Real candidates, anonymized — full CVs are shared with permission through the private talent feed.",
         "candidates": [
           {
-            "role": "Senior Backend Engineer",
+            "role": "Software Engineer",
             "points": [
-              "7 years of experience",
-              "Python, AWS, Kubernetes, and PostgreSQL",
-              "B2B SaaS and cybersecurity experience"
+              "Former Unit 8200",
+              "Graduate of an elite military software program"
             ],
-            "cv": "senior-backend-engineer.png"
+            "cv": "software-engineer.png"
           },
           {
-            "role": "Product Manager",
+            "role": "VP Product",
             "points": [
-              "6 years of experience",
-              "B2B SaaS, analytics, and growth products",
-              "Experience at funded startups"
+              "VP Product at a public company",
+              "20+ years of experience"
             ],
-            "cv": "product-manager.png"
+            "cv": "vp-product.png"
           },
           {
             "role": "Cybersecurity Researcher",
             "points": [
-              "5 years of experience",
-              "Cloud security and threat research",
-              "Enterprise cybersecurity experience"
+              "5+ years at leading automotive and defense companies",
+              "MBA + Ivy League executive education"
             ],
             "cv": "cybersecurity-researcher.png"
           }

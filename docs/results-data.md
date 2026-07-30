@@ -66,7 +66,7 @@ Live source: `GET /wa/debug/stats?key=<ADMIN_SECRET>` on the bot service
 - Registered community members: 1,300+ (per Ofir, 2026-07)
 - Monthly registrations / referral totals: ❓
 - Professional categories: currently the 6 generic ones on the Results page — replace with real bot categories
-- Candidate example cards: currently ILLUSTRATIVE (marked as such on the page) — replace with real anonymized, consented profiles
+- Candidate example cards: REAL anonymized profiles since 2026-07-30 (SW engineer ex-8200, VP Product 20+y, cyber researcher 5+y MBA) — CV card images pending from Ofir → `app/static/cv/{software-engineer,vp-product,cybersecurity-researcher}.png` (<500KB, ensure candidate consent)
 - Consent status for CV sharing: only surface candidates with explicit consent
 
 ## Site placement map (don't duplicate)
