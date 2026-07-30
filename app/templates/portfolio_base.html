@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-{% set ui = ui | default({'dir': 'ltr'}) %}{% set lang = lang | default('en') %}<html class="light" lang="{{ lang }}" dir="{{ ui.dir }}" style=""><head>
+{% set ui = ui | default({}) %}<html class="light" lang="en" style=""><head>
     {% include 'components/analytics.html' %}
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -286,7 +286,6 @@
 <a href="mailto:info@ofoodiez.com" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-custom-brown/5 font-label-mono text-xs uppercase tracking-wider text-custom-brown font-bold"><span class="material-symbols-outlined text-lg text-custom-burgundy">mail</span> {{ ui.contact_email | default('Email') }}</a>
 </div>
 </div>
-<a href="{{ url_for('portfolio_lang', code=ui.toggle_code | default('he')) }}" class="font-label-mono text-xs uppercase tracking-wider text-custom-brown border border-custom-brown/40 rounded-lg px-3 py-2 hover:bg-custom-brown/5 transition-colors">{{ ui.toggle | default('עברית') }}</a>
 </div>
 <button id="menu-toggle" class="md:hidden bg-custom-burgundy text-white btn-soft p-2 font-label-bold text-label-bold rounded-full border border-custom-brown shadow-[2px_2px_0px_0px_#2A2420]">
   <span class="material-symbols-outlined">menu</span>
@@ -305,8 +304,7 @@
       <li><a class="{{ 'text-custom-burgundy border-b-2 border-custom-burgundy pb-1' if active_page == slug else 'text-custom-brown hover:text-custom-burgundy transition-colors' }}" href="{{ href }}">{{ label }}</a></li>
       {% endfor %}
     </ul>
-    <a href="{{ url_for('portfolio_lang', code=ui.toggle_code | default('he')) }}" class="mt-auto block text-center font-label-mono text-xs uppercase tracking-wider text-custom-brown border border-custom-brown/40 rounded-lg px-3 py-2 mb-3">{{ ui.toggle | default('עברית') }}</a>
-<a href="https://wa.me/972542471816" target="_blank" rel="noopener" class="block text-center bg-custom-burgundy text-white btn-soft px-6 py-3 mb-3 font-label-bold text-label-bold uppercase tracking-widest transition-all border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg w-full">{{ ui.contact_whatsapp | default('WhatsApp') }}</a>
+    <a href="https://wa.me/972542471816" target="_blank" rel="noopener" class="mt-auto block text-center bg-custom-burgundy text-white btn-soft px-6 py-3 mb-3 font-label-bold text-label-bold uppercase tracking-widest transition-all border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg w-full">{{ ui.contact_whatsapp | default('WhatsApp') }}</a>
 <a href="mailto:info@ofoodiez.com" class="block text-center bg-white text-custom-brown btn-soft px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest transition-all border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg w-full">
       {{ ui.contact_email | default('Email') }}
     </a>
