@@ -398,6 +398,7 @@ def get_whatsapp_applications():
             "id": app_row.id,
             "user_id": app_row.candidate_user_id,
             "candidate": _name(usr),
+            "terms": _terms_state(usr),
             "number": usr.phone,
             "company": comp.name,
             "role": app_row.role_query or "",
