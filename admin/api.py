@@ -343,14 +343,23 @@ def get_whatsapp_candidates():
 def get_whatsapp_applications():
     rec_agg = {}
     rec_details = {}
-    for r in WaApplicationRecipient.query.all():
+    recs = WaApplicationRecipient.query.all()
+    # Batch advocate/user lookups (2 queries total) — calling _recipient_advocate
+    # per row fired 2 queries per recipient and timed the endpoint out on prod.
+    adv_ids = {r.advocate_id for r in recs if r.advocate_id}
+    advs = {a.id: a for a in WaAdvocate.query.filter(WaAdvocate.id.in_(adv_ids)).all()} if adv_ids else {}
+    user_ids = {a.user_id for a in advs.values() if a.user_id}
+    users = {u.id: u for u in WaUser.query.filter(WaUser.id.in_(user_ids)).all()} if user_ids else {}
+    for r in recs:
         a = rec_agg.setdefault(r.application_id, {"emailed": 0, "approved": 0, "denied": 0})
         a["emailed"] += 1
         if r.approved_at:
             a["approved"] += 1
         if r.denied_at:
             a["denied"] += 1
-        rec_details.setdefault(r.application_id, []).append(_recipient_advocate(r))
+        adv = advs.get(r.advocate_id) if r.advocate_id else None
+        au = users.get(adv.user_id) if adv and adv.user_id else None
+        rec_details.setdefault(r.application_id, []).append(_advocate_summary(r, adv, au))
     results = db.session.query(WaApplication, WaUser, WaCompany).join(
         WaUser, WaApplication.candidate_user_id == WaUser.id).join(
         WaCompany, WaApplication.company_id == WaCompany.id).order_by(
@@ -390,15 +399,12 @@ def get_whatsapp_applications():
     return jsonify(out)
 
 
-def _recipient_advocate(rec):
-    """Advocate details for one application recipient — who the CV was sent to."""
-    adv = WaAdvocate.query.get(rec.advocate_id) if rec.advocate_id else None
+def _advocate_summary(rec, adv, au):
+    """Advocate details for one application recipient — pure formatting, no queries."""
     name = None
     if adv:
-        if adv.user_id:
-            au = WaUser.query.get(adv.user_id)
-            if au:
-                name = f"{au.first_name or ''} {au.last_name or ''}".strip() or None
+        if au:
+            name = f"{au.first_name or ''} {au.last_name or ''}".strip() or None
         name = name or adv.advocate_name
     return {
         "name": name or "advocate",
@@ -407,6 +413,14 @@ def _recipient_advocate(rec):
         "approved": bool(rec.approved_at),
         "status": rec.email_status or "sent",   # sent | pending | failed
     }
+
+
+def _recipient_advocate(rec):
+    """Advocate details for one recipient, fetched per row — fine for one user's
+    flow; use the batched lookup in get_whatsapp_applications for full scans."""
+    adv = WaAdvocate.query.get(rec.advocate_id) if rec.advocate_id else None
+    au = WaUser.query.get(adv.user_id) if adv and adv.user_id else None
+    return _advocate_summary(rec, adv, au)
 
 
 @admin_bp.route('/api/whatsapp/users/<int:id>/flow', methods=['GET'])
