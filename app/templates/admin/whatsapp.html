@@ -86,6 +86,7 @@
     <div class="stat-card"><i class="fas fa-user-tie"></i><div class="stat-value" id="s-advocates">…</div><div class="stat-label">Active advocates</div></div>
     <div class="stat-card"><i class="fas fa-users"></i><div class="stat-value" id="s-candidates">…</div><div class="stat-label">Candidates</div></div>
     <div class="stat-card"><i class="fas fa-paper-plane"></i><div class="stat-value" id="s-applications">…</div><div class="stat-label">Applications</div></div>
+    <div class="stat-card"><i class="fas fa-check-circle"></i><div class="stat-value" id="s-approved">…</div><div class="stat-label">Approved referrals</div></div>
     <div class="stat-card"><i class="fas fa-clipboard-list"></i><div class="stat-value" id="s-requests">…</div><div class="stat-label">Open backfill requests</div></div>
 </div>
 
@@ -168,6 +169,7 @@ fetch("{{ url_for('admin.get_whatsapp_stats') }}").then(r => r.json()).then(d =>
     document.getElementById('s-advocates').textContent = d.advocates_count;
     document.getElementById('s-candidates').textContent = d.candidates_count;
     document.getElementById('s-applications').textContent = d.applications_count;
+    document.getElementById('s-approved').textContent = d.approved_count;
     document.getElementById('s-requests').textContent = d.open_requests_count;
 });
 
@@ -275,8 +277,13 @@ function openApplication(d) {
         + flowItem('📄', 'CV', '', cv)
         + flowItem(sent ? '📧' : '⚠️', 'Sent to advocate', '',
             sent
-                ? (d.emailed + ' advocate(s) emailed'
-                    + (d.approved ? ' &middot; <span style="color:#2e7d32;">' + d.approved + ' approved</span>' : ''))
+                ? ((d.recipients || []).map(function (a) {
+                        return advLine(a) + (a.approved
+                            ? ' &middot; <span style="color:#2e7d32;">✓ approved — referred the CV on</span>'
+                            : ' &middot; <span style="color:#888;">' + escHtml(a.status || 'sent') + ', awaiting reply</span>');
+                    }).join('<br>')
+                    || (d.emailed + ' advocate(s) emailed'
+                        + (d.approved ? ' &middot; <span style="color:#2e7d32;">' + d.approved + ' approved</span>' : '')))
                 : '<span style="color:#c62828;">Not sent to any advocate &mdash; the CV did not reach an advocate</span>')
         + '</div></div>';
     Swal.fire({ title: escHtml(d.company) + ' — submission', html: h, width: 600, showConfirmButton: true, confirmButtonText: 'Close' });

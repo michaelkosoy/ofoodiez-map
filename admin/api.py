@@ -243,6 +243,8 @@ def get_whatsapp_stats():
         "advocates_count": WaAdvocate.query.filter_by(status="active").count(),
         "candidates_count": WaUser.query.filter(WaUser.first_name.isnot(None)).count(),
         "applications_count": WaApplication.query.count(),
+        "approved_count": db.session.query(WaApplicationRecipient.application_id).filter(
+            WaApplicationRecipient.approved_at.isnot(None)).distinct().count(),
         "open_requests_count": WaCompanyRequest.query.filter_by(status="open").count(),
     })
 
@@ -340,6 +342,7 @@ def get_whatsapp_candidates():
 @login_required
 def get_whatsapp_applications():
     rec_agg = {}
+    rec_details = {}
     for r in WaApplicationRecipient.query.all():
         a = rec_agg.setdefault(r.application_id, {"emailed": 0, "approved": 0, "denied": 0})
         a["emailed"] += 1
@@ -347,6 +350,7 @@ def get_whatsapp_applications():
             a["approved"] += 1
         if r.denied_at:
             a["denied"] += 1
+        rec_details.setdefault(r.application_id, []).append(_recipient_advocate(r))
     results = db.session.query(WaApplication, WaUser, WaCompany).join(
         WaUser, WaApplication.candidate_user_id == WaUser.id).join(
         WaCompany, WaApplication.company_id == WaCompany.id).order_by(
@@ -379,6 +383,7 @@ def get_whatsapp_applications():
             "emailed": ra["emailed"],
             "approved": ra["approved"],
             "denied": ra["denied"],
+            "recipients": rec_details.get(app_row.id, []),
             "status": status,
             "created": _fmt(app_row.created_at),
         })
