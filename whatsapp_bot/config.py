@@ -110,7 +110,9 @@ class _WaConfig:
         # One-time Terms-of-Use notice: quick-reply template, body {{1}} + one
         # "I agree ✅" button (payload TERMS_AGREE). Falls back to plain text when
         # unset — the notice is only ever sent reactively, so always in-session.
-        return os.environ.get("WA_CT_TERMS")
+        # Default = the live template made by POST /wa/debug/create-terms-template
+        # (ofoodiez_terms_notice_v1); the env var still overrides.
+        return os.environ.get("WA_CT_TERMS") or "HX67ef81e493d3ec1f8af92cdf4db54170"
 
     # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
     @property
