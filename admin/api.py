@@ -208,6 +208,20 @@ def _name(usr):
             or usr.profile_name or "Unknown")
 
 
+def _terms_state(u):
+    """ToU consent display. Informed consent = accepted AFTER seeing the notice
+    (wa_users.terms_accepted_at > terms_notice_sent_at); 'signup' = the silent
+    pre-notice stamp; 'notified' = notice sent, no action since."""
+    if (u.terms_notice_sent_at and u.terms_accepted_at
+            and u.terms_accepted_at > u.terms_notice_sent_at):
+        return "✅ " + _fmt(u.terms_accepted_at)
+    if u.terms_notice_sent_at:
+        return "notified " + _fmt(u.terms_notice_sent_at)
+    if u.terms_accepted_at:
+        return "signup " + _fmt(u.terms_accepted_at)
+    return "—"
+
+
 def _resolve_company(name):
     """Find a company by normalized name, creating it if it doesn't exist."""
     norm = " ".join((name or "").strip().lower().split())
@@ -333,6 +347,8 @@ def get_whatsapp_candidates():
             "job_status": (u.job_status or "").replace("_", " "),
             "is_advocate": "Yes" if u.id in advocate_uids else "No",
             "blocked": "Yes" if u.is_blocked else "No",
+            "terms": _terms_state(u),
+            "deleted": "Yes" if u.deleted_at else "No",
             "joined": _fmt(u.created_at),
         })
     return jsonify(out)
