@@ -418,7 +418,7 @@ var COLS = {
         { title: "Job status", field: "job_status", headerFilter: "select", headerFilterParams: { values: true }, width: 120 },
         { title: "Advocate?", field: "is_advocate", headerFilter: "select", headerFilterParams: { values: true }, width: 110 },
         { title: "Blocked", field: "blocked", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
-        { title: "Terms", field: "terms", headerFilter: "input", minWidth: 150 },
+        { title: "Terms", field: "terms", headerFilter: "select", headerFilterParams: { values: true }, width: 90, hozAlign: "center" },
         { title: "Deleted", field: "deleted", headerFilter: "select", headerFilterParams: { values: true }, width: 100 },
         { title: "Joined", field: "joined", width: 150 },
         {
@@ -477,7 +477,7 @@ var COLS = {
         },
         { title: "Emailed", field: "emailed", width: 90 },
         { title: "Approved", field: "approved", width: 100 },
-        { title: "Terms", field: "terms", headerFilter: "input", minWidth: 140 },
+        { title: "Terms", field: "terms", headerFilter: "select", headerFilterParams: { values: true }, width: 90, hozAlign: "center" },
         { title: "Status", field: "status", headerFilter: "select", headerFilterParams: { values: true }, width: 120, formatter: function (c) { var v = c.getValue(); var col = v === 'Approved' ? '#2e7d32' : (v === 'Disputed' ? '#c0392b' : (v === 'Emailed' ? '#1565c0' : '#e65100')); return '<span style="color:' + col + ';font-weight:600;">' + (v || '') + '</span>'; } },
         {
             title: "Actions", headerSort: false, width: 170, hozAlign: "center",

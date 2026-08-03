@@ -209,17 +209,13 @@ def _name(usr):
 
 
 def _terms_state(u):
-    """ToU consent display. Informed consent = accepted AFTER seeing the notice
-    (wa_users.terms_accepted_at > terms_notice_sent_at); 'signup' = the silent
-    pre-notice stamp; 'notified' = notice sent, no action since."""
+    """ToU consent, boiled down per Ofir: ✅ = accepted after seeing the notice
+    (informed consent), ✖ = not yet. Exact timestamps stay in wa_users
+    (terms_notice_sent_at / terms_accepted_at) for the audit trail."""
     if (u.terms_notice_sent_at and u.terms_accepted_at
             and u.terms_accepted_at > u.terms_notice_sent_at):
-        return "✅ " + _fmt(u.terms_accepted_at)
-    if u.terms_notice_sent_at:
-        return "notified " + _fmt(u.terms_notice_sent_at)
-    if u.terms_accepted_at:
-        return "signup " + _fmt(u.terms_accepted_at)
-    return "—"
+        return "✅"
+    return "✖"
 
 
 def _resolve_company(name):
