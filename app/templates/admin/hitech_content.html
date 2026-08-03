@@ -171,10 +171,14 @@ function renderEditor() {
     html += inputField('directory_title', 'Directory Section Header (above the search bar)', sectionData.directory_title);
     html += inputField('search_placeholder', 'Search Box Placeholder Text', sectionData.search_placeholder);
 
-    html += '<p class="section-title">Ofoodiez Recommended</p>';
+    html += '<p class="section-title">Recommended Companies</p>';
     html += inputField('recommended_title', 'Recommended Section Header', sectionData.recommended_title);
     html += inputField('recommended_sub', 'Recommended Section Subtext', sectionData.recommended_sub);
-    html += inputField('recommended_companies', 'Recommended Companies (comma-separated, order = display order)', (sectionData.recommended_companies || []).join(', '));
+    currentRecs = (sectionData.recommended_companies || []).map(r => typeof r === 'string' ? { name: r, careers_url: '' } : r);
+    html += '<div id="rec-list">';
+    currentRecs.forEach((r, idx) => { html += recItemHtml(idx, r.name, r.careers_url); });
+    html += '</div>';
+    html += '<button type="button" class="btn" onclick="addRecItem()"><i class="fas fa-plus"></i> Add Company</button>';
 
     html += '<p class="section-title">Common Questions (FAQ)</p>';
     html += inputField('faq_title', 'FAQ Section Header', sectionData.faq_title);
@@ -259,6 +263,48 @@ function inputField(key, label, val) {
 function textareaField(key, label, val) {
   val = (val || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return `<div class="editor-field"><label>${label}</label><textarea rows="3" data-key="${key}">${val}</textarea></div>`;
+}
+
+var currentRecs = [];
+function recItemHtml(idx, name, url) {
+  var nVal = (name || '').replace(/"/g, '&quot;');
+  var uVal = (url || '').replace(/"/g, '&quot;');
+  return `<div class="sub-card" data-rec-idx="${idx}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h4 style="margin:0;color:var(--sidebar-bg)">Company #${idx + 1}</h4>
+      <button type="button" class="btn btn-danger" style="font-size:.78rem;padding:5px 10px" onclick="removeRecItem(${idx})"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="editor-field"><label>Company Name</label><input type="text" data-key="rec_name_${idx}" value="${nVal}"></div>
+    <div class="editor-field"><label>Careers Page URL</label><input type="text" data-key="rec_url_${idx}" value="${uVal}"></div>
+  </div>`;
+}
+
+function syncRecsFromDom() {
+  var items = [];
+  document.querySelectorAll('#rec-list [data-rec-idx]').forEach(div => {
+    var idx = div.getAttribute('data-rec-idx');
+    items.push({
+      name: document.querySelector(`[data-key="rec_name_${idx}"]`).value,
+      careers_url: document.querySelector(`[data-key="rec_url_${idx}"]`).value
+    });
+  });
+  currentRecs = items;
+}
+
+function renderRecList() {
+  document.getElementById('rec-list').innerHTML = currentRecs.map((r, idx) => recItemHtml(idx, r.name, r.careers_url)).join('');
+}
+
+function addRecItem() {
+  syncRecsFromDom();
+  currentRecs.push({ name: '', careers_url: '' });
+  renderRecList();
+}
+
+function removeRecItem(idx) {
+  syncRecsFromDom();
+  currentRecs.splice(idx, 1);
+  renderRecList();
 }
 
 function faqItemHtml(idx, q, a) {
@@ -359,7 +405,7 @@ function collectData() {
       search_placeholder: document.querySelector('[data-key="search_placeholder"]').value,
       recommended_title: document.querySelector('[data-key="recommended_title"]').value,
       recommended_sub: document.querySelector('[data-key="recommended_sub"]').value,
-      recommended_companies: document.querySelector('[data-key="recommended_companies"]').value.split(',').map(s => s.trim()).filter(Boolean),
+      recommended_companies: [],
       faq_title: document.querySelector('[data-key="faq_title"]').value,
       steps: [],
       faq: []
@@ -374,6 +420,8 @@ function collectData() {
     });
     syncFaqsFromDom();
     sectionData.faq = currentFaqs;
+    syncRecsFromDom();
+    sectionData.recommended_companies = currentRecs.filter(r => r.name.trim());
 
   } else if (currentSection === 'cv') {
     sectionData = {

@@ -34,11 +34,26 @@
     "meta_description": "My WhatsApp referrals bot connects you with advocates inside top tech companies. Find companies, search advocates, and get real introductions.",
     "page_title": "Referrals Bot — Ofoodiez HiTech",
     "recommended_companies": [
-      "Appcharge",
-      "Cyera",
-      "Venice",
-      "Zafran Security",
-      "ScaleOps"
+      {
+        "careers_url": "https://appcharge.com/careers",
+        "name": "Appcharge"
+      },
+      {
+        "careers_url": "https://www.cyera.com/careers",
+        "name": "Cyera"
+      },
+      {
+        "careers_url": "https://www.venice.io/careers",
+        "name": "Venice"
+      },
+      {
+        "careers_url": "https://www.zafran.io/careers",
+        "name": "Zafran Security"
+      },
+      {
+        "careers_url": "https://scaleops.com/careers",
+        "name": "ScaleOps"
+      }
     ],
     "recommended_sub": "Teams I work with and personally vouch for — actively hiring through the bot.",
     "recommended_title": "My top recommended companies",

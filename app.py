@@ -581,11 +581,22 @@ def hitech_bot():
     content = _load_hitech_content()
     c_bot = content.get('bot', {})
     companies = _companies_with_advocates()
-    # "Ofoodiez Recommended" — admin-curated names (hitech_content.json, order kept).
-    # Unmatched names still render (no careers link) so the section never shrinks silently.
+    # Recommended picks — admin-curated (hitech_content.json, order kept). Entries are
+    # {name, careers_url} dicts (bare strings still accepted); a configured careers_url
+    # wins, else we fall back to the matched serviceable company's URL from admin.
     by_name = {co['name'].strip().lower(): co for co in companies}
-    recommended = [by_name.get(n.strip().lower(), {"name": n.strip(), "careers_url": None})
-                   for n in c_bot.get('recommended_companies', []) if n.strip()]
+    recommended = []
+    for item in c_bot.get('recommended_companies', []):
+        if isinstance(item, str):
+            item = {"name": item}
+        name = (item.get('name') or '').strip()
+        if not name:
+            continue
+        match = by_name.get(name.lower())
+        recommended.append({
+            "name": match['name'] if match else name,
+            "careers_url": item.get('careers_url') or (match['careers_url'] if match else None),
+        })
     return render_template('hitech_bot.html', active_hitech_page='referrals-bot',
                            active_page='hitech', companies=companies,
                            recommended=recommended, c=c_bot)
