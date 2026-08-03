@@ -11,7 +11,7 @@ from datetime import datetime
 
 from database.models import db
 
-from . import conversation, copy, messaging
+from . import conversation, copy, messaging, terms
 from .config import WaConfig
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -54,6 +54,7 @@ def handle(user, conv, payload, text):
     if step == "reg_review":
         if payload == "REG_CONFIRM":
             _persist(user, data)
+            terms.send_notice(user)  # ToU notice right after sign-up, before the resume prompt
             # Resume into the route they picked before sign-up; else the menu.
             from . import router, candidate, employee  # late import (avoid cycle)
             pending = data.get("pending_flow")

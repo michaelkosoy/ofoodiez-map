@@ -31,7 +31,7 @@ from database.models import db
 
 from . import messaging, router, wa_bp
 from .config import WaConfig
-from .copy import ERROR
+from .copy import ERROR, TERMS_NOTICE
 from .models import WaInboundMessage, WaOutboundMessage
 
 logger = logging.getLogger("whatsapp_bot")
@@ -219,7 +219,8 @@ def debug_templates():
     out = {}
     for name in ("WA_CT_WELCOME", "WA_CT_WELCOME_BACK", "WA_CT_BACK_TO_MENU",
                  "WA_CT_REGISTER_REVIEW", "WA_CT_PROMPT", "WA_CT_EMPLOYEE_CONFIRM",
-                 "WA_CT_EMP_METHOD", "WA_CT_EXPLORE_MORE", "WA_CT_ADVOCATE_PING"):
+                 "WA_CT_EMP_METHOD", "WA_CT_EXPLORE_MORE", "WA_CT_ADVOCATE_PING",
+                 "WA_CT_COMPANY_AVAILABLE", "WA_CT_TERMS"):
         sid = getattr(WaConfig, name, None)
         if not sid:
             out[name] = None
@@ -252,3 +253,44 @@ def debug_templates():
         out[name] = info
     return Response(json.dumps(out, ensure_ascii=False, indent=1),
                     mimetype="application/json")
+
+
+@wa_bp.route("/debug/create-terms-template", methods=["POST"])
+def debug_create_terms_template():
+    """One-off setup: create the WA_CT_TERMS quick-reply template (body {{1}} +
+    one "I agree ✅" button, payload TERMS_AGREE) via the Content API, using this
+    service's own Twilio creds — no console clicking, no local secrets.
+    Idempotent: if a template with this friendly name already exists, returns
+    its sid instead of creating a duplicate. The sid gets pinned as the
+    WA_CT_TERMS default in config.py."""
+    from .backfill import _secret
+    if request.args.get("key") != _secret():
+        return Response("forbidden", status=403)
+    import requests as _rq
+    auth = (WaConfig.TWILIO_ACCOUNT_SID, WaConfig.TWILIO_AUTH_TOKEN)
+    name = "ofoodiez_terms_notice_v1"
+    try:
+        r = _rq.get("https://content.twilio.com/v1/Content?PageSize=200",
+                    auth=auth, timeout=20)
+        for c in (r.json() or {}).get("contents") or []:
+            if c.get("friendly_name") == name:
+                return Response(json.dumps({"sid": c["sid"], "existing": True}),
+                                mimetype="application/json")
+        r = _rq.post("https://content.twilio.com/v1/Content", auth=auth, timeout=20, json={
+            "friendly_name": name,
+            "language": "en",
+            "variables": {"1": TERMS_NOTICE},  # sample value (only used if submitted for approval)
+            "types": {"twilio/quick-reply": {
+                "body": "{{1}}",
+                "actions": [{"title": "I agree ✅", "id": "TERMS_AGREE"}],
+            }},
+        })
+        if r.status_code >= 300:
+            return Response(json.dumps({"error": r.status_code, "detail": r.text[:500]}),
+                            status=502, mimetype="application/json")
+        return Response(json.dumps({"sid": (r.json() or {}).get("sid"), "existing": False}),
+                        mimetype="application/json")
+    except Exception as exc:
+        logger.exception("wa terms: template create failed")
+        return Response(json.dumps({"error": str(exc)}), status=502,
+                        mimetype="application/json")

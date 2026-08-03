@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database.models import db
 
-from . import conversation, copy, messaging
+from . import conversation, copy, messaging, terms
 from .config import WaConfig
 from .models import WaAdvocate, WaCompany
 
@@ -361,6 +361,7 @@ def _finalize_email_advocate(user, conv, data):
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
         company=company_name, emails=email or "—"))
+    terms.send_notice(user)  # ToU notice once sign-up is truly done (idempotent)
     return "advocate_created"
 
 
@@ -384,6 +385,7 @@ def _save_link(user, conv, data, text):
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.ADVOCATE_LINK_DONE.format(
         company=company_name, link=link))
+    terms.send_notice(user)  # link-method advocates may never be is_registered — this covers them
     return "advocate_link_created"
 
 
@@ -431,6 +433,7 @@ def _finalize(user, conv, data):
     conversation.reset_state(conv)
     messaging.send_prompt(user.phone, copy.ADVOCATE_DONE.format(
         company=company_name, emails=", ".join(saved or emails)))
+    terms.send_notice(user)  # ToU notice once sign-up is truly done (idempotent)
     return "advocate_created"
 
 

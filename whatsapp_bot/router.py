@@ -9,7 +9,7 @@ Text prompts carry a Back-to-Menu button (see messaging.send_prompt).
 import logging
 from datetime import datetime, timedelta, timezone
 
-from . import candidate, contact, conversation, copy, employee, messaging, profile, registration
+from . import candidate, contact, conversation, copy, employee, messaging, profile, registration, terms
 from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
@@ -61,6 +61,14 @@ def handle(inbound):
     if user.is_blocked:
         logger.info("wa: ignoring message from blocked user %s", user.phone)
         return "blocked"
+
+    # Terms-of-Use: always-on "I agree" catcher, then consent stamp / one-time
+    # notice (whatsapp_bot/terms.py). Notice-first, before the stale reset —
+    # the current message still dispatches normally below.
+    agreed = terms.intercept_agree(user, payload, text)
+    if agreed:
+        return agreed  # ack sent; never let the button label leak into a flow
+    terms.on_message(user)
 
     # Idle timeout: a long-idle message starts fresh — sign-up if needed, else
     # the personalised Welcome. An explicit "menu" still gets the real menu

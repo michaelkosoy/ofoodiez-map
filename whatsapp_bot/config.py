@@ -105,6 +105,13 @@ class _WaConfig:
         # candidates outside the 24h window — they usually asked days earlier.
         return os.environ.get("WA_CT_COMPANY_AVAILABLE")
 
+    @property
+    def WA_CT_TERMS(self):
+        # One-time Terms-of-Use notice: quick-reply template, body {{1}} + one
+        # "I agree ✅" button (payload TERMS_AGREE). Falls back to plain text when
+        # unset — the notice is only ever sent reactively, so always in-session.
+        return os.environ.get("WA_CT_TERMS")
+
     # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
     @property
     def SUPABASE_URL(self):

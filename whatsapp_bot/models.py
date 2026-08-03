@@ -152,6 +152,7 @@ class WaUser(db.Model):
     last_name = db.Column(db.Text)
     email = db.Column(db.Text)
     terms_accepted_at = db.Column(db.DateTime)
+    terms_notice_sent_at = db.Column(db.DateTime)  # one-time WhatsApp ToU notice; informed consent = accepted > notice
     last_language = db.Column(db.Text, nullable=False, default="en")
     is_blocked = db.Column(db.Boolean, nullable=False, default=False)
     job_status = db.Column(db.Text)                # hired | pending | no_response (status-check email answer)

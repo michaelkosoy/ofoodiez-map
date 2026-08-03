@@ -349,3 +349,22 @@ COMPANY_AVAILABLE_PING = (
     "who can refer you!\n"
     "Ask me for a referral to *{company}* and send your CV again 🚀"
 )
+
+# ---- One-time Terms-of-Use notice (sent right after sign-up; once, lazily, to
+# users who signed up before the notice existed). Never blocks — tapping the
+# I-agree button OR simply continuing to use the bot both count as acceptance.
+TERMS_NOTICE = (
+    "📄 *A quick word about your data*\n"
+    "We keep the details and CV you share with us (including anything you've "
+    "already sent) so we can process your referrals — we share them with "
+    "advocates at the companies you pick, and may suggest other relevant roles.\n"
+    "Full terms: https://ofoodiez.com/hitech/referrals-bot/terms\n"
+    "Tap *I agree* — or just keep using the bot, and that counts as accepting. "
+    "You can ask us to delete your data anytime."
+)
+# Appended when WA_CT_TERMS (the template with the I-agree button) isn't configured.
+TERMS_NOTICE_NO_BUTTON = "Reply *agree* to confirm — or simply keep going. 🙌"
+TERMS_AGREED_ACK = (
+    "Thanks — you've accepted our terms ✅\n"
+    "https://ofoodiez.com/hitech/referrals-bot/terms"
+)
