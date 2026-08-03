@@ -172,6 +172,11 @@ function renderEditor() {
     html += textareaField('directory_desc', 'Directory Section Description', sectionData.directory_desc);
     html += inputField('search_placeholder', 'Search Box Placeholder Text', sectionData.search_placeholder);
 
+    html += '<p class="section-title">Ofoodiez Recommended</p>';
+    html += inputField('recommended_title', 'Recommended Section Header', sectionData.recommended_title);
+    html += inputField('recommended_sub', 'Recommended Section Subtext', sectionData.recommended_sub);
+    html += inputField('recommended_companies', 'Recommended Companies (comma-separated, order = display order)', (sectionData.recommended_companies || []).join(', '));
+
     html += '<p class="section-title">Common Questions (FAQ)</p>';
     html += inputField('faq_title', 'FAQ Section Header', sectionData.faq_title);
     currentFaqs = (sectionData.faq || []).slice();
@@ -354,6 +359,9 @@ function collectData() {
       directory_title: document.querySelector('[data-key="directory_title"]').value,
       directory_desc: document.querySelector('[data-key="directory_desc"]').value,
       search_placeholder: document.querySelector('[data-key="search_placeholder"]').value,
+      recommended_title: document.querySelector('[data-key="recommended_title"]').value,
+      recommended_sub: document.querySelector('[data-key="recommended_sub"]').value,
+      recommended_companies: document.querySelector('[data-key="recommended_companies"]').value.split(',').map(s => s.trim()).filter(Boolean),
       faq_title: document.querySelector('[data-key="faq_title"]').value,
       steps: [],
       faq: []

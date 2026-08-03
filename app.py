@@ -579,9 +579,16 @@ def hitech_bot():
     """HiTech referrals bot info + advocates directory. The companies list is
     cached and refreshed in the background — see _companies_with_advocates()."""
     content = _load_hitech_content()
+    c_bot = content.get('bot', {})
+    companies = _companies_with_advocates()
+    # "Ofoodiez Recommended" — admin-curated names (hitech_content.json, order kept).
+    # Unmatched names still render (no careers link) so the section never shrinks silently.
+    by_name = {co['name'].strip().lower(): co for co in companies}
+    recommended = [by_name.get(n.strip().lower(), {"name": n.strip(), "careers_url": None})
+                   for n in c_bot.get('recommended_companies', []) if n.strip()]
     return render_template('hitech_bot.html', active_hitech_page='referrals-bot',
-                           active_page='hitech', companies=_companies_with_advocates(),
-                           c=content.get('bot', {}))
+                           active_page='hitech', companies=companies,
+                           recommended=recommended, c=c_bot)
 
 
 @app.route('/hitech/referrals-bot/terms')

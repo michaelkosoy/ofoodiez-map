@@ -34,6 +34,15 @@
     "hero_sub": "Stop sending your resume into black holes. My automated WhatsApp bot connects you directly with employees inside companies you want to work at who have offered to refer candidates.",
     "meta_description": "My WhatsApp referrals bot connects you with advocates inside top tech companies. Find companies, search advocates, and get real introductions.",
     "page_title": "Referrals Bot — Ofoodiez HiTech",
+    "recommended_companies": [
+      "Appcharge",
+      "Cyera",
+      "Venice",
+      "Zafran Security",
+      "ScaleOps"
+    ],
+    "recommended_sub": "Teams I work with and personally vouch for — actively hiring through the bot.",
+    "recommended_title": "Ofoodiez Recommended",
     "search_placeholder": "Search companies…",
     "steps": [
       {

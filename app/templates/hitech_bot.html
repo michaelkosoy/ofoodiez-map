@@ -140,6 +140,40 @@
         /* Section divider */
         .ht-divider { border: none; border-top: 1px solid rgba(114,8,21,0.18); margin: 0 20px 36px; }
 
+        /* Ofoodiez Recommended */
+        .ht-rec-section { padding: 0 20px 36px; max-width: 900px; margin: 0 auto; width: 100%; }
+        .ht-rec-sub {
+            text-align: center; font-size: 0.84rem; color: var(--butter-dim);
+            margin: -8px auto 20px; max-width: 460px; line-height: 1.6;
+        }
+        .ht-rec-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .ht-rec-card {
+            background: linear-gradient(160deg, rgba(114,8,21,0.22) 0%, var(--bg-card) 60%);
+            border: 1px solid rgba(194,58,73,0.55);
+            border-radius: 14px;
+            padding: 15px 20px;
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: inherit;
+            box-shadow: 0 4px 18px rgba(114,8,21,0.16);
+            transition: all 0.2s;
+        }
+        a.ht-rec-card:hover { transform: translateY(-2px); border-color: var(--burgundy-mid); box-shadow: 0 8px 26px rgba(114,8,21,0.3); }
+        .ht-rec-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: rgba(194,58,73,0.2); border: 1px solid rgba(194,58,73,0.42);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: var(--butter); flex-shrink: 0;
+        }
+        .ht-rec-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.92rem; font-weight: 700; color: var(--butter); line-height: 1.2;
+        }
+        .ht-rec-tag {
+            font-size: 0.62rem; font-weight: 700; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--burgundy-mid); margin-top: 3px;
+        }
+        a.ht-rec-card:hover .ht-rec-tag { color: #c0374a; }
+
         /* Featured logos */
         .ht-featured-section { padding: 0 20px 36px; max-width: 900px; margin: 0 auto; width: 100%; }
         .ht-section-title {
@@ -273,6 +307,31 @@
         </section>
 
         <hr class="ht-divider">
+
+        {% if recommended %}
+        <!-- Ofoodiez Recommended -->
+        <section class="ht-rec-section">
+            <p class="ht-section-title">{{ c.recommended_title | default('Ofoodiez Recommended') | safe }}</p>
+            {% if c.recommended_sub %}<p class="ht-rec-sub">{{ c.recommended_sub | safe }}</p>{% endif %}
+            <div class="ht-rec-grid">
+                {% for co in recommended %}
+                {% if co.careers_url %}<a class="ht-rec-card" href="{{ co.careers_url }}" target="_blank" rel="noopener">{% else %}<div class="ht-rec-card">{% endif %}
+                    <div class="ht-rec-icon"><i class="fas fa-star"></i></div>
+                    <div>
+                        <div class="ht-rec-name">{{ co.name }}</div>
+                        {% if co.careers_url %}
+                        <div class="ht-rec-tag">Open Positions →</div>
+                        {% else %}
+                        <div class="ht-rec-tag">Ofoodiez Pick</div>
+                        {% endif %}
+                    </div>
+                {% if co.careers_url %}</a>{% else %}</div>{% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <hr class="ht-divider">
+        {% endif %}
 
         <!-- Featured companies -->
         <section class="ht-featured-section">
