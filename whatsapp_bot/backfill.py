@@ -176,6 +176,7 @@ def status_check():
         WaUser.query
         .filter(WaUser.id.in_(db.session.query(WaApplication.candidate_user_id)))
         .filter(WaUser.email.isnot(None), WaUser.is_blocked.is_(False))
+        .filter(WaUser.deleted_at.is_(None))  # soft-deleted users get no outreach
         .filter(db.or_(WaUser.job_status.is_(None), WaUser.job_status != "hired"))
         .filter(db.or_(WaUser.last_status_checked.is_(None),
                        WaUser.last_status_checked < cutoff))

@@ -67,7 +67,14 @@ def handle(inbound):
     # the current message still dispatches normally below.
     agreed = terms.intercept_agree(user, payload, text)
     if agreed:
-        return agreed  # ack sent; never let the button label leak into a flow
+        # Thanks sent; move them along without losing their place: no active
+        # flow → the menu; the post-signup company question → re-shown; any
+        # other pending step is already the last thing on their screen.
+        if not conv.flow:
+            return _entry(user, conv)
+        if conv.flow == "candidate" and conv.step == "cand_company":
+            return candidate.start(user, conv, returning=False)
+        return agreed
     terms.on_message(user)
 
     # Idle timeout: a long-idle message starts fresh — sign-up if needed, else

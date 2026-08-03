@@ -26,6 +26,7 @@ create table if not exists public.wa_users (
     email             text,
     terms_accepted_at timestamptz,
     terms_notice_sent_at timestamptz, -- one-time WhatsApp ToU notice (informed consent = accepted > notice)
+    deleted_at        timestamptz, -- soft delete (profile → delete); cleared on re-signup
     last_language     text not null default 'en' check (last_language in ('en','he')),
     is_blocked        boolean not null default false,
     job_status          text,        -- hired | pending | no_response (status-check email answer)

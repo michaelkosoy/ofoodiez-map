@@ -153,6 +153,7 @@ class WaUser(db.Model):
     email = db.Column(db.Text)
     terms_accepted_at = db.Column(db.DateTime)
     terms_notice_sent_at = db.Column(db.DateTime)  # one-time WhatsApp ToU notice; informed consent = accepted > notice
+    deleted_at = db.Column(db.DateTime)            # soft delete (profile → delete); cleared on re-signup
     last_language = db.Column(db.Text, nullable=False, default="en")
     is_blocked = db.Column(db.Boolean, nullable=False, default=False)
     job_status = db.Column(db.Text)                # hired | pending | no_response (status-check email answer)
@@ -163,7 +164,8 @@ class WaUser(db.Model):
 
     @property
     def is_registered(self):
-        return bool(self.first_name and self.email)
+        # A soft-deleted user is treated as a brand-new phone until they sign up again.
+        return bool(self.first_name and self.email) and self.deleted_at is None
 
     def __repr__(self):
         return f"<WaUser {self.phone}>"

@@ -146,6 +146,8 @@ _STATEMENTS = [
     "alter table public.wa_users add column if not exists last_status_checked timestamptz",
     # One-time WhatsApp Terms-of-Use notice (informed consent = accepted_at > notice_sent_at).
     "alter table public.wa_users add column if not exists terms_notice_sent_at timestamptz",
+    # Soft delete (profile → delete): user is treated as new; cleared on re-signup.
+    "alter table public.wa_users add column if not exists deleted_at timestamptz",
     # ---- seed known careers pages, keyed by normalized_name (fills NULL only,
     # so admin edits via /admin → WhatsApp → Companies are never overwritten;
     # all URLs verified live 2026-07-11, updated 2026-07-13) ----

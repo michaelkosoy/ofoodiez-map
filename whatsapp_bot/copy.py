@@ -90,7 +90,18 @@ PROFILE_MENU = (
     "Your details 👤\n"
     "• Name: {name}\n"
     "• Email: {email}\n\n"
-    "Reply *name* or *email* to update one{company_hint} · *menu* to go back."
+    "Reply *name* or *email* to update one{company_hint}, "
+    "*delete* to remove your info · *menu* to go back."
+)
+# Soft delete (ToU data rights): flag + retire, never a hard DB delete.
+PROFILE_DELETE_CONFIRM = (
+    "⚠️ This removes your details, CV and referral links from the service "
+    "(you can always sign up again later).\n"
+    "Type *delete* to confirm — anything else cancels."
+)
+PROFILE_DELETED = (
+    "Done — your information has been removed 🙏\n"
+    "If you ever want back in, just message me and sign up again. 🧡"
 )
 # Extra option shown only to advocates — hands off to the employee edit flow.
 PROFILE_COMPANY_HINT = ", *company* to edit your referral companies"
@@ -354,17 +365,11 @@ COMPANY_AVAILABLE_PING = (
 # users who signed up before the notice existed). Never blocks — tapping the
 # I-agree button OR simply continuing to use the bot both count as acceptance.
 TERMS_NOTICE = (
-    "📄 *A quick word about your data*\n"
     "We keep the details and CV you share with us (including anything you've "
     "already sent) so we can process your referrals — we share them with "
-    "advocates at the companies you pick, and may suggest other relevant roles.\n"
-    "Full terms: https://ofoodiez.com/hitech/referrals-bot/terms\n"
-    "Tap *I agree* — or just keep using the bot, and that counts as accepting. "
-    "You can ask us to delete your data anytime."
+    "advocates at the companies you pick, and may suggest other relevant roles. "
+    "Full terms: https://ofoodiez.com/hitech/referrals-bot/terms"
 )
 # Appended when WA_CT_TERMS (the template with the I-agree button) isn't configured.
 TERMS_NOTICE_NO_BUTTON = "Reply *agree* to confirm — or simply keep going. 🙌"
-TERMS_AGREED_ACK = (
-    "Thanks — you've accepted our terms ✅\n"
-    "https://ofoodiez.com/hitech/referrals-bot/terms"
-)
+TERMS_AGREED_ACK = "Thanks for accepting ✅"

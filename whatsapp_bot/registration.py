@@ -87,4 +87,5 @@ def _persist(user, data):
     user.last_name = data.get("last_name")
     user.email = data.get("email")
     user.terms_accepted_at = user.terms_accepted_at or datetime.utcnow()
+    user.deleted_at = None  # signing up again restores a soft-deleted user
     db.session.commit()
