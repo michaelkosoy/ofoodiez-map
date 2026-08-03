@@ -174,30 +174,11 @@
         }
         a.ht-rec-card:hover .ht-rec-tag { color: #c0374a; }
 
-        /* Featured logos */
-        .ht-featured-section { padding: 0 20px 36px; max-width: 900px; margin: 0 auto; width: 100%; }
         .ht-section-title {
             font-family: 'Bodoni Moda', Georgia, serif;
             font-size: 1.4rem; font-style: italic;
             color: var(--butter); margin-bottom: 18px; text-align: center;
         }
-        .ht-logos-row {
-            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-        }
-        .ht-logo-badge {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem; font-weight: 700;
-            color: var(--butter-dim);
-            display: flex; align-items: center; gap: 8px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .ht-logo-badge i { color: var(--burgundy-mid); }
-        .ht-logo-badge:hover { border-color: rgba(114,8,21,0.4); color: var(--butter); transform: translateY(-1px); }
 
         /* Search + Company grid */
         .ht-advocates-section { padding: 0 20px 40px; max-width: 900px; margin: 0 auto; width: 100%; }
@@ -333,31 +314,9 @@
         <hr class="ht-divider">
         {% endif %}
 
-        <!-- Featured companies -->
-        <section class="ht-featured-section">
-            <p class="ht-section-title">{{ c.directory_title | default('Featured companies') | safe }}</p>
-            <div class="ht-logos-row">
-                {% for co in companies if co.featured %}
-                {% if co.careers_url %}
-                <a href="{{ co.careers_url }}" target="_blank" rel="noopener" class="ht-logo-badge">
-                    <i class="fas fa-building"></i> {{ co.name }}
-                </a>
-                {% else %}
-                <span class="ht-logo-badge">
-                    <i class="fas fa-building"></i> {{ co.name }}
-                </span>
-                {% endif %}
-                {% else %}
-                <span style="color:var(--butter-dim);font-size:0.82rem;">Companies will appear here soon.</span>
-                {% endfor %}
-            </div>
-        </section>
-
-        <hr class="ht-divider">
-
         <!-- All advocates -->
         <section class="ht-advocates-section">
-            <p class="ht-section-title">{{ c.directory_desc | default('All companies with advocates') | safe }}</p>
+            <p class="ht-section-title">{{ c.directory_title | default('Active Advocates Directory') | safe }}</p>
 
             <div class="ht-search-wrap">
                 <i class="fas fa-search ht-search-icon"></i>
