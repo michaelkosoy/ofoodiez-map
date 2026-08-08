@@ -76,6 +76,23 @@ Follow the existing pattern used for the HiTech pages:
 - Non-HiTech pages that grow admin-editable copy should follow the same shape: one JSON
   file per page/section in `app/data/`, one admin editor page + API pair to read/write it.
 
+### JSON files are edited in git, never in production
+Render's filesystem is ephemeral: anything written to `app/data/*.json` **in production**
+is erased by the next deploy or container restart, silently and with no merge. So the JSON
+content files are a git-edited store — edit locally, commit, push. Editing them in the prod
+admin panel appears to work and then reverts.
+
+Anything that must accept writes *from* production therefore belongs in Postgres, not in a
+JSON file. That's why the listing pages' entries (bachelorette venues + suppliers, HiTech
+vendors — written by the public "add your business" form and the admin grid) live in the
+`listing_entries` table: one row per entry, `slug` + `kind` matching
+`LISTING_SUBMISSION_CONFIGS`, the entry itself in a `data` JSON column so a new form field
+needs no migration. Read/write helpers are in `listing_submissions.py` § Storage
+(`merge_entries` on read, `replace_entries`/`add_entry`/`set_entry_status` on write).
+Each page's `blog_<slug>.json` keeps its static copy plus the arrays used to seed a fresh
+database once (`seed_entries`, run from `init_db`) — those arrays are seed data, not the
+live list. Follow this split for any new page that accepts public submissions.
+
 ## Do not do
 - Do not push large images (>500KB) directly to the git repo — it can break the production deployment
 - Do not create blog pages outside `/blog/` prefix

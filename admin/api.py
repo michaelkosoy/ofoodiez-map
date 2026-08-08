@@ -1549,22 +1549,42 @@ def _blog_path(slug):
 @admin_bp.route('/api/blog/<slug>', methods=['GET'])
 @login_required
 def get_blog(slug):
+    from listing_submissions import get_config, merge_entries
     path = _blog_path(slug)
     if not os.path.exists(path):
         return jsonify({'error': 'Not found'}), 404
     with open(path, encoding='utf-8') as f:
-        return jsonify(json.load(f))
+        blog_data = json.load(f)
+    if get_config(slug):   # listing page: the live venues/suppliers are DB rows
+        blog_data = merge_entries(blog_data, slug)
+    return jsonify(blog_data)
 
 @admin_bp.route('/api/blog/<slug>', methods=['PUT'])
 @login_required
 def save_blog(slug):
-    from listing_submissions import atomic_write_json
+    """Whole-page save from the admin editor. A listing page's entry arrays go to
+    the DB, not the file — they're edited in production, where a file write is
+    erased by the next deploy (see listing_submissions.py § Storage)."""
+    from listing_submissions import atomic_write_json, get_config, replace_entries
     path = _blog_path(slug)
     if not os.path.exists(path):
         return jsonify({'error': 'Not found'}), 404
     data = request.json
     if not data:
         return jsonify({'error': 'No data'}), 400
+    config = get_config(slug)
+    if config:
+        with open(path, encoding='utf-8') as f:
+            on_disk = json.load(f)
+        data = dict(data)
+        for kind, kind_config in config['kinds'].items():
+            array_key = kind_config['array_key']
+            if array_key in data:
+                replace_entries(slug, kind, data[array_key])
+                # Assign in place rather than pop + re-add: keeps the file's key
+                # order stable, so a save that only touched listings leaves the
+                # JSON byte-identical instead of producing a reshuffled diff.
+                data[array_key] = on_disk.get(array_key, data[array_key])
     atomic_write_json(path, data)
     return jsonify({'ok': True})
 
@@ -1579,7 +1599,7 @@ def update_listing_status(slug):
     Generic across any page configured in listing_submissions.py. Unlike the
     generic save_blog PUT, this fires a best-effort notification email to the
     submitter, so it's kept separate from plain field edits."""
-    from listing_submissions import get_config, blog_json_path, atomic_write_json
+    from listing_submissions import get_config, set_entry_status
 
     config = get_config(slug)
     if not config:
@@ -1592,22 +1612,9 @@ def update_listing_status(slug):
     if kind not in config['kinds'] or not submission_id or new_status not in ('approved', 'rejected'):
         return jsonify({'error': 'kind, submission_id and a valid status are required'}), 400
 
-    path = blog_json_path(slug)
-    if not os.path.exists(path):
-        return jsonify({'error': 'Not found'}), 404
-    with open(path, encoding='utf-8') as f:
-        blog_data = json.load(f)
-
-    array_key = config['kinds'][kind]['array_key']
-    entries = blog_data.get(array_key, [])
-    entry = next((e for e in entries if e.get('submission_id') == submission_id), None)
+    entry = set_entry_status(slug, kind, submission_id, new_status)
     if not entry:
         return jsonify({'error': 'Submission not found'}), 404
-
-    entry['status'] = new_status
-    entry['reviewed_at'] = datetime.utcnow().isoformat()
-
-    atomic_write_json(path, blog_data)
 
     contact_email = (entry.get('contact_email') or '').strip()
     if contact_email:

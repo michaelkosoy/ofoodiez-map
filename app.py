@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session, Response
 import pandas as pd
 import os
+import re
 import json
 import time
 import secrets
@@ -263,6 +264,23 @@ def blog_home():
 
     return render_template('home.html', data=data_to_render)
 
+@app.template_filter('wa_number')
+def wa_number(phone):
+    """A phone number as typed -> the digits wa.me expects.
+
+    Numbers reach us from the admin grid and from public business submissions, so
+    they arrive in whatever shape someone typed: '052-333-3255', '+972 54-909-9553',
+    '00972...'. wa.me only accepts international digits, and a leading-0 local
+    number silently produces a dead link, so fill in the Israeli country code.
+    """
+    digits = re.sub(r'\D', '', phone or '')
+    if digits.startswith('00'):
+        digits = digits[2:]
+    elif digits.startswith('0'):
+        digits = '972' + digits[1:]
+    return digits
+
+
 def _load_blog(slug):
     path = os.path.join(os.path.dirname(__file__), 'app', 'data', f'blog_{slug}.json')
     with open(path, encoding='utf-8') as f:
@@ -302,9 +320,11 @@ def map_page():
 
 @app.route('/blog/bachelorette')
 def bachelorette_page():
-    from listing_submissions import get_config, filter_approved
+    from listing_submissions import get_config, filter_approved, merge_entries
     listing_config = get_config('bachelorette')
-    bachelorette_data = _load_blog('bachelorette')
+    # Venues + suppliers come from the DB (listing_entries); the file supplies the
+    # rest of the page's copy. See listing_submissions.py § Storage.
+    bachelorette_data = merge_entries(_load_blog('bachelorette'), 'bachelorette')
     bachelorette_data = filter_approved(bachelorette_data, listing_config)
     return render_template('bachelorette.html', bachelorette_data=bachelorette_data, data=home_data,
                            listing_slug='bachelorette', listing_config=listing_config)
@@ -649,9 +669,10 @@ def hitech_suppliers():
     """HiTech career-suppliers directory — public gallery of approved providers
     plus public self-submission. Approval is handled by the generic listing
     machinery (see listing_submissions.py), same as /blog/bachelorette."""
-    from listing_submissions import get_config, filter_approved
+    from listing_submissions import get_config, filter_approved, merge_entries
     listing_config = get_config('hitech_suppliers')
-    data = filter_approved(_load_blog('hitech_suppliers'), listing_config)
+    data = merge_entries(_load_blog('hitech_suppliers'), 'hitech_suppliers')
+    data = filter_approved(data, listing_config)
     content = _load_hitech_content()
     return render_template('hitech_suppliers.html',
                            suppliers_data=data,
@@ -779,9 +800,9 @@ def _listing_rate_limited(ip):
 def submit_business_listing(slug):
     """Public 'add your business' form for any configured blog listing page
     (see listing_submissions.LISTING_SUBMISSION_CONFIGS). Lands as a pending
-    entry directly in the matching array of blog_<slug>.json, filtered out of
-    the public page until an admin approves it."""
-    from listing_submissions import get_config, blog_json_path, atomic_write_json
+    row in listing_entries, filtered out of the public page until an admin
+    approves it."""
+    from listing_submissions import get_config, add_entry
 
     config = get_config(slug)
     if not config:
@@ -828,12 +849,7 @@ def submit_business_listing(slug):
         'submitted_at': datetime.utcnow().isoformat(),
     }
 
-    path = blog_json_path(slug)
-    with open(path, encoding='utf-8') as f:
-        blog_data = json.load(f)
-    array_key = config['kinds'][kind]['array_key']
-    blog_data.setdefault(array_key, []).append(entry)
-    atomic_write_json(path, blog_data)
+    add_entry(slug, kind, entry)
 
     try:
         from whatsapp_bot.emailer import send_custom_community_email

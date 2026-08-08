@@ -440,9 +440,9 @@ function switchAdminTab(tabName) {
 
   // Venues/Suppliers can change server-side outside this admin session (public
   // business submissions, or an Approve/Reject click writing straight to the
-  // file) — refresh from the server on every visit so a later bulk "Save
-  // Changes" can't silently clobber something that landed while this tab was
-  // open with stale data.
+  // listing_entries table) — refresh from the server on every visit so a later
+  // bulk "Save Changes" can't silently clobber something that landed while this
+  // tab was open with stale data.
   if (tabName === 'venues' || tabName === 'suppliers') {
     fetch('/admin/api/blog/bachelorette')
       .then(function(r) { return r.json(); })
@@ -698,6 +698,9 @@ function renderEditor() {
           { title: "Set Name", field: "name", editor: "input", minWidth: 150 },
           { title: "Description", field: "description", editor: "input", minWidth: 250 },
           { title: "Canva Template Link", field: "canva_link", editor: "input", minWidth: 200 },
+          // Preview image, as a path under app/static (e.g. img/blog/bachelorette/design-red.jpeg).
+          // Empty falls back to the palette icon on the card.
+          { title: "Preview Image", field: "image", editor: "input", minWidth: 180 },
           {
             formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
             width: 50, hozAlign: "center", headerSort: false,
@@ -756,6 +759,11 @@ function renderEditor() {
           { title: "Description", field: "description", editor: "input", minWidth: 250 },
           { title: "Where to Buy URL", field: "buy_url", editor: "input", minWidth: 200 },
           { title: "Button Text", field: "buy_text", editor: "input", width: 120 },
+          // Photo path under app/static (empty falls back to the gift icon); WhatsApp
+          // takes a plain phone number and the card turns it into a wa.me link.
+          { title: "Photo", field: "image", editor: "input", minWidth: 180 },
+          { title: "WhatsApp", field: "whatsapp", editor: "input", width: 130 },
+          { title: "Instagram", field: "instagram", editor: "input", minWidth: 160 },
           {
             formatter: function(cell) { return "<button style='background:none;border:none;color:#e74c3c;cursor:pointer;'><i class='fas fa-trash'></i></button>"; },
             width: 50, hozAlign: "center", headerSort: false,

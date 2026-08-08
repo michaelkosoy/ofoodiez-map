@@ -55,6 +55,18 @@ def _run_migrations():
             db.session.rollback()
 
 
+def _seed_listings():
+    """First-run import of each listing page's curated entries from its
+    blog_<slug>.json into listing_entries. A no-op once a page has rows, so it
+    never overwrites what was edited in the admin panel."""
+    try:
+        from listing_submissions import LISTING_SUBMISSION_CONFIGS, seed_entries
+        for slug in LISTING_SUBMISSION_CONFIGS:
+            seed_entries(slug)
+    except Exception as e:
+        print(f"⚠️ listing seed skipped: {e}")
+
+
 def init_db(app):
     """Initialize the database with the Flask app."""
     # Try to load IG_DATABASE_URL first for backward compatibility with existing envs,
@@ -76,6 +88,7 @@ def init_db(app):
     with app.app_context():
         db.create_all()
         _run_migrations()
+        _seed_listings()
 
 
 class PopupEvent(db.Model):
@@ -298,3 +311,34 @@ class PortfolioAccess(db.Model):
 
     def __repr__(self):
         return f'<PortfolioAccess {self.company} ({self.code})>'
+
+
+class ListingEntry(db.Model):
+    """One venue/supplier row of a listing page — bachelorette venues + suppliers,
+    HiTech vendors; the per-page config lives in listing_submissions.py.
+
+    These rows are in the DB rather than in app/data/blog_<slug>.json because both
+    the public "add your business" form and the admin grid write them *in
+    production*, and Render's filesystem is ephemeral: a file write there is erased
+    by the next deploy or restart. The JSON file keeps only the static copy
+    (intro/games/designs/gifts), which is edited in git.
+
+    `data` is the entry exactly as the page template consumes it (name, category,
+    description, price, links, contact_*, status, submitted_at), so a new form field
+    needs no migration. Table auto-creates via init_db()'s db.create_all().
+
+    ponytail: `status` stays inside `data` and is filtered in Python instead of
+    being its own indexed column — it's a few dozen rows per page; promote it to a
+    real column with a WHERE clause if a listing ever grows into the thousands.
+    """
+    __tablename__ = 'listing_entries'
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(64), nullable=False, index=True)  # LISTING_SUBMISSION_CONFIGS key
+    kind = db.Column(db.String(32), nullable=False)              # 'venue' / 'supplier'
+    position = db.Column(db.Integer, default=0)                  # display order within a kind
+    data = db.Column(db.JSON, nullable=False, default=dict)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<ListingEntry {self.slug}/{self.kind} {(self.data or {}).get("name")}>'

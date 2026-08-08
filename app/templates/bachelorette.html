@@ -49,7 +49,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bachelorette.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bachelorette.css') }}?v=2">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/business-submission-form.css') }}">
 </head>
 
@@ -144,7 +144,7 @@
                                 <a href="{{ place.instagram }}" target="_blank" class="ig-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-instagram"></i></a>
                                 {% endif %}
                                 {% if place.whatsapp %}
-                                <a href="https://wa.me/{{ place.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
+                                <a href="https://wa.me/{{ place.whatsapp | wa_number }}" target="_blank" class="wa-link" style="width: 24px; height: 24px; font-size: 1rem;"><i class="fab fa-whatsapp"></i></a>
                                 {% endif %}
                                 {% if place.link and place.link != "#" %}
                                 <a href="{{ place.link }}" target="_blank" style="width: 24px; height: 24px; font-size: 0.9rem; background: #F8F9FA; color: var(--secondary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
@@ -209,7 +209,7 @@
                             <a href="{{ supplier.instagram }}" target="_blank" class="ig-link"><i class="fab fa-instagram"></i></a>
                             {% endif %}
                             {% if supplier.whatsapp %}
-                            <a href="https://wa.me/{{ supplier.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" class="wa-link"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://wa.me/{{ supplier.whatsapp | wa_number }}" target="_blank" class="wa-link"><i class="fab fa-whatsapp"></i></a>
                             {% endif %}
                         </div>
                     </div>
@@ -342,7 +342,12 @@
             <div class="designs-grid">
                 {% for design in bachelorette_data.designs.sets %}
                 <div class="design-card">
+                    {% if design.image %}
+                    <img class="design-preview" src="{{ url_for('static', filename=design.image) }}"
+                         alt="תצוגה מקדימה של {{ design.name }}" loading="lazy">
+                    {% else %}
                     <div class="design-icon-box"><i class="fas fa-palette"></i></div>
+                    {% endif %}
                     <h3 class="design-title">{{ design.name }}</h3>
                     <p class="design-desc">{{ design.description }}</p>
                     {% if design.canva_link %}
@@ -395,21 +400,37 @@
         <div id="tab-gifts" class="tab-content">
             <div class="branding-header">
                 <h2>{{ bachelorette_data.gifts_title or "🎁 רעיונות למתנות שוות לכלה" }}</h2>
-                <p>{{ bachelorette_data.gifts_desc or "אספנו לכן את המתנות הכי מיוחדות, מפנקות ומצטלמות טוב שיגרמו לכלה להרגיש הכי מיוחדת:" }}</p>
+                {# Optional: clearing gifts_desc in the admin removes the sub-header entirely #}
+                {% if bachelorette_data.gifts_desc %}
+                <p>{{ bachelorette_data.gifts_desc }}</p>
+                {% endif %}
             </div>
 
             <div class="gifts-grid">
                 {% for gift in bachelorette_data.gifts %}
                 <div class="gift-card">
+                    {% if gift.image %}
+                    <img class="gift-preview" src="{{ url_for('static', filename=gift.image) }}"
+                         alt="{{ gift.title }}" loading="lazy">
+                    {% else %}
                     <div class="gift-icon-box"><i class="fas fa-gift"></i></div>
+                    {% endif %}
                     <div class="gift-details">
                         <h3 class="gift-title">{{ gift.title }}</h3>
                         <p class="gift-desc">{{ gift.description }}</p>
-                        {% if gift.buy_url %}
-                        <a href="{{ gift.buy_url }}" target="_blank" class="gift-buy-btn">
-                            <i class="fas fa-shopping-cart"></i> {{ gift.buy_text or "לרכישה" }}
-                        </a>
-                        {% endif %}
+                        <div class="gift-actions">
+                            {% if gift.buy_url %}
+                            <a href="{{ gift.buy_url }}" target="_blank" class="gift-buy-btn">
+                                <i class="fas fa-shopping-cart"></i> {{ gift.buy_text or "לרכישה" }}
+                            </a>
+                            {% endif %}
+                            {% if gift.instagram %}
+                            <a href="{{ gift.instagram }}" target="_blank" class="ig-link"><i class="fab fa-instagram"></i></a>
+                            {% endif %}
+                            {% if gift.whatsapp %}
+                            <a href="https://wa.me/{{ gift.whatsapp | wa_number }}" target="_blank" class="wa-link"><i class="fab fa-whatsapp"></i></a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% endfor %}

@@ -939,6 +939,18 @@ body {
     transform: translateY(-5px);
     box-shadow: var(--shadow-hover);
 }
+/* Preview of the actual Canva kit. The templates are tall portrait posters: fix the
+   height so the cards line up and let the width follow the poster's own ratio --
+   cropping to a full-width box would cut the floral kit's flowers (they sit along
+   the bottom edge), and letterboxing one would leave wide empty bars. */
+.design-preview {
+    height: 300px;
+    width: auto;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+}
 .design-icon-box {
     width: 60px;
     height: 60px;
@@ -1081,10 +1093,27 @@ body {
     font-size: 1.4rem;
     flex-shrink: 0;
 }
+/* Product photo in place of the gift icon. The card is a horizontal row, so this
+   stays a small portrait thumb; cover-crop keeps every gift the same size no
+   matter what ratio the supplier's photo came in at. */
+.gift-preview {
+    width: 100px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
 .gift-details {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+}
+/* Buy button + contact icons on one row; wraps on narrow screens. */
+.gift-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 .gift-title {
     font-size: 1.1rem;

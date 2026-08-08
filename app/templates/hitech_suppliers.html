@@ -105,7 +105,7 @@
                         <div class="hs-socials">
                             {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="hs-social" title="Website / Profile"><i class="fas fa-globe"></i></a>{% endif %}
                             {% if s.instagram and s.instagram != "https://instagram.com/" %}<a href="{{ s.instagram }}" target="_blank" rel="noopener" class="hs-social" title="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
-                            {% if s.whatsapp %}<a href="https://wa.me/{{ s.whatsapp | replace('-', '') | replace(' ', '') | replace('+', '') }}" target="_blank" rel="noopener" class="hs-social hs-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
+                            {% if s.whatsapp %}<a href="https://wa.me/{{ s.whatsapp | wa_number }}" target="_blank" rel="noopener" class="hs-social hs-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
                         </div>
                     </div>
                     {% if s.description %}<p class="hs-desc">{{ s.description }}</p>{% endif %}

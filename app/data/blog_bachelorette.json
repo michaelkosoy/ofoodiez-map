@@ -3,7 +3,7 @@
   "note": "שימו לב: כל המחירים יכולים להשתנות, ונכונים לקיץ 26",
   "games_intro": "מגוון משחקים מגניבים לבחירה בהתאם לאופי האירוע, סגנון הכלה והאווירה שאתן רוצות לייצר:",
   "gifts_title": "🎁 רעיונות למתנות שוות לחברות",
-  "gifts_desc": "אספנו לכן את המתנות הכי מיוחדות, מפנקות ומצטלמות טוב שיגרמו לכלה להרגיש הכי מיוחדת:",
+  "gifts_desc": "",
   "places": [
     {
       "category": "חלל ושף",
@@ -392,42 +392,6 @@
   ],
   "suppliers": [
     {
-      "category": "דיג׳יי",
-      "description": "דיג׳יית מנוסה למסיבות רווקות, מתאימה את המוזיקה בדיוק לוייב שלכן - ממוזיקת רקע אלגנטית ועד מסיבת מיינסטרים מטורפת.",
-      "instagram": "https://www.instagram.com/",
-      "location": "כל הארץ",
-      "name": "דיג׳יי עדי שרון",
-      "price": "החל מ-1,500₪",
-      "whatsapp": "0541234567"
-    },
-    {
-      "category": "שף",
-      "description": "ארוחת שף איטלקית חגיגית של פסטות עבודת יד, פוקאצ׳ות חמות, סלטים רעננים וקינוחים מטורפים.",
-      "instagram": "https://www.instagram.com/",
-      "location": "אזור המרכז",
-      "name": "שף מאור לוי",
-      "price": "350₪ - 450₪ לסועדת",
-      "whatsapp": "0547654321"
-    },
-    {
-      "category": "אטרקציה",
-      "description": "סדנה חווייתית של ציור חופשי בליווי יין ללא הגבלה. מתאימה לכל רמת ציור ויוצרת מזכרת מושלמת לכל אחת מהבנות.",
-      "instagram": "https://www.instagram.com/",
-      "location": "סטודיו בתל אביב או אצלכן",
-      "name": "סדנת יין וציור קנבס",
-      "price": "180₪ למשתתפת",
-      "whatsapp": "0501112222"
-    },
-    {
-      "category": "בר קוקטיילים",
-      "description": "עמדת קוקטיילים מעוצבת למסיבת רווקות הכוללת הכנת קוקטיילים אישיים, שואו אלכוהול מטורף ומשחקי שתייה מדליקים.",
-      "instagram": "https://www.instagram.com/",
-      "location": "כל הארץ",
-      "name": "מיקסולוג נייד - Cocktail Show",
-      "price": "החל מ-2,000₪ לאירוע",
-      "whatsapp": "0528889999"
-    },
-    {
       "category": "שף",
       "contact_email": "ofir.lazarov@gmail.com",
       "contact_name": "אופיר לזרוב",
@@ -651,66 +615,67 @@
   "designs": {
     "sets": [
       {
-        "canva_link": "https://www.canva.com/",
-        "description": "עיצובים נקיים בגווני שמנת, חום בהיר וזהב. כולל הזמנה, תפריט מעוצב, שלט כניסה, חבקים לבקבוקי יין ומדבקות למתנות מלוות.",
-        "name": "סט מיתוג Boho Chic"
+        "canva_link": "https://canva.link/br5mi4whaf4h2iu",
+        "description": "פלטת אדום עם ורד לבן — תבנית קנבה לשכפול ועריכה עצמית.",
+        "image": "img/blog/bachelorette/design-red.jpeg",
+        "name": "סט מיתוג אדום, ורד לבן"
       },
       {
-        "canva_link": "https://www.canva.com/",
-        "description": "עיצוב רומנטי ואלגנטי בגווני ורוד בייבי וזהב. כולל הזמנה, תפריט, שלט כניסה ומדבקות מעוצבות.",
-        "name": "סט מיתוג Classic Pink"
-      },
-      {
-        "canva_link": "https://www.canva.com/",
-        "description": "עיצוב נועז ומודרני עם אלמנטים צבעוניים ומרימים. מתאים במיוחד למסיבות בריכה ואירועים פרועים.",
-        "name": "סט מיתוג Wild & Fun"
+        "canva_link": "https://canva.link/lneapglmso1jj3l",
+        "description": "פלטה צבעונית בסגנון פרחוני — תבנית קנבה לשכפול ועריכה עצמית.",
+        "image": "img/blog/bachelorette/design-floral.jpeg",
+        "name": "מיתוג צבעוני פרחוני"
       }
     ],
     "aliexpress_text": "מגוון אביזרים ומדבקות מומלצים להזמנה מאליאקספרס שישדרגו לכן את המיתוג והקישוטים ברבע מחיר:",
     "aliexpress_links": [
       {
-        "name": "דפי מדבקה איכותיים עמידים במים להדפסת חבקי יין",
-        "url": "https://aliexpress.com/"
+        "name": "מדבקות עגולות למתנות",
+        "url": "https://s.click.aliexpress.com/e/_c3JfBBdv"
       },
       {
-        "name": "שקיות קטנות מכותנה מעוצבות לערכת הנגאובר",
-        "url": "https://aliexpress.com/"
+        "name": "מניפה פרוותית לכלה",
+        "url": "https://s.click.aliexpress.com/e/_c4329Caf"
       },
       {
-        "name": "קשים ממותגים ובלונים מטאליים מיוחדים",
-        "url": "https://aliexpress.com/"
+        "name": "כובע קאבוי כלה",
+        "url": "https://a.aliexpress.com/_c39dLif1"
+      },
+      {
+        "name": "מדבקות ממותגות ליין",
+        "url": "https://s.click.aliexpress.com/e/_c3XH5Zeb"
       }
     ],
     "print_shops_text": "אם אין לכן מדפסת ביתית, מומלץ להדפיס את שלטי הכניסה הגדולים והכרטיסיות בבתי דפוס בתל אביב שמציעים הדפסה מהירה במקום מהיום להיום:",
     "print_shops_links": [
       {
-        "name": "דפוס תל אביב - דיזנגוף (הדפסה מהירה ואיכותית)",
-        "url": "https://google.com/"
+        "name": "דפוס דנה - דיזנגוף, תל אביב",
+        "url": "https://maps.app.goo.gl/jAfWpyi7x7BBtDu87?g_st=ic"
       },
       {
-        "name": "דפוס מנטור - הדפסת פוסטרים ושלטים קשיחים",
-        "url": "https://google.com/"
+        "name": "דפוס אלון - מבזק אופסט, רחוב המסגר · 050-3703707",
+        "url": "https://maps.app.goo.gl/eg7vvJHoNc22CSbe9?g_st=ic"
       }
     ]
   },
   "gifts": [
     {
-      "buy_text": "לרכישה ב-ASOS",
-      "buy_url": "https://www.asos.com/",
-      "description": "פיג׳מת כפתורים לבנה חגיגית ומפנקת עם כיתוב מוזהב בגב. מושלמת לצילומים של בוקר החתונה וההכנות.",
-      "title": "סט פיג׳מת משי Bride מותאמת אישית"
+      "buy_text": "",
+      "buy_url": "",
+      "description": "נר בכלי פח שחור עם מדבקה עגולה מעוצבת ומותאמת אישית לאירוע — מזכרת שווה במיוחד למלוות. להזמנות בוואטסאפ או באינסטגרם.",
+      "image": "img/blog/bachelorette/gift-candle.jpeg",
+      "instagram": "https://www.instagram.com/hasiba__candles?igsh=MTVmOHZ0ZmJuZDZpMQ==",
+      "title": "נר ממותג בהתאמה אישית מבית HASIBA",
+      "whatsapp": "+972 50-9632008"
     },
     {
-      "buy_text": "לרכישה",
-      "buy_url": "https://www.google.com/",
-      "description": "חלוק ספא איכותי עם רקמת השם של הכלה או הכיתוב 'Bride' בגב החלוק.",
-      "title": "חלוק רחצה מפנק עם רקמה אישית"
-    },
-    {
-      "buy_text": "לרכישה באליאקספרס",
-      "buy_url": "https://www.google.com/",
-      "description": "כובע קש גדול ומהמם המעוטר בשמה או בכיתוב מותאם אישית, מצוין למסיבת בריכה או חוף.",
-      "title": "כובע קש ממותג לכלה"
+      "buy_text": "לרכישה באתר Havaianas",
+      "buy_url": "https://havaianas.co.il/product/%D7%98%D7%95%D7%A4-%D7%9C%D7%91%D7%9F/?attribute_pa_%25d7%2593%25d7%2592%25d7%259d=5778",
+      "description": "כפכפים קלאסיים בצבע אחיד — מתנה שימושית שנשארת איתן גם אחרי המסיבה, ומצטלמת מעולה כשכל החבורה נועלת את אותו הצבע.",
+      "image": "img/blog/bachelorette/gift-havaianas.jpeg",
+      "instagram": "",
+      "title": "כפכפי Havaianas",
+      "whatsapp": ""
     }
   ]
 }

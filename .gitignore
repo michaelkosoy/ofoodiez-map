@@ -44,3 +44,6 @@ instance/
 *.db
 
 scripts/
+
+# local data backups (git history is the real backup; these are just belt-and-braces)
+backups/
