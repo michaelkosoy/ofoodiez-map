@@ -1,0 +1,16 @@
+/* Shared layout primitive (P1-1): one bounded, centred content column.
+   Section backgrounds stay full-bleed; only the content inside a
+   .container is constrained. Reuse this — no per-section max-width
+   one-offs. */
+:root {
+    --container: 1280px;
+    --gutter: clamp(16px, 4vw, 40px);
+}
+
+.container {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}

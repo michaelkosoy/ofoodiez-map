@@ -517,6 +517,9 @@ a { text-decoration: none; color: inherit; }
     inset: 0;
     background: linear-gradient(180deg, rgba(28, 12, 9, .05) 0%, rgba(28, 12, 9, .75) 100%);
     pointer-events: none;
+    /* full-bleed over the section AND above the iPhone stage (it sits
+       earlier in the DOM now so the grid wrapper can bound the content) */
+    z-index: 1;
 }
 
 /* Map text overlay */
@@ -526,6 +529,39 @@ a { text-decoration: none; color: inherit; }
     padding: 0 30px 42px;
     color: #f9f6eb;
     z-index: 10;
+}
+
+/* Mobile keeps the absolute cinematic layout untouched: the wrapper
+   contributes no box. On desktop it becomes the bounded two-column
+   grid — copy left, iPhone mockup right — so the pair reads as one
+   composition instead of edge text + floating phone (P1-1). */
+.map-cols { display: contents; }
+
+@media (min-width: 900px) {
+    .map-section { height: 560px; }
+    .map-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        height: 100%;
+        position: relative;
+    }
+    .map-cols .map-overlay-content {
+        position: relative;
+        inset: auto;
+        grid-column: 1;
+        grid-row: 1;
+        padding: 0;
+    }
+    .map-cols .map-iphone-stage {
+        position: relative;
+        inset: auto;
+        grid-column: 2;
+        grid-row: 1;
+        height: 100%;
+    }
+    .map-overlay-title { font-size: 56px; }
+    .map-overlay-desc { max-width: 360px; font-size: 16px; }
 }
 
 .map-overlay-eyebrow {
@@ -624,7 +660,7 @@ a { text-decoration: none; color: inherit; }
 /* =====================================================
    COMMUNITY CARD  — Dark Burgundy
    ===================================================== */
-.community-section { padding: 30px 24px; }
+.community-section { padding: 30px 0; } /* sides come from the inner .container */
 
 .community-card {
     position: relative;
@@ -677,7 +713,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 .world-maps-header {
-    padding: 0 30px;
+    /* sides come from the .container class on the same element */
     margin-bottom: 20px;
 }
 
@@ -702,7 +738,9 @@ a { text-decoration: none; color: inherit; }
     /* proximity, not mandatory: mandatory x-snap captures vertical pans on iOS
        WebKit, freezing page scroll when the swipe starts on the carousel */
     scroll-snap-type: x proximity;
-    padding: 20px 30px 16px;
+    /* sits inside a .container now — it scrolls within the bounded column,
+       so no side padding of its own (6px keeps hover shadows unclipped) */
+    padding: 20px 6px 16px;
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -786,7 +824,7 @@ a { text-decoration: none; color: inherit; }
    CALENDAR SECTION
    ===================================================== */
 .calendar-section-wrap {
-    padding: 30px 20px;
+    padding: 30px 0; /* sides come from the inner .container */
     background: linear-gradient(#f4ecda, var(--bg-color));
     overflow: hidden;
 }

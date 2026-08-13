@@ -42,6 +42,10 @@ const slug = (p) => (p === '/' ? 'root' : p.replace(/^\//, '').replace(/\//g, '-
       try {
         await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
         await page.waitForTimeout(1500); // fonts, maps, lazy paint
+        // fullPage capture never fires IntersectionObserver for below-fold
+        // [data-reveal] blocks — force-reveal so screenshots show real content
+        await page.evaluate(() => document.querySelectorAll('[data-reveal]').forEach((e) => e.classList.add('is-visible')));
+        await page.waitForTimeout(300);
         // /map is a fixed-viewport app; everything else is a document.
         const fullPage = p !== '/map';
         const file = path.join(outDir, `${slug(p)}-${vp.width}.png`);

@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=10">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}?v=4">
 
@@ -102,6 +103,10 @@
          HAPPY HOUR MAP — Dark Cinematic
          ========================================= -->
     <section class="map-section">
+        <div class="map-bg-overlay"></div>
+        <!-- .map-cols: display:contents on mobile (absolute layout unchanged),
+             explicit two-column container grid on desktop (P1-1) -->
+        <div class="container map-cols">
         <!-- Animated iPhone stage -->
         <div class="map-iphone-stage">
             <div class="map-glow-ring"></div>
@@ -147,8 +152,6 @@
             </div>
         </div>
 
-        <div class="map-bg-overlay"></div>
-
         <!-- Text overlay -->
         <div class="map-overlay-content">
             <div class="map-overlay-eyebrow">Live map</div>
@@ -158,12 +161,14 @@
                 <i class="fas fa-location-dot"></i> Open the map
             </a>
         </div>
+        </div>
     </section>
 
     <!-- =========================================
          COMMUNITY INSIDER
          ========================================= -->
     <div class="community-section">
+        <div class="container">
         <div class="community-card" data-reveal>
             <i class="fab fa-whatsapp whatsapp-icon"></i>
             <div class="community-eyebrow">The community</div>
@@ -173,17 +178,19 @@
                 <i class="fab fa-whatsapp"></i> {{ data.community.link_text }}
             </a>
         </div>
+        </div>
     </div>
 
     <!-- =========================================
          WORLD MAPS — Horizontal Carousel
          ========================================= -->
     <section class="world-maps-section" id="destinations">
-        <div class="world-maps-header">
+        <div class="world-maps-header container">
             <div class="section-eyebrow">Foodie maps</div>
             <h2 class="section-title">Travel like Ofoodiez</h2>
             <p>City guides for people who plan their trips around where to eat. I've explored each place myself, dug past the tourist traps, and mapped out the spots worth your time — so you can skip the research and just eat and drink well.</p>
         </div>
+        <div class="container">
         <div class="world-carousel">
             {% for item in data.world_maps %}
             <a href="{{ item.map_link }}" class="country-card"
@@ -201,12 +208,14 @@
             </a>
             {% endfor %}
         </div>
+        </div>
     </section>
 
     <!-- =========================================
          POP-UPS CALENDAR
          ========================================= -->
     <section class="calendar-section-wrap" id="popups-section" style="scroll-margin-top:64px;">
+        <div class="container">
         <div class="calendar-header-block">
             <div class="section-eyebrow">Pop-ups · TLV</div>
             <h2 class="section-title">Pop-ups<br>this month</h2>
@@ -244,10 +253,12 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Dark Footer -->
     <footer class="site-footer">
+        <div class="container">
         <div class="social-media">
             {% for social in data.social_media %}
             <a href="{{ social.link }}" target="_blank" class="social-icon">
@@ -261,6 +272,7 @@
         </div>
         <div class="footer-legal" style="margin-top:8px;">
             <a href="mailto:info@ofoodiez.com">info@ofoodiez.com</a>
+        </div>
         </div>
     </footer>
 
