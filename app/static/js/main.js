@@ -317,7 +317,16 @@ async function initMap() {
         }
     ];
 
-    map = new Map(document.getElementById("map"), {
+    // First-paint guard: the Maps API will not draw tiles into a container
+    // whose height hasn't resolved yet (the calc(100vh - 52px) races the nav
+    // script on slow loads) and it never recovers without an interaction.
+    const mapEl = document.getElementById("map");
+    if (!mapEl.offsetHeight) {
+        const bar = document.querySelector('.sn-bar');
+        mapEl.style.minHeight = (window.innerHeight - (bar ? bar.offsetHeight : 52)) + 'px';
+    }
+
+    map = new Map(mapEl, {
         center: { lat: 32.075, lng: 34.775 },
         zoom: 14,
         mapId: "DEMO_MAP_ID", // Required for AdvancedMarkerElement, using demo ID
@@ -326,6 +335,15 @@ async function initMap() {
         zoomControl: false, // We can add custom controls if needed
         gestureHandling: 'greedy', // Allow single-finger panning
     });
+
+    // Re-trigger tile paint whenever the container's box changes (fires once
+    // immediately on observe, which covers the cold-load zero-size case).
+    const keepCentered = () => {
+        const c = map.getCenter();
+        google.maps.event.trigger(map, 'resize');
+        if (c) map.setCenter(c);
+    };
+    new ResizeObserver(keepCentered).observe(mapEl);
 
     // Close InfoWindow when clicking on the map (outside popup)
     map.addListener("click", () => {
