@@ -902,7 +902,7 @@ function getInfoWindowContent(place) {
             <h3 style="margin: 0 0 5px 0; color: #333;">${place.Name}</h3>
             ${place.Address ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #888;"><i class="fas fa-map-marker-alt"></i> ${place.Address}</p>` : ''}
 
-            <p class="place-description" style="margin: 5px 0 0 0; font-size: 14px; text-align: right;">${place.Description || ''}</p>
+            <p class="place-description" lang="he" dir="rtl" style="margin: 5px 0 0 0; font-size: 14px;">${place.Description || ''}</p>
             ${daysText ? `<p style="margin: 4px 0 0 0; font-size: 13px; color: #888; direction: rtl; text-align: right;">תקף בימים: ${daysText}</p>` : ''}
             <div style="margin-top: 8px; display: flex; gap: 12px; align-items: center; justify-content: space-between;">
                 <div style="display: flex; gap: 12px; align-items: center;">
@@ -960,10 +960,12 @@ function renderPlaceList(places) {
         const daysText = formatDays(place);
         return `
                 <li class="place-list-item" data-name="${place.Name.replace(/"/g, '&quot;')}" onclick="handlePlaceClick('${place.Name.replace(/'/g, "\\'")}')">
-                    <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
-                        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0;">
-                            ${place.Description ? `<p class="place-description" style="margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; direction: rtl;">${place.Description}</p>` : ''}
+                    <!-- rows are Hebrew-first: real dir=rtl instead of the old
+                         row-reverse hack, so bidi text orders itself (P1-2) -->
+                    <div dir="rtl" style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 8px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0;">
                             <h3 style="white-space: nowrap; flex-shrink: 0;">${place.Name}</h3>
+                            ${place.Description ? `<p class="place-description" lang="he" style="margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${place.Description}</p>` : ''}
                         </div>
                         <div style="display: flex; flex-direction: row; gap: 4px; flex-shrink: 0; align-items: center;">
                             <div style="width: 20px; display: flex; justify-content: center; align-items: center;">

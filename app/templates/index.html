@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- Hebrew-primary content in an LTR-designed app shell: lang says what the
+     content is, dir=ltr keeps the layout; Hebrew blocks carry their own dir. -->
+<html lang="he" dir="ltr">
 
 <head>
     {% include 'components/analytics.html' %}
@@ -297,7 +299,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=39"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=40"></script>
 </body>
 
 </html>
