@@ -1002,7 +1002,11 @@ a { text-decoration: none; color: inherit; }
    DARK FOOTER
    ===================================================== */
 .site-footer {
-    margin: 38px -20px -80px;
+    /* bottom bleed (-80px) deliberately cancels body's legacy
+       padding-bottom so the dark band reaches the page end; the old -20px
+       side margins had no parent padding to cancel and just made the
+       footer 40px wider than the viewport (P0-4) */
+    margin: 38px 0 -80px;
     padding: 32px 30px 100px;
     background: #2b1a13;
     text-align: center;
