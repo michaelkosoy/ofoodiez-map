@@ -39,6 +39,9 @@
     .sn-link { display:flex; align-items:center; gap:13px; padding:12px 14px; border-radius:12px;
         text-decoration:none; color:var(--sn-fg); font-weight:600; font-size:.97rem; transition:background .18s, color .18s; }
     .sn-link i { width:20px; text-align:center; font-size:15px; opacity:.8; }
+    /* Inline marker on links whose destination is Hebrew (language model "C":
+       label cross-language links instead of surprising the visitor). */
+    .lang-note { font-size:.78em; opacity:.7; font-weight:400; }
     .sn-link:hover { background:var(--sn-hover); color:var(--sn-accent); }
     .sn-link.active { background:var(--sn-active); color:var(--sn-active-fg); }
     .sn-link.active i { opacity:1; }
@@ -71,7 +74,7 @@
     <nav class="sn-links">
         {% for l in nav_links %}
         <a class="sn-link {% if nav_active == l.key %}active{% endif %}" href="{{ l.href }}"{% if l.external %} target="_blank" rel="noopener"{% endif %}>
-            <i class="{{ l.icon }}"></i>{{ l.label }}
+            <i class="{{ l.icon }}"></i>{{ l.label }}{% if l.he %} <span class="lang-note" lang="he">· עברית</span>{% endif %}
         </a>
         {% endfor %}
     </nav>
