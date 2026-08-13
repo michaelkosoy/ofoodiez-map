@@ -510,9 +510,22 @@ nav.bottom-nav.map-bottom-nav .bottom-nav-item span {
 
 
 .sidebar-content {
-    padding: 0 32px 32px 32px;
+    /* bottom padding = a11y-widget safe area, so the last rows can scroll
+       fully clear of the fixed accessibility button (P0-3) */
+    padding: 0 32px var(--a11y-fab-safe-area, 64px) 32px;
     overflow-y: auto;
     flex-grow: 1;
+}
+
+/* /map only: the global bottom-left corner belongs to the sidebar/list, so
+   float the a11y widget over the map canvas instead — right of the 480px
+   sidebar, above Google's attribution, clear of the locate/+ stack (P0-3). */
+body:has(#map) .a11y-fab { left: 494px; bottom: 34px; }
+body:has(#map) .a11y-panel { left: 494px; bottom: 88px; }
+@media (max-width: 768px) {
+    /* mobile: the sheet peeks 260px — sit just above it on the canvas */
+    body:has(#map) .a11y-fab { left: 14px; bottom: 274px; }
+    body:has(#map) .a11y-panel { left: 14px; bottom: 328px; }
 }
 
 /* Place List */

@@ -42,7 +42,9 @@
     .sn-link:hover { background:var(--sn-hover); color:var(--sn-accent); }
     .sn-link.active { background:var(--sn-active); color:var(--sn-active-fg); }
     .sn-link.active i { opacity:1; }
-    .sn-footer { margin-top:auto; padding:12px; border-top:1px solid var(--sn-border); display:flex; flex-direction:column; gap:6px; }
+    /* Bottom padding reserves the corner for the fixed accessibility widget
+       (it floats above the drawer), so Contact/account rows stay clickable. */
+    .sn-footer { margin-top:auto; padding:12px 12px var(--a11y-fab-safe-area, 64px); border-top:1px solid var(--sn-border); display:flex; flex-direction:column; gap:6px; }
     .sn-account { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:10px;
         text-decoration:none; color:var(--sn-muted); font-size:.85rem; }
     .sn-account:hover { color:var(--sn-accent); }

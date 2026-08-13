@@ -9,11 +9,14 @@
     var FLAGS = ['bigtext', 'hugetext', 'contrast', 'grayscale', 'links', 'font', 'still'];
 
     var css = [
-        '.a11y-fab{position:fixed;bottom:88px;left:14px;z-index:99990;width:46px;height:46px;',
+        /* Sections that reach the viewport's bottom-left corner reserve this
+           much space so no content ever sits under the widget (P0-3). */
+        ':root{--a11y-fab-safe-area:64px;}',
+        '.a11y-fab{position:fixed;bottom:16px;left:14px;z-index:99990;width:46px;height:46px;',
         'border-radius:50%;background:#1a56b0;color:#fff;border:2px solid #fff;cursor:pointer;',
         'font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.35);}',
         '.a11y-fab:focus{outline:3px solid #ffbf47;outline-offset:2px;}',
-        '.a11y-panel{position:fixed;bottom:142px;left:14px;z-index:99991;background:#fff;color:#111;',
+        '.a11y-panel{position:fixed;bottom:70px;left:14px;z-index:99991;background:#fff;color:#111;',
         'border:1px solid #bbb;border-radius:12px;padding:14px;width:230px;box-shadow:0 8px 30px rgba(0,0,0,.3);',
         'font-family:Arial,sans-serif;font-size:15px;direction:rtl;text-align:right;}',
         '.a11y-panel h2{font-size:16px;margin:0 0 10px;}',
