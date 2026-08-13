@@ -1,6 +1,6 @@
-"""Advocate notification emails via SendGrid (best-effort, config-gated).
+"""Advocate notification emails via Brevo (best-effort, config-gated).
 
-If SENDGRID_API_KEY / WA_FROM_EMAIL aren't set, send_application_email returns
+If BREVO_API_KEY / WA_FROM_EMAIL aren't set, send_application_email returns
 False and the caller records the recipient as 'pending' — the application is
 still saved, the email just isn't sent.
 """
@@ -14,7 +14,7 @@ from .config import WaConfig
 
 logger = logging.getLogger("whatsapp_bot")
 
-_SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send"
+_BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 def send_application_email(to_email, advocate_name, candidate_name, candidate_email,
@@ -26,11 +26,11 @@ def send_application_email(to_email, advocate_name, candidate_name, candidate_em
     candidate's email, an "I referred them" confirmation button (approval_url), an
     "I didn't submit this" denial link (deny_url), and a clickable CV download
     link (cv_url) alongside the attachment.
-    Returns True if sent, False if SendGrid isn't configured or the send failed.
+    Returns True if sent, False if Brevo isn't configured or the send failed.
 
     Sends both a text/plain and a text/html part so the button renders.
     """
-    api_key = WaConfig.SENDGRID_API_KEY
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
         return False
@@ -136,7 +136,7 @@ def send_status_check_email(to_email, candidate_name, hired_url, pending_url,
     """Monthly status check-in for a candidate with applications: three
     one-click answer buttons (hired / still in process / no response), each a
     signed link to /wa/status/update. Returns True if sent."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
         return False
@@ -199,7 +199,7 @@ def send_referral_confirmed_email(to_email, candidate_name, advocate_name, compa
     in the subject) so Gmail files it in Primary, not Promotions — this is the
     one a candidate must actually see.
     """
-    api_key = WaConfig.SENDGRID_API_KEY
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
         return False
@@ -234,7 +234,7 @@ def send_referral_confirmed_email(to_email, candidate_name, advocate_name, compa
 def send_company_available_email(to_email, candidate_name, company_name):
     """Tell a candidate that a company they asked about is now serviceable (has an
     advocate). Plain text + personal subject so it lands in Primary. Best-effort."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not api_key or not from_email or not to_email:
         return False
@@ -259,8 +259,8 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
                                candidate_email, reason):
     """Notify ops (WA_OPS_EMAIL, default info@ofoodiez.com) that a candidate
     searched a company we can't yet serve, so it can be backfilled. Best-effort:
-    returns False if SendGrid / the ops address aren't configured."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    returns False if Brevo / the ops address aren't configured."""
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     to_email = WaConfig.WA_OPS_EMAIL
     if not api_key or not from_email or not to_email:
@@ -294,8 +294,8 @@ def send_company_request_email(company_name, candidate_name, candidate_phone,
 def send_contact_email(name, phone, email, message):
     """Forward a Contact-Us message from the WhatsApp bot to ops (WA_OPS_EMAIL).
     Reply-To is the user's email when we have one, so ops can reply directly.
-    Best-effort: returns False if SendGrid / the ops address aren't configured."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    Best-effort: returns False if Brevo / the ops address aren't configured."""
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     to_email = WaConfig.WA_OPS_EMAIL
     if not api_key or not from_email or not to_email:
@@ -318,38 +318,9 @@ def send_contact_email(name, phone, email, message):
     return _post(payload)
 
 
-def send_hitech_signup_email(email, linkedin_url=""):
-    """Notify ops that a new person joined the HiTech waitlist. Best-effort."""
-    api_key = WaConfig.SENDGRID_API_KEY
-    from_email = WaConfig.WA_FROM_EMAIL
-    to_email = WaConfig.WA_OPS_EMAIL
-    logger.info(
-        "[hitech emailer] api_key=%s from=%s to=%s",
-        bool(api_key), from_email, to_email,
-    )
-    if not api_key or not from_email or not to_email:
-        logger.warning("[hitech emailer] missing config — email NOT sent")
-        return False
-
-    linkedin_line = f"\nLinkedIn: {linkedin_url}" if linkedin_url else ""
-    body = (
-        f"New HiTech waitlist signup!\n\n"
-        f"Email: {email}"
-        f"{linkedin_line}\n\n"
-        f"— Ofoodiez"
-    )
-    payload = {
-        "personalizations": [{"to": [{"email": to_email}]}],
-        "from": {"email": from_email, "name": "Ofoodiez"},
-        "subject": f"HiTech signup: {email}",
-        "content": [{"type": "text/plain", "value": body}],
-    }
-    return _post(payload)
-
-
 def send_hitech_rejection_email(to_email):
     """Send a rejection email to a HiTech signup whose LinkedIn was invalid."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not to_email:
         return False
@@ -396,8 +367,8 @@ def send_hitech_rejection_email(to_email):
 
 
 def send_custom_community_email(to_email, subject, body_html, body_text):
-    """Send a custom community email to a tech member using SendGrid."""
-    api_key = WaConfig.SENDGRID_API_KEY
+    """Send a custom community email to a tech member via Brevo."""
+    api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not to_email:
         return False
@@ -423,30 +394,47 @@ def send_custom_community_email(to_email, subject, body_html, body_text):
 
 
 def _post(payload):
-    api_key = WaConfig.SENDGRID_API_KEY
-    # Don't let SendGrid rewrite links into ct.sendgrid.net click-tracking URLs
-    # (the advocate must see the real job link the candidate provided, and
-    # rewritten links + open-tracking pixels hurt inbox placement).
-    payload.setdefault("tracking_settings", {
-        "click_tracking": {"enable": False, "enable_text": False},
-        "open_tracking": {"enable": False},
-    })
+    """Send via Brevo, translating from the SendGrid-v3 payload shape the
+    wrappers above still build — translating here keeps every wrapper and all
+    their call sites untouched.
+
+    Click/open tracking has no per-send toggle in Brevo: keep it OFF in the
+    Brevo dashboard (Transactional → Settings) — rewritten links would break
+    the real job/approval URLs and tracking pixels hurt inbox placement.
+    """
+    api_key = WaConfig.BREVO_API_KEY
+    body = {
+        "sender": payload["from"],
+        "to": payload["personalizations"][0]["to"],
+        "subject": payload["subject"],
+    }
+    for part in payload.get("content", []):
+        key = "htmlContent" if part.get("type") == "text/html" else "textContent"
+        body[key] = part.get("value", "")
     # A real reply path (on the authenticated domain) reads as legitimate and
     # lets candidates/advocates reply straight to the team.
-    reply_to = WaConfig.WA_OPS_EMAIL or WaConfig.WA_FROM_EMAIL
+    reply_to = payload.get("reply_to")
+    if not reply_to and (WaConfig.WA_OPS_EMAIL or WaConfig.WA_FROM_EMAIL):
+        reply_to = {"email": WaConfig.WA_OPS_EMAIL or WaConfig.WA_FROM_EMAIL,
+                    "name": "Ofoodiez"}
     if reply_to:
-        payload.setdefault("reply_to", {"email": reply_to, "name": "Ofoodiez"})
+        body["replyTo"] = reply_to
+    if payload.get("attachments"):
+        body["attachment"] = [
+            {"name": a.get("filename") or "attachment", "content": a["content"]}
+            for a in payload["attachments"]
+        ]
     try:
         resp = requests.post(
-            _SENDGRID_URL,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            json=payload,
+            _BREVO_URL,
+            headers={"api-key": api_key, "Content-Type": "application/json"},
+            json=body,
             timeout=20,
         )
         if resp.status_code in (200, 201, 202):
             return True
-        logger.warning("wa SendGrid send failed: %s %s", resp.status_code, resp.text[:200])
+        logger.warning("wa Brevo send failed: %s %s", resp.status_code, resp.text[:200])
         return False
     except Exception:
-        logger.exception("wa: SendGrid send error")
+        logger.exception("wa: Brevo send error")
         return False

@@ -114,7 +114,7 @@ class _WaConfig:
         # (ofoodiez_terms_notice_v1); the env var still overrides.
         return os.environ.get("WA_CT_TERMS") or "HX67ef81e493d3ec1f8af92cdf4db54170"
 
-    # ---- Résumé storage (Supabase Storage) + advocate emails (SendGrid) ----
+    # ---- Résumé storage (Supabase Storage) + advocate emails (Brevo) ----
     @property
     def SUPABASE_URL(self):
         return os.environ.get("SUPABASE_URL")
@@ -128,8 +128,8 @@ class _WaConfig:
         return os.environ.get("SUPABASE_RESUME_BUCKET", "wa-resumes")
 
     @property
-    def SENDGRID_API_KEY(self):
-        return os.environ.get("SENDGRID_API_KEY")
+    def BREVO_API_KEY(self):
+        return os.environ.get("BREVO_API_KEY")
 
     @property
     def WA_FROM_EMAIL(self):
