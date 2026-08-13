@@ -1,0 +1,26 @@
+{
+  "name": "ofoodiez-map",
+  "version": "1.0.0",
+  "description": "",
+  "main": "update_js.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelkosoy/ofoodiez-map.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaelkosoy/ofoodiez-map/issues"
+  },
+  "homepage": "https://github.com/michaelkosoy/ofoodiez-map#readme",
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
