@@ -141,6 +141,18 @@ class SchemaError(ValueError):
     pass
 
 
+def _strip_nul(obj):
+    """Postgres JSON columns reject \\u0000 in strings — model output extracted
+    from arbitrary PDFs can contain them. Scrub recursively."""
+    if isinstance(obj, str):
+        return obj.replace('\x00', '')
+    if isinstance(obj, list):
+        return [_strip_nul(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: _strip_nul(v) for k, v in obj.items()}
+    return obj
+
+
 def _need(d, key, types, where):
     if not isinstance(d, dict) or key not in d or not isinstance(d[key], types):
         raise SchemaError(f'missing/invalid "{key}" in {where}')
@@ -159,6 +171,7 @@ def _clamp_int(v, lo, hi, default=0):
 
 
 def ensure_extraction(data):
+    data = _strip_nul(data)
     _need(data, 'candidate_name', dict, 'extraction')
     _need(data, 'contact', dict, 'extraction')
     data.setdefault('is_cv', True)
@@ -184,6 +197,7 @@ def ensure_extraction(data):
 
 
 def ensure_critic(data):
+    data = _strip_nul(data)
     checklist = _need(data, 'rules_checklist', list, 'critic')
     # Exactly one entry per rule, in canonical order; missing rules fail closed.
     by_rule = {}
@@ -216,6 +230,7 @@ def rules_score(checklist):
 
 
 def ensure_optimizer(data):
+    data = _strip_nul(data)
     cv = _need(data, 'optimized_cv', dict, 'optimizer')
     _need(cv, 'name', str, 'optimized_cv')
     cv.setdefault('title', '')

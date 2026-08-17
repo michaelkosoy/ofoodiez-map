@@ -19,12 +19,12 @@ import os
 import time
 from urllib.parse import quote
 
-from flask import (Blueprint, Response, jsonify, redirect, render_template,
-                   request, session, url_for)
+from flask import (Blueprint, Response, current_app, jsonify, redirect,
+                   render_template, request, session, url_for)
 
-from . import gemini, storage
+from . import gemini, pipeline, storage
 from .jobspec import JobInputError, normalize_job_input
-from .pipeline import PipelineError, resume_review, start_review
+from .pipeline import PipelineError
 
 cv_review_bp = Blueprint('cv_review', __name__)
 
@@ -92,12 +92,20 @@ def cv_review_page():
                            locked=not _review_unlocked(), error=error)
 
 
-# NOTE: never return 502/504 from these APIs — Cloudflare replaces those
-# bodies with its own error page and the frontend loses our JSON message.
+# The review runs in a background thread and the client POLLS — a long
+# pipeline must never sit inside one HTTP request (Cloudflare caps origin
+# responses at ~100s and swallows 502/504 bodies, which is exactly how the
+# user ends up with a generic error and no explanation).
 @cv_review_bp.route('/api/hitech/cv-review', methods=['POST'])
 def cv_review_api():
     if not _review_unlocked():
         return jsonify({'error': 'The AI reviewer is not open yet — coming soon.'}), 403
+
+    # Consent is REQUIRED: we keep the CV to run the review and for matching.
+    if request.form.get('talent_pool_consent') != '1':
+        return jsonify({'error': 'Please agree to the CV storage terms first — the review '
+                                 'can\'t run without it. See "what we store and why" next '
+                                 'to the checkbox.'}), 400
 
     file = request.files.get('cv')
     if file is None or not file.filename:
@@ -128,13 +136,40 @@ def cv_review_api():
                                  'Please try again later.'}), 503
 
     try:
-        payload, review = start_review(
+        # File parsing/validation stays synchronous (fast) so hostile or
+        # broken files are an immediate 400 — the model work goes async.
+        doc_part = pipeline.file_to_evidence_parts(file_bytes, ext)
+        review = pipeline.launch_review(
+            current_app._get_current_object(), doc_part=doc_part,
             file_bytes=file_bytes, filename=file.filename, ext=ext, job=job,
-            consent=request.form.get('talent_pool_consent') == '1',
-            owner_user_id=session.get('user_id'), key=key)
+            consent=True, owner_user_id=session.get('user_id'), key=key)
     except PipelineError as exc:
         return jsonify({'error': exc.user_message}), exc.status
     _remember_review(review.id)
+    return jsonify({'status': 'processing', 'review_id': review.id})
+
+
+@cv_review_bp.route('/api/hitech/cv-review/<review_id>/status')
+def cv_review_status(review_id):
+    if not _owns_review(review_id):
+        return jsonify({'error': 'Review not found.'}), 404
+    from database.models import CvReview
+    review = CvReview.query.get(review_id)
+    if review is None:
+        return jsonify({'error': 'Review not found.'}), 404
+    if review.status == 'processing':
+        return jsonify({'status': 'processing', 'review_id': review.id})
+    if review.status == 'pending_name':
+        return jsonify(review.result or {'status': 'needs_name_confirmation',
+                                         'review_id': review.id, 'guessed_name': '',
+                                         'message': ''})
+    if review.status == 'failed':
+        return jsonify({'status': 'failed', 'review_id': review.id,
+                        'error': review.error or 'Something went wrong while reviewing '
+                                                 'your CV. Please try again.'})
+    payload = dict(review.result or {})
+    payload.setdefault('status', 'complete')
+    payload['optimized_text'] = review.optimized_text or ''
     return jsonify(payload)
 
 
@@ -154,10 +189,17 @@ def cv_review_confirm_name():
     if key is None:
         return jsonify({'error': 'The AI reviewer is not configured on this server yet.'}), 503
     try:
-        payload = resume_review(review, data.get('name'), key=key)
+        pipeline.launch_resume(current_app._get_current_object(), review,
+                               data.get('name'), key=key)
     except PipelineError as exc:
         return jsonify({'error': exc.user_message}), exc.status
-    return jsonify(payload)
+    return jsonify({'status': 'processing', 'review_id': review.id})
+
+
+@cv_review_bp.route('/hitech/cv-review/terms')
+def cv_review_terms():
+    """What we store and why — linked from the required consent checkbox."""
+    return render_template('legal/cv_review_terms.html')
 
 
 _KIND_MIME = {

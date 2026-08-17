@@ -71,6 +71,9 @@
         .ht-cvr-textarea { resize: vertical; min-height: 96px; line-height: 1.55; }
         .ht-cvr-consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 16px; font-size: 0.78rem; color: var(--butter-dim); line-height: 1.55; cursor: pointer; }
         .ht-cvr-consent input { margin-top: 3px; accent-color: var(--burgundy); }
+        .ht-cvr-consent strong { color: var(--butter); }
+        .ht-cvr-consent a { color: var(--burgundy-mid); font-weight: 600; text-decoration: none; }
+        .ht-cvr-consent a:hover { text-decoration: underline; }
 
         /* Primary button */
         .ht-cvr-btn {
@@ -272,8 +275,11 @@
                 </div>
                 <label class="ht-cvr-consent">
                     <input type="checkbox" id="cvr-consent">
-                    <span>Keep my CV on file so Ofoodiez can match me with relevant opportunities.
-                          Off by default — either way your CV is never shared publicly.</span>
+                    <span><strong>Required:</strong> I agree that Ofoodiez will store my CV
+                          (the uploaded file and the optimized version) to run this review,
+                          and may use it to match me with relevant job opportunities.
+                          Never shared publicly.
+                          <a href="/hitech/cv-review/terms" target="_blank" rel="noopener">What we store and why →</a></span>
                 </label>
 
                 <div class="ht-cvr-error" id="cvr-error"></div>
@@ -413,13 +419,17 @@
             var statusEl = document.getElementById('cvr-status');
             var resultsEl = document.getElementById('cvr-results');
 
+            var consentEl = document.getElementById('cvr-consent');
             var selectedFile = null;
             var statusTimer = null;
+            var pollTimer = null;
             var loading = false;
             var optimizedText = '';
 
             function showError(msg) { errorEl.textContent = msg || GENERIC_ERROR; errorEl.classList.add('visible'); }
             function clearError() { errorEl.textContent = ''; errorEl.classList.remove('visible'); }
+            function updateSubmit() { submitBtn.disabled = loading || !selectedFile || !consentEl.checked; }
+            consentEl.addEventListener('change', updateSubmit);
 
             function validateFile(file) {
                 var name = (file.name || '').toLowerCase();
@@ -437,7 +447,7 @@
                 if (!validateFile(file)) {
                     selectedFile = null;
                     filenameEl.classList.remove('visible');
-                    submitBtn.disabled = true;
+                    updateSubmit();
                     return;
                 }
                 selectedFile = file;
@@ -447,7 +457,7 @@
                 filenameEl.appendChild(icon);
                 filenameEl.appendChild(document.createTextNode(file.name));
                 filenameEl.classList.add('visible');
-                submitBtn.disabled = false;
+                updateSubmit();
             }
 
             dropzone.addEventListener('click', function () { if (!loading) fileInput.click(); });
@@ -481,9 +491,50 @@
                 loading = false;
                 clearInterval(statusTimer);
                 statusTimer = null;
+                clearInterval(pollTimer);
+                pollTimer = null;
                 btnBusy.style.display = 'none';
                 btnIdle.style.display = 'inline';
-                submitBtn.disabled = !selectedFile;
+                updateSubmit();
+            }
+
+            /* The review runs server-side in the background — poll until done. */
+            function startPolling(reviewId) {
+                var tries = 0;
+                var misses = 0;
+                clearInterval(pollTimer);
+                pollTimer = setInterval(function () {
+                    if (++tries > 240) {   // ~10 minutes
+                        stopLoading();
+                        showError('This is taking longer than expected. Please try again.');
+                        return;
+                    }
+                    fetch('/api/hitech/cv-review/' + encodeURIComponent(reviewId) + '/status')
+                        .then(function (res) {
+                            return res.json().catch(function () { return {}; }).then(function (data) {
+                                if (!res.ok) throw new Error((data && data.error) || GENERIC_ERROR);
+                                return data;
+                            });
+                        })
+                        .then(function (data) {
+                            misses = 0;
+                            if (data.status === 'processing') return;
+                            stopLoading();
+                            if (data.status === 'needs_name_confirmation') {
+                                showNameCard(data);
+                            } else if (data.status === 'failed') {
+                                showError(data.error);
+                            } else {
+                                renderResults(data);
+                            }
+                        })
+                        .catch(function (err) {
+                            if (++misses >= 4) {
+                                stopLoading();
+                                showError(err && err.message ? err.message : GENERIC_ERROR);
+                            }
+                        });
+                }, 2500);
             }
 
             function el(tag, className, text) {
@@ -762,7 +813,12 @@
                         nameSubmit.disabled = false;
                         document.getElementById('cvr-name-idle').style.display = 'inline';
                         document.getElementById('cvr-name-busy').style.display = 'none';
-                        renderResults(data);
+                        if (data.status === 'processing' && data.review_id) {
+                            startLoading();
+                            startPolling(data.review_id);
+                        } else {
+                            renderResults(data);
+                        }
                     })
                     .catch(function (err) {
                         nameSubmit.disabled = false;
@@ -776,6 +832,10 @@
             /* ---- submit ---- */
             submitBtn.addEventListener('click', function () {
                 if (!selectedFile || loading) return;
+                if (!consentEl.checked) {
+                    showError('Please agree to the CV storage terms first — the review can\'t run without it.');
+                    return;
+                }
                 if (!validateFile(selectedFile)) return;
                 clearError();
                 nameCard.style.display = 'none';
@@ -797,10 +857,13 @@
                         });
                     })
                     .then(function (data) {
-                        stopLoading();
-                        if (data.status === 'needs_name_confirmation') {
+                        if (data.status === 'processing' && data.review_id) {
+                            startPolling(data.review_id);   // stay in loading state
+                        } else if (data.status === 'needs_name_confirmation') {
+                            stopLoading();
                             showNameCard(data);
                         } else {
+                            stopLoading();
                             renderResults(data);
                         }
                     })

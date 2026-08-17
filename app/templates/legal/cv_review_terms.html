@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'components/analytics.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CV Reviewer — What We Store and Why | Ofoodiez</title>
+    <meta name="description" content="Exactly what the Ofoodiez AI CV Reviewer stores, why, for how long, and how to have it deleted.">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 30px 20px; color: #333; }
+        h1, h2 { color: #5A3A31; margin-top: 1.5em; }
+        a { color: #5A3A31; }
+        .last-updated { color: #666; font-style: italic; margin-bottom: 2em; }
+        ul { margin-top: 0; padding-left: 20px; }
+        li { margin-bottom: 0.5em; }
+        .highlight-box { background: #fff5f5; border-left: 4px solid #5A3A31; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+        .highlight-box h2 { margin-top: 0; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 40px 0; }
+        .back-link { display: inline-block; margin-bottom: 8px; font-size: 14px; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a class="back-link" href="/hitech/cv-review">&larr; Back to the AI CV Reviewer</a>
+    <h1>AI CV Reviewer — What We Store and Why</h1>
+    <p class="last-updated">Last updated: August 2026</p>
+
+    <p>The Ofoodiez AI CV Reviewer (the "Service") reviews your CV against the Ofoodiez
+    job-search &amp; CV guide and generates an optimized version you can download. To do
+    that it has to process and keep your CV — this page explains exactly what is stored,
+    why, for how long, and how to have it removed.</p>
+
+    <div class="highlight-box">
+        <h2>Your agreement</h2>
+        <p>Ticking the consent box and uploading your CV means you agree that Ofoodiez
+        stores your CV and the generated results as described below, and may use them to
+        match you with relevant job opportunities (for example through the
+        <a href="/hitech/referrals-bot">Referrals Bot</a> community). This consent is
+        <strong>required</strong> — without it the Service can't run. See also the
+        <a href="/privacy">Privacy Policy</a>.</p>
+    </div>
+
+    <h2>1. What we store</h2>
+    <ul>
+        <li><strong>The file you upload</strong> (your original CV), kept for audit/history.</li>
+        <li><strong>The content extracted from it</strong> — your name, contact details,
+            experience, skills, education — used as the factual basis for the review.</li>
+        <li><strong>The optimized CV we generate</strong> (Word, PDF and text versions).</li>
+        <li><strong>The review results</strong> — scores, feedback, the list of changes and
+            skill recommendations.</li>
+        <li><strong>The job title/description you paste</strong>, if any.</li>
+        <li>Basic operational data (timestamps, processing stats). We never store your
+            uploaded file anywhere public.</li>
+    </ul>
+
+    <h2>2. Why we store it</h2>
+    <ul>
+        <li>To run the review and let you download your optimized CV.</li>
+        <li>To keep your CV on file so we can <strong>offer you relevant job
+            opportunities</strong> that match your profile — the same idea as the
+            Referrals Bot.</li>
+        <li>To improve the Service (e.g. checking review quality). We never sell your
+            data and never share your CV publicly.</li>
+    </ul>
+
+    <h2>3. What we deliberately do NOT do</h2>
+    <ul>
+        <li>Your optimized CV never includes your precise home address — city at most.</li>
+        <li>We never invent experience, skills or numbers — the optimized CV is built
+            only from what your original CV actually says.</li>
+        <li>We never fetch links you paste; job descriptions are processed as text only.</li>
+        <li>Your CV is shared with a specific employer or advocate <strong>only</strong>
+            through flows where you explicitly ask for it (e.g. requesting a referral).</li>
+    </ul>
+
+    <h2>4. AI processing</h2>
+    <p>Reviews are generated with Google's Gemini API under Google's paid service data
+    terms. Your CV content is sent to that API solely to produce your review and is not
+    used by us for anything else.</p>
+
+    <h2>5. How long we keep it</h2>
+    <ul>
+        <li>Completed reviews are kept so we can match you with opportunities —
+            <strong>until you ask us to delete them</strong>.</li>
+        <li>Uploads that never completed (errors, abandoned runs) are deleted
+            automatically within about 7 days.</li>
+    </ul>
+
+    <h2>6. Your rights</h2>
+    <p>Providing your CV is voluntary. Under Israel's Privacy Protection Law you may
+    request <strong>access to, correction of, or deletion of</strong> your personal
+    information at any time — email
+    <a href="mailto:info@ofoodiez.com">info@ofoodiez.com</a> and we'll remove your CV
+    and results.</p>
+
+    <h2>7. No guarantees &amp; liability</h2>
+    <p>The review is automated advice, provided "as is" — always read the optimized CV
+    yourself before sending it anywhere. Ofoodiez is not liable for hiring outcomes or
+    decisions made based on the Service.</p>
+
+    <h2>8. Contact</h2>
+    <p>Questions or data requests: <a href="mailto:info@ofoodiez.com">info@ofoodiez.com</a>.</p>
+
+    <p>These terms are governed by the laws of the State of Israel.</p>
+
+    <hr>
+    <p><a href="/hitech/cv-review">&larr; Back to the AI CV Reviewer</a> ·
+    <a href="/terms">Ofoodiez site terms</a> ·
+    <a href="/privacy">Privacy Policy</a></p>
+</body>
+</html>

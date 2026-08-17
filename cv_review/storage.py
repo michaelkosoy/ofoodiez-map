@@ -104,24 +104,33 @@ def upload_review_to_drive(owner_key, review_id, files):
 
 # ── Retention ────────────────────────────────────────────────────────────────
 def purge_expired():
-    """Delete reviews past the retention window unless the candidate opted in
-    to the talent pool. Called opportunistically on new-review creation."""
-    days = int(os.environ.get('CV_REVIEW_RETENTION_DAYS', '180'))
-    if days <= 0:
-        return 0
+    """Data retention, run opportunistically on new-review creation.
+    Two tiers (consent to keep the CV is REQUIRED to run a review, so consent
+    alone no longer distinguishes rows):
+      * failed / never-completed runs: purged after 7 days — they hold an
+        original CV that never delivered value.
+      * completed reviews WITHOUT talent-pool consent (legacy rows from before
+        consent became mandatory): purged after CV_REVIEW_RETENTION_DAYS.
+    Completed + consented reviews are kept until a deletion request."""
     from database.models import db, CvReview
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    now = datetime.utcnow()
+    days = int(os.environ.get('CV_REVIEW_RETENTION_DAYS', '180'))
     try:
         n = (CvReview.query
-             .filter(CvReview.talent_pool_consent.is_(False),
-                     CvReview.created_at < cutoff)
+             .filter(CvReview.status != 'complete',
+                     CvReview.created_at < now - timedelta(days=7))
              .delete(synchronize_session=False))
+        if days > 0:
+            n += (CvReview.query
+                  .filter(CvReview.status == 'complete',
+                          CvReview.talent_pool_consent.is_(False),
+                          CvReview.created_at < now - timedelta(days=days))
+                  .delete(synchronize_session=False))
         db.session.commit()
         if n:
             print(f'🧹 CV review: purged {n} expired review(s)')
         return n
     except Exception as exc:
-        from database.models import db as _db
-        _db.session.rollback()
+        db.session.rollback()
         print(f'⚠️ CV review: retention purge failed ({exc})')
         return 0

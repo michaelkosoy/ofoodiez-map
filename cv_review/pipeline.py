@@ -19,9 +19,10 @@ import base64
 import copy
 import json
 import os
+import threading
 import time
+import traceback
 import uuid
-from datetime import datetime
 
 from . import gemini, prompts, sandbox, schemas, storage, validators
 from .docx_inspect import inspect_docx
@@ -218,45 +219,61 @@ def _change_summary(changes, jd_analysis, city):
 
 
 # ── Public entry points ──────────────────────────────────────────────────────
-def start_review(*, file_bytes, filename, ext, job, consent, owner_user_id,
-                 key, generate=None):
-    """Phase A+B, then either a name-confirmation stop or the full run.
-    Returns (payload, review_row)."""
+def _create_shell(*, filename, ext, job, consent, owner_user_id, file_bytes):
     from database.models import db, CvReview
-    generate = generate or gemini.generate_json
-    usage = gemini.UsageTracker()
-
-    storage.purge_expired()
-
-    doc_part = file_to_evidence_parts(file_bytes, ext)
-    extraction = _call(generate,
-                       parts=[{'text': prompts.extraction_prompt()}, doc_part],
-                       schema=schemas.EXTRACTION_SCHEMA, purpose='extract',
-                       usage=usage, key=key, temperature=0.1)
-    try:
-        canonical = schemas.ensure_extraction(extraction)
-    except schemas.SchemaError as exc:
-        raise PipelineError('The AI reviewer returned an unexpected answer. Please try again.') from exc
-
-    contact = canonical.get('contact') or {}
     review = CvReview(
         id=str(uuid.uuid4()),
         owner_user_id=owner_user_id,
-        candidate_name=(canonical['candidate_name'].get('full_name') or '')[:256] or None,
-        candidate_email=(contact.get('email') or '')[:256] or None,
-        candidate_phone=(contact.get('phone') or '')[:64] or None,
-        primary_role=(canonical.get('title') or '')[:128] or None,
-        status='pending',
+        status='processing',
         talent_pool_consent=bool(consent),
         job_title=job['job_title'] or None,
         job_description=job['job_description'] or None,
         instructions=job['instructions'] or None,
-        canonical=canonical,
         original_filename=(filename or '')[:256],
         original_ext=ext,
         original_file=file_bytes,
     )
     db.session.add(review)
+    db.session.commit()
+    return review
+
+
+def _mark_failed(review, message, usage=None):
+    from database.models import db
+    try:
+        review.status = 'failed'
+        review.error = str(message)[:1000]
+        if usage is not None:
+            review.usage = usage.totals()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+def _extract_phase(review, doc_part, *, generate, key, usage):
+    """Phase B on an existing row. Returns the confirmed candidate name, or
+    None when the review paused for name confirmation (row already updated)."""
+    from database.models import db
+    try:
+        extraction = _call(generate,
+                           parts=[{'text': prompts.extraction_prompt()}, doc_part],
+                           schema=schemas.EXTRACTION_SCHEMA, purpose='extract',
+                           usage=usage, key=key, temperature=0.1)
+        try:
+            canonical = schemas.ensure_extraction(extraction)
+        except schemas.SchemaError as exc:
+            raise PipelineError('The AI reviewer returned an unexpected answer. '
+                                'Please try again.') from exc
+    except PipelineError as exc:
+        _mark_failed(review, exc.user_message, usage)
+        raise
+
+    contact = canonical.get('contact') or {}
+    review.canonical = canonical
+    review.candidate_name = (canonical['candidate_name'].get('full_name') or '')[:256] or None
+    review.candidate_email = (contact.get('email') or '')[:256] or None
+    review.candidate_phone = (contact.get('phone') or '')[:64] or None
+    review.primary_role = (canonical.get('title') or '')[:128] or None
     db.session.commit()
 
     name = canonical['candidate_name'].get('full_name')
@@ -264,21 +281,56 @@ def start_review(*, file_bytes, filename, ext, job, consent, owner_user_id,
     if not name or confidence < NAME_CONFIDENCE_THRESHOLD:
         review.status = 'pending_name'
         review.usage = usage.totals()
+        review.result = {'status': 'needs_name_confirmation',
+                         'review_id': review.id,
+                         'guessed_name': name or '',
+                         'message': 'לא הצלחנו לזהות בביטחון את השם בקורות החיים. איך רושמים אותו בדיוק?'}
         db.session.commit()
-        return ({'status': 'needs_name_confirmation',
-                 'review_id': review.id,
-                 'guessed_name': name or '',
-                 'message': 'לא הצלחנו לזהות בביטחון את השם בקורות החיים. איך רושמים אותו בדיוק?'},
-                review)
-
-    payload = _continue_review(review, name, generate=generate, key=key, usage=usage)
-    return payload, review
+        return None
+    return name
 
 
-def resume_review(review, confirmed_name, *, key, generate=None):
-    """Continue a pending_name review with the user-confirmed candidate name."""
-    from database.models import db
+def start_review(*, file_bytes, filename, ext, job, consent, owner_user_id,
+                 key, generate=None):
+    """Synchronous run (tests, eval harness): phase A+B, then either a
+    name-confirmation stop or the full pipeline. Returns (payload, review)."""
     generate = generate or gemini.generate_json
+    usage = gemini.UsageTracker()
+    storage.purge_expired()
+    doc_part = file_to_evidence_parts(file_bytes, ext)
+    review = _create_shell(filename=filename, ext=ext, job=job, consent=consent,
+                           owner_user_id=owner_user_id, file_bytes=file_bytes)
+    name = _extract_phase(review, doc_part, generate=generate, key=key, usage=usage)
+    if name is None:
+        return review.result, review
+    return _continue_review(review, name, generate=generate, key=key, usage=usage), review
+
+
+def launch_review(app, *, doc_part, file_bytes, filename, ext, job, consent,
+                  owner_user_id, key, generate=None):
+    """Asynchronous entry used by the web routes: creates the row and runs the
+    whole pipeline in a background thread, so the HTTP request returns
+    immediately and no proxy/worker timeout (Cloudflare caps responses at
+    ~100s) can kill a long review. The client polls the status endpoint.
+    `doc_part` comes from file_to_evidence_parts, run synchronously by the
+    route so invalid/hostile files still fail fast with a 400."""
+    generate = generate or gemini.generate_json
+    storage.purge_expired()
+    review = _create_shell(filename=filename, ext=ext, job=job, consent=consent,
+                           owner_user_id=owner_user_id, file_bytes=file_bytes)
+
+    def body(r, usage):
+        name = _extract_phase(r, doc_part, generate=generate, key=key, usage=usage)
+        if name is not None:   # None = paused for name confirmation
+            _continue_review(r, name, generate=generate, key=key, usage=usage)
+
+    _spawn(app, review.id, body)
+    return review
+
+
+def _prepare_resume(review, confirmed_name):
+    """Validate + apply the user-confirmed name (fast, synchronous)."""
+    from database.models import db
     name = ' '.join((confirmed_name or '').split())
     if not (2 <= len(name) <= 120):
         raise PipelineError('Please enter the candidate name as it should appear on the CV.', 400)
@@ -291,8 +343,48 @@ def resume_review(review, confirmed_name, *, key, generate=None):
     canonical.setdefault('candidate_name', {})['full_name'] = name
     canonical['candidate_name']['confidence'] = 1.0   # user-confirmed
     review.canonical = canonical
+    review.status = 'processing'
+    review.result = None
     db.session.commit()
+    return name, usage
+
+
+def resume_review(review, confirmed_name, *, key, generate=None):
+    """Synchronous resume (tests, eval harness)."""
+    generate = generate or gemini.generate_json
+    name, usage = _prepare_resume(review, confirmed_name)
     return _continue_review(review, name, generate=generate, key=key, usage=usage)
+
+
+def launch_resume(app, review, confirmed_name, *, key, generate=None):
+    """Asynchronous resume used by the web routes (validation stays sync so a
+    bad name is still an immediate 400)."""
+    generate = generate or gemini.generate_json
+    name, usage = _prepare_resume(review, confirmed_name)
+    _spawn(app, review.id,
+           lambda r, _usage: _continue_review(r, name, generate=generate,
+                                              key=key, usage=usage))
+    return review
+
+
+def _spawn(app, review_id, body):
+    def worker():
+        with app.app_context():
+            from database.models import db, CvReview
+            review = CvReview.query.get(review_id)
+            usage = gemini.UsageTracker()
+            try:
+                body(review, usage)
+            except PipelineError:
+                pass   # row already marked failed with a user-facing message
+            except Exception:
+                print(f'❌ CV review worker crashed ({review_id}):\n{traceback.format_exc()}')
+                _mark_failed(review, 'Something went wrong while reviewing your CV. '
+                                     'Please try again.')
+            finally:
+                db.session.remove()
+    threading.Thread(target=worker, daemon=True,
+                     name=f'cvreview-{review_id[:8]}').start()
 
 
 def _continue_review(review, name, *, generate, key, usage):
@@ -317,16 +409,17 @@ def _continue_review(review, name, *, generate, key, usage):
             critic = _run_critic(generate, key, usage, canonical_like=redacted, claims=claims,
                                  jd_text=jd_text, job_title=job_title,
                                  formatting_note=None, purpose='critic_original')
+            payload = {'status': 'not_a_cv', 'review_id': review.id,
+                       'original_review': _review_block(critic),
+                       'scores': {'rules': {'before': schemas.rules_score(critic['rules_checklist']),
+                                            'after': None, 'total': len(schemas.RULES)},
+                                  'quality': {'before': critic['quality_score'], 'after': None},
+                                  'jd_match': None}}
             review.status = 'complete'
             review.usage = usage.totals()
-            review.result = {'status': 'not_a_cv', 'original_review': _review_block(critic)}
+            review.result = payload
             db.session.commit()
-            return {'status': 'not_a_cv', 'review_id': review.id,
-                    'original_review': _review_block(critic),
-                    'scores': {'rules': {'before': schemas.rules_score(critic['rules_checklist']),
-                                         'after': None, 'total': len(schemas.RULES)},
-                               'quality': {'before': critic['quality_score'], 'after': None},
-                               'jd_match': None}}
+            return payload
 
         fmt_orig = ('flags.emphasized_technologies reflects whether the original document '
                     'visually highlights technologies — grade rule 6 from it plus the content.')
@@ -453,11 +546,16 @@ def _continue_review(review, name, *, generate, key, usage):
         return payload
 
     except PipelineError as exc:
-        review.status = 'failed'
-        review.error = str(exc)[:1000]
-        review.usage = usage.totals()
-        db.session.commit()
+        _mark_failed(review, exc.user_message, usage)
         raise
+    except Exception:
+        # Never let an unhandled exception become a bare 500 / silent thread
+        # death — log the traceback server-side, fail the row with a friendly
+        # message, and surface it as a PipelineError.
+        print(f'❌ CV review pipeline crashed ({review.id}):\n{traceback.format_exc()}')
+        _mark_failed(review, 'Something went wrong while reviewing your CV. Please try again.',
+                     usage)
+        raise PipelineError('Something went wrong while reviewing your CV. Please try again.')
 
 
 def _review_block(critic):
