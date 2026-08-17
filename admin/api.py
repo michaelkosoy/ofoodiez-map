@@ -1646,3 +1646,71 @@ def update_listing_status(slug):
             logger.warning("%s listing status email failed: %s", slug, e)
 
     return jsonify({'ok': True, 'entry': entry})
+
+
+# --- CV Reviews (AI CV reviewer/optimizer database) ---
+# Candidate names/emails are searchable metadata, private behind admin auth.
+# The DEFAULT download is always the sanitized reconstruction; the raw
+# original is a separate, explicitly-labeled kind.
+
+@admin_bp.route('/api/cv-reviews')
+@login_required
+def cv_reviews_list():
+    from database.models import CvReview
+    q = (request.args.get('q') or '').strip()
+    query = CvReview.query
+    if q:
+        like = f'%{q}%'
+        query = query.filter(db.or_(CvReview.candidate_name.ilike(like),
+                                    CvReview.candidate_email.ilike(like)))
+    # Single batched query (no per-row lookups) — deferred blobs stay unloaded.
+    rows = (query.options(db.defer(CvReview.original_file),
+                          db.defer(CvReview.optimized_docx),
+                          db.defer(CvReview.optimized_pdf),
+                          db.defer(CvReview.optimized_text),
+                          db.defer(CvReview.canonical))
+            .order_by(CvReview.created_at.desc()).limit(200).all())
+    out = []
+    for r in rows:
+        scores = (r.result or {}).get('scores') or {}
+        usage = r.usage or {}
+        out.append({
+            'id': r.id,
+            'candidate_name': r.candidate_name,
+            'candidate_email': r.candidate_email,
+            'candidate_phone': r.candidate_phone,
+            'primary_role': r.primary_role,
+            'status': r.status,
+            'talent_pool_consent': bool(r.talent_pool_consent),
+            'job_title': r.job_title,
+            'created_at': r.created_at.isoformat() if r.created_at else None,
+            'scores': scores,
+            'cost_usd': usage.get('estimated_cost_usd'),
+            'model_calls': usage.get('calls'),
+            'error': r.error,
+            'drive': bool(r.drive),
+        })
+    return jsonify(out)
+
+
+@admin_bp.route('/api/cv-reviews/<review_id>/download/<kind>')
+@login_required
+def cv_reviews_download(review_id, kind):
+    from database.models import CvReview
+    from cv_review import serve_review_file
+    review = CvReview.query.get(review_id)
+    if review is None:
+        return jsonify({'error': 'Not found'}), 404
+    return serve_review_file(review, kind, allow_original=True)
+
+
+@admin_bp.route('/api/cv-reviews/<review_id>', methods=['DELETE'])
+@login_required
+def cv_reviews_delete(review_id):
+    from database.models import CvReview
+    review = CvReview.query.get(review_id)
+    if review is None:
+        return jsonify({'error': 'Not found'}), 404
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({'ok': True})

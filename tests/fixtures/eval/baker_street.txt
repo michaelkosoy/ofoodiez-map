@@ -1,0 +1,24 @@
+Sherry Holmes
+221B Baker Street, London NW1
+sherry.holmes@protonmail.com | +44 7700 900123 | linkedin.com/in/sherryholmes
+
+Frontend developer with 2 years of experience building React applications. I enjoy pixel-perfect UI work and I am looking for a frontend position in a product company, relocating to Tel Aviv in October.
+
+EXPERIENCE
+Deduction Ltd, London — Frontend Developer (Jan 2024 - Present)
+* Building the customer dashboard in React and TypeScript, used by around 3,500 monthly active users
+* Reduced initial bundle size by 38% by code-splitting and lazy loading routes
+* Wrote Playwright end-to-end tests covering the 15 most important user flows
+* Worked with designers in Figma and shipped a component library with 42 components
+
+Freelance (2023)
+* Built marketing sites for 6 small businesses with Next.js and Tailwind
+
+EDUCATION
+University of London — B.Sc. Computer Science, 2023
+
+PROJECTS
+casewatch.dev — open-source case tracking tool, 210 GitHub stars. github.com/sherryh/casewatch
+
+SKILLS
+React, TypeScript, JavaScript, Next.js, Tailwind CSS, Playwright, Git, Figma

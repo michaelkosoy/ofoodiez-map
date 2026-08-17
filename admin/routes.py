@@ -44,6 +44,11 @@ def portfolio_content():
 def members():
     return render_template('admin/members.html')
 
+@admin_bp.route('/cv-reviews')
+@login_required
+def cv_reviews():
+    return render_template('admin/cv_reviews.html')
+
 @admin_bp.route('/blog')
 @login_required
 def blog():

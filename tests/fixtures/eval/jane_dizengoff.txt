@@ -1,0 +1,35 @@
+Jane Smith
+12 Dizengoff Street, Apt 3, Tel Aviv 6433212
+jane.smith.dev@gmail.com | 050-1234567 | github.com/janesmithdev
+
+ABOUT ME
+I am a junior developer. Responsible for backend tasks at my current job. Looking for a position.
+
+WORK EXPERIENCE
+Acme Analytics, Tel Aviv — Junior Backend Developer (March 2024 - Present)
+- Responsible for maintaining REST APIs written in Python (Flask)
+- Was in charge of the PostgreSQL database and wrote SQL queries
+- Helped the team with Kafka consumers that process about 40,000 events per day
+- Fixed bugs and did code reviews sometimes
+
+IDF, Unit 8200 adjacent — Data Support (2020-2022)
+- Worked with data processing scripts
+- Made dashboards for commanders
+
+EDUCATION
+The Open University — B.Sc. Computer Science (2022-2025, GPA 88)
+
+PROJECTS
+recipe-api — a personal project, a REST API for recipes with Python and PostgreSQL, deployed on Render. https://github.com/janesmithdev/recipe-api
+telegram expense bot — tracks my expenses, used by me and 12 friends. https://github.com/janesmithdev/expense-bot
+
+SKILLS
+Python - 9/10
+SQL - 8/10
+Kafka - 6/10
+Microsoft Office, Windows, Teams
+English (fluent), Hebrew (native)
+
+PERSONAL
+Age: 26, single. Hobbies: baking, chess.
+References available upon request.

@@ -1,0 +1,23 @@
+CV - Computer Science Student
+
+Third-year computer science student at Ben-Gurion University looking for a first student position in software development. Available 3 days a week.
+
+EDUCATION
+Ben-Gurion University of the Negev - B.Sc. Computer Science (2023 - expected 2026)
+GPA: 85. Relevant courses: Data Structures, Algorithms, Operating Systems, Databases.
+
+PROJECTS
+Course project - "Beersheba Bus" - Android app showing live bus arrivals, written in Kotlin with a Firebase backend. Won 2nd place in the department project fair out of 31 teams.
+Hackathon - built a Chrome extension that summarizes long articles using the OpenAI API, in a team of 4, over 24 hours.
+Personal - small Python scripts for scraping and organizing my study materials.
+
+TECHNICAL SKILLS
+Java, Python, Kotlin, C, SQL, Git, Linux, Firebase
+
+MILITARY SERVICE
+2019-2022 - Combat medic, Nahal Brigade. Trained 30 new medics as a squad instructor.
+
+LANGUAGES
+Hebrew - native. English - fluent. Russian - conversational.
+
+Contact: cs.student.bgu@gmail.com | 052-9876543 | Beer Sheva

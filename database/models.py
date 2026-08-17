@@ -313,6 +313,49 @@ class PortfolioAccess(db.Model):
         return f'<PortfolioAccess {self.company} ({self.code})>'
 
 
+class CvReview(db.Model):
+    """One AI CV review + optimization run (/hitech/cv-review).
+
+    Files live in the DB (LargeBinary) because prod's filesystem is ephemeral;
+    Drive mirroring is optional on top. `original_file` is the RAW / UNTRUSTED
+    ORIGINAL upload — retained for audit only, never parsed in-process again
+    and never the default admin download. The sanitized, reconstructed
+    optimized_docx/pdf are the MAIN documents.
+
+    candidate_name/email/phone are searchable metadata for the admin CV
+    database (private — only exposed behind admin auth). The row id (UUID) is
+    the security identifier; the candidate name is only a display label.
+    Table auto-creates via init_db()'s db.create_all() at startup."""
+    __tablename__ = 'cv_reviews'
+
+    id = db.Column(db.String(36), primary_key=True)          # review UUID
+    owner_user_id = db.Column(db.Integer, index=True)         # site_users.id when logged in
+    candidate_name = db.Column(db.String(256), index=True)
+    candidate_email = db.Column(db.String(256))
+    candidate_phone = db.Column(db.String(64))
+    primary_role = db.Column(db.String(128))
+    status = db.Column(db.String(32), default='pending')      # pending_name | complete | failed
+    talent_pool_consent = db.Column(db.Boolean, default=False)
+    job_title = db.Column(db.String(256))
+    job_description = db.Column(db.Text)                      # normalized text (URLs stripped, never fetched)
+    instructions = db.Column(db.Text)
+    canonical = db.Column(db.JSON)                            # extraction/evidence (contains location_raw — private)
+    result = db.Column(db.JSON)                               # client payload: scores/changes/recs/review
+    usage = db.Column(db.JSON)                                # model calls/tokens/estimated cost (no prompts)
+    original_filename = db.Column(db.String(256))
+    original_ext = db.Column(db.String(8))
+    original_file = db.Column(db.LargeBinary)                 # RAW / UNTRUSTED ORIGINAL
+    optimized_docx = db.Column(db.LargeBinary)                # sanitized reconstruction
+    optimized_pdf = db.Column(db.LargeBinary)
+    optimized_text = db.Column(db.Text)
+    drive = db.Column(db.JSON)                                # optional Drive file ids
+    error = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    def __repr__(self):
+        return f'<CvReview {self.id} {self.candidate_name!r} {self.status}>'
+
+
 class ListingEntry(db.Model):
     """One venue/supplier row of a listing page — bachelorette venues + suppliers,
     HiTech vendors; the per-page config lives in listing_submissions.py.

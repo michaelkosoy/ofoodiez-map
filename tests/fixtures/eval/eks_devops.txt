@@ -1,0 +1,22 @@
+Daniel Peretz
+Haifa, Israel | daniel.peretz.dev@gmail.com | 054-5551234 | github.com/danielperetz
+
+Backend engineer with 3 years of experience building event-driven services in Python and Go, owning them in production end to end.
+
+EXPERIENCE
+Seatrade Systems, Haifa — Backend Engineer (2023 - Present)
+- Built and own 4 microservices in Python (FastAPI) handling 2.1M requests/day
+- Managed Kubernetes deployments on EKS, including Helm charts, HPA autoscaling and rollout strategies
+- Designed Kafka-based ingestion pipeline that cut data latency from 15 minutes to 40 seconds
+- Set up Prometheus + Grafana dashboards and on-call alerts, reducing MTTR by 35%
+- Migrated the main PostgreSQL database to RDS with zero downtime
+
+Port Authority (contract) — Junior Developer (2022-2023)
+- Wrote internal tools in Python and Bash for container tracking
+- Automated a weekly report that saved the operations team 6 hours per week
+
+EDUCATION
+Technion — B.Sc. Information Systems Engineering (2018-2022)
+
+SKILLS
+Python, Go, FastAPI, PostgreSQL, Kafka, Kubernetes, EKS, Helm, Docker, Prometheus, Grafana, Git, Bash, AWS (EKS, RDS, S3)

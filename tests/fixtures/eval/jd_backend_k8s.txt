@@ -1,0 +1,24 @@
+Senior Backend Engineer — Tel Aviv (hybrid)
+
+We're a fast-growing fintech infrastructure company processing millions of transactions daily. We're looking for a backend engineer to join our core platform team in Tel Aviv.
+
+What you'll do:
+- Design and build high-throughput backend services in Python
+- Own services in production: deployment, monitoring, incident response
+- Work with our event streaming platform (Kafka) to build reliable data pipelines
+- Operate workloads on Kubernetes: deployments, autoscaling, troubleshooting
+- Model and optimize data in PostgreSQL
+- Build on AWS (EKS, RDS, S3, Lambda)
+
+What we're looking for:
+- 2+ years of backend development experience in Python or Go
+- Production experience with PostgreSQL — schema design, query optimization
+- Hands-on Kafka experience: consumers, producers, exactly-once semantics
+- Kubernetes experience is required — Helm, HPA, debugging pods in production
+- AWS experience strongly preferred
+- Experience with observability tooling (Prometheus, Grafana, Datadog)
+- B.Sc. in Computer Science or equivalent experience
+
+Nice to have:
+- Terraform, ArgoCD, gRPC
+- Experience in fintech or other regulated environments

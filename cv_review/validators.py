@@ -1,0 +1,372 @@
+"""Deterministic validators for the optimized CV — the hard gates the model
+output must pass before anything is rendered, stored or shown:
+
+  * residential-address leakage (city-level is the maximum allowed precision)
+  * candidate-name preservation (exactly as extracted/confirmed)
+  * evidence discipline (no skills/numbers/JD terms that the CV doesn't back)
+  * career-recommendation hygiene (never recommend what's already evidenced,
+    never phrase "not evidenced" as "you don't know")
+
+Each check returns violation dicts; the pipeline first asks the model to
+repair, then applies the deterministic fixes here so nothing dirty can ship.
+"""
+import re
+
+# ── Address profile & leakage ────────────────────────────────────────────────
+_STREET_SUFFIXES = {'street', 'st', 'blvd', 'boulevard', 'ave', 'avenue',
+                    'road', 'rd', 'lane', 'ln', 'drive', 'dr', 'way', 'court',
+                    'ct', 'place', 'pl', 'רחוב', 'רח', 'שדרות', 'שד', 'דרך'}
+_UNIT_WORDS = {'apt', 'apartment', 'suite', 'unit', 'flat', 'floor',
+               'דירה', 'קומה', 'כניסה'}
+
+# Patterns that indicate sub-city precision regardless of the original text.
+_GENERIC_ADDRESS_PATTERNS = [
+    re.compile(r"(?i)\b\d{1,4}[a-z]?\s+(?:[\w'’-]+\s+){0,3}(?:street|st|boulevard|blvd|avenue|ave|road|rd|lane|ln|drive|dr|court|ct|place|pl)\b\.?"),
+    re.compile(r"(?i)\b(?:street|boulevard|blvd|avenue|ave|road|rd|lane|ln)\s*,?\s*\d{1,4}\b"),
+    re.compile(r"(?i)\b(?:apt|apartment|suite|unit|flat)\.?\s*#?\s*\d+\b"),
+    re.compile(r"\b[A-Z]{1,2}\d{1,2}[A-Z]?\s+\d[A-Z]{2}\b"),        # full UK postcode
+    re.compile(r"\b\d{5}-\d{4}\b"),                                   # US ZIP+4
+    re.compile(r"(?:רחוב|רח'|שדרות|שד'|דרך)\s+[\w\"'׳״-]+\s*,?\s*\d{1,4}"),
+    re.compile(r"(?:דירה|קומה|כניסה)\s*\d+"),
+]
+
+
+def _tokens(text):
+    return re.findall(r"[\w'׳״-]+", text or '', re.UNICODE)
+
+
+def address_profile(canonical):
+    """Distill the ORIGINAL evidence's address into (a) the allowed city-level
+    location and (b) the forbidden tokens/phrases the final CV must not carry.
+
+    No external geolocation services are ever used — everything derives from
+    what the candidate themselves wrote."""
+    contact = canonical.get('contact') or {}
+    raw = contact.get('location_raw') or ''
+    city = (contact.get('city') or '').strip()
+    country = (contact.get('country') or '').strip()
+    allowed = {t.lower() for t in _tokens(city) + _tokens(country)}
+
+    forbidden_tokens = set()   # matched with word boundaries, case-insensitive
+    phrases = set()            # multiword street phrases ("baker street")
+    words = _tokens(raw)
+    for i, tok in enumerate(words):
+        low = tok.lower()
+        if low in allowed:
+            continue
+        if tok.isdigit():
+            if len(tok) >= 5:                      # postal code
+                forbidden_tokens.add(tok)
+        elif re.fullmatch(r'\d+[A-Za-z]', tok):    # house number like 221B
+            forbidden_tokens.add(tok)
+        elif re.fullmatch(r'[A-Za-z]{1,2}\d{1,2}[A-Za-z]?', tok):  # NW1
+            forbidden_tokens.add(tok)
+        elif low not in _STREET_SUFFIXES and low not in _UNIT_WORDS and len(low) >= 3:
+            # A street-name word: forbid it together with its suffix and with
+            # any adjacent house number — but never the bare word alone (a CV
+            # may legitimately mention "Dizengoff Center" as a workplace).
+            nxt = words[i + 1].lower() if i + 1 < len(words) else ''
+            prv = words[i - 1].lower() if i > 0 else ''
+            if nxt in _STREET_SUFFIXES:
+                phrases.add(f'{low} {nxt}')
+            if prv in _STREET_SUFFIXES:
+                phrases.add(f'{prv} {low}')
+            if (nxt.isdigit() and len(nxt) <= 4) or (prv.isdigit() and len(prv) <= 4):
+                phrases.add(f'{low} {nxt}' if nxt.isdigit() else f'{prv} {low}')
+    return {'city': city, 'country': country,
+            'forbidden_tokens': forbidden_tokens, 'phrases': phrases}
+
+
+def _phrase_re(phrase):
+    parts = [re.escape(p) for p in phrase.split()]
+    return re.compile(r'(?i)(?<!\w)' + r'[\s,.-]+'.join(parts) + r'(?!\w)')
+
+
+def _token_re(tok):
+    return re.compile(r'(?i)(?<!\w)' + re.escape(tok) + r'(?!\w)')
+
+
+def find_address_leaks(text, profile):
+    hits = []
+    for pat in _GENERIC_ADDRESS_PATTERNS:
+        hits += [m.group(0) for m in pat.finditer(text)]
+    for tok in profile['forbidden_tokens']:
+        if _token_re(tok).search(text):
+            hits.append(tok)
+    for phrase in profile['phrases']:
+        if _phrase_re(phrase).search(text):
+            hits.append(phrase)
+    return hits
+
+
+def scrub_address(text, profile):
+    """Deterministic removal of address fragments (last-resort hard fix)."""
+    for pat in _GENERIC_ADDRESS_PATTERNS:
+        text = pat.sub(' ', text)
+    for phrase in profile['phrases']:
+        text = _phrase_re(phrase).sub(' ', text)
+    for tok in profile['forbidden_tokens']:
+        text = _token_re(tok).sub(' ', text)
+    text = re.sub(r'\s*,\s*(?=,|$)', '', re.sub(r'[ \t]{2,}', ' ', text)).strip(' ,;-\t')
+    return text
+
+
+def iter_cv_strings(cv):
+    """Yield (path, value, setter) for every string in the optimized CV."""
+    def walk(obj, path):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                yield from walk(v, path + [k])
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                yield from walk(v, path + [i])
+        elif isinstance(obj, str):
+            def setter(new, o=obj, p=tuple(path)):
+                node = cv
+                for key in p[:-1]:
+                    node = node[key]
+                node[p[-1]] = new
+            yield '.'.join(map(str, path)), obj, setter
+    yield from walk(cv, [])
+
+
+def validate_no_address(cv, profile):
+    violations = []
+    for path, value, _set in iter_cv_strings(cv):
+        # URLs may contain street-like tokens coincidentally; still forbidden —
+        # simpler and safer to hold links to the same rule.
+        for hit in find_address_leaks(value, profile):
+            violations.append({'type': 'address', 'path': path,
+                               'detail': f'residential-address fragment "{hit}" must not appear (max precision: city)'})
+    return violations
+
+
+def fix_address(cv, profile):
+    for _path, value, setter in iter_cv_strings(cv):
+        if find_address_leaks(value, profile):
+            setter(scrub_address(value, profile))
+
+
+# ── Candidate name ───────────────────────────────────────────────────────────
+def _norm_ws(s):
+    return re.sub(r'\s+', ' ', (s or '')).strip()
+
+
+def validate_name(cv, expected_name):
+    if _norm_ws(cv.get('name')) != _norm_ws(expected_name):
+        return [{'type': 'name', 'path': 'name',
+                 'detail': f'candidate name must be exactly "{expected_name}" '
+                           f'(got "{cv.get("name")}") — never shortened, corrected or invented'}]
+    return []
+
+
+# ── Evidence discipline ──────────────────────────────────────────────────────
+def derive_claims(canonical):
+    """Flatten the canonical extraction into an evidence ledger:
+    [{'id', 'section', 'text'}]. Everything the optimizer may build from."""
+    claims = []
+
+    def add(section, text):
+        if isinstance(text, str) and text.strip():
+            claims.append({'id': f'claim_{len(claims):03d}',
+                           'section': section, 'text': text.strip()})
+
+    name = (canonical.get('candidate_name') or {})
+    add('name', name.get('full_name'))
+    contact = canonical.get('contact') or {}
+    for key in ('email', 'phone', 'city', 'country'):
+        add('contact', contact.get(key))
+    for link in contact.get('links') or []:
+        add('links', f"{link.get('label', '')} {link.get('url', '')}")
+    add('title', canonical.get('title'))
+    add('summary', canonical.get('summary'))
+    for s in canonical.get('skills') or []:
+        add('skills', s.get('name'))
+        add('skills', s.get('source_text'))
+    for exp in canonical.get('experience') or []:
+        add('experience', f"{exp.get('title', '')} — {exp.get('company', '')} {exp.get('dates', '')}")
+        for b in exp.get('bullets') or []:
+            add('experience', b)
+    for p in canonical.get('projects') or []:
+        add('projects', f"{p.get('name', '')}: {p.get('description', '')} {p.get('link') or ''}")
+    for e in canonical.get('education') or []:
+        add('education', f"{e.get('degree', '')} — {e.get('institution', '')} {e.get('dates', '')}")
+    for ex in canonical.get('extras') or []:
+        add('extras', ex.get('heading'))
+        for line in ex.get('lines') or []:
+            add('extras', line)
+    return claims
+
+
+def evidence_corpus(claims):
+    return '\n'.join(c['text'] for c in claims)
+
+
+def _word_in(term, text):
+    if not term:
+        return True
+    return bool(re.search(r'(?i)(?<!\w)' + re.escape(term.strip()) + r'(?!\w)', text))
+
+
+def cv_full_text(cv):
+    return '\n'.join(v for _p, v, _s in iter_cv_strings(cv))
+
+
+_PLACEHOLDER_SPAN = re.compile(r'\[[^\]\n]{0,60}\]')
+_NUMBER = re.compile(r'\d[\d,.]*%?')
+
+
+def validate_evidence(optimizer_out, corpus):
+    """Unsupported skills / numbers / JD-term leakage into the optimized CV."""
+    cv = optimizer_out['optimized_cv']
+    violations = []
+    for group in cv.get('skills_groups') or []:
+        for skill in group.get('skills') or []:
+            if not _word_in(skill, corpus):
+                violations.append({'type': 'unsupported_skill', 'path': 'skills_groups',
+                                   'detail': f'skill "{skill}" is not evidenced in the CV — remove it'})
+    full = cv_full_text(cv)
+    jd = optimizer_out.get('jd_analysis') or {}
+    for term in jd.get('not_evidenced') or []:
+        if _word_in(term, full) and not _word_in(term, corpus):
+            violations.append({'type': 'jd_term_added', 'path': 'optimized_cv',
+                               'detail': f'JD requirement "{term}" is not evidenced in the CV but appears in the optimized CV — remove it'})
+    for term in jd.get('surfaced') or []:
+        if not _word_in(term, corpus):
+            violations.append({'type': 'surfaced_unevidenced', 'path': 'jd_analysis.surfaced',
+                               'detail': f'"{term}" is listed as surfaced but has no evidence in the CV'})
+    number_sources = [('summary', cv['summary'])] if cv.get('summary') else []
+    for section in ('experience', 'projects'):
+        for item in cv.get(section) or []:
+            texts = item.get('bullets') or ([item.get('description')] if item.get('description') else [])
+            number_sources += [(section, b) for b in texts]
+    for section, bullet in number_sources:
+        stripped = _PLACEHOLDER_SPAN.sub(' ', bullet)
+        for num in _NUMBER.findall(stripped):
+            plain = num.replace(',', '').rstrip('%.')
+            if plain and plain not in corpus.replace(',', ''):
+                violations.append({'type': 'unsupported_number', 'path': section,
+                                   'detail': f'number "{num}" in "{bullet[:80]}" does not appear in the CV — '
+                                             f'use a [placeholder] or drop it'})
+    return violations
+
+
+def drop_unevidenced(optimizer_out, corpus):
+    """Deterministic hard fix: strip skills/bullets that still lack evidence."""
+    cv = optimizer_out['optimized_cv']
+    for group in cv.get('skills_groups') or []:
+        group['skills'] = [s for s in group['skills'] if _word_in(s, corpus)]
+    cv['skills_groups'] = [g for g in cv.get('skills_groups') or [] if g['skills']]
+    jd = optimizer_out.get('jd_analysis') or {}
+    bad_terms = [t for t in (jd.get('not_evidenced') or []) if not _word_in(t, corpus)]
+
+    def bullet_ok(bullet):
+        stripped = _PLACEHOLDER_SPAN.sub(' ', bullet)
+        for num in _NUMBER.findall(stripped):
+            plain = num.replace(',', '').rstrip('%.')
+            if plain and plain not in corpus.replace(',', ''):
+                return False
+        return not any(_word_in(t, bullet) for t in bad_terms)
+
+    for exp in cv.get('experience') or []:
+        exp['bullets'] = [b for b in exp['bullets'] if bullet_ok(b)]
+    for proj in list(cv.get('projects') or []):
+        if proj.get('description') and not bullet_ok(proj['description']):
+            proj['description'] = _PLACEHOLDER_SPAN.sub(' ', proj['description'])
+            if not bullet_ok(proj['description']):
+                cv['projects'].remove(proj)
+    if jd:
+        jd['surfaced'] = [t for t in (jd.get('surfaced') or []) if _word_in(t, corpus)]
+
+
+# ── Career recommendations ───────────────────────────────────────────────────
+# "Not evidenced in the CV" must never be phrased as "you don't know X".
+WORDING_FORBIDDEN = [
+    re.compile(r"(?i)\byou (?:don'?t|do not) know\b"),
+    re.compile(r"(?i)\byou (?:don'?t|do not) have (?:any\s+)?[\w /-]{0,30}(?:experience|knowledge)"),
+    re.compile(r"(?i)\byou have no [\w /-]{0,30}(?:experience|knowledge)"),
+    re.compile(r"(?i)\b(?:candidate|he|she|they) (?:doesn'?t|does not|don'?t|do not) know\b"),
+    re.compile(r"אין ל(?:ך|כם|כן) (?:ניסיון|ידע)"),
+    re.compile(r"את[הם]? לא (?:יודעת?|יודעים|מכירה?|מכירים)"),
+    re.compile(r"אינ(?:ך|כם) (?:יודעת?|מכירה?)"),
+    re.compile(r"חסר ל(?:ך|כם) (?:ניסיון|ידע)"),
+]
+
+MAX_RECOMMENDATIONS = 5
+
+
+def validate_recommendations(optimizer_out, corpus):
+    violations = []
+    cv_text = cv_full_text(optimizer_out['optimized_cv'])
+    for i, rec in enumerate(optimizer_out.get('career_recommendations') or []):
+        skill = rec.get('skill', '')
+        where = f'career_recommendations[{i}]'
+        if rec.get('cv_evidence') == 'not_found' and _word_in(skill, corpus):
+            violations.append({'type': 'rec_already_evidenced', 'path': where,
+                               'detail': f'"{skill}" IS evidenced in the CV — do not recommend learning it; '
+                                         f'surface the existing evidence instead'})
+        if rec.get('cv_evidence') == 'not_found' and _word_in(skill, cv_text):
+            violations.append({'type': 'rec_leaked_into_cv', 'path': where,
+                               'detail': f'"{skill}" is a learning suggestion, not CV content — it must not '
+                                         f'appear in the optimized CV'})
+    return violations
+
+
+def validate_wording(feedback_texts):
+    """feedback_texts: iterable of (path, text) covering recs/verdict/improvements."""
+    violations = []
+    for path, text in feedback_texts:
+        for pat in WORDING_FORBIDDEN:
+            m = pat.search(text or '')
+            if m:
+                violations.append({'type': 'wording', 'path': path,
+                                   'detail': f'"{m.group(0)}" — absence of evidence is not absence of knowledge; '
+                                             f'phrase it as "isn\'t evidenced in the CV" / "לא נראה בקורות החיים"'})
+    return violations
+
+
+def fix_recommendations(optimizer_out, corpus):
+    """Deterministic hard fix: drop recs that are already evidenced or still
+    use forbidden wording; cap at MAX_RECOMMENDATIONS ordered by priority."""
+    order = {'high': 0, 'medium': 1, 'low': 2}
+    kept = []
+    for rec in optimizer_out.get('career_recommendations') or []:
+        if rec.get('cv_evidence') == 'not_found' and _word_in(rec.get('skill', ''), corpus):
+            continue
+        text = f"{rec.get('reason', '')} {rec.get('recommendation', '')}"
+        if any(p.search(text) for p in WORDING_FORBIDDEN):
+            continue
+        kept.append(rec)
+    kept.sort(key=lambda r: order.get(r.get('priority'), 1))
+    optimizer_out['career_recommendations'] = kept[:MAX_RECOMMENDATIONS]
+
+
+def rec_feedback_texts(optimizer_out):
+    for i, rec in enumerate(optimizer_out.get('career_recommendations') or []):
+        yield f'career_recommendations[{i}].reason', rec.get('reason', '')
+        yield f'career_recommendations[{i}].recommendation', rec.get('recommendation', '')
+
+
+def critic_feedback_texts(critic_out):
+    yield 'verdict', critic_out.get('verdict', '')
+    for i, s in enumerate(critic_out.get('strengths') or []):
+        yield f'strengths[{i}]', s
+    for i, imp in enumerate(critic_out.get('improvements') or []):
+        yield f'improvements[{i}].issue', imp.get('issue', '')
+        yield f'improvements[{i}].fix', imp.get('fix', '')
+    for i, a in enumerate(critic_out.get('action_items') or []):
+        yield f'action_items[{i}]', a
+
+
+def drop_forbidden_feedback(critic_out):
+    """Hard fix for critic text that still misphrases absence-of-evidence."""
+    def clean_list(items, texts_of):
+        return [it for it in items
+                if not any(p.search(texts_of(it)) for p in WORDING_FORBIDDEN)]
+    critic_out['strengths'] = clean_list(critic_out.get('strengths') or [], lambda s: s)
+    critic_out['action_items'] = clean_list(critic_out.get('action_items') or [], lambda s: s)
+    critic_out['improvements'] = clean_list(
+        critic_out.get('improvements') or [],
+        lambda i: f"{i.get('issue', '')} {i.get('fix', '')}")
+    for pat in WORDING_FORBIDDEN:
+        critic_out['verdict'] = pat.sub('לא נראה בקורות החיים', critic_out.get('verdict', ''))

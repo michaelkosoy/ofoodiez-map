@@ -1,0 +1,133 @@
+{% extends "admin/base.html" %}
+
+{% block title %}CV Reviews{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <h2>CV Reviews</h2>
+</div>
+
+<div style="margin-bottom:14px; display:flex; gap:10px; align-items:center;">
+    <input id="cvr-search" type="search" placeholder="Search candidate name or email…"
+           style="flex:1; max-width:380px; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-family:inherit; font-size:0.95rem;">
+    <span id="cvr-count" style="color:#777; font-size:0.85rem;"></span>
+</div>
+
+<div style="overflow:auto;">
+<table id="cvr-table" style="width:100%; border-collapse:collapse; background:#fff; font-size:0.86rem;">
+    <thead>
+        <tr style="text-align:left; border-bottom:2px solid #eee;">
+            <th style="padding:8px;">Candidate</th>
+            <th style="padding:8px;">Role</th>
+            <th style="padding:8px;">Job title</th>
+            <th style="padding:8px;">Created</th>
+            <th style="padding:8px;">Status</th>
+            <th style="padding:8px;">Rules</th>
+            <th style="padding:8px;">Quality</th>
+            <th style="padding:8px;">Cost</th>
+            <th style="padding:8px;">Pool</th>
+            <th style="padding:8px;">Files</th>
+            <th style="padding:8px;"></th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var tbody = document.querySelector('#cvr-table tbody');
+    var countEl = document.getElementById('cvr-count');
+    var searchEl = document.getElementById('cvr-search');
+    var timer = null;
+
+    function td(parent, text) {
+        var cell = document.createElement('td');
+        cell.style.padding = '8px';
+        cell.style.borderBottom = '1px solid #f0f0f0';
+        if (text !== undefined && text !== null) cell.textContent = String(text);
+        parent.appendChild(cell);
+        return cell;
+    }
+
+    function fileLink(cell, id, kind, label, admin) {
+        var a = document.createElement('a');
+        a.href = '/admin/api/cv-reviews/' + encodeURIComponent(id) + '/download/' + kind;
+        a.textContent = label;
+        a.style.marginRight = '8px';
+        cell.appendChild(a);
+    }
+
+    function render(rows) {
+        tbody.innerHTML = '';
+        countEl.textContent = rows.length + ' review(s)';
+        rows.forEach(function (r) {
+            var tr = document.createElement('tr');
+            var cand = td(tr, '');
+            var name = document.createElement('div');
+            name.style.fontWeight = '600';
+            name.textContent = r.candidate_name || '(no name)';
+            cand.appendChild(name);
+            if (r.candidate_email) {
+                var mail = document.createElement('div');
+                mail.style.color = '#777';
+                mail.textContent = r.candidate_email;
+                cand.appendChild(mail);
+            }
+            td(tr, r.primary_role || '');
+            td(tr, r.job_title || '');
+            td(tr, r.created_at ? r.created_at.replace('T', ' ').slice(0, 16) : '');
+            var st = td(tr, r.status);
+            st.style.color = r.status === 'complete' ? '#2e7d32'
+                : (r.status === 'failed' ? '#e74c3c' : '#b8860b');
+            var s = r.scores || {};
+            td(tr, s.rules ? (s.rules.before + '→' + s.rules.after + '/' + s.rules.total) : '');
+            td(tr, s.quality ? (s.quality.before + '→' + s.quality.after) : '');
+            td(tr, r.cost_usd != null ? ('$' + r.cost_usd.toFixed(4) + ' (' + r.model_calls + ')') : '');
+            td(tr, r.talent_pool_consent ? '✓' : '');
+            var files = td(tr, '');
+            if (r.status === 'complete') {
+                fileLink(files, r.id, 'docx', 'Word');
+                fileLink(files, r.id, 'pdf', 'PDF');
+                fileLink(files, r.id, 'txt', 'Text');
+                var raw = document.createElement('a');
+                raw.href = '/admin/api/cv-reviews/' + encodeURIComponent(r.id) + '/download/original_untrusted';
+                raw.textContent = 'RAW/untrusted original';
+                raw.style.cssText = 'color:#b8860b; font-size:0.78rem;';
+                raw.title = 'The exact file the user uploaded — untrusted; the sanitized Word/PDF are the main documents.';
+                files.appendChild(raw);
+            } else if (r.error) {
+                files.textContent = r.error.slice(0, 60);
+                files.style.color = '#e74c3c';
+            }
+            var actions = td(tr, '');
+            var del = document.createElement('button');
+            del.textContent = 'Delete';
+            del.style.cssText = 'background:none; border:1px solid #e74c3c; color:#e74c3c; border-radius:6px; padding:3px 9px; cursor:pointer;';
+            del.onclick = function () {
+                if (!window.confirm('Delete this review and its files?')) return;
+                fetch('/admin/api/cv-reviews/' + encodeURIComponent(r.id), { method: 'DELETE' })
+                    .then(function () { load(); });
+            };
+            actions.appendChild(del);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function load() {
+        var q = searchEl.value.trim();
+        fetch('/admin/api/cv-reviews' + (q ? ('?q=' + encodeURIComponent(q)) : ''))
+            .then(function (r) { return r.json(); })
+            .then(render);
+    }
+
+    searchEl.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(load, 300);
+    });
+    load();
+})();
+</script>
+{% endblock %}

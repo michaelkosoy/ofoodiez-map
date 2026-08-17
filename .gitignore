@@ -45,5 +45,23 @@ instance/
 
 scripts/
 
+# founder-profile-video (media + renders are regenerable; keep configs/plans/reports)
+tools/video-renderer/node_modules/
+tools/video-renderer/public/project
+projects/*/footage/
+projects/*/broll/
+projects/*/images/
+projects/*/screenshots/
+projects/*/logos/
+projects/*/audio/
+projects/*/generated/normalized/
+projects/*/generated/transcripts/
+projects/*/output/*.mp4
+projects/*/output/qc/
+projects/*/output/preview-frames/
+
 # local data backups (git history is the real backup; these are just belt-and-braces)
 backups/
+
+# CV reviewer live-eval outputs (synthetic CVs + sqlite db)
+artifacts/cv_eval/

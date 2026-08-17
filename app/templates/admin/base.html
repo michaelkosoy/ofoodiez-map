@@ -352,6 +352,9 @@
             <a href="{{ url_for('admin.members') }}" class="nav-link {% if request.endpoint == 'admin.members' %}active{% endif %}">
                 <i class="fas fa-users"></i> Website Users
             </a>
+            <a href="{{ url_for('admin.cv_reviews') }}" class="nav-link {% if request.endpoint == 'admin.cv_reviews' %}active{% endif %}">
+                <i class="fas fa-wand-magic-sparkles"></i> CV Reviews
+            </a>
             <a href="{{ url_for('admin.blog') }}" class="nav-link {% if request.endpoint == 'admin.blog' %}active{% endif %}">
                 <i class="fas fa-book-open"></i> Blog Content
             </a>
