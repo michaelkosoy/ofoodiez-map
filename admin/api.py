@@ -1719,3 +1719,16 @@ def cv_reviews_delete(review_id):
     db.session.delete(review)
     db.session.commit()
     return jsonify({'ok': True})
+
+
+@admin_bp.route('/api/cv-reviews/<review_id>/usage')
+@login_required
+def cv_reviews_usage(review_id):
+    """Full per-call model usage for one review (token counters only, never
+    prompt content). Used to verify things like context-cache hits and
+    per-step model choices against real traffic."""
+    from database.models import CvReview
+    review = CvReview.query.get(review_id)
+    if review is None:
+        return jsonify({'error': 'Not found'}), 404
+    return jsonify(review.usage or {})
