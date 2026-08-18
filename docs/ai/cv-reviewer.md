@@ -46,10 +46,25 @@ after-scores → career recommendations. Code lives in the `cv_review/` package;
   it in all three renderers together (`render_common.cv_to_text`,
   `pdf_writer`, `docx_writer`) or the three artifacts drift apart.
 
-### Known limitation
-The PDF uses reportlab's standard Helvetica, so a **Hebrew candidate name
-renders as boxes** in the PDF (the DOCX and text are fine). The guide mandates
-English CVs so this is rare; fixing it means embedding a Unicode TTF.
+### Hebrew in the PDF
+reportlab's built-in fonts have no Hebrew glyphs and no bidi engine, so Hebrew
+(typically the candidate's name, sometimes a Languages line) used to render as
+black boxes. Now: `cv_review/fonts/NotoSansHebrew-{Regular,Bold}.ttf` (OFL,
+42 KB each, license in the same folder) is registered at import, and
+`pdf_writer._hebrew_aware()` renders Hebrew runs in that font after reordering
+them to visual order with `python-bidi`. Latin text keeps Helvetica, so the
+approved look is unchanged. If the font ever fails to load, `HEBREW_READY` goes
+false and reviews still run (Hebrew degrades to boxes rather than erroring).
+The DOCX and text exports keep logical order — Word applies bidi itself.
+
+## Cost (measured, not estimated)
+`gemini-3.5-flash-lite`, 11 completed prod reviews (2026-08-17/18):
+**min $0.024, avg $0.034, max $0.038 per review**, 4–6 model calls each.
+Input-dominated: the full Hebrew guide is re-sent with each critic/optimizer
+call. The obvious lever if this ever matters at volume is putting the guide
+FIRST in every prompt (identical prefix → Gemini implicit context caching) or
+not sending it to the after-critic at all; per-review cost/tokens are recorded
+in `cv_reviews.usage` and surfaced in admin → CV Reviews.
 
 ## Invariants (enforced by validators + tests, not just prompts)
 - **Candidate name** comes from the CV only, preserved EXACTLY (never the

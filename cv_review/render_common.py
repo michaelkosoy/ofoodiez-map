@@ -4,6 +4,40 @@ uploaded document is ever copied through."""
 import re
 
 
+HEBREW_RE = re.compile(r'[֐-׿יִ-ﭏ]')
+
+
+def has_hebrew(text):
+    return bool(HEBREW_RE.search(text or ''))
+
+
+def script_runs(text):
+    """Split text into [(chunk, is_hebrew), ...] so each renderer can pick the
+    right font per chunk. Neutral characters (spaces, punctuation, digits) join
+    the run they touch, keeping the chunk count small."""
+    if not text:
+        return []
+    if not has_hebrew(text):
+        return [(text, False)]
+    runs, current, current_heb = [], [], None
+    for char in text:
+        if HEBREW_RE.match(char):
+            kind = True
+        elif char.isalpha():          # Latin letter
+            kind = False
+        else:
+            kind = current_heb        # neutral: stay in the current run
+        if current and kind is not current_heb and kind is not None:
+            runs.append((''.join(current), bool(current_heb)))
+            current = []
+        current.append(char)
+        if kind is not None:
+            current_heb = kind
+    if current:
+        runs.append((''.join(current), bool(current_heb)))
+    return runs
+
+
 _LINK_LABELS = {
     'linkedin': 'LinkedIn', 'github': 'GitHub', 'gitlab': 'GitLab',
     'website': 'Portfolio', 'site': 'Portfolio', 'portfolio': 'Portfolio',

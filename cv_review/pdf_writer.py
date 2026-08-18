@@ -11,16 +11,62 @@ One-pager guarantee: the layout is rendered at the LARGEST font scale that
 still fits a single page (trying big→small), so a short CV fills the page and
 a long one compresses instead of spilling over."""
 import io
+import os
 from xml.sax.saxutils import escape
 
 from reportlab.lib import colors
+from reportlab.lib.fonts import addMapping
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (HRFlowable, Paragraph, SimpleDocTemplate,
                                 Spacer, Table, TableStyle)
 
-from .render_common import collect_bold_terms, split_segments, term_pattern
+from .render_common import (collect_bold_terms, has_hebrew, script_runs,
+                            split_segments, term_pattern)
+
+# ── Hebrew support ──────────────────────────────────────────────────────────
+# reportlab's built-in fonts have no Hebrew (a Hebrew name rendered as boxes)
+# and no bidi engine. Hebrew runs are therefore drawn with a vendored OFL font
+# and reordered to visual order with python-bidi; Latin text keeps Helvetica so
+# the approved look is unchanged.
+_FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
+HEBREW_FONT = 'NotoSansHebrew'
+
+
+def _register_hebrew_font():
+    try:
+        pdfmetrics.registerFont(TTFont(HEBREW_FONT,
+                                       os.path.join(_FONT_DIR, 'NotoSansHebrew-Regular.ttf')))
+        pdfmetrics.registerFont(TTFont(f'{HEBREW_FONT}-Bold',
+                                       os.path.join(_FONT_DIR, 'NotoSansHebrew-Bold.ttf')))
+        pdfmetrics.registerFontFamily(HEBREW_FONT, normal=HEBREW_FONT,
+                                      bold=f'{HEBREW_FONT}-Bold',
+                                      italic=HEBREW_FONT,
+                                      boldItalic=f'{HEBREW_FONT}-Bold')
+        addMapping(HEBREW_FONT, 0, 0, HEBREW_FONT)
+        addMapping(HEBREW_FONT, 1, 0, f'{HEBREW_FONT}-Bold')
+        return True
+    except Exception as exc:      # missing/corrupt font must not break reviews
+        print(f'⚠️ CV review: Hebrew font unavailable ({type(exc).__name__}: {exc})')
+        return False
+
+
+HEBREW_READY = _register_hebrew_font()
+
+
+def _to_visual(text):
+    """Logical → visual order for a line containing Hebrew (reportlab draws
+    strictly left to right)."""
+    try:
+        from bidi.algorithm import get_display
+        return get_display(text)
+    except Exception:
+        # ponytail: naive fallback — reverse the whole line. Correct for a
+        # Hebrew-only line (a name), imperfect for mixed punctuation.
+        return text[::-1]
 
 _MARGIN = 1.25 * cm
 _DATE_COL = 3.0 * cm
@@ -58,30 +104,47 @@ def _styles(s, extra_gap=0):
     }
 
 
+def _hebrew_aware(text, bold=False):
+    """Escape `text`, switching to the Hebrew font (and visual order) for its
+    Hebrew runs. Latin runs keep the document font."""
+    if not has_hebrew(text) or not HEBREW_READY:
+        return escape(text or '')
+    out = []
+    for chunk, is_hebrew in script_runs(_to_visual(text)):
+        safe = escape(chunk)
+        if is_hebrew:
+            name = f'{HEBREW_FONT}-Bold' if bold else HEBREW_FONT
+            out.append(f'<font name="{name}">{safe}</font>')
+        else:
+            out.append(safe)
+    return ''.join(out)
+
+
 def _markup(text, pattern):
-    return ''.join(f'<b>{escape(seg)}</b>' if bold else escape(seg)
-                   for seg, bold in split_segments(text or '', pattern))
+    return ''.join(
+        f'<b>{_hebrew_aware(seg, bold=True)}</b>' if bold else _hebrew_aware(seg)
+        for seg, bold in split_segments(text or '', pattern))
 
 
 def _contact_markup(cv):
     bits = []
     for value in (cv.get('phone'), cv.get('email')):
         if value:
-            bits.append(escape(value))
+            bits.append(_hebrew_aware(value))
     if cv.get('location'):
-        bits.append(escape(cv['location']))
+        bits.append(_hebrew_aware(cv['location']))
     for link in cv.get('links') or []:
         url = (link.get('url') or '').strip()
         if not url:
             continue
         href = url if url.startswith(('http://', 'https://')) else f'https://{url}'
-        label = escape(link.get('label') or url)
+        label = _hebrew_aware(link.get('label') or url)
         bits.append(f'<link href="{escape(href)}" color="{_LINK_COLOR}"><u>{label}</u></link>')
     return ' &nbsp;|&nbsp; '.join(bits)
 
 
 def _entry_table(date_text, right_flowables, styles, s):
-    left = Paragraph(escape(date_text or ''), styles['dates'])
+    left = Paragraph(_hebrew_aware(date_text or ''), styles['dates'])
     table = Table([[left, right_flowables]], colWidths=[_DATE_COL, _BODY_COL])
     table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
@@ -97,15 +160,15 @@ def _entry_table(date_text, right_flowables, styles, s):
 def _story(cv, s, extra_gap=0):
     styles = _styles(s, extra_gap)
     pattern = term_pattern(collect_bold_terms(cv))
-    story = [Paragraph(escape(cv.get('name', '')), styles['name'])]
+    story = [Paragraph(_hebrew_aware(cv.get('name', ''), bold=True), styles['name'])]
     if cv.get('title'):
-        story.append(Paragraph(escape(cv['title']), styles['title']))
+        story.append(Paragraph(_hebrew_aware(cv['title']), styles['title']))
     contact = _contact_markup(cv)
     if contact:
         story.append(Paragraph(contact, styles['contact']))
 
     def heading(text):
-        story.append(Paragraph(escape(text) + ':', styles['heading']))
+        story.append(Paragraph(_hebrew_aware(text, bold=True) + ':', styles['heading']))
         story.append(HRFlowable(width='100%', thickness=0.8, color=colors.HexColor('#333333'),
                                 spaceBefore=1 * s, spaceAfter=3 * s))
 
@@ -116,8 +179,8 @@ def _story(cv, s, extra_gap=0):
     if cv.get('experience'):
         heading('Experience')
         for exp in cv['experience']:
-            company = f" — {escape(exp['company'])}" if exp.get('company') else ''
-            right = [Paragraph(f"<b>{escape(exp.get('title', ''))}</b>{company}", styles['role'])]
+            company = f" — {_hebrew_aware(exp['company'])}" if exp.get('company') else ''
+            right = [Paragraph(f"<b>{_hebrew_aware(exp.get('title', ''), bold=True)}</b>{company}", styles['role'])]
             right += [Paragraph(_markup(b, pattern), styles['bullet'], bulletText='•')
                       for b in exp.get('bullets') or []]
             story.append(_entry_table(exp.get('dates'), right, styles, s))
@@ -125,8 +188,8 @@ def _story(cv, s, extra_gap=0):
     if cv.get('projects'):
         heading('Projects')
         for proj in cv['projects']:
-            tech = f" <font color='#555555'>({escape(proj['tech'])})</font>" if proj.get('tech') else ''
-            right = [Paragraph(f"<b>{escape(proj.get('name', ''))}</b>{tech}", styles['role'])]
+            tech = f" <font color='#555555'>({_hebrew_aware(proj['tech'])})</font>" if proj.get('tech') else ''
+            right = [Paragraph(f"<b>{_hebrew_aware(proj.get('name', ''), bold=True)}</b>{tech}", styles['role'])]
             desc = _markup(proj.get('description', ''), pattern)
             if proj.get('link'):
                 url = proj['link'].strip()
@@ -140,8 +203,8 @@ def _story(cv, s, extra_gap=0):
     if cv.get('education'):
         heading('Education')
         for edu in cv['education']:
-            inst = f" — {escape(edu['institution'])}" if edu.get('institution') else ''
-            right = [Paragraph(f"<b>{escape(edu.get('degree', ''))}</b>{inst}", styles['role'])]
+            inst = f" — {_hebrew_aware(edu['institution'])}" if edu.get('institution') else ''
+            right = [Paragraph(f"<b>{_hebrew_aware(edu.get('degree', ''), bold=True)}</b>{inst}", styles['role'])]
             story.append(_entry_table(edu.get('dates'), right, styles, s))
 
     for extra in cv.get('extras') or []:
@@ -156,9 +219,9 @@ def _story(cv, s, extra_gap=0):
     if cv.get('skills_groups'):
         heading('Skills')
         for g in cv['skills_groups']:
-            skills = escape(', '.join(g.get('skills') or []))
+            skills = _hebrew_aware(', '.join(g.get('skills') or []))
             story.append(Paragraph(
-                f"<b>{escape(g.get('group', ''))}:</b> {skills}", styles['skills']))
+                f"<b>{_hebrew_aware(g.get('group', ''), bold=True)}:</b> {skills}", styles['skills']))
 
     return story
 

@@ -1,4 +1,6 @@
 """Address privacy, name preservation, evidence and wording validators."""
+import pytest
+
 from cv_review import validators
 from cv_review.storage import sanitize_name
 
@@ -179,6 +181,43 @@ def test_polish_cv_presentation():
     assert len(military['lines']) == 2
     assert languages['lines'] == ['Hebrew — native', 'English — fluent']   # list untouched
     assert idf['heading'] == 'IDF Service'                                 # acronym kept
+
+
+def test_hebrew_name_renders_in_pdf():
+    """A Hebrew name used to come out as black boxes (no Hebrew glyphs in
+    reportlab's built-in fonts, no bidi)."""
+    pypdf = pytest.importorskip('pypdf')
+    import io as _io
+
+    from cv_review.pdf_writer import HEBREW_READY, build_pdf
+    from cv_review.render_common import polish_cv
+    assert HEBREW_READY, 'vendored Hebrew font failed to register'
+    cv = polish_cv({
+        'name': 'נועה לוי', 'title': 'Frontend Developer', 'location': 'Ramat Gan',
+        'email': 'noa@example.com', 'phone': '053-7654321', 'links': [],
+        'summary': 'Junior frontend developer with React experience.',
+        'skills_groups': [{'group': 'Languages', 'skills': ['React']}],
+        'experience': [{'company': 'Petala', 'title': 'Developer', 'dates': '2025',
+                        'bullets': ['Built a React storefront']}],
+        'projects': [], 'education': [],
+        'extras': [{'heading': 'Languages', 'lines': ['עברית — שפת אם', 'English — fluent']}],
+    })
+    pdf = build_pdf(cv)
+    text = pypdf.PdfReader(_io.BytesIO(pdf)).pages[0].extract_text() or ''
+    assert '■' not in text
+    assert all(c in text for c in 'נועהלוי')
+    assert 'עברית' in text
+    assert 'React' in text                       # Latin content unaffected
+
+
+def test_script_runs_splits_mixed_text():
+    from cv_review.render_common import has_hebrew, script_runs
+    assert not has_hebrew('Backend Engineer')
+    assert has_hebrew('עברית — native')
+    runs = script_runs('React מפתחת Frontend')
+    assert [is_heb for _chunk, is_heb in runs] == [False, True, False]
+    assert ''.join(chunk for chunk, _ in runs) == 'React מפתחת Frontend'
+    assert script_runs('plain latin') == [('plain latin', False)]
 
 
 def test_unrenderable_glyphs_normalized_hebrew_kept():
