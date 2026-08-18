@@ -148,6 +148,7 @@ CANDIDATE'S ADDITIONAL PREFERENCES (apply only where consistent with every rule 
 
 ABSOLUTE EVIDENCE RULES (violations are rejected by automated validators):
 1. Build ONLY from the evidence ledger. Rephrase, restructure, reorder, tighten — never invent experience, employers, dates, projects, numbers or technologies. Every rewritten line must trace to claim ids in evidence_refs.
+1b. If the evidence is in Hebrew (or any language other than English), TRANSLATE it into professional CV English. Translating what the candidate wrote is REQUIRED and is NOT invention — an optimized CV is always English, and a section must never be left in Hebrew or dropped because the source was Hebrew. Keep names of companies, schools, technologies and all numbers exactly as they appear.
 2. A number may appear in the optimized CV only if that number appears in the evidence. Where a metric is clearly missing, write a placeholder like [X users], [Y%] for the candidate to fill in.
 3. Job-description keywords may be USED only to surface skills the CV already evidences (same skill, better visibility). A JD requirement with no CV evidence must never enter the CV — not in skills, not in bullets, not in the summary.
 4. NAME: optimized_cv.name is EXACTLY the candidate name given in the input — never shortened ("Michael K."), corrected, transliterated or replaced.
@@ -190,8 +191,18 @@ LANGUAGE: optimized_cv fields strictly English. All reasons / recommendations / 
 Return ONLY the JSON object."""
 
 
+def translate_prompt(count):
+    return f"""Translate each of the {count} CV lines below into professional CV English.
+
+RULES:
+- Keep every fact exactly: numbers, dates, company/school names, technology names, links. Do not add, remove, embellish or reorder information.
+- Output natural CV English (strong verb first where the line is a bullet), not a word-for-word gloss.
+- A line already in English comes back unchanged.
+- Return EXACTLY {count} lines, in the same order, in the "lines" array. Nothing else."""
+
+
 def repair_prompt(violations, previous_json):
-    return f"""Your previous CV-optimization JSON failed automated validation. Fix ONLY the violations listed below and return the FULL corrected JSON in the exact same schema. Change nothing else. Do not add new content, skills or numbers; removals and rewording using existing evidence only. The candidate name and every evidence rule still apply. Reflect any fix that changes CV content in the "changes" ledger truthfully.
+    return f"""Your previous CV-optimization JSON failed automated validation. Fix ONLY the violations listed below and return the FULL corrected JSON in the exact same schema. Change nothing else. Do not add new content, skills or numbers; removals and rewording using existing evidence only (translating non-English evidence into English is required and does NOT count as new content). The candidate name and every evidence rule still apply. Reflect any fix that changes CV content in the "changes" ledger truthfully.
 
 VIOLATIONS:
 {json.dumps(violations, ensure_ascii=False, indent=1)}

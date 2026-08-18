@@ -2,6 +2,7 @@
 identity, address privacy, evidence discipline, recommendations, summaries,
 and the zero-HTTP guarantee (conftest blocks all real HTTP)."""
 import json
+import re
 
 import pytest
 
@@ -306,6 +307,53 @@ def test_links_restored_when_model_drops_them(app_ctx):
     responses['repair'] = no_links
     payload, _, _ = run(responses)
     assert 'github.com/janesmith' in payload['optimized_text']
+
+
+def test_hebrew_cv_never_ships_hebrew_body(app_ctx):
+    """A Hebrew CV whose optimizer output lost a section used to come back with
+    the Hebrew original restored verbatim — the guide requires English."""
+    hebrew_extraction = fake.make_extraction(
+        name='נועה לוי',
+        location_raw='רחוב הרצל 45, דירה 12, רמת גן 5250606', city='רמת גן',
+        skills=('React', 'Node.js'),
+        bullets=('פיתחתי אתר מלא עם React בצד לקוח ו-Node.js בצד שרת',
+                 'בסיס נתונים MongoDB עם 300 מוצרים'))
+    hebrew_extraction['experience'][0]['company'] = 'בוטקאמפ'
+    hebrew_extraction['experience'][0]['title'] = 'פרויקט גמר'
+    hebrew_extraction['extras'] = [{'heading': 'שירות צבאי', 'lines': ['מדריכת חובשים']}]
+
+    gutted = fake.make_optimizer(name='נועה לוי',
+                                 summary='Junior full-stack developer.',
+                                 skills=('React', 'Node.js'))
+    gutted['optimized_cv']['experience'] = []       # what prod actually returned
+    gutted['optimized_cv']['extras'] = []
+
+    translations = {
+        'lines': ['Final bootcamp project', 'Bootcamp',
+                  'Built a full web app with React on the client and Node.js on the server',
+                  'Designed a MongoDB database holding 300 products',
+                  'Military Service', 'Combat medic instructor']
+    }
+    model = fake.FakeModel({
+        'extract': hebrew_extraction,
+        'critic': fake.make_critic(),
+        'critic_optimized': fake.make_critic(quality=88),
+        'optimize': gutted,
+        'repair': gutted,
+        'translate': lambda parts: translations,
+    })
+    payload, review = pipeline.start_review(
+        file_bytes='נועה לוי\nמפתחת'.encode(), filename='cv.txt', ext='.txt',
+        job=fake.NO_JOB, consent=True, owner_user_id=None, key='k', generate=model)
+
+    text = payload['optimized_text']
+    assert payload['candidate']['name'] == 'נועה לוי'      # the name stays Hebrew
+    assert text.splitlines()[0] == 'נועה לוי'
+    body = '\n'.join(text.splitlines()[1:])
+    assert not re.search(r'[֐-׿]', body), f'Hebrew left in the CV body: {body[:120]}'
+    assert 'React' in body and '300 products' in body      # facts preserved
+    assert 'translate' in model.purposes
+    assert 'רחוב הרצל' not in text and '5250606' not in text   # address still redacted
 
 
 def test_pdf_fits_exactly_one_page(app_ctx):

@@ -29,7 +29,7 @@ from .docx_inspect import inspect_docx
 from .docx_writer import build_docx
 from .frameworks import FRAMEWORK_VERSION, framework_for
 from .pdf_writer import build_pdf
-from .render_common import cv_to_text, polish_cv
+from .render_common import cv_to_text, has_hebrew, polish_cv
 
 GUIDE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           '..', 'app', 'data', 'cv_guide_full.md')
@@ -142,6 +142,39 @@ def _optimized_as_canonical(cv, text_len):
                   'emphasized_technologies': True,
                   'page_count_estimate': max(1.0, round(text_len / 3200, 1))},
     }
+
+
+def _translate_leftover_hebrew(cv, *, generate, key, usage):
+    """The content floor restores text VERBATIM, so a Hebrew CV whose optimizer
+    output lost a section comes back in Hebrew — but an optimized CV must be
+    English (guide rule 2). One structured call translates exactly those
+    strings; the candidate's name is never touched, and on any failure the
+    Hebrew text stays (content beats emptiness).
+    Returns the number of translated strings."""
+    targets = [(path, value, setter)
+               for path, value, setter in validators.iter_cv_strings(cv)
+               if has_hebrew(value) and path != 'name']
+    if not targets:
+        return 0
+    payload = [value for _p, value, _s in targets]
+    try:
+        out = generate([{'text': prompts.translate_prompt(len(payload))},
+                        {'text': json.dumps(payload, ensure_ascii=False, indent=0)}],
+                       schemas.TRANSLATION_SCHEMA, purpose='translate',
+                       usage=usage, key=key, temperature=0.1)
+        lines = out.get('lines') if isinstance(out, dict) else None
+        if not isinstance(lines, list) or len(lines) != len(targets):
+            print(f'⚠️ CV review: translation returned {len(lines or [])} of {len(targets)} lines — kept original')
+            return 0
+        translated = 0
+        for (_path, original, setter), line in zip(targets, lines):
+            if isinstance(line, str) and line.strip() and not has_hebrew(line):
+                setter(line.strip())
+                translated += 1
+        return translated
+    except gemini.GeminiError as exc:
+        print(f'⚠️ CV review: translation call failed ({exc}) — kept original text')
+        return 0
 
 
 def _collect_violations(opt, corpus, profile, expected_name, canonical):
@@ -486,10 +519,22 @@ def _continue_review(review, name, *, generate, key, usage):
                 raise PipelineError('Could not produce a compliant CV from this document. '
                                     'Please try again.')
         validators.fix_recommendations(opt, corpus)   # cap 3–5, priority order
-        validators.restore_from_canonical(opt, canonical, profile)  # content floor, always
+        restored = validators.restore_from_canonical(opt, canonical, profile)  # content floor
         _ensure_location_redaction_change(opt, canonical, profile)
 
-        cv = polish_cv(opt['optimized_cv'])
+        cv = opt['optimized_cv']
+        # The floor restores text verbatim, so a Hebrew source can leak Hebrew
+        # into the CV — which breaks the guide's "CV in English" rule.
+        if has_hebrew(cv_to_text(cv)) and remaining() > 30:
+            n = _translate_leftover_hebrew(cv, generate=generate, key=key, usage=usage)
+            if n:
+                opt['changes'].append({
+                    'change_type': 'rewrite', 'section': ','.join(restored) or 'cv',
+                    'before': '', 'after': '',
+                    'reason': f'{n} שורות תורגמו לאנגלית — קורות חיים באנגלית זה כלל בסיסי במדריך.',
+                    'evidence_refs': []})
+
+        cv = polish_cv(cv)
         text = cv_to_text(cv)
         if validators.find_address_leaks(text, profile):
             raise PipelineError('Could not produce a compliant CV from this document. '

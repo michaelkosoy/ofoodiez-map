@@ -136,6 +136,9 @@ OPTIMIZER_SCHEMA = _obj({
 }, ['optimized_cv', 'changes', 'career_recommendations'])
 
 
+TRANSLATION_SCHEMA = _obj({'lines': _STR_ARR}, ['lines'])
+
+
 # ── Server-side structural validation ────────────────────────────────────────
 class SchemaError(ValueError):
     pass

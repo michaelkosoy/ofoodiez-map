@@ -16,7 +16,8 @@ class FakeModel:
         self.purposes.append(purpose)
         usage.add(purpose, 'fake-model',
                   {'promptTokenCount': 100, 'candidatesTokenCount': 200}, 0.01)
-        for prefix in ('repair', 'critic_optimized', 'critic', 'optimize', 'extract'):
+        for prefix in ('repair', 'critic_optimized', 'critic', 'optimize', 'extract',
+                       'translate'):
             if purpose.startswith(prefix) and prefix in self.responses:
                 r = self.responses[prefix]
                 out = r(parts) if callable(r) else r
