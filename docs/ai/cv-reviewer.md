@@ -35,8 +35,21 @@ after-scores → career recommendations. Code lives in the `cv_review/` package;
   a regression to show a candidate.
 - **Presentation polish** (`render_common.polish_cv`) runs once before all
   renderers: link labels (LinkedIn/GitHub/Portfolio), Title-Case headings
-  (acronyms kept), and merging an entry's split attribute lines so
-  "Military Service" isn't a pile of one-word bullets.
+  (acronyms kept), merging an entry's split attribute lines so "Military
+  Service" isn't a pile of one-word bullets, one-line degrees, a summary
+  trimmed to ≤42 words at a sentence boundary, and normalizing glyphs the
+  PDF's standard fonts can't draw (U+2011 etc. rendered as black boxes).
+- **Section order is a product decision** (Ofir's, 2026-08-18): Summary →
+  Experience → Projects → Education → extras → **Skills last**, and the skills
+  list is NOT bold (only its group label) — technologies stay emphasized
+  inside the experience bullets, which is where a screener reads them. Change
+  it in all three renderers together (`render_common.cv_to_text`,
+  `pdf_writer`, `docx_writer`) or the three artifacts drift apart.
+
+### Known limitation
+The PDF uses reportlab's standard Helvetica, so a **Hebrew candidate name
+renders as boxes** in the PDF (the DOCX and text are fine). The guide mandates
+English CVs so this is rare; fixing it means embedding a Unicode TTF.
 
 ## Invariants (enforced by validators + tests, not just prompts)
 - **Candidate name** comes from the CV only, preserved EXACTLY (never the
