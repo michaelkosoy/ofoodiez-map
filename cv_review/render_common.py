@@ -77,6 +77,31 @@ def _short_degree(degree):
 
 MAX_SUMMARY_WORDS = 42   # ~2–3 rendered lines; the prompt targets 40
 
+# Characters the PDF's standard fonts (WinAnsi) cannot draw — they come out as
+# a black box (e.g. U+2011 NON-BREAKING HYPHEN in "self‑checkout"). Mapped to
+# their plain equivalents before rendering. Anything else (Hebrew, etc.) is
+# left untouched on purpose.
+_GLYPH_FIXES = {
+    '‐': '-', '‑': '-', '‒': '-', '−': '-', '­': '',
+    ' ': ' ', ' ': ' ', ' ': ' ', ' ': ' ', ' ': ' ',
+    ' ': ' ', ' ': ' ', '​': '', '‌': '', '‍': '',
+    '﻿': '', '‘': "'", '’': "'", '‚': "'", '‛': "'",
+    '“': '"', '”': '"', '„': '"', '′': "'", '″': '"',
+    '•': '-', '‣': '-', '●': '-', '·': '-', '…': '...',
+    'ﬁ': 'fi', 'ﬂ': 'fl', '⁄': '/', '∕': '/',
+}
+_GLYPH_TABLE = str.maketrans(_GLYPH_FIXES)
+
+
+def _fix_glyphs(obj):
+    if isinstance(obj, str):
+        return obj.translate(_GLYPH_TABLE)
+    if isinstance(obj, list):
+        return [_fix_glyphs(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: _fix_glyphs(v) for k, v in obj.items()}
+    return obj
+
 
 def _trim_summary(text):
     """Keep the summary to a tight 2–3 lines. Cuts at sentence boundaries only,
@@ -97,6 +122,7 @@ def _trim_summary(text):
 def polish_cv(cv):
     """Presentation normalization applied once, before every renderer: tidy
     link labels, section headings and list fragments. Never changes facts."""
+    cv.update(_fix_glyphs({k: v for k, v in cv.items()}))
     cv['summary'] = _trim_summary(cv.get('summary'))
     for edu in cv.get('education') or []:
         edu['degree'] = _short_degree(edu.get('degree'))

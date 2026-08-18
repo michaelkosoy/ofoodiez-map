@@ -181,6 +181,22 @@ def test_polish_cv_presentation():
     assert idf['heading'] == 'IDF Service'                                 # acronym kept
 
 
+def test_unrenderable_glyphs_normalized_hebrew_kept():
+    """U+2011 & friends draw as a black box in the PDF's standard fonts."""
+    from cv_review.render_common import cv_to_text, polish_cv
+    cv = {'name': 'Osher Elikamel', 'title': 'Dev',
+          'summary': 'Built a self‑checkout kiosk with “clean” code…',
+          'experience': [{'company': 'A', 'title': 'Dev', 'dates': '2024',
+                          'bullets': ['Shipped self‑checkout flows']}],
+          'extras': [{'heading': 'Languages', 'lines': ['Hebrew — native', 'עברית']}],
+          'skills_groups': [], 'projects': [], 'education': [], 'links': []}
+    text = cv_to_text(polish_cv(cv))
+    assert 'self-checkout' in text and '‑' not in text
+    assert '"clean"' in text and '...' in text and ' ' not in text
+    assert 'עברית' in text          # non-Latin content is never stripped
+    assert '—' in text              # en/em dashes are renderable, keep them
+
+
 def test_summary_trimmed_at_sentence_boundary():
     from cv_review.render_common import MAX_SUMMARY_WORDS, polish_cv
     long_summary = (
