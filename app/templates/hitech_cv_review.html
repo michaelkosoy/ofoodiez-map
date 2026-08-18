@@ -642,7 +642,10 @@
                 /* What I changed */
                 var summary = data.change_summary || {};
                 document.getElementById('cvr-summary-total').textContent =
-                    summary.total_changes ? ('בוצעו ' + summary.total_changes + ' שינויים') : '';
+                    summary.total_changes
+                        ? (summary.total_changes === 1 ? 'בוצע שינוי אחד'
+                                                       : 'בוצעו ' + summary.total_changes + ' שינויים')
+                        : '';
                 var linesEl = document.getElementById('cvr-summary-lines');
                 linesEl.innerHTML = '';
                 (summary.lines || []).forEach(function (line) {

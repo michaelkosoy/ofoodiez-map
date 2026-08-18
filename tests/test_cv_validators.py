@@ -155,6 +155,41 @@ def test_allowed_wording_passes():
 
 
 # ── Filenames (names are labels, UUIDs are security identifiers) ────────────
+def test_polish_cv_presentation():
+    from cv_review.render_common import polish_cv
+    cv = {
+        'links': [{'label': 'linkedin', 'url': 'www.linkedin.com/in/x'},
+                  {'label': 'website', 'url': 'https://x.dev'}],
+        'skills_groups': [{'group': 'FRAMEWORKS & TOOLS', 'skills': ['FastAPI']}],
+        'extras': [
+            {'heading': 'MILITARY SERVICE',
+             'lines': ['Artillery Corps', 'Sergeant', '2020-2022',
+                       'Served as a howitzer team leader, led a team in operational '
+                       'activities and managed logistical planning and equipment readiness']},
+            {'heading': 'LANGUAGES', 'lines': ['Hebrew — native', 'English — fluent']},
+            {'heading': 'IDF SERVICE', 'lines': ['Combat medic']},
+        ],
+    }
+    p = polish_cv(cv)
+    assert [l['label'] for l in p['links']] == ['LinkedIn', 'Portfolio']
+    assert p['skills_groups'][0]['group'] == 'Frameworks & Tools'
+    military, languages, idf = p['extras']
+    assert military['heading'] == 'Military Service'
+    assert military['lines'][0] == 'Artillery Corps — Sergeant — 2020-2022'
+    assert len(military['lines']) == 2
+    assert languages['lines'] == ['Hebrew — native', 'English — fluent']   # list untouched
+    assert idf['heading'] == 'IDF Service'                                 # acronym kept
+
+
+def test_too_few_recommendations_flagged():
+    opt = _opt(['Python'], recs=[{'skill': 'Kubernetes', 'priority': 'high',
+                                  'reason_type': 'target_job_gap', 'reason': 'נדרש',
+                                  'cv_evidence': 'not_found', 'recommendation': 'x',
+                                  'cv_instruction': ''}])
+    assert any(v['type'] == 'rec_too_few'
+               for v in validators.validate_recommendations(opt, 'Python'))
+
+
 def test_sanitize_name():
     assert sanitize_name('Michael Kosoy') == 'Michael_Kosoy'
     traversal = sanitize_name('../../etc/passwd')

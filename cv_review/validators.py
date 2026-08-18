@@ -380,10 +380,17 @@ WORDING_FORBIDDEN = [
 ]
 
 MAX_RECOMMENDATIONS = 5
+MIN_RECOMMENDATIONS = 3
 
 
 def validate_recommendations(optimizer_out, corpus):
     violations = []
+    recs = optimizer_out.get('career_recommendations') or []
+    if len(recs) < MIN_RECOMMENDATIONS:
+        violations.append({'type': 'rec_too_few', 'path': 'career_recommendations',
+                           'detail': f'only {len(recs)} career recommendation(s) — return '
+                                     f'{MIN_RECOMMENDATIONS}–{MAX_RECOMMENDATIONS}, ranked by '
+                                     f'impact, none of them skills the CV already evidences'})
     cv_text = cv_full_text(optimizer_out['optimized_cv'])
     for i, rec in enumerate(optimizer_out.get('career_recommendations') or []):
         skill = rec.get('skill', '')

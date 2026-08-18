@@ -29,7 +29,7 @@ from .docx_inspect import inspect_docx
 from .docx_writer import build_docx
 from .frameworks import FRAMEWORK_VERSION, framework_for
 from .pdf_writer import build_pdf
-from .render_common import cv_to_text
+from .render_common import cv_to_text, polish_cv
 
 GUIDE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           '..', 'app', 'data', 'cv_guide_full.md')
@@ -195,22 +195,28 @@ def _change_summary(changes, jd_analysis, city):
         n = by_type.get(t, 0)
         if not n:
             continue
+        one = n == 1
         if t == 'rewrite':
-            lines.append(f'שוכתבו {n} שורות ותיאורים לניסוח תוצאה (X-Y-Z) עם פעלים חזקים')
+            lines.append('שורה אחת שוכתבה לניסוח תוצאה (X-Y-Z) עם פועל חזק' if one else
+                         f'{n} שורות שוכתבו לניסוח תוצאה (X-Y-Z) עם פעלים חזקים')
         elif t == 'shorten':
-            lines.append(f'קוצרו {n} סעיפים כדי לשמור על עמוד אחד')
+            lines.append('סעיף אחד קוצר כדי לשמור על עמוד אחד' if one else
+                         f'{n} סעיפים קוצרו כדי לשמור על עמוד אחד')
         elif t == 'remove':
-            lines.append(f'הוסרו {n} סעיפים חלשים או מיותרים')
+            lines.append('סעיף אחד חלש או מיותר הוסר' if one else
+                         f'{n} סעיפים חלשים או מיותרים הוסרו')
         elif t == 'reorder':
-            lines.append(f'סודרו מחדש {n} מקטעים לפי רלוונטיות')
+            lines.append('מקטע אחד סודר מחדש לפי רלוונטיות' if one else
+                         f'{n} מקטעים סודרו מחדש לפי רלוונטיות')
         elif t == 'keyword_surface':
             suffix = ' בהתאם למשרה' if jd_analysis else ''
-            lines.append(f'הובלטו {n} כישורים שכבר קיימים בקורות החיים{suffix}')
+            lines.append(f'כישור אחד שכבר קיים בקורות החיים הובלט{suffix}' if one else
+                         f'{n} כישורים שכבר קיימים בקורות החיים הובלטו{suffix}')
         elif t == 'location_redaction':
             kept = f'נשארה רק "{city}"' if city else 'המיקום הושמט'
-            lines.append(f'הוסרה הכתובת המדויקת — {kept}')
+            lines.append(f'הכתובת המדויקת הוסרה — {kept}')
         elif t == 'deduplication':
-            lines.append(f'אוחדו {n} כפילויות')
+            lines.append('כפילות אחת אוחדה' if one else f'{n} כפילויות אוחדו')
         elif t == 'formatting':
             lines.append('הפורמט הותאם לתבנית נקייה של עמוד אחד')
     not_evidenced = (jd_analysis or {}).get('not_evidenced') or []
@@ -482,7 +488,7 @@ def _continue_review(review, name, *, generate, key, usage):
         validators.restore_from_canonical(opt, canonical, profile)  # content floor, always
         _ensure_location_redaction_change(opt, canonical, profile)
 
-        cv = opt['optimized_cv']
+        cv = polish_cv(opt['optimized_cv'])
         text = cv_to_text(cv)
         if validators.find_address_leaks(text, profile):
             raise PipelineError('Could not produce a compliant CV from this document. '

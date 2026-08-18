@@ -4,6 +4,74 @@ uploaded document is ever copied through."""
 import re
 
 
+_LINK_LABELS = {
+    'linkedin': 'LinkedIn', 'github': 'GitHub', 'gitlab': 'GitLab',
+    'website': 'Portfolio', 'site': 'Portfolio', 'portfolio': 'Portfolio',
+    'homepage': 'Portfolio', 'blog': 'Blog', 'medium': 'Medium',
+    'stackoverflow': 'Stack Overflow', 'stack overflow': 'Stack Overflow',
+    'kaggle': 'Kaggle', 'behance': 'Behance', 'dribbble': 'Dribbble',
+    'twitter': 'X', 'x': 'X', 'email': 'Email', 'phone': 'Phone',
+}
+_SMALL_WORDS = {'and', 'of', 'the', 'in', 'on', 'for', 'to', 'a', 'an', '&'}
+
+
+def _title_case(text):
+    """MILITARY SERVICE → Military Service, while keeping acronyms (IDF, IT)."""
+    parts = re.split(r'(\s+)', (text or '').strip())
+    out = []
+    for part in parts:
+        if not part or part.isspace():
+            out.append(part)
+            continue
+        low = part.lower()
+        if len(part) <= 3 and part.isupper() and part.isalpha() and low not in _SMALL_WORDS:
+            out.append(part)                       # acronym
+        elif out and low in _SMALL_WORDS:
+            out.append(low)
+        else:
+            out.append(part if any(c.islower() for c in part) else low.capitalize())
+    return ''.join(out).rstrip(':')
+
+
+def _merge_extra_lines(lines):
+    """A model often emits one entry's attributes as separate lines
+    ("Artillery Corps" / "Sergeant" / "2020-2022" / "<description>"), which
+    renders as a pile of one-word bullets. Join the fragments into a single
+    lead line — but only in sections that actually have a descriptive line, so
+    genuine per-line lists (languages, certifications) stay untouched."""
+    lines = [l.strip() for l in lines if l and l.strip()]
+    if len(lines) < 2 or not any(len(l) > 80 for l in lines):
+        return lines
+    out, buf = [], []
+    for line in lines:
+        self_contained = (len(line) > 80 or re.search(r'[.!?]$', line)
+                          or ' — ' in line or ' - ' in line or ':' in line)
+        if self_contained:
+            if buf:
+                out.append(' — '.join(buf))
+                buf = []
+            out.append(line)
+        else:
+            buf.append(line)
+    if buf:
+        out.append(' — '.join(buf))
+    return out
+
+
+def polish_cv(cv):
+    """Presentation normalization applied once, before every renderer: tidy
+    link labels, section headings and list fragments. Never changes facts."""
+    for link in cv.get('links') or []:
+        label = (link.get('label') or '').strip()
+        link['label'] = _LINK_LABELS.get(label.lower(), _title_case(label) if label else '')
+    for extra in cv.get('extras') or []:
+        extra['heading'] = _title_case(extra.get('heading') or 'Additional')
+        extra['lines'] = _merge_extra_lines(extra.get('lines') or [])
+    for group in cv.get('skills_groups') or []:
+        group['group'] = _title_case(group.get('group') or '')
+    return cv
+
+
 def collect_bold_terms(cv):
     """Technologies to visually emphasize (guide rule 6): the skills list plus
     project tech — longest first so overlapping terms bold correctly."""

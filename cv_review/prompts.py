@@ -159,7 +159,9 @@ CV WRITING RULES (from the guide):
 - Bullets: strong action verbs + X-Y-Z impact ("Accomplished X, measured by Y, by doing Z"), technologies named explicitly.
 - skills_groups: honest, grouped (Languages / Frameworks / Tools...), no self-ratings, no office-suite filler, nothing indefensible in an interview.
 - title: a short professional title matching the evidence (and the target job only when the evidence honestly supports it).
-- Projects with links stay prominent for juniors. Keep GitHub/LinkedIn/portfolio links from the evidence; never create links.
+- Projects with links stay prominent for juniors. Keep GitHub/LinkedIn/portfolio links from the evidence; never create links. Give each link a short label ("LinkedIn", "GitHub", "Portfolio").
+- education[].degree stays short (≈60 characters — degree/course name plus GPA if evidenced); put anything longer in the dates or drop it.
+- extras (military service, languages, certifications, volunteering): every line must be ONE self-contained line — merge a unit/role/rank/date fragment into the same line (e.g. "Artillery Corps — Sergeant, 2020–2022"), never split one entry across several lines. Headings in Title Case, not ALL CAPS.
 
 CHANGE LEDGER (the user-facing "What I changed" is generated from it, so it must be complete and truthful):
 - One record per difference: change_type ∈ {schemas.CHANGE_TYPES}, section, before (verbatim original, "" when nothing existed), after ("" for removals), reason (Hebrew, one sentence), evidence_refs (claim ids).
