@@ -5,6 +5,39 @@ English CV (DOCX + PDF + text, rebuilt from scratch) → validation/repair →
 after-scores → career recommendations. Code lives in the `cv_review/` package;
 `pipeline.py` is the orchestrator and documents the phases.
 
+## Runtime shape
+- **Consent is mandatory**: no consent → 400, no review. The checkbox links to
+  `/hitech/cv-review/terms` (`app/templates/legal/cv_review_terms.html`),
+  written to mirror the referrals-bot ToS.
+- **Async + polling**: `POST /api/hitech/cv-review` starts a background thread
+  and returns `{status: processing, review_id}`; the page polls
+  `/api/hitech/cv-review/<id>/status`. This is not optional — a full review
+  takes 30–90s and Cloudflare cuts origin responses at ~100s, swallowing the
+  body, which is exactly how a working pipeline looked like a generic
+  "something went wrong" to the user. Failures are stored on the row and
+  surfaced verbatim through the status endpoint.
+
+## Output guarantees
+- **True one-pager**: `pdf_writer` measures the story and renders at the
+  largest type scale that fits one page, then spreads leftover height across
+  the section gaps — thin CVs fill the page, long CVs compress. `docx_writer`
+  mirrors the template with a volume-based font preset (Word gives us no
+  layout engine to measure).
+- **Content floor** (`validators.validate_content_floor` +
+  `restore_from_canonical`): the optimizer can never return a gutted CV. A
+  repair round that deletes most bullets is discarded; missing
+  experience/education/projects/extras/summary/links are restored verbatim
+  (address-scrubbed) from the canonical extraction; unevidenced numbers
+  degrade to `[X]` instead of deleting the bullet.
+- **Scores only improve or hold**: the after-critic receives the before-scores
+  as an explicit anchor and the payload floors after at before. Two gradings
+  of the same preserved evidence differing by a few points is judge noise, not
+  a regression to show a candidate.
+- **Presentation polish** (`render_common.polish_cv`) runs once before all
+  renderers: link labels (LinkedIn/GitHub/Portfolio), Title-Case headings
+  (acronyms kept), and merging an entry's split attribute lines so
+  "Military Service" isn't a pile of one-word bullets.
+
 ## Invariants (enforced by validators + tests, not just prompts)
 - **Candidate name** comes from the CV only, preserved EXACTLY (never the
   logged-in account's name, never shortened/corrected/invented). Low
@@ -49,8 +82,10 @@ after-scores → career recommendations. Code lives in the `cv_review/` package;
 - Optional Drive mirror (`GOOGLE_DRIVE_CREDENTIALS_JSON` +
   `GOOGLE_DRIVE_CV_FOLDER_ID`): `<folder>/<owner>/<review_uuid>/…`, never
   shared publicly.
-- Retention: non-consented reviews purge after `CV_REVIEW_RETENTION_DAYS`
-  (default 180); `talent_pool_consent` comes from the upload-form checkbox.
+- Retention: incomplete/failed runs purge after 7 days; completed reviews
+  without talent-pool consent (legacy rows from before consent was mandatory)
+  purge after `CV_REVIEW_RETENTION_DAYS` (default 180); completed + consented
+  reviews are kept until a deletion request.
 
 ## Testing / evaluation
 - `./venv/bin/python -m pytest tests/` — security fixtures + enforcement

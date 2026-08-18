@@ -58,9 +58,28 @@ def _merge_extra_lines(lines):
     return out
 
 
+_GPA_RE = re.compile(r'(?i)\bGPA\b[^\d]{0,12}(\d{1,3}(?:\.\d+)?)')
+
+
+def _short_degree(degree):
+    """CV convention is a one-line degree. "Software Development Course:
+    Graduated with a GPA of 96 in an intensive full stack program." becomes
+    "Software Development Course — GPA 96" (the GPA is kept, the prose isn't)."""
+    degree = (degree or '').strip()
+    if len(degree) <= 70 or ':' not in degree:
+        return degree
+    head = degree.split(':', 1)[0].strip(' .,;—-')
+    if not (3 <= len(head) <= 70):
+        return degree
+    gpa = _GPA_RE.search(degree)
+    return f'{head} — GPA {gpa.group(1)}' if gpa else head
+
+
 def polish_cv(cv):
     """Presentation normalization applied once, before every renderer: tidy
     link labels, section headings and list fragments. Never changes facts."""
+    for edu in cv.get('education') or []:
+        edu['degree'] = _short_degree(edu.get('degree'))
     for link in cv.get('links') or []:
         label = (link.get('label') or '').strip()
         link['label'] = _LINK_LABELS.get(label.lower(), _title_case(label) if label else '')

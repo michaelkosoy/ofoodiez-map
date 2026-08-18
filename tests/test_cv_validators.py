@@ -181,6 +181,18 @@ def test_polish_cv_presentation():
     assert idf['heading'] == 'IDF Service'                                 # acronym kept
 
 
+def test_long_degree_line_shortened_keeping_gpa():
+    from cv_review.render_common import polish_cv
+    cv = {'education': [
+        {'degree': 'Software Development Course: Graduated with a GPA of 96 in an '
+                   'intensive full stack program.', 'institution': 'Sela', 'dates': '2023'},
+        {'degree': 'B.Sc. Computer Science', 'institution': 'TAU', 'dates': '2020'},
+    ]}
+    out = polish_cv(cv)['education']
+    assert out[0]['degree'] == 'Software Development Course — GPA 96'
+    assert out[1]['degree'] == 'B.Sc. Computer Science'      # short lines untouched
+
+
 def test_too_few_recommendations_flagged():
     opt = _opt(['Python'], recs=[{'skill': 'Kubernetes', 'priority': 'high',
                                   'reason_type': 'target_job_gap', 'reason': 'נדרש',
