@@ -323,7 +323,7 @@ Deliver the run's output to an inbox via **`scripts/notify.py`** (stdlib only; B
 
 **Setup (once):** add to `~/.env` (git-ignored; the bot already uses Brevo elsewhere):
 ```
-BREVO_API_KEY=xkeysib-xxxxx
+BREVO_API_KEY=<your Brevo v3 API key — never commit it>
 FOOD_RADAR_FROM=radar@your-verified-sender.com   # must be a Brevo-verified sender
 FOOD_RADAR_TO=ofir.lazarov@gmail.com             # comma-separate for multiple; this is the default
 ```

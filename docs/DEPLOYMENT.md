@@ -35,7 +35,10 @@ git push -u origin main
 
 5. Add Environment Variable:
    - Key: `GOOGLE_MAPS_API_KEY`
-   - Value: `AIzaSyBdh_bKAGD6ZFbNpq3G_2tmV1BlaedFcPU`
+   - Value: paste the key from Google Cloud Console → APIs & Services →
+     Credentials. **Never commit the value** — it lives only in the Render
+     environment (and your git-ignored local `.env`). Restrict the key by
+     HTTP referrer (`ofoodiez.com/*`) so a leaked value is unusable elsewhere.
 
 6. Click **"Create Web Service"**
 
