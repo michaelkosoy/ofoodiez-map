@@ -1687,6 +1687,10 @@ def cv_reviews_list():
             'scores': scores,
             'cost_usd': usage.get('estimated_cost_usd'),
             'model_calls': usage.get('calls'),
+            'model': usage.get('model'),
+            'input_tokens': usage.get('input_tokens'),
+            'output_tokens': usage.get('output_tokens'),
+            'seconds': usage.get('seconds'),
             'error': r.error,
             'drive': bool(r.drive),
         })
