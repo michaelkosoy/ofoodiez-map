@@ -95,7 +95,16 @@ class UsageTracker:
             'model': model,
             'input_tokens': um.get('promptTokenCount', 0),
             # Prefix tokens served from Gemini's context cache — billed at ~1/10.
-            'cached_tokens': um.get('cachedContentTokenCount', 0),
+            # Implicit-cache hits have been reported under different keys across
+            # API versions, so read the known ones and keep the raw counters.
+            'cached_tokens': (um.get('cachedContentTokenCount')
+                              or um.get('cachedTokenCount')
+                              or sum(d.get('tokenCount', 0)
+                                     for d in um.get('cacheTokensDetails') or [])
+                              or 0),
+            # Token counters only — never prompt content (see §31).
+            'raw_usage': {k: v for k, v in um.items() if isinstance(v, (int, float))}
+                         | {'keys': sorted(um.keys())},
             'output_tokens': um.get('candidatesTokenCount', 0),
             'thoughts_tokens': um.get('thoughtsTokenCount', 0),
             'seconds': round(seconds, 2),
