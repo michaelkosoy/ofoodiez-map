@@ -123,6 +123,35 @@ def test_status_requires_ownership(client, monkeypatch):
     assert resp.status_code == 404
 
 
+def test_interrupted_review_reported_instead_of_polling_forever(client, monkeypatch):
+    """A deploy/restart kills the worker thread; the row must not stay
+    'processing' forever."""
+    from datetime import datetime, timedelta
+
+    from database.models import CvReview, db
+    from cv_review import storage
+
+    monkeypatch.setattr(gemini, 'generate_json', fake.FakeModel({
+        'extract': fake.make_extraction(), 'critic': fake.make_critic(),
+        'critic_optimized': fake.make_critic(), 'optimize': fake.make_optimizer(),
+        'repair': fake.make_optimizer()}))
+    body = _post_cv(client).get_json()
+    _poll_until_done(client, body['review_id'])
+
+    # Simulate an interrupted run: back to processing, created long ago.
+    with client.application.app_context():
+        review = CvReview.query.get(body['review_id'])
+        review.status = 'processing'
+        review.created_at = datetime.utcnow() - timedelta(minutes=storage.STALE_MINUTES + 1)
+        db.session.commit()
+
+    data = client.get(f"/api/hitech/cv-review/{body['review_id']}/status").get_json()
+    assert data['status'] == 'failed'
+    assert 'again' in data['error']
+    with client.application.app_context():
+        assert CvReview.query.get(body['review_id']).status == 'failed'
+
+
 def test_terms_page_renders(client):
     resp = client.get('/hitech/cv-review/terms')
     assert resp.status_code == 200

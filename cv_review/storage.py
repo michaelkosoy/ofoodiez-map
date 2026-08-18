@@ -102,6 +102,40 @@ def upload_review_to_drive(owner_key, review_id, files):
         return None
 
 
+# ── Stale in-flight reviews ──────────────────────────────────────────────────
+# A review runs in a background thread, so a deploy or container restart kills
+# it mid-flight and leaves the row stuck on 'processing' forever — the client
+# would poll until it gives up with a vague message. Anything still
+# 'processing' past this window is declared failed, with a message that tells
+# the user what to do.
+STALE_MINUTES = 6
+STALE_MESSAGE = ('The review was interrupted (the server restarted mid-run). '
+                 'Please upload your CV again — it usually takes under a minute.')
+
+
+def fail_stale_processing():
+    from database.models import db, CvReview
+    cutoff = datetime.utcnow() - timedelta(minutes=STALE_MINUTES)
+    try:
+        n = (CvReview.query
+             .filter(CvReview.status == 'processing', CvReview.created_at < cutoff)
+             .update({'status': 'failed', 'error': STALE_MESSAGE},
+                     synchronize_session=False))
+        db.session.commit()
+        if n:
+            print(f'⚠️ CV review: {n} interrupted review(s) marked failed')
+        return n
+    except Exception as exc:
+        db.session.rollback()
+        print(f'⚠️ CV review: stale sweep failed ({exc})')
+        return 0
+
+
+def is_stale(review):
+    return (review.status == 'processing' and review.created_at
+            and review.created_at < datetime.utcnow() - timedelta(minutes=STALE_MINUTES))
+
+
 # ── Retention ────────────────────────────────────────────────────────────────
 def purge_expired():
     """Data retention, run opportunistically on new-review creation.

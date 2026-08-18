@@ -324,6 +324,7 @@ def launch_review(app, *, doc_part, file_bytes, filename, ext, job, consent,
     route so invalid/hostile files still fail fast with a 400."""
     generate = generate or gemini.generate_json
     storage.purge_expired()
+    storage.fail_stale_processing()
     review = _create_shell(filename=filename, ext=ext, job=job, consent=consent,
                            owner_user_id=owner_user_id, file_bytes=file_bytes)
 

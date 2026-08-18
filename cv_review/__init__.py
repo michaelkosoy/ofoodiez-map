@@ -158,6 +158,12 @@ def cv_review_status(review_id):
     if review is None:
         return jsonify({'error': 'Review not found.'}), 404
     if review.status == 'processing':
+        # A restart/deploy can kill the worker thread mid-review; don't let the
+        # client poll a dead row for ten minutes.
+        if storage.is_stale(review):
+            storage.fail_stale_processing()
+            return jsonify({'status': 'failed', 'review_id': review.id,
+                            'error': storage.STALE_MESSAGE})
         return jsonify({'status': 'processing', 'review_id': review.id})
     if review.status == 'pending_name':
         return jsonify(review.result or {'status': 'needs_name_confirmation',
