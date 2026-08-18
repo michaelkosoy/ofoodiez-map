@@ -137,18 +137,6 @@ def build_docx(cv):
         p = doc.add_paragraph()
         _add_runs(p, cv['summary'], pattern, body_sz)
 
-    if cv.get('skills_groups'):
-        _heading(doc, 'Skills', heading_sz)
-        for g in cv['skills_groups']:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(1)
-            run = p.add_run(f"{g.get('group', '')}: ")
-            run.bold = True
-            run.font.size = Pt(body_sz)
-            skills_run = p.add_run(', '.join(g.get('skills') or []))
-            skills_run.bold = True
-            skills_run.font.size = Pt(body_sz)
-
     def bullets_into(cell, items):
         for bullet in items:
             p = _cell_para(cell, first=False)
@@ -222,6 +210,18 @@ def build_docx(cv):
             dot = p.add_run('• ')
             dot.font.size = Pt(body_sz)
             _add_runs(p, line, pattern, body_sz)
+
+    # Skills close the CV: group label bold, the list itself plain.
+    if cv.get('skills_groups'):
+        _heading(doc, 'Skills', heading_sz)
+        for g in cv['skills_groups']:
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(1)
+            run = p.add_run(f"{g.get('group', '')}: ")
+            run.bold = True
+            run.font.size = Pt(body_sz)
+            skills_run = p.add_run(', '.join(g.get('skills') or []))
+            skills_run.font.size = Pt(body_sz)
 
     buf = io.BytesIO()
     doc.save(buf)

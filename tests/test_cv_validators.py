@@ -181,6 +181,38 @@ def test_polish_cv_presentation():
     assert idf['heading'] == 'IDF Service'                                 # acronym kept
 
 
+def test_summary_trimmed_at_sentence_boundary():
+    from cv_review.render_common import MAX_SUMMARY_WORDS, polish_cv
+    long_summary = (
+        'Full Stack Developer and analyst with hands-on experience building production '
+        'systems, data pipelines, and security platforms using Python, Node.js, PostgreSQL, '
+        'and MongoDB. Brings strong automation, system integration, and troubleshooting '
+        'skills to analyze complex technical workflows. Looking to apply this to strategic '
+        'business roadmaps and data-heavy product work in a modern engineering team.')
+    out = polish_cv({'summary': long_summary})['summary']
+    assert len(out.split()) <= MAX_SUMMARY_WORDS
+    assert out.endswith('.')                       # never cut mid-sentence
+    assert out.startswith('Full Stack Developer')
+    short = 'Backend engineer with three years of Python experience.'
+    assert polish_cv({'summary': short})['summary'] == short
+
+
+def test_skills_render_last():
+    from cv_review.render_common import cv_to_text
+    text = cv_to_text({
+        'name': 'X', 'title': 'Y', 'summary': 'S',
+        'skills_groups': [{'group': 'Languages', 'skills': ['Python']}],
+        'experience': [{'company': 'A', 'title': 'Dev', 'dates': '2024',
+                        'bullets': ['Built things']}],
+        'education': [{'degree': 'B.Sc.', 'institution': 'U', 'dates': '2020'}],
+        'extras': [{'heading': 'Military Service', 'lines': ['Artillery — Sergeant']}],
+        'projects': [], 'links': [],
+    })
+    sections = [l for l in text.splitlines()
+                if l in ('SUMMARY', 'EXPERIENCE', 'EDUCATION', 'MILITARY SERVICE', 'SKILLS')]
+    assert sections == ['SUMMARY', 'EXPERIENCE', 'EDUCATION', 'MILITARY SERVICE', 'SKILLS']
+
+
 def test_long_degree_line_shortened_keeping_gpa():
     from cv_review.render_common import polish_cv
     cv = {'education': [

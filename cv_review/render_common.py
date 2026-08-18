@@ -75,9 +75,29 @@ def _short_degree(degree):
     return f'{head} — GPA {gpa.group(1)}' if gpa else head
 
 
+MAX_SUMMARY_WORDS = 42   # ~2–3 rendered lines; the prompt targets 40
+
+
+def _trim_summary(text):
+    """Keep the summary to a tight 2–3 lines. Cuts at sentence boundaries only,
+    so a trimmed summary never ends mid-thought."""
+    text = (text or '').strip()
+    if len(text.split()) <= MAX_SUMMARY_WORDS:
+        return text
+    kept, count = [], 0
+    for sentence in re.split(r'(?<=[.!?])\s+', text):
+        words = len(sentence.split())
+        if kept and count + words > MAX_SUMMARY_WORDS:
+            break
+        kept.append(sentence)
+        count += words
+    return ' '.join(kept)
+
+
 def polish_cv(cv):
     """Presentation normalization applied once, before every renderer: tidy
     link labels, section headings and list fragments. Never changes facts."""
+    cv['summary'] = _trim_summary(cv.get('summary'))
     for edu in cv.get('education') or []:
         edu['degree'] = _short_degree(edu.get('degree'))
     for link in cv.get('links') or []:
@@ -150,10 +170,6 @@ def cv_to_text(cv):
         lines.append(contact)
     if cv.get('summary'):
         lines += ['', 'SUMMARY', cv['summary']]
-    if cv.get('skills_groups'):
-        lines += ['', 'SKILLS']
-        for g in cv['skills_groups']:
-            lines.append(f"{g.get('group', '')}: {', '.join(g.get('skills') or [])}")
     if cv.get('experience'):
         lines += ['', 'EXPERIENCE']
         for exp in cv['experience']:
@@ -174,4 +190,9 @@ def cv_to_text(cv):
     for ex in cv.get('extras') or []:
         lines += ['', (ex.get('heading') or '').upper()]
         lines += ex.get('lines') or []
+    # Skills last: a screener reads the story first, the keyword list closes it.
+    if cv.get('skills_groups'):
+        lines += ['', 'SKILLS']
+        for g in cv['skills_groups']:
+            lines.append(f"{g.get('group', '')}: {', '.join(g.get('skills') or [])}")
     return '\n'.join(lines).strip() + '\n'

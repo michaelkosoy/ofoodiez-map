@@ -113,13 +113,6 @@ def _story(cv, s, extra_gap=0):
         heading('Summary')
         story.append(Paragraph(_markup(cv['summary'], pattern), styles['body']))
 
-    if cv.get('skills_groups'):
-        heading('Skills')
-        for g in cv['skills_groups']:
-            skills = escape(', '.join(g.get('skills') or []))
-            story.append(Paragraph(
-                f"<b>{escape(g.get('group', ''))}:</b> <b>{skills}</b>", styles['skills']))
-
     if cv.get('experience'):
         heading('Experience')
         for exp in cv['experience']:
@@ -157,6 +150,15 @@ def _story(cv, s, extra_gap=0):
         heading(extra.get('heading') or 'Additional')
         for line in extra['lines']:
             story.append(Paragraph(_markup(line, pattern), styles['bullet'], bulletText='•'))
+
+    # Skills close the CV: group label bold, the list itself plain — the
+    # technologies are already emphasized where they carry weight (bullets).
+    if cv.get('skills_groups'):
+        heading('Skills')
+        for g in cv['skills_groups']:
+            skills = escape(', '.join(g.get('skills') or []))
+            story.append(Paragraph(
+                f"<b>{escape(g.get('group', ''))}:</b> {skills}", styles['skills']))
 
     return story
 

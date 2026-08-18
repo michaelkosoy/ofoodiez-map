@@ -108,17 +108,50 @@
         .ht-cvr-results.visible { display: block; }
         .ht-cvr-block-title { font-family: 'Bodoni Moda', Georgia, serif; font-size: 1.15rem; font-style: italic; color: var(--butter); margin: 26px 0 12px; text-align: center; }
 
-        /* Downloads */
+        /* Downloads — the payoff of the whole flow, so it gets a real panel
+           rather than three quiet pills that scroll past unnoticed. */
+        .ht-cvr-hero-card {
+            position: relative;
+            background: linear-gradient(160deg, rgba(114,8,21,0.28), rgba(114,8,21,0.10) 60%, rgba(249,246,235,0.03));
+            border: 1px solid rgba(114,8,21,0.55); border-radius: 18px;
+            padding: 26px 22px 24px; text-align: center;
+            box-shadow: 0 10px 40px rgba(114,8,21,0.28);
+        }
+        .ht-cvr-ready-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(37,211,102,0.12); color: #5fc97a;
+            border: 1px solid rgba(37,211,102,0.35); border-radius: 999px;
+            padding: 5px 14px; margin-bottom: 12px;
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+        }
+        .ht-cvr-hero-title {
+            font-family: 'Bodoni Moda', Georgia, serif; font-size: clamp(1.4rem, 4vw, 1.9rem);
+            font-weight: 700; color: var(--butter); line-height: 1.2; margin-bottom: 6px;
+        }
+        .ht-cvr-hero-sub { font-size: 0.84rem; color: var(--butter-dim); line-height: 1.6; margin-bottom: 18px; }
         .ht-cvr-downloads { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .ht-cvr-dl {
-            display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px;
+            display: inline-flex; align-items: center; gap: 9px; padding: 14px 26px;
             background: var(--burgundy); color: var(--butter); text-decoration: none;
             border: none; border-radius: 999px; cursor: pointer;
-            font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700;
+            font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 800;
+            box-shadow: 0 3px 16px rgba(114,8,21,0.5);
             transition: all 0.2s;
         }
-        .ht-cvr-dl:hover { background: var(--burgundy-mid); transform: translateY(-1px); }
-        .ht-cvr-dl.ghost { background: transparent; border: 1px solid var(--burgundy-mid); }
+        .ht-cvr-dl:hover { background: var(--burgundy-mid); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(114,8,21,0.6); }
+        .ht-cvr-dl i { font-size: 1.05rem; }
+        .ht-cvr-dl.ghost {
+            background: transparent; border: 1px solid var(--burgundy-mid);
+            box-shadow: none; font-weight: 700; font-size: 0.88rem; padding: 13px 22px;
+        }
+        .ht-cvr-dl.ghost:hover { background: rgba(114,8,21,0.18); box-shadow: none; }
+        .ht-cvr-scrollhint {
+            margin-top: 14px; font-size: 0.74rem; color: var(--butter-dim);
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .ht-cvr-scrollhint i { color: var(--burgundy-mid); animation: cvr-nudge 1.6s ease-in-out infinite; }
+        @keyframes cvr-nudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+        @media (prefers-reduced-motion: reduce) { .ht-cvr-scrollhint i { animation: none; } }
 
         /* Score tiles */
         .ht-cvr-scoregrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
@@ -307,11 +340,16 @@
         <section class="ht-cvr-results" id="cvr-results">
 
             <div id="cvr-optimized-block" style="display:none;">
-                <p class="ht-cvr-block-title">Your optimized CV</p>
-                <div class="ht-cvr-downloads">
-                    <a class="ht-cvr-dl" id="cvr-dl-pdf" href="#"><i class="fas fa-file-pdf"></i> Download PDF</a>
-                    <a class="ht-cvr-dl" id="cvr-dl-docx" href="#"><i class="fas fa-file-word"></i> Download Word</a>
-                    <button class="ht-cvr-dl ghost" id="cvr-copy" type="button"><i class="fas fa-copy"></i> Copy text</button>
+                <div class="ht-cvr-hero-card">
+                    <span class="ht-cvr-ready-badge"><i class="fas fa-circle-check"></i> Ready</span>
+                    <div class="ht-cvr-hero-title">Your optimized CV is ready</div>
+                    <p class="ht-cvr-hero-sub">One page, in English, built only from what your CV already says.<br>Download it and send it out.</p>
+                    <div class="ht-cvr-downloads">
+                        <a class="ht-cvr-dl" id="cvr-dl-pdf" href="#"><i class="fas fa-file-pdf"></i> Download PDF</a>
+                        <a class="ht-cvr-dl" id="cvr-dl-docx" href="#"><i class="fas fa-file-word"></i> Download Word</a>
+                        <button class="ht-cvr-dl ghost" id="cvr-copy" type="button"><i class="fas fa-copy"></i> Copy text</button>
+                    </div>
+                    <div class="ht-cvr-scrollhint"><i class="fas fa-arrow-down"></i> Below: what changed, your scores and skills worth developing</div>
                 </div>
             </div>
 
