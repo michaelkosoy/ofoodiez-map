@@ -33,16 +33,18 @@ STEP_MODELS = {
     'REPAIR': 'gemini-3.7-flash',
 }
 
-# USD per 1M tokens (input, output) — Google AI pricing as of 2026-08.
-# Thinking tokens bill at the output rate. Update alongside model changes.
+# USD per 1M tokens (input, output, CACHED input) — Google AI pricing 2026-08.
+# Thinking tokens bill at the output rate. Cached input is what makes the
+# guide-first prompt ordering pay off, so it has to be priced separately or
+# our cost figures overstate every review. Update alongside model changes.
 PRICES_PER_1M = {
-    'gemini-3.5-flash-lite': (0.30, 2.50),
-    'gemini-3.1-flash-lite': (0.25, 1.50),
-    'gemini-2.5-flash-lite': (0.10, 0.40),
-    'gemini-3.7-flash': (0.75, 3.75),
-    'gemini-3.6-flash': (0.75, 3.75),
-    'gemini-3.5-flash': (1.50, 9.00),
-    'gemini-3.1-pro-preview': (2.00, 12.00),
+    'gemini-3.5-flash-lite': (0.30, 2.50, 0.03),
+    'gemini-3.1-flash-lite': (0.25, 1.50, 0.025),
+    'gemini-2.5-flash-lite': (0.10, 0.40, 0.01),
+    'gemini-3.7-flash': (0.75, 3.75, 0.075),
+    'gemini-3.6-flash': (0.75, 3.75, 0.075),
+    'gemini-3.5-flash': (1.50, 9.00, 0.15),
+    'gemini-3.1-pro-preview': (2.00, 12.00, 0.20),
 }
 
 
@@ -92,6 +94,8 @@ class UsageTracker:
             'purpose': purpose,
             'model': model,
             'input_tokens': um.get('promptTokenCount', 0),
+            # Prefix tokens served from Gemini's context cache — billed at ~1/10.
+            'cached_tokens': um.get('cachedContentTokenCount', 0),
             'output_tokens': um.get('candidatesTokenCount', 0),
             'thoughts_tokens': um.get('thoughtsTokenCount', 0),
             'seconds': round(seconds, 2),
@@ -99,21 +103,27 @@ class UsageTracker:
 
     def totals(self):
         inp = sum(c['input_tokens'] for c in self.calls)
+        cached = sum(c.get('cached_tokens', 0) for c in self.calls)
         out = sum(c['output_tokens'] + c['thoughts_tokens'] for c in self.calls)
-        # Price per call, since steps may run on different models.
+        # Price per call: steps may run on different models, and cached prefix
+        # tokens bill at the cached rate rather than full input.
         cost, priced = 0.0, True
         for call in self.calls:
             prices = PRICES_PER_1M.get(call['model'])
             if not prices:
                 priced = False
                 continue
-            cost += (call['input_tokens'] * prices[0]
+            hit = min(call.get('cached_tokens', 0), call['input_tokens'])
+            fresh = call['input_tokens'] - hit
+            cost += (fresh * prices[0]
+                     + hit * (prices[2] if len(prices) > 2 else prices[0])
                      + (call['output_tokens'] + call['thoughts_tokens']) * prices[1]) / 1e6
         models = sorted({c['model'] for c in self.calls})
         return {
             'model': ' + '.join(models) if models else model_name(),
             'calls': len(self.calls),
             'input_tokens': inp,
+            'cached_tokens': cached,
             'output_tokens': out,
             'estimated_cost_usd': round(cost, 6) if priced else None,
             'seconds': round(sum(c['seconds'] for c in self.calls), 2),
