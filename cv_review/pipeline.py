@@ -59,6 +59,28 @@ def _load_guide():
     return _guide_text
 
 
+_rubric_text = None
+# Measured on prod: the ~17.6k-token guide was ~97% of a review's input cost
+# (sent whole to both critics AND the optimizer, with zero context-cache hits —
+# Google reports no cache field for these calls at all). Parts א'/ב' cover how
+# to RUN a job search — timelines, LinkedIn, networking, interview practice —
+# none of which can change how a CV is graded or written. Every prompt
+# therefore gets the CV chapter onward (ג' CV + ד' AI + summary, ~11.3k
+# tokens), which is where the rules, the worked example and the X-Y-Z advice
+# live. The full guide stays untouched for the public /hitech/cv-guide/full
+# page.
+_RUBRIC_START = re.compile(r"^## חלק ג'", re.M)
+
+
+def _load_rubric():
+    global _rubric_text
+    if _rubric_text is None:
+        guide = _load_guide()
+        m = _RUBRIC_START.search(guide)
+        _rubric_text = guide[m.start():] if m else guide
+    return _rubric_text
+
+
 # ── Phase A: untrusted file → model input ────────────────────────────────────
 def file_to_evidence_parts(file_bytes, ext):
     """Returns the Gemini `parts` entry describing the CV document."""
@@ -103,7 +125,7 @@ def _cv_json_part(label, obj):
 
 def _run_critic(generate, key, usage, *, canonical_like, claims, jd_text, job_title,
                 formatting_note, purpose, anchor=None):
-    prompt = prompts.critic_prompt(_load_guide(), jd_text=jd_text, job_title=job_title,
+    prompt = prompts.critic_prompt(_load_rubric(), jd_text=jd_text, job_title=job_title,
                                    formatting_note=formatting_note, anchor=anchor)
     data = _call(generate, parts=[{'text': prompt},
                                   _cv_json_part('THE CV (structured extraction)', canonical_like),
@@ -491,7 +513,7 @@ def _continue_review(review, name, *, generate, key, usage):
 
         family, framework = framework_for(f"{job_title or ''} {canonical.get('title') or ''}")
         opt_prompt = prompts.optimizer_prompt(
-            _load_guide(), job_title=job_title, jd_text=jd_text,
+            _load_rubric(), job_title=job_title, jd_text=jd_text,
             instructions=review.instructions or None,
             framework_family=family, framework=framework if not jd_text else None,
             framework_version=FRAMEWORK_VERSION)

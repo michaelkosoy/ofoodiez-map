@@ -103,7 +103,9 @@ class UsageTracker:
                                      for d in um.get('cacheTokensDetails') or [])
                               or 0),
             # Token counters only — never prompt content (see §31).
-            'raw_usage': {k: v for k, v in um.items() if isinstance(v, (int, float))}
+            'raw_usage': {k: v for k, v in um.items()
+                          if isinstance(v, (int, float))
+                          or (isinstance(v, str) and len(v) <= 40)}
                          | {'keys': sorted(um.keys())},
             'output_tokens': um.get('candidatesTokenCount', 0),
             'thoughts_tokens': um.get('thoughtsTokenCount', 0),
