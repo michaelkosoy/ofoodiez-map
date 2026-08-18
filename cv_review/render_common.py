@@ -153,11 +153,31 @@ def _trim_summary(text):
     return ' '.join(kept)
 
 
+_MONTHS = {'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+           'jul', 'aug', 'sep', 'oct', 'nov', 'dec'}
+
+
+def _tidy_dates(text):
+    """"DEC 2025 - JUL 2026" → "Dec 2025 – Jul 2026". Consistent case and an
+    en dash keep the date column narrow enough to stay on one line, which is
+    what makes the experience entries line up."""
+    text = re.sub(r'\s*[-–—]\s*', ' – ', (text or '').strip())
+    text = re.sub(r'\s+', ' ', text)
+
+    def word(m):
+        w = m.group(0)
+        return w.capitalize() if (w.lower()[:3] in _MONTHS or w.isupper()) else w
+
+    return re.sub(r'[A-Za-z]{3,}', word, text)
+
+
 def polish_cv(cv):
     """Presentation normalization applied once, before every renderer: tidy
     link labels, section headings and list fragments. Never changes facts."""
     cv.update(_fix_glyphs({k: v for k, v in cv.items()}))
     cv['summary'] = _trim_summary(cv.get('summary'))
+    for item in (cv.get('experience') or []) + (cv.get('education') or []):
+        item['dates'] = _tidy_dates(item.get('dates'))
     for edu in cv.get('education') or []:
         edu['degree'] = _short_degree(edu.get('degree'))
     for link in cv.get('links') or []:

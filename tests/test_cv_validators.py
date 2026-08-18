@@ -252,6 +252,29 @@ def test_summary_trimmed_at_sentence_boundary():
     assert polish_cv({'summary': short})['summary'] == short
 
 
+def test_dates_normalized_for_alignment():
+    from cv_review.render_common import polish_cv
+    cv = polish_cv({'experience': [{'dates': 'DEC 2025 - JUL 2026'},
+                                   {'dates': 'nov 2024—dec 2025'},
+                                   {'dates': 'JUL 2024 - PRESENT'}],
+                    'education': [{'dates': '2023 -2024', 'degree': 'B.Sc.'}]})
+    assert [e['dates'] for e in cv['experience']] == [
+        'Dec 2025 – Jul 2026', 'Nov 2024 – Dec 2025', 'Jul 2024 – Present']
+    assert cv['education'][0]['dates'] == '2023 – 2024'
+
+
+def test_date_gutter_fits_the_widest_date():
+    from cv_review.pdf_writer import _date_col_width, _styles
+    styles = _styles(1.0)
+    narrow = _date_col_width({'experience': [{'dates': '2024'}]}, styles)
+    wide = _date_col_width({'experience': [{'dates': 'Dec 2025 – Jul 2026'}]}, styles)
+    assert wide > narrow                      # gutter grows so dates stay on one line
+    from reportlab.pdfbase import pdfmetrics
+    text_w = pdfmetrics.stringWidth('Dec 2025 – Jul 2026',
+                                    styles['dates'].fontName, styles['dates'].fontSize)
+    assert wide >= text_w                     # ...and actually fits it
+
+
 def test_skills_render_last():
     from cv_review.render_common import cv_to_text
     text = cv_to_text({

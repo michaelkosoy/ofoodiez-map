@@ -15,6 +15,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
+    import cv_review
     from database.models import db
     from cv_review import cv_review_bp
     app = Flask('cvtest',
@@ -32,10 +33,10 @@ def client(tmp_path, monkeypatch):
     with app.app_context():
         db.create_all()
     monkeypatch.setenv('GEMINI_API_KEY', 'fake-key')
-    c = app.test_client()
-    with c.session_transaction() as s:
-        s['cv_review_unlocked'] = True
-    return c
+    # The per-IP rate limiter is module-level state; every test posts from
+    # 127.0.0.1, so it has to be reset or later tests get 429s from earlier ones.
+    cv_review._recent_reviews.clear()
+    return app.test_client()
 
 
 def _post_cv(client, consent='1', **extra):
@@ -53,6 +54,32 @@ def _poll_until_done(client, review_id, timeout=10):
             return data
         time.sleep(0.05)
     raise AssertionError('review never left processing')
+
+
+def test_open_to_the_public_without_a_password(client, monkeypatch):
+    """No password gate any more: a brand-new visitor is never answered 403,
+    and consent stays the only precondition."""
+    with client.session_transaction() as s:
+        s.clear()                                   # brand-new visitor
+    assert _post_cv(client, consent='0').status_code == 400   # 400 (consent), not 403
+    # the gate can still be re-closed by env flag if ever needed
+    monkeypatch.setenv('CV_REVIEW_PASSWORD_ENABLED', '1')
+    blocked = _post_cv(client)
+    assert blocked.status_code == 403 and 'coming soon' in blocked.get_json()['error']
+
+
+def test_daily_cap_blocks_when_reached(client, monkeypatch):
+    monkeypatch.setenv('CV_REVIEW_DAILY_CAP', '1')
+    monkeypatch.setattr(gemini, 'generate_json', fake.FakeModel({
+        'extract': fake.make_extraction(), 'critic': fake.make_critic(),
+        'critic_optimized': fake.make_critic(), 'optimize': fake.make_optimizer(),
+        'repair': fake.make_optimizer()}))
+    first = _post_cv(client)
+    assert first.status_code == 200
+    _poll_until_done(client, first.get_json()['review_id'])
+    second = _post_cv(client)
+    assert second.status_code == 429
+    assert 'daily limit' in second.get_json()['error']
 
 
 def test_consent_is_required(client):

@@ -18,6 +18,7 @@ Phases (per review):
 import base64
 import copy
 import json
+import re
 import os
 import threading
 import time
@@ -195,6 +196,25 @@ def _apply_hard_fixes(opt, corpus, profile, expected_name, canonical):
     validators.drop_unevidenced(opt, corpus)
     validators.fix_recommendations(opt, corpus)
     validators.restore_from_canonical(opt, canonical, profile)
+
+
+def _align_title_to_job(opt, job_title):
+    """The line under the name is what a screener reads first, so when the
+    candidate told us the target role it wins over the model's phrasing.
+    Evidence rules are untouched — this is a label, not a claim of experience."""
+    target = ' '.join((job_title or '').split())[:60]
+    if not target or not re.search(r'[^\W\d_]', target, re.UNICODE):
+        return
+    cv = opt['optimized_cv']
+    current = (cv.get('title') or '').strip()
+    if current.lower() == target.lower():
+        return
+    cv['title'] = target
+    opt['changes'].append({
+        'change_type': 'rewrite', 'section': 'title',
+        'before': current, 'after': target,
+        'reason': 'הטייטל שמתחת לשם הותאם לתפקיד היעד — זה מה שהמסנן קורא ראשון.',
+        'evidence_refs': []})
 
 
 def _ensure_location_redaction_change(opt, canonical, profile):
@@ -521,6 +541,7 @@ def _continue_review(review, name, *, generate, key, usage):
         validators.fix_recommendations(opt, corpus)   # cap 3–5, priority order
         restored = validators.restore_from_canonical(opt, canonical, profile)  # content floor
         _ensure_location_redaction_change(opt, canonical, profile)
+        _align_title_to_job(opt, job_title)
 
         cv = opt['optimized_cv']
         # The floor restores text verbatim, so a Hebrew source can leak Hebrew

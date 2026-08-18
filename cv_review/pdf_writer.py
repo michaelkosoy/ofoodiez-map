@@ -82,26 +82,44 @@ _MAX_SECTION_GAP = 40   # pt of extra air per section when content is thin
 
 def _styles(s, extra_gap=0):
     def st(name, size, *, bold=False, leading=1.28, align=0, color='#111111',
-           space_after=0, space_before=0, left=0, bullet=0):
+           space_after=0, space_before=0, left=0, bullet=0, char_space=0):
         return ParagraphStyle(
             name, fontName='Helvetica-Bold' if bold else 'Helvetica',
             fontSize=size * s, leading=size * s * leading, alignment=align,
             textColor=colors.HexColor(color), spaceAfter=space_after * s,
-            spaceBefore=space_before * s, leftIndent=left * s, bulletIndent=bullet * s)
+            spaceBefore=space_before * s, leftIndent=left * s, bulletIndent=bullet * s,
+            charSpace=char_space * s)
     return {
-        'name': st('name', 19, bold=True, align=1, leading=1.1, space_after=1),
-        'title': st('title', 11.5, align=1, space_after=2),
-        'contact': st('contact', 9, align=1, color='#444444', space_after=4),
+        # Name: smaller than a headline, lifted by letter-spacing instead of size.
+        'name': st('name', 16.5, bold=True, align=1, leading=1.15, space_after=2,
+                   char_space=1.6),
+        'title': st('title', 10.5, align=1, space_after=3, color='#444444',
+                    char_space=1.5),
+        'contact': st('contact', 8.8, align=1, color='#555555', space_after=5),
         'heading': ParagraphStyle(
-            'heading', fontName='Helvetica-Bold', fontSize=10.5 * s,
-            leading=10.5 * s * 1.28, textColor=colors.HexColor('#111111'),
-            spaceBefore=7 * s + extra_gap, spaceAfter=0),
+            'heading', fontName='Helvetica-Bold', fontSize=9.6 * s,
+            leading=9.6 * s * 1.25, textColor=colors.HexColor('#1a1a1a'),
+            spaceBefore=7 * s + extra_gap, spaceAfter=0, charSpace=0.9 * s),
         'body': st('body', 9.5, space_after=2),
         'role': st('role', 10, space_after=1),
-        'dates': st('dates', 8.5, color='#555555', leading=1.2),
+        'dates': st('dates', 8.4, color='#666666', leading=1.25),
         'bullet': st('bullet', 9.5, left=11, bullet=2, space_after=1, leading=1.25),
         'skills': st('skills', 9.5, space_after=1.5),
     }
+
+
+def _date_col_width(cv, styles):
+    """Size the date gutter to the widest date so ranges never wrap — a
+    "Dec 2025 –" / "Jul 2026" split is what makes an entry look misaligned."""
+    style = styles['dates']
+    widest = 0.0
+    for item in (cv.get('experience') or []) + (cv.get('education') or []):
+        text = item.get('dates') or ''
+        try:
+            widest = max(widest, pdfmetrics.stringWidth(text, style.fontName, style.fontSize))
+        except Exception:            # non-Latin dates: fall back to the default
+            return _DATE_COL
+    return max(2.1 * cm, min(4.7 * cm, widest + 9))
 
 
 def _hebrew_aware(text, bold=False):
@@ -143,9 +161,10 @@ def _contact_markup(cv):
     return ' &nbsp;|&nbsp; '.join(bits)
 
 
-def _entry_table(date_text, right_flowables, styles, s):
+def _entry_table(date_text, right_flowables, styles, s, date_col=None):
+    date_col = date_col or _DATE_COL
     left = Paragraph(_hebrew_aware(date_text or ''), styles['dates'])
-    table = Table([[left, right_flowables]], colWidths=[_DATE_COL, _BODY_COL])
+    table = Table([[left, right_flowables]], colWidths=[date_col, _AVAIL_W - date_col])
     table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
@@ -160,6 +179,7 @@ def _entry_table(date_text, right_flowables, styles, s):
 def _story(cv, s, extra_gap=0):
     styles = _styles(s, extra_gap)
     pattern = term_pattern(collect_bold_terms(cv))
+    date_col = _date_col_width(cv, styles)
     story = [Paragraph(_hebrew_aware(cv.get('name', ''), bold=True), styles['name'])]
     if cv.get('title'):
         story.append(Paragraph(_hebrew_aware(cv['title']), styles['title']))
@@ -169,8 +189,8 @@ def _story(cv, s, extra_gap=0):
 
     def heading(text):
         story.append(Paragraph(_hebrew_aware(text, bold=True) + ':', styles['heading']))
-        story.append(HRFlowable(width='100%', thickness=0.8, color=colors.HexColor('#333333'),
-                                spaceBefore=1 * s, spaceAfter=3 * s))
+        story.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#b3b3b3'),
+                                spaceBefore=1.5 * s, spaceAfter=3.5 * s))
 
     if cv.get('summary'):
         heading('Summary')
@@ -183,7 +203,7 @@ def _story(cv, s, extra_gap=0):
             right = [Paragraph(f"<b>{_hebrew_aware(exp.get('title', ''), bold=True)}</b>{company}", styles['role'])]
             right += [Paragraph(_markup(b, pattern), styles['bullet'], bulletText='•')
                       for b in exp.get('bullets') or []]
-            story.append(_entry_table(exp.get('dates'), right, styles, s))
+            story.append(_entry_table(exp.get('dates'), right, styles, s, date_col))
 
     if cv.get('projects'):
         heading('Projects')
@@ -198,14 +218,14 @@ def _story(cv, s, extra_gap=0):
                          f'<u>{escape(url)}</u></link>')
             if desc:
                 right.append(Paragraph(desc, styles['bullet'], bulletText='•'))
-            story.append(_entry_table('', right, styles, s))
+            story.append(_entry_table('', right, styles, s, date_col))
 
     if cv.get('education'):
         heading('Education')
         for edu in cv['education']:
             inst = f" — {_hebrew_aware(edu['institution'])}" if edu.get('institution') else ''
             right = [Paragraph(f"<b>{_hebrew_aware(edu.get('degree', ''), bold=True)}</b>{inst}", styles['role'])]
-            story.append(_entry_table(edu.get('dates'), right, styles, s))
+            story.append(_entry_table(edu.get('dates'), right, styles, s, date_col))
 
     for extra in cv.get('extras') or []:
         if not (extra.get('lines') or []):

@@ -6,6 +6,13 @@ after-scores → career recommendations. Code lives in the `cv_review/` package;
 `pipeline.py` is the orchestrator and documents the phases.
 
 ## Runtime shape
+- **Open to the public** since 2026-08-18 — no password. The shared-password
+  gate is still in the code but bypassed; set `CV_REVIEW_PASSWORD_ENABLED=1` to
+  re-close it (same dormant-gate pattern as `/hitech/cv-guide/full`).
+- **Spend guards**: 5 reviews/hour per IP plus a whole-site cap of
+  `CV_REVIEW_DAILY_CAP` reviews per rolling 24h (default 200 ≈ $7/day at
+  today's ~$0.034/review; 0 = unlimited). Both answer 429 with a friendly
+  message.
 - **Consent is mandatory**: no consent → 400, no review. The checkbox links to
   `/hitech/cv-review/terms` (`app/templates/legal/cv_review_terms.html`),
   written to mirror the referrals-bot ToS.
@@ -125,6 +132,7 @@ in `cv_reviews.usage` and surfaced in admin → CV Reviews.
 
 ## Env vars (see .env.example)
 `GEMINI_API_KEY` (paid project), `GEMINI_CV_MODEL`, `CV_REVIEW_PASSWORD`,
-`CV_REVIEW_RETENTION_DAYS`, optional `GOOGLE_DRIVE_CREDENTIALS_JSON` +
-`GOOGLE_DRIVE_CV_FOLDER_ID`. Procfile timeout is 300s for the multi-call
+`CV_REVIEW_RETENTION_DAYS`, `CV_REVIEW_DAILY_CAP`,
+`CV_REVIEW_PASSWORD_ENABLED` (unset = public), optional
+`GOOGLE_DRIVE_CREDENTIALS_JSON` + `GOOGLE_DRIVE_CV_FOLDER_ID`. Procfile timeout is 300s for the multi-call
 pipeline.

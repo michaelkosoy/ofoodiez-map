@@ -309,6 +309,24 @@ def test_links_restored_when_model_drops_them(app_ctx):
     assert 'github.com/janesmith' in payload['optimized_text']
 
 
+def test_title_matches_the_target_job(app_ctx):
+    """With a target job, the line under the name is that role — it's the first
+    thing a screener reads."""
+    responses = good_responses()
+    responses['optimize'] = fake.make_optimizer()          # model says "Backend Software Engineer"
+    job = dict(fake.JOB, job_title='Business Data Analyst')
+    payload, _, _ = run(responses, job=job)
+    assert payload['optimized_cv']['title'] == 'Business Data Analyst'
+    assert payload['optimized_text'].splitlines()[1] == 'Business Data Analyst'
+    assert any(c['section'] == 'title' for c in payload['changes'])
+
+
+def test_title_kept_when_no_target_job(app_ctx):
+    payload, _, _ = run(good_responses(), job=fake.NO_JOB)
+    assert payload['optimized_cv']['title'] == 'Backend Software Engineer'
+    assert not any(c['section'] == 'title' for c in payload['changes'])
+
+
 def test_hebrew_cv_never_ships_hebrew_body(app_ctx):
     """A Hebrew CV whose optimizer output lost a section used to come back with
     the Hebrew original restored verbatim — the guide requires English."""

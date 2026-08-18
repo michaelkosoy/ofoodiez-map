@@ -59,7 +59,41 @@ def _rate_limited(ip):
     return False
 
 
+# Now that the reviewer is public, every run spends real Gemini money
+# (~$0.03) with no login behind it. The per-IP limit above doesn't bound the
+# total, so a whole-site daily cap is the budget backstop. Raise/lower with
+# CV_REVIEW_DAILY_CAP (0 = unlimited).
+DAILY_CAP_DEFAULT = 200
+
+
+def _daily_cap_reached():
+    cap = int(os.environ.get('CV_REVIEW_DAILY_CAP', DAILY_CAP_DEFAULT))
+    if cap <= 0:
+        return False
+    from datetime import datetime, timedelta
+
+    from database.models import CvReview
+    since = datetime.utcnow() - timedelta(hours=24)
+    try:
+        used = CvReview.query.filter(CvReview.created_at >= since).count()
+    except Exception as exc:            # never block a review on a count query
+        print(f'⚠️ CV review: daily-cap check failed ({exc})')
+        return False
+    if used >= cap:
+        print(f'⚠️ CV review: daily cap reached ({used}/{cap})')
+        return True
+    return False
+
+
 def _review_unlocked():
+    """The reviewer is OPEN TO EVERYONE (public launch 2026-08-18).
+
+    ponytail: the shared-password gate below is kept but bypassed — set
+    CV_REVIEW_PASSWORD_ENABLED=1 to re-close it (same pattern as
+    /hitech/cv-guide/full). Consent to store the CV is still required.
+    """
+    if os.environ.get('CV_REVIEW_PASSWORD_ENABLED') != '1':
+        return True
     return bool(session.get('cv_review_unlocked'))
 
 
@@ -129,6 +163,10 @@ def cv_review_api():
     if _rate_limited(_client_ip()):
         return jsonify({'error': f'Rate limit reached — up to {RATE_LIMIT} reviews per hour. '
                                  'Take the time to apply the fixes, then come back :)'}), 429
+
+    if _daily_cap_reached():
+        return jsonify({'error': 'The AI reviewer has hit its daily limit. '
+                                 'Please come back tomorrow — it resets every day.'}), 429
 
     key = gemini.api_key()
     if key is None:
