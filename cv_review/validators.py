@@ -251,8 +251,23 @@ def validate_evidence(optimizer_out, corpus):
     return violations
 
 
+def _fix_numbers(text, corpus):
+    """Replace unevidenced numbers with an [X] placeholder — degrade the claim,
+    never delete the whole bullet (content must survive hard fixes)."""
+    plain_corpus = corpus.replace(',', '')
+
+    def repl(m):
+        plain = m.group(0).replace(',', '').rstrip('%.')
+        return m.group(0) if (not plain or plain in plain_corpus) else '[X]'
+
+    parts = re.split(r'(\[[^\]\n]{0,60}\])', text)   # leave existing [placeholders] alone
+    return ''.join(p if p.startswith('[') else _NUMBER.sub(repl, p) for p in parts)
+
+
 def drop_unevidenced(optimizer_out, corpus):
-    """Deterministic hard fix: strip skills/bullets that still lack evidence."""
+    """Deterministic hard fix: strip skills that lack evidence; downgrade
+    unevidenced numbers to [X]; drop a bullet only when it carries a JD term
+    the CV doesn't back (the term IS the claim there)."""
     cv = optimizer_out['optimized_cv']
     for group in cv.get('skills_groups') or []:
         group['skills'] = [s for s in group['skills'] if _word_in(s, corpus)]
@@ -260,23 +275,95 @@ def drop_unevidenced(optimizer_out, corpus):
     jd = optimizer_out.get('jd_analysis') or {}
     bad_terms = [t for t in (jd.get('not_evidenced') or []) if not _word_in(t, corpus)]
 
-    def bullet_ok(bullet):
-        stripped = _PLACEHOLDER_SPAN.sub(' ', bullet)
-        for num in _NUMBER.findall(stripped):
-            plain = num.replace(',', '').rstrip('%.')
-            if plain and plain not in corpus.replace(',', ''):
-                return False
-        return not any(_word_in(t, bullet) for t in bad_terms)
+    def clean(text):
+        if any(_word_in(t, text) for t in bad_terms):
+            return None
+        return _fix_numbers(text, corpus)
 
     for exp in cv.get('experience') or []:
-        exp['bullets'] = [b for b in exp['bullets'] if bullet_ok(b)]
+        exp['bullets'] = [c for c in (clean(b) for b in exp['bullets']) if c]
     for proj in list(cv.get('projects') or []):
-        if proj.get('description') and not bullet_ok(proj['description']):
-            proj['description'] = _PLACEHOLDER_SPAN.sub(' ', proj['description'])
-            if not bullet_ok(proj['description']):
+        if proj.get('description'):
+            cleaned = clean(proj['description'])
+            if cleaned is None:
                 cv['projects'].remove(proj)
+            else:
+                proj['description'] = cleaned
+    if cv.get('summary'):
+        cv['summary'] = _fix_numbers(cv['summary'], corpus)
     if jd:
         jd['surfaced'] = [t for t in (jd.get('surfaced') or []) if _word_in(t, corpus)]
+
+
+# ── Content floor ────────────────────────────────────────────────────────────
+# A repair round must never be allowed to "fix" violations by deleting the CV.
+def total_bullets(cv_or_canonical):
+    return sum(len(e.get('bullets') or []) for e in cv_or_canonical.get('experience') or [])
+
+
+def validate_content_floor(optimizer_out, canonical):
+    cv = optimizer_out['optimized_cv']
+    violations = []
+    for section in ('experience', 'education'):
+        if (canonical.get(section) or []) and not (cv.get(section) or []):
+            violations.append({'type': 'content_loss', 'path': section,
+                               'detail': f'the original CV has {section} but the optimized CV '
+                                         f'lost it entirely — it must be rewritten, not removed'})
+    if total_bullets(canonical) >= 2 and total_bullets(cv) == 0 and (cv.get('experience') or []):
+        violations.append({'type': 'content_loss', 'path': 'experience',
+                           'detail': 'every experience bullet was lost — rewrite them from '
+                                     'the evidence, do not delete them'})
+    if (canonical.get('summary') or '').strip() and not (cv.get('summary') or '').strip():
+        violations.append({'type': 'content_loss', 'path': 'summary',
+                           'detail': 'the summary was lost — rewrite it from the evidence'})
+    return violations
+
+
+def restore_from_canonical(optimizer_out, canonical, profile):
+    """Last-resort content floor: lost sections come back VERBATIM from the
+    canonical extraction (address-scrubbed) — verbatim original text is
+    evidence-safe by construction, just not optimized."""
+    cv = optimizer_out['optimized_cv']
+
+    def scrub(text):
+        return scrub_address(text or '', profile)
+
+    restored = []
+    if ((canonical.get('experience') or []) and
+            (not cv.get('experience') or total_bullets(cv) == 0 < total_bullets(canonical))):
+        cv['experience'] = [{'company': scrub(e.get('company')), 'title': scrub(e.get('title')),
+                             'dates': e.get('dates') or '',
+                             'bullets': [scrub(b) for b in e.get('bullets') or []]}
+                            for e in canonical['experience']]
+        restored.append('experience')
+    if (canonical.get('education') or []) and not (cv.get('education') or []):
+        cv['education'] = [{'institution': scrub(e.get('institution')),
+                            'degree': scrub(e.get('degree')), 'dates': e.get('dates') or ''}
+                           for e in canonical['education']]
+        restored.append('education')
+    if (canonical.get('projects') or []) and not (cv.get('projects') or []):
+        cv['projects'] = [{'name': scrub(p.get('name')), 'tech': None,
+                           'description': scrub(p.get('description')), 'link': p.get('link')}
+                          for p in canonical['projects']]
+        restored.append('projects')
+    if (canonical.get('extras') or []) and not (cv.get('extras') or []):
+        cv['extras'] = [{'heading': scrub(x.get('heading')),
+                         'lines': [scrub(l) for l in x.get('lines') or []]}
+                        for x in canonical['extras']]
+        restored.append('extras')
+    if (canonical.get('summary') or '').strip() and not (cv.get('summary') or '').strip():
+        cv['summary'] = scrub(canonical['summary'])
+        restored.append('summary')
+    contact_links = (canonical.get('contact') or {}).get('links') or []
+    if contact_links and not (cv.get('links') or []):
+        cv['links'] = [{'label': l.get('label') or '', 'url': l.get('url') or ''}
+                       for l in contact_links if l.get('url')]
+    for section in restored:
+        optimizer_out['changes'].append({
+            'change_type': 'keep', 'section': section, 'before': '', 'after': '',
+            'reason': f'התוכן המקורי של {section} נשמר כפי שהוא (שחזור אוטומטי לאחר שהמודל השמיט אותו).',
+            'evidence_refs': []})
+    return restored
 
 
 # ── Career recommendations ───────────────────────────────────────────────────

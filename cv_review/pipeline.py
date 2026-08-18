@@ -101,9 +101,9 @@ def _cv_json_part(label, obj):
 
 
 def _run_critic(generate, key, usage, *, canonical_like, claims, jd_text, job_title,
-                formatting_note, purpose):
+                formatting_note, purpose, anchor=None):
     prompt = prompts.critic_prompt(_load_guide(), jd_text=jd_text, job_title=job_title,
-                                   formatting_note=formatting_note)
+                                   formatting_note=formatting_note, anchor=anchor)
     data = _call(generate, parts=[{'text': prompt},
                                   _cv_json_part('THE CV (structured extraction)', canonical_like),
                                   _cv_json_part('EVIDENCE LEDGER', claims)],
@@ -144,22 +144,24 @@ def _optimized_as_canonical(cv, text_len):
     }
 
 
-def _collect_violations(opt, corpus, profile, expected_name):
+def _collect_violations(opt, corpus, profile, expected_name, canonical):
     v = []
     v += validators.validate_name(opt['optimized_cv'], expected_name)
     v += validators.validate_no_address(opt['optimized_cv'], profile)
     v += validators.validate_evidence(opt, corpus)
+    v += validators.validate_content_floor(opt, canonical)
     v += validators.validate_recommendations(opt, corpus)
     v += validators.validate_wording(validators.rec_feedback_texts(opt))
     return v
 
 
-def _apply_hard_fixes(opt, corpus, profile, expected_name):
+def _apply_hard_fixes(opt, corpus, profile, expected_name, canonical):
     cv = opt['optimized_cv']
     cv['name'] = expected_name
     validators.fix_address(cv, profile)
     validators.drop_unevidenced(opt, corpus)
     validators.fix_recommendations(opt, corpus)
+    validators.restore_from_canonical(opt, canonical, profile)
 
 
 def _ensure_location_redaction_change(opt, canonical, profile):
@@ -447,7 +449,7 @@ def _continue_review(review, name, *, generate, key, usage):
 
         # Validate → model repair (bounded) → deterministic hard fixes.
         repairs = 0
-        violations = _collect_violations(opt, corpus, profile, name)
+        violations = _collect_violations(opt, corpus, profile, name, canonical)
         while violations and repairs < MAX_REPAIRS and remaining() > 60:
             repairs += 1
             repaired = _call(generate,
@@ -456,17 +458,28 @@ def _continue_review(review, name, *, generate, key, usage):
                              schema=schemas.OPTIMIZER_SCHEMA, purpose=f'repair_{repairs}',
                              usage=usage, key=key, temperature=0.1)
             try:
-                opt = schemas.ensure_optimizer(repaired)
+                candidate_opt = schemas.ensure_optimizer(repaired)
             except schemas.SchemaError:
                 break   # keep previous opt; hard fixes below
-            violations = _collect_violations(opt, corpus, profile, name)
+            # A repair must never "fix" violations by deleting the CV: if the
+            # repaired output lost most of the content, keep what we had and
+            # let the deterministic fixes handle the rest.
+            prev_bullets = validators.total_bullets(opt['optimized_cv'])
+            new_bullets = validators.total_bullets(candidate_opt['optimized_cv'])
+            if prev_bullets > 0 and new_bullets < max(1, prev_bullets // 2):
+                print(f'⚠️ CV review: repair_{repairs} regressed content '
+                      f'({prev_bullets}→{new_bullets} bullets) — discarding the repair')
+                break
+            opt = candidate_opt
+            violations = _collect_violations(opt, corpus, profile, name, canonical)
         if violations:
-            _apply_hard_fixes(opt, corpus, profile, name)
-            violations = _collect_violations(opt, corpus, profile, name)
+            _apply_hard_fixes(opt, corpus, profile, name, canonical)
+            violations = _collect_violations(opt, corpus, profile, name, canonical)
             if any(v['type'] in ('address', 'name') for v in violations):
                 raise PipelineError('Could not produce a compliant CV from this document. '
                                     'Please try again.')
         validators.fix_recommendations(opt, corpus)   # cap 3–5, priority order
+        validators.restore_from_canonical(opt, canonical, profile)  # content floor, always
         _ensure_location_redaction_change(opt, canonical, profile)
 
         cv = opt['optimized_cv']
@@ -480,7 +493,9 @@ def _continue_review(review, name, *, generate, key, usage):
         critic_after = _run_critic(generate, key, usage,
                                    canonical_like=_optimized_as_canonical(cv, len(text)),
                                    claims=claims, jd_text=jd_text, job_title=job_title,
-                                   formatting_note=fmt_opt, purpose='critic_optimized')
+                                   formatting_note=fmt_opt, purpose='critic_optimized',
+                                   anchor={'quality': critic_before['quality_score'],
+                                           'jd_match': critic_before['jd_match']})
 
         docx_bytes = build_docx(cv)
         problems = inspect_docx(docx_bytes)
@@ -492,14 +507,20 @@ def _continue_review(review, name, *, generate, key, usage):
         changes = sorted(opt['changes'], key=lambda c: c['change_type'] == 'keep')
         summary = _change_summary(changes, opt.get('jd_analysis'),
                                   cv.get('location') or profile['city'])
+        # The product rule: optimization only improves or holds — a lower
+        # after-score is judge noise (two model gradings of preserved
+        # evidence), floored at the before-score, never shown as a regression.
+        def _floored(before, after):
+            return {'before': before, 'after': max(before, after)}
         scores = {
-            'rules': {'before': schemas.rules_score(critic_before['rules_checklist']),
-                      'after': schemas.rules_score(critic_after['rules_checklist']),
+            'rules': {**_floored(schemas.rules_score(critic_before['rules_checklist']),
+                                 schemas.rules_score(critic_after['rules_checklist'])),
                       'total': len(schemas.RULES)},
-            'quality': {'before': critic_before['quality_score'],
-                        'after': critic_after['quality_score']},
-            'jd_match': ({'before': critic_before['jd_match'],
-                          'after': critic_after['jd_match']}
+            'quality': _floored(critic_before['quality_score'],
+                                critic_after['quality_score']),
+            'jd_match': (_floored(critic_before['jd_match'],
+                                  critic_after['jd_match'] if critic_after['jd_match']
+                                  is not None else critic_before['jd_match'])
                          if jd_text and critic_before['jd_match'] is not None else None),
         }
 

@@ -358,19 +358,10 @@
                 <div class="ht-cvr-recs" id="cvr-recs" dir="rtl"></div>
             </div>
 
-            <div id="cvr-changes-block" style="display:none;">
-                <p class="ht-cvr-block-title">Detailed changes</p>
-                <div class="ht-cvr-changecards" id="cvr-changes" dir="rtl"></div>
-            </div>
-
             <div id="cvr-review-block" style="display:none;">
                 <p class="ht-cvr-block-title">The original review</p>
                 <div class="ht-cvr-score-card">
                     <p class="ht-cvr-verdict" id="cvr-verdict" dir="rtl"></p>
-                </div>
-                <div id="cvr-actions-block" style="display:none;">
-                    <p class="ht-cvr-block-title">Do this now</p>
-                    <div class="ht-cvr-actions" id="cvr-actions" dir="rtl"></div>
                 </div>
                 <div id="cvr-checklist-block" style="display:none;">
                     <p class="ht-cvr-block-title">The guide checklist</p>
@@ -552,18 +543,6 @@
                 if (!review) { show('cvr-review-block', false); return; }
                 document.getElementById('cvr-verdict').textContent = review.verdict || '';
 
-                var actionsEl = document.getElementById('cvr-actions');
-                actionsEl.innerHTML = '';
-                (review.action_items || []).forEach(function (a, idx) {
-                    if (!a) return;
-                    var row = el('div', 'ht-cvr-action');
-                    var num = el('span', 'ht-cvr-action-num', idx + 1);
-                    row.appendChild(num);
-                    row.appendChild(document.createTextNode(String(a)));
-                    actionsEl.appendChild(row);
-                });
-                show('cvr-actions-block', actionsEl.children.length > 0);
-
                 var checklistEl = document.getElementById('cvr-checklist');
                 checklistEl.innerHTML = '';
                 (review.checklist || []).forEach(function (c) {
@@ -639,7 +618,6 @@
                     show('cvr-summary-block', false);
                     show('cvr-jdfit-block', false);
                     show('cvr-recs-block', false);
-                    show('cvr-changes-block', false);
                     renderReview(data.original_review);
                     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     return;
@@ -709,35 +687,6 @@
                     recsEl.appendChild(card);
                 });
                 show('cvr-recs-block', recsEl.children.length > 0);
-
-                /* Detailed changes (skip 'keep' records) */
-                var changesEl = document.getElementById('cvr-changes');
-                changesEl.innerHTML = '';
-                (data.changes || []).forEach(function (c) {
-                    if (!c || c.change_type === 'keep') return;
-                    var card = document.createElement('details');
-                    card.className = 'ht-cvr-changecard';
-                    var summaryEl = document.createElement('summary');
-                    summaryEl.appendChild(el('span', 'tag', c.change_type.replace('_', ' ')));
-                    summaryEl.appendChild(el('span', 'reason', c.reason || c.section || ''));
-                    card.appendChild(summaryEl);
-                    var body = el('div', 'body');
-                    if (c.before) {
-                        var bf = el('div', 'ht-cvr-imp-before');
-                        bf.appendChild(el('span', 'cvr-rw-label', 'Before'));
-                        bf.appendChild(document.createTextNode(String(c.before)));
-                        body.appendChild(bf);
-                    }
-                    if (c.after) {
-                        var af = el('div', 'ht-cvr-imp-rewrite');
-                        af.appendChild(el('span', 'cvr-rw-label', 'After'));
-                        af.appendChild(document.createTextNode(String(c.after)));
-                        body.appendChild(af);
-                    }
-                    if (body.children.length) card.appendChild(body);
-                    changesEl.appendChild(card);
-                });
-                show('cvr-changes-block', changesEl.children.length > 0);
 
                 renderReview(data.original_review);
                 resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });

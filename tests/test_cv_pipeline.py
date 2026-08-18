@@ -231,3 +231,93 @@ def test_not_a_cv_gets_review_only(app_ctx):
     assert payload['status'] == 'not_a_cv'
     assert 'optimize' not in model.purposes
     assert review.status == 'complete' and review.optimized_docx is None
+
+
+# ── Content floor / repair regression / score floor (post-launch fixes) ─────
+def test_gutting_repair_is_discarded(app_ctx):
+    """A repair that 'fixes' violations by deleting the CV content is thrown
+    away; deterministic fixes handle the violation on the kept version."""
+    full_but_leaky = fake.make_optimizer(
+        summary='Backend engineer at 12 Dizengoff Street skilled in Python.')
+    gutted = fake.make_optimizer()
+    gutted['optimized_cv']['experience'] = []
+    gutted['optimized_cv']['summary'] = 'Backend engineer skilled in Python.'
+    responses = good_responses()
+    responses['optimize'] = full_but_leaky
+    responses['repair'] = gutted
+    payload, _, _ = run(responses)
+    cv = payload['optimized_cv']
+    assert cv['experience'], 'experience must survive a gutting repair'
+    assert '12 Dizengoff' not in payload['optimized_text']
+
+
+def test_lost_sections_restored_from_canonical(app_ctx):
+    responses = good_responses()
+    empty = fake.make_optimizer()
+    empty['optimized_cv']['experience'] = []
+    empty['optimized_cv']['education'] = []
+    responses['optimize'] = empty
+    responses['repair'] = empty
+    payload, _, _ = run(responses)
+    cv = payload['optimized_cv']
+    assert cv['experience'] and cv['education']
+    assert 'Built REST APIs in Python serving 6,000 users' in payload['optimized_text']
+    assert 'B.Sc. Computer Science' in payload['optimized_text']
+
+
+def test_scores_never_shown_as_regression(app_ctx):
+    responses = good_responses()
+    responses['critic_optimized'] = fake.make_critic(quality=50, jd_match=40)
+    payload, _, _ = run(responses, job=fake.JOB)
+    s = payload['scores']
+    assert s['quality']['after'] >= s['quality']['before']
+    assert s['jd_match']['after'] >= s['jd_match']['before']
+    assert s['rules']['after'] >= s['rules']['before']
+
+
+def test_markdown_emphasis_stripped(app_ctx):
+    responses = good_responses()
+    responses['optimize'] = fake.make_optimizer(
+        summary='Works with **Python** and **PostgreSQL** using `Kafka`.')
+    payload, _, _ = run(responses)
+    assert '**' not in payload['optimized_text'] and '`' not in payload['optimized_text']
+    assert 'Python' in payload['optimized_text']
+
+
+def test_unevidenced_number_becomes_placeholder_not_deletion(app_ctx):
+    responses = good_responses()
+    bad_number = fake.make_optimizer(
+        bullets=('Improved throughput by 73% using Python',
+                 'Designed PostgreSQL schemas and Kafka pipelines'))
+    responses['optimize'] = bad_number
+    responses['repair'] = bad_number
+    payload, _, _ = run(responses)
+    text = payload['optimized_text']
+    assert '73' not in text
+    assert 'Improved throughput by [X] using Python' in text
+
+
+def test_links_restored_when_model_drops_them(app_ctx):
+    responses = good_responses()
+    no_links = fake.make_optimizer()
+    no_links['optimized_cv']['links'] = []
+    no_links['optimized_cv']['experience'] = []   # trigger hard-fix path
+    responses['optimize'] = no_links
+    responses['repair'] = no_links
+    payload, _, _ = run(responses)
+    assert 'github.com/janesmith' in payload['optimized_text']
+
+
+def test_pdf_fits_exactly_one_page(app_ctx):
+    pypdf = pytest.importorskip('pypdf')
+    from cv_review.pdf_writer import build_pdf
+    import io as _io
+    dense = fake.make_optimizer(
+        bullets=tuple(f'Built REST APIs in Python serving 6,000 users, iteration {i}'
+                      for i in range(14)))['optimized_cv']
+    dense['extras'] = [{'heading': 'Military Service',
+                        'lines': ['Team leader, artillery corps', 'Trained [X] soldiers']}]
+    sparse = fake.make_optimizer()['optimized_cv']
+    for cv in (dense, sparse):
+        pdf = build_pdf(cv)
+        assert len(pypdf.PdfReader(_io.BytesIO(pdf)).pages) == 1

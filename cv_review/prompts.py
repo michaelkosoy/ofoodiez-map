@@ -63,7 +63,18 @@ def _rules_text():
 10. "AI משולב נכון" — AI appears integrated in real projects / work, not sprinkled as empty buzzwords."""
 
 
-def critic_prompt(guide, jd_text=None, job_title=None, formatting_note=None):
+def critic_prompt(guide, jd_text=None, job_title=None, formatting_note=None,
+                  anchor=None):
+    anchor_block = ''
+    if anchor:
+        anchor_block = (f"\nSCORING ANCHOR: the ORIGINAL version of this CV was already graded "
+                        f"on this exact rubric: quality_score={anchor.get('quality')}"
+                        + (f", jd_match={anchor['jd_match']}" if anchor.get('jd_match') is not None else '')
+                        + ". You are now grading the OPTIMIZED version, which contains the same "
+                          "evidence rewritten per the guide (stronger verbs, surfaced keywords, "
+                          "one page, no excess personal details). Grade on the same scale, "
+                          "relative to that anchor — a lower score than the anchor is only "
+                          "justified if content genuinely got worse, not for phrasing taste.")
     jd_block = ''
     if jd_text or job_title:
         jd_block = f"""
@@ -95,6 +106,7 @@ Review rules:
 - {_WORDING_RULE}
 - If flags/is_cv indicate the document is not actually a CV, give a low score and say so in the verdict (in Hebrew).
 {('- FORMATTING NOTE: ' + formatting_note) if formatting_note else ''}
+{anchor_block}
 {jd_block}
 
 ===== THE GUIDE (your grading rubric) =====
@@ -143,7 +155,7 @@ ABSOLUTE EVIDENCE RULES (violations are rejected by automated validators):
 6. Exclude entirely: photo references, age/birth date, ID number, marital status, references lines.
 
 CV WRITING RULES (from the guide):
-- Strictly English. One page: summary 2–4 lines; 3–5 bullets for recent/relevant roles, 1–2 for older ones; at most ~16 experience bullets overall; cut the weakest content and record each cut as a "remove" change.
+- Strictly English. Target a FULL single page — a half-empty page is as much a failure as an overflowing one: summary 3–4 lines; 3–6 bullets for recent/relevant roles, 1–3 for older ones; ~14–22 experience bullets overall. Keep EVERY position, project, education entry and extra section from the evidence (military service, languages, certifications) — rewrite and tighten them, never delete a whole section. Cut only individual weak bullets, recording each cut as a "remove" change.
 - Bullets: strong action verbs + X-Y-Z impact ("Accomplished X, measured by Y, by doing Z"), technologies named explicitly.
 - skills_groups: honest, grouped (Languages / Frameworks / Tools...), no self-ratings, no office-suite filler, nothing indefensible in an interview.
 - title: a short professional title matching the evidence (and the target job only when the evidence honestly supports it).
