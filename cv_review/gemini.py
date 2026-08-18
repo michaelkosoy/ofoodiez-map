@@ -30,10 +30,24 @@ PRICES_PER_1M = {
     'gemini-3.5-flash-lite': (0.30, 2.50),
     'gemini-3.1-flash-lite': (0.25, 1.50),
     'gemini-2.5-flash-lite': (0.10, 0.40),
+    'gemini-3.7-flash': (0.75, 3.75),
+    'gemini-3.6-flash': (0.75, 3.75),
+    'gemini-3.5-flash': (1.50, 9.00),
+    'gemini-3.1-pro-preview': (2.00, 12.00),
 }
 
 
-def model_name():
+def model_name(purpose=None):
+    """Model for one pipeline step. A step can be pointed at a stronger model
+    without touching code — GEMINI_CV_MODEL_OPTIMIZE=gemini-3.7-flash spends
+    the extra money only on the rewrite, which is the step where writing
+    quality actually shows. Falls back to GEMINI_CV_MODEL, then the default.
+    (Benchmark before switching: scripts/cv_eval.py is the judge.)"""
+    if purpose:
+        step = purpose.split('_')[0].upper()        # repair_1 → REPAIR
+        override = os.environ.get(f'GEMINI_CV_MODEL_{step}')
+        if override:
+            return override
     return os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
 
 
@@ -72,17 +86,24 @@ class UsageTracker:
         })
 
     def totals(self):
-        model = model_name()
         inp = sum(c['input_tokens'] for c in self.calls)
         out = sum(c['output_tokens'] + c['thoughts_tokens'] for c in self.calls)
-        prices = PRICES_PER_1M.get(model)
-        cost = round((inp * prices[0] + out * prices[1]) / 1e6, 6) if prices else None
+        # Price per call, since steps may run on different models.
+        cost, priced = 0.0, True
+        for call in self.calls:
+            prices = PRICES_PER_1M.get(call['model'])
+            if not prices:
+                priced = False
+                continue
+            cost += (call['input_tokens'] * prices[0]
+                     + (call['output_tokens'] + call['thoughts_tokens']) * prices[1]) / 1e6
+        models = sorted({c['model'] for c in self.calls})
         return {
-            'model': model,
+            'model': ' + '.join(models) if models else model_name(),
             'calls': len(self.calls),
             'input_tokens': inp,
             'output_tokens': out,
-            'estimated_cost_usd': cost,
+            'estimated_cost_usd': round(cost, 6) if priced else None,
             'seconds': round(sum(c['seconds'] for c in self.calls), 2),
             'per_call': self.calls,
         }
@@ -103,7 +124,7 @@ def generate_json(parts, schema, *, purpose, usage, key,
                   max_output_tokens=16384, temperature=0.2, timeout=90):
     """One structured-output call. Returns the parsed JSON dict.
     Raises GeminiError with a client-safe message on any failure."""
-    model = model_name()
+    model = model_name(purpose)
     url = (f'https://generativelanguage.googleapis.com/v1beta/'
            f'models/{model}:generateContent')
     payload = {
