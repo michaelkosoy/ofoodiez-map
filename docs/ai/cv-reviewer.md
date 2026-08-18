@@ -65,13 +65,14 @@ false and reviews still run (Hebrew degrades to boxes rather than erroring).
 The DOCX and text exports keep logical order — Word applies bidi itself.
 
 ## Cost (measured, not estimated)
-`gemini-3.5-flash-lite`, 11 completed prod reviews (2026-08-17/18):
-**min $0.024, avg $0.034, max $0.038 per review**, 4–6 model calls each.
-Input-dominated: the full Hebrew guide is re-sent with each critic/optimizer
-call. The obvious lever if this ever matters at volume is putting the guide
-FIRST in every prompt (identical prefix → Gemini implicit context caching) or
-not sending it to the after-critic at all; per-review cost/tokens are recorded
-in `cv_reviews.usage` and surfaced in admin → CV Reviews.
+Baseline from 15 completed prod reviews (2026-08-17/18) on flash-lite only:
+**52,877 input + 7,522 output tokens, 5.5 calls, 25s, $0.0347 per review.**
+Same workload priced at other tiers: 3.1-flash-lite $0.025 · **hybrid
+(rewrite on 3.7-flash) $0.050** · all-3.7-flash $0.068 · 3.5-flash $0.147 ·
+3.1-pro $0.196. Guide-prefix caching is expected to take the hybrid to
+~$0.042. Per-review model/tokens/cost/duration are recorded in
+`cv_reviews.usage` and shown in admin → CV Reviews — check real numbers there
+after any model change rather than trusting these projections.
 
 ## Invariants (enforced by validators + tests, not just prompts)
 - **Candidate name** comes from the CV only, preserved EXACTLY (never the
@@ -99,8 +100,21 @@ in `cv_reviews.usage` and surfaced in admin → CV Reviews.
   the admin default download.
 
 ## Model & cost
-- Default `gemini-3.5-flash-lite` via `GEMINI_CV_MODEL` (generateContent +
-  responseSchema; NO tools — no search grounding/URL context/code execution).
+- **Hybrid, per step** (`gemini.STEP_MODELS`): extraction and both critics run
+  on `gemini-3.5-flash-lite`; the REWRITE and its repairs run on
+  `gemini-3.7-flash`, because that is the only step whose prose the candidate
+  reads. Override any step with `GEMINI_CV_MODEL_<STEP>` (OPTIMIZE, REPAIR,
+  EXTRACT, CRITIC, TRANSLATE), change the base with `GEMINI_CV_MODEL`, or set
+  `GEMINI_CV_HYBRID=off` to put everything back on one model. A per-step model
+  that the API key can't use falls back to the base model for the rest of the
+  process instead of failing reviews.
+- **Guide-first prompts**: the ~18k-token guide is emitted by
+  `prompts.guide_prefix()` as the byte-identical LEADING block of every prompt
+  that carries it, so Gemini's implicit context caching charges the repeat
+  copies at ~1/10 the input rate. Anything call-specific must come AFTER that
+  block or caching stops hitting.
+- generateContent + responseSchema; NO tools — no search grounding, URL
+  context or code execution.
 - ~5 calls/review (extract, critic×2, optimize, +repairs when needed);
   per-review tokens/cost recorded in `cv_reviews.usage` (no prompts logged).
 - Don't swap models on vibes: `scripts/cv_eval.py` is the judge — compare

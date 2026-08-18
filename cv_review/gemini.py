@@ -24,6 +24,15 @@ import requests
 
 DEFAULT_MODEL = 'gemini-3.5-flash-lite'
 
+# Hybrid by default: the mechanical steps (extraction, both critics) run on
+# Flash-Lite, while the REWRITE — the only step whose quality the candidate
+# actually reads — runs on Flash. Measured 2026-08-18: $0.035 → ~$0.050 per
+# review, versus ~$0.068 for putting every step on Flash.
+STEP_MODELS = {
+    'OPTIMIZE': 'gemini-3.7-flash',
+    'REPAIR': 'gemini-3.7-flash',
+}
+
 # USD per 1M tokens (input, output) — Google AI pricing as of 2026-08.
 # Thinking tokens bill at the output rate. Update alongside model changes.
 PRICES_PER_1M = {
@@ -38,17 +47,20 @@ PRICES_PER_1M = {
 
 
 def model_name(purpose=None):
-    """Model for one pipeline step. A step can be pointed at a stronger model
-    without touching code — GEMINI_CV_MODEL_OPTIMIZE=gemini-3.7-flash spends
-    the extra money only on the rewrite, which is the step where writing
-    quality actually shows. Falls back to GEMINI_CV_MODEL, then the default.
-    (Benchmark before switching: scripts/cv_eval.py is the judge.)"""
-    if purpose:
-        step = purpose.split('_')[0].upper()        # repair_1 → REPAIR
-        override = os.environ.get(f'GEMINI_CV_MODEL_{step}')
-        if override:
-            return override
-    return os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
+    """Model for one pipeline step: GEMINI_CV_MODEL_<STEP> wins, then the
+    hybrid STEP_MODELS default, then GEMINI_CV_MODEL, then DEFAULT_MODEL.
+    Set GEMINI_CV_HYBRID=off to put every step back on one model.
+    (Benchmark before changing: scripts/cv_eval.py is the judge — spec §32.)"""
+    base = os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
+    if not purpose:
+        return base
+    step = purpose.split('_')[0].upper()            # repair_1 → REPAIR
+    override = os.environ.get(f'GEMINI_CV_MODEL_{step}')
+    if override:
+        return override
+    if os.environ.get('GEMINI_CV_HYBRID', 'on').lower() in ('off', '0', 'false'):
+        return base
+    return STEP_MODELS.get(step, base)
 
 
 def api_key():
@@ -120,11 +132,22 @@ def _strip_code_fences(text):
     return text
 
 
+_unavailable_models = set()   # per-process: a model this key can't use
+
+
 def generate_json(parts, schema, *, purpose, usage, key,
-                  max_output_tokens=16384, temperature=0.2, timeout=90):
+                  max_output_tokens=16384, temperature=0.2, timeout=90,
+                  model=None):
     """One structured-output call. Returns the parsed JSON dict.
-    Raises GeminiError with a client-safe message on any failure."""
-    model = model_name(purpose)
+    Raises GeminiError with a client-safe message on any failure.
+
+    If a per-step model isn't available to this API key (wrong name, not
+    enabled on the project), the call is retried once on the base model and
+    that step falls back for the rest of the process — a model rollout must
+    never take the feature down."""
+    model = model or model_name(purpose)
+    if model in _unavailable_models:
+        model = os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
     url = (f'https://generativelanguage.googleapis.com/v1beta/'
            f'models/{model}:generateContent')
     payload = {
@@ -161,6 +184,16 @@ def generate_json(parts, schema, *, purpose, usage, key,
                     continue
                 raise GeminiError('gemini 429', 'The AI reviewer is at capacity right now. '
                                                 'Please try again in a few minutes.')
+            if resp.status_code in (400, 403, 404):
+                fallback = os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
+                if model != fallback:
+                    print(f'⚠️ CV gemini [{purpose}]: model {model} unavailable — '
+                          f'falling back to {fallback} for the rest of this process')
+                    _unavailable_models.add(model)
+                    return generate_json(parts, schema, purpose=purpose, usage=usage,
+                                         key=key, max_output_tokens=max_output_tokens,
+                                         temperature=temperature, timeout=timeout,
+                                         model=fallback)
             if resp.status_code >= 500 and attempt == 1:
                 last_err = f'HTTP {resp.status_code}'
                 time.sleep(2.0)

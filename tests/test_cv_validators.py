@@ -183,6 +183,54 @@ def test_polish_cv_presentation():
     assert idf['heading'] == 'IDF Service'                                 # acronym kept
 
 
+def test_hybrid_model_selection(monkeypatch):
+    from cv_review import gemini
+    for var in ('GEMINI_CV_MODEL', 'GEMINI_CV_MODEL_OPTIMIZE', 'GEMINI_CV_HYBRID'):
+        monkeypatch.delenv(var, raising=False)
+    # mechanical steps stay cheap, the rewrite (and its repairs) go to Flash
+    assert gemini.model_name('extract') == gemini.DEFAULT_MODEL
+    assert gemini.model_name('critic_original') == gemini.DEFAULT_MODEL
+    assert gemini.model_name('optimize') == 'gemini-3.7-flash'
+    assert gemini.model_name('repair_1') == 'gemini-3.7-flash'
+    # explicit per-step override wins
+    monkeypatch.setenv('GEMINI_CV_MODEL_OPTIMIZE', 'gemini-3.1-flash-lite')
+    assert gemini.model_name('optimize') == 'gemini-3.1-flash-lite'
+    # and the hybrid can be switched off entirely
+    monkeypatch.delenv('GEMINI_CV_MODEL_OPTIMIZE')
+    monkeypatch.setenv('GEMINI_CV_HYBRID', 'off')
+    monkeypatch.setenv('GEMINI_CV_MODEL', 'gemini-3.5-flash-lite')
+    assert gemini.model_name('optimize') == 'gemini-3.5-flash-lite'
+
+
+def test_mixed_model_costs_are_priced_per_call():
+    from cv_review import gemini
+    usage = gemini.UsageTracker()
+    usage.add('extract', 'gemini-3.5-flash-lite',
+              {'promptTokenCount': 20_000, 'candidatesTokenCount': 1_500}, 3)
+    usage.add('optimize', 'gemini-3.7-flash',
+              {'promptTokenCount': 25_000, 'candidatesTokenCount': 2_500}, 9)
+    totals = usage.totals()
+    expected = (20_000 * 0.30 + 1_500 * 2.50) / 1e6 + (25_000 * 0.75 + 2_500 * 3.75) / 1e6
+    assert abs(totals['estimated_cost_usd'] - expected) < 1e-9
+    assert totals['model'] == 'gemini-3.5-flash-lite + gemini-3.7-flash'
+
+
+def test_guide_is_a_shared_cacheable_prefix():
+    """Gemini only caches an identical leading prefix, so the guide must come
+    first and byte-identical in every prompt that carries it."""
+    from cv_review import prompts
+    guide = 'GUIDE-BODY\n' * 50
+    prefix = prompts.guide_prefix(guide)
+    critic_before = prompts.critic_prompt(guide, jd_text='jd', job_title='t')
+    critic_after = prompts.critic_prompt(guide, formatting_note='note',
+                                         anchor={'quality': 70, 'jd_match': 60})
+    optimizer = prompts.optimizer_prompt(guide, job_title='t', jd_text='jd')
+    for p in (critic_before, critic_after, optimizer):
+        assert p.startswith(prefix)
+        assert p.count('END OF GUIDE') == 1       # guide included exactly once
+    assert 'CHECKLIST' in critic_before and 'ABSOLUTE EVIDENCE RULES' in optimizer
+
+
 def test_hebrew_name_renders_in_pdf():
     """A Hebrew name used to come out as black boxes (no Hebrew glyphs in
     reportlab's built-in fonts, no bidi)."""
