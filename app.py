@@ -347,7 +347,8 @@ def portfolio_page():
     Portfolio Access, valid 7 days), by the admin password (ADMIN_SECRET),
     or by an active admin session. Gate copy lives in portfolio_content.json
     under portfolio.gate (editable at /admin/portfolio/content)."""
-    content = _load_portfolio_content()
+    content = _load_portfolio_content(_portfolio_lang())
+    i18n = _portfolio_i18n(content)
     c = content.get('portfolio', {})
     gate_c = c.get('gate', {})
 
@@ -355,7 +356,8 @@ def portfolio_page():
         from database.models import db, PortfolioAccess
         code = request.form.get('code', '').strip()
         row = None
-        if code and code == os.environ.get('ADMIN_SECRET', 'ofoodiez2025'):
+        _admin_secret = os.environ.get('ADMIN_SECRET')  # no default: unset locks out
+        if code and _admin_secret and code == _admin_secret:
             grant = 'admin'
         else:
             if code:
@@ -368,11 +370,18 @@ def portfolio_page():
             state = 'granted'
         else:
             state = 'expired' if row else 'denied'
-        return render_template('portfolio_gate.html', c=gate_c, state=state)
+        return render_template('portfolio_gate.html', c=gate_c, state=state, **i18n)
 
     if _portfolio_unlocked():
-        return render_template('portfolio.html', c=c, hide_pricing=_portfolio_pricing_hidden())
-    return render_template('portfolio_gate.html', c=gate_c, state=None)
+        return render_template('portfolio.html', c=c, hide_pricing=_portfolio_pricing_hidden(), **i18n)
+    return render_template('portfolio_gate.html', c=gate_c, state=None, **i18n)
+
+
+@app.route('/portfolio/lang/<code>')
+def portfolio_lang(code):
+    """Switch the portfolio language for this session (en/he)."""
+    session['portfolio_lang'] = 'he' if code == 'he' else 'en'
+    return redirect(request.referrer or url_for('portfolio_page'))
 
 
 @app.route('/portfolio/lock')
@@ -387,9 +396,10 @@ def portfolio_work():
     """Portfolio work examples (content series). Same gate as /portfolio."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    content = _load_portfolio_content(_portfolio_lang())
     return render_template('portfolio_work.html', c=content.get('portfolio', {}),
-                           hide_pricing=_portfolio_pricing_hidden())
+                           hide_pricing=_portfolio_pricing_hidden(),
+                           **_portfolio_i18n(content))
 
 
 @app.route('/portfolio/results')
@@ -397,9 +407,10 @@ def portfolio_results():
     """Portfolio results (stats + case studies). Same gate as /portfolio."""
     if not _portfolio_unlocked():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    content = _load_portfolio_content(_portfolio_lang())
     return render_template('portfolio_results.html', c=content.get('portfolio', {}),
-                           hide_pricing=_portfolio_pricing_hidden())
+                           hide_pricing=_portfolio_pricing_hidden(),
+                           **_portfolio_i18n(content))
 
 
 @app.route('/portfolio/pricing')
@@ -417,7 +428,7 @@ def portfolio_pricing():
         return redirect(url_for('portfolio_page'))
     if _portfolio_pricing_hidden():
         return redirect(url_for('portfolio_page'))
-    content = _load_portfolio_content()
+    content = _load_portfolio_content(_portfolio_lang())
     row = _portfolio_grant()
     if row and row.is_legacy_pricing():
         pricing = {
@@ -434,14 +445,18 @@ def portfolio_pricing():
         'show_launch': row.show_launch is not False if row else True,
         'show_boost': row.show_boost is not False if row else True,
         'show_presence': row.show_presence is not False if row else True,
+        # Access joined 2026-08: opt-IN per code (NULL/False → hidden), so
+        # codes sent before it existed never gain a package they weren't offered.
+        'show_access': row.show_access is True if row else True,
         'launch_price': (row.launch_price or None) if row else None,
         'launch_note': ((row.launch_price_note or '')
                         if row and row.launch_price else None),
         'boost_price': (row.boost_price or None) if row else None,
         'presence_price': (row.presence_price or None) if row else None,
+        'access_price': (row.access_price or None) if row else None,
     }
     return render_template('portfolio_pricing.html', c=content.get('portfolio', {}),
-                           pricing=pricing)
+                           pricing=pricing, **_portfolio_i18n(content))
 
 
 def _portfolio_grant():
@@ -479,14 +494,85 @@ def _portfolio_unlocked():
     return False
 
 
-def _load_portfolio_content():
-    """Load portfolio content from portfolio_content.json."""
-    path = os.path.join(os.path.dirname(__file__), 'app', 'data', 'portfolio_content.json')
+# Hebrew v2 (plan: mixed-language, LTR): only nav/buttons/labels/body lines
+# translate — section badges, big headers and package names stay English, so
+# they have NO keys here and render their template defaults in both languages.
+PORTFOLIO_UI = {
+    'en': {
+        'toggle': 'עברית', 'toggle_code': 'he',
+        'nav_about': 'About', 'nav_work': 'Work', 'nav_results': 'Results', 'nav_pricing': 'Pricing',
+        'contact': 'Contact', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'Email',
+        'metric_community': 'Tech community', 'metric_cv': 'Increase in CV submissions',
+        'metric_views': 'Views last month', 'see_more_metrics': 'See more metrics',
+        'edge_p1': 'I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.',
+        'edge_p2_pre': "I don't just make videos,", 'edge_p2_mark': 'I understand your product.',
+        'see_full_results': 'See full results',
+        'availability': 'Limited monthly availability',
+        'recommended': 'Recommended', 'get_started': 'Get Started', 'per_month': '/month',
+        'min_commitment': 'Minimum commitment:', 'addon': 'add-on',
+    },
+    'he': {
+        'toggle': 'English', 'toggle_code': 'en',
+        'nav_about': 'אודות', 'nav_work': 'עבודות', 'nav_results': 'תוצאות', 'nav_pricing': 'תמחור',
+        'contact': 'צרו קשר', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'אימייל',
+        'metric_community': 'קהילת הייטק', 'metric_cv': 'עלייה בהגשות קורות חיים',
+        'metric_views': 'צפיות בחודש האחרון', 'see_more_metrics': 'לכל המדדים',
+        'edge_p1': 'עבדתי כמהנדס תוכנה בחברות סייבר ובניתי קריירת תוכן לצד משרה מלאה.',
+        'edge_p2_pre': 'אני לא רק מצלם סרטונים,', 'edge_p2_mark': 'אני מבין את המוצר שלכם.',
+        'see_full_results': 'לכל התוצאות',
+        'availability': 'זמינות חודשית מוגבלת',
+        'recommended': 'מומלץ', 'get_started': 'בואו נתחיל', 'per_month': '/לחודש',
+        'min_commitment': 'התחייבות מינימלית:', 'addon': 'תוספת',
+    },
+}
+
+
+def _portfolio_lang():
+    return 'he' if session.get('portfolio_lang') == 'he' else 'en'
+
+
+def _pf_merge(base, over):
+    """Deep-merge translated content over the English content. Dicts merge by
+    key; lists merge element-wise by index — the Hebrew file carries text
+    fields only, so values/videoIds/prices always come from English."""
+    if isinstance(base, dict) and isinstance(over, dict):
+        out = dict(base)
+        for k, v in over.items():
+            out[k] = _pf_merge(base[k], v) if k in base else v
+        return out
+    if isinstance(base, list) and isinstance(over, list):
+        merged = [_pf_merge(b, over[i]) if i < len(over) else b for i, b in enumerate(base)]
+        return merged + over[len(base):]
+    return base if over is None else over
+
+
+def _load_portfolio_content(lang='en'):
+    """Load portfolio content; Hebrew = portfolio_content_he.json merged over EN."""
+    base_dir = os.path.join(os.path.dirname(__file__), 'app', 'data')
     try:
-        with open(path, encoding='utf-8') as f:
-            return json.load(f)
+        with open(os.path.join(base_dir, 'portfolio_content.json'), encoding='utf-8') as f:
+            content = json.load(f)
     except Exception:
         return {}
+    if lang == 'he':
+        try:
+            with open(os.path.join(base_dir, 'portfolio_content_he.json'), encoding='utf-8') as f:
+                content = _pf_merge(content, json.load(f))
+        except Exception:
+            pass  # missing/broken translation → English
+    return content
+
+
+def _portfolio_i18n(content):
+    """Template kwargs for the language layer. The toggle stays admin-only
+    until portfolio.hebrewLive is flipped in the admin content editor."""
+    lang = _portfolio_lang()
+    return {
+        'ui': PORTFOLIO_UI[lang],
+        'lang': lang,
+        'show_lang_toggle': (session.get('portfolio_access') == 'admin'
+                             or bool(content.get('portfolio', {}).get('hebrewLive'))),
+    }
 
 
 def _load_hitech_data(filename):
@@ -1229,9 +1315,9 @@ def refresh_cache():
     """Force refresh the data cache."""
     # Simple security check
     key = request.args.get('key')
-    admin_secret = get_env_var('ADMIN_SECRET', 'ofoodiez2025') # Default secret
-    
-    if key != admin_secret:
+    admin_secret = get_env_var('ADMIN_SECRET')  # no default: unset locks out
+
+    if not admin_secret or key != admin_secret:
         return jsonify({"error": "Unauthorized"}), 401
 
     clear_data_cache()
@@ -1260,9 +1346,9 @@ def update_date():
     """Update the last_update date in config.json to today."""
     # Simple security check
     key = request.args.get('key')
-    admin_secret = get_env_var('ADMIN_SECRET', 'ofoodiez2025') # Default secret
-    
-    if key != admin_secret:
+    admin_secret = get_env_var('ADMIN_SECRET')  # no default: unset locks out
+
+    if not admin_secret or key != admin_secret:
         return jsonify({"error": "Unauthorized"}), 401
 
     try:

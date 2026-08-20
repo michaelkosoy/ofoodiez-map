@@ -18,9 +18,11 @@ def login():
 
     if request.method == 'POST':
         password = request.form.get('password')
-        admin_secret = os.environ.get('ADMIN_SECRET', 'ofoodiez2025')
-        
-        if password == admin_secret:
+        # No default: an unset ADMIN_SECRET must lock everyone OUT, not let
+        # everyone in with a password that is published in the public repo.
+        admin_secret = os.environ.get('ADMIN_SECRET')
+
+        if admin_secret and password == admin_secret:
             session['admin_logged_in'] = True
             next_url = request.args.get('next')
             return redirect(next_url or url_for('admin.dashboard'))

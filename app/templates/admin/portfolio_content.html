@@ -74,6 +74,10 @@
 <div class="header-controls">
   <h2><i class="fas fa-edit"></i> Portfolio Content Editor</h2>
 </div>
+<div style="margin:0 0 16px;display:flex;gap:8px;">
+  <a href="{{ url_for('admin.portfolio_content') }}" class="btn btn-sm" id="tab-en" style="text-decoration:none;">English (fields)</a>
+  <a href="{{ url_for('admin.portfolio_content') }}?lang=he" class="btn btn-sm" id="tab-he" style="text-decoration:none;">עברית (JSON)</a>
+</div>
 
 <div class="content-editor" id="content-editor">
   <div style="color:#999;padding:40px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
@@ -88,17 +92,38 @@
 {% block scripts %}
 <script>
 var portfolioContent = {};
+var HE = new URLSearchParams(location.search).get('lang') === 'he';
+document.getElementById(HE ? 'tab-he' : 'tab-en').style.background = 'var(--sidebar-bg, #333)';
+document.getElementById(HE ? 'tab-he' : 'tab-en').style.color = '#fff';
 
 function loadContent() {
-  fetch('/admin/api/portfolio/content')
+  fetch('/admin/api/portfolio/content' + (HE ? '?lang=he' : ''))
     .then(r => r.json())
     .then(data => {
       portfolioContent = data;
-      renderEditor();
+      if (HE) { renderHebrewEditor(); } else { renderEditor(); }
     })
     .catch(() => {
       document.getElementById('content-editor').innerHTML = '<p style="color:red">Failed to load content data.</p>';
     });
+}
+
+function renderHebrewEditor() {
+  /* The Hebrew file is a sparse OVERLAY deep-merged over the English content
+     (lists align by index; missing keys fall back to English). Editing it
+     through the field editor would write empty strings over English values,
+     so Hebrew is edited as raw JSON. */
+  document.getElementById('content-editor').innerHTML = `
+    <div class="section-title">Hebrew overlay — raw JSON</div>
+    <p style="font-size:13px;color:#777;margin-bottom:10px;">
+      Only translated text lives here; anything missing falls back to English.
+      Keep list lengths aligned with the English file. Values, prices and video
+      IDs belong in the English file only. See the <code>_glossary</code> key for the rules.
+    </p>
+    <div class="editor-field">
+      <textarea id="he-json" style="min-height:520px;font-family:monospace;font-size:12px;direction:ltr;">${escapeHtml(JSON.stringify(portfolioContent, null, 2))}</textarea>
+    </div>
+  `;
 }
 
 function renderEditor() {
@@ -119,6 +144,12 @@ function renderEditor() {
     <div class="editor-field">
       <label>Canonical URL</label>
       <input type="text" id="meta-canonical" value="${escapeHtml(c.meta?.canonical || '')}">
+    </div>
+    <div class="editor-field">
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="hebrew-live" ${c.hebrewLive ? 'checked' : ''} style="width:auto;">
+        Hebrew toggle visible to ALL portfolio visitors (unchecked = admin preview only)
+      </label>
     </div>
   `;
 
@@ -755,6 +786,7 @@ function collectData() {
   const c = portfolioContent.portfolio || {};
 
   // Meta
+  c.hebrewLive = document.getElementById('hebrew-live').checked;
   c.meta = {
     title: document.getElementById('meta-title').value,
     description: document.getElementById('meta-description').value,
@@ -1025,8 +1057,18 @@ function collectData() {
 }
 
 function saveContent() {
-  const data = collectData();
-  fetch('/admin/api/portfolio/content', {
+  let data;
+  if (HE) {
+    try {
+      data = JSON.parse(document.getElementById('he-json').value || '{}');
+    } catch (err) {
+      alert('Hebrew JSON is invalid — fix it before saving:\n' + err.message);
+      return;
+    }
+  } else {
+    data = collectData();
+  }
+  fetch('/admin/api/portfolio/content' + (HE ? '?lang=he' : ''), {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data),

@@ -72,9 +72,11 @@ def _package_price_defaults():
         return {
             'launch': items[0].get('price'), 'launch_note': items[0].get('priceNote'),
             'boost': items[1].get('price'), 'presence': items[2].get('price'),
+            'access': items[3].get('price') if len(items) > 3 else None,
         }
     except Exception:
-        return {'launch': None, 'launch_note': None, 'boost': None, 'presence': None}
+        return {'launch': None, 'launch_note': None, 'boost': None,
+                'presence': None, 'access': None}
 
 
 @admin_bp.route('/portfolio/access')
@@ -94,11 +96,13 @@ def portfolio_access_create():
     show_launch = bool(request.form.get('show_launch'))
     show_boost = bool(request.form.get('show_boost'))
     show_presence = bool(request.form.get('show_presence'))
+    show_access = bool(request.form.get('show_access'))
     show_pricing = bool(request.form.get('show_pricing'))
     launch_price = request.form.get('launch_price', '').strip() or None
     launch_price_note = request.form.get('launch_price_note', '').strip() or None
     boost_price = request.form.get('boost_price', '').strip() or None
     presence_price = request.form.get('presence_price', '').strip() or None
+    access_price = request.form.get('access_price', '').strip() or None
     # Snapshot the current defaults for anything not customized, so the row
     # always records exactly the prices this company was sent — future default
     # changes won't rewrite an already-sent offer.
@@ -110,9 +114,11 @@ def portfolio_access_create():
         boost_price = defaults['boost']
     if presence_price is None:
         presence_price = defaults['presence']
+    if access_price is None:
+        access_price = defaults['access']
     if not company:
         flash('Company name is required', 'error')
-    elif show_pricing and not (show_launch or show_boost or show_presence):
+    elif show_pricing and not (show_launch or show_boost or show_presence or show_access):
         flash('Pick at least one package to show', 'error')
     elif PortfolioAccess.query.filter(db.func.lower(PortfolioAccess.code) == code.lower()).first():
         flash(f'Code "{code}" already exists — pick another', 'error')
@@ -121,11 +127,13 @@ def portfolio_access_create():
                                        expires_at=datetime.utcnow() + timedelta(days=7),
                                        show_launch=show_launch, show_boost=show_boost,
                                        show_presence=show_presence,
+                                       show_access=show_access,
                                        show_pricing=show_pricing,
                                        launch_price=launch_price,
                                        launch_price_note=launch_price_note,
                                        boost_price=boost_price,
-                                       presence_price=presence_price))
+                                       presence_price=presence_price,
+                                       access_price=access_price))
         db.session.commit()
         flash(f'Access for {company} created — code "{code}", valid 7 days', 'success')
     return redirect(url_for('admin.portfolio_access'))

@@ -42,6 +42,10 @@ def _run_migrations():
         "ALTER TABLE portfolio_access ADD COLUMN show_pricing BOOLEAN DEFAULT TRUE",
         "ALTER TABLE portfolio_access ADD COLUMN show_boost BOOLEAN DEFAULT TRUE",
         "ALTER TABLE portfolio_access ADD COLUMN boost_price VARCHAR(64)",
+        # 2026-08 "Access" package: DEFAULT FALSE on purpose — codes created
+        # before it existed must not sprout a package they were never offered.
+        "ALTER TABLE portfolio_access ADD COLUMN show_access BOOLEAN DEFAULT FALSE",
+        "ALTER TABLE portfolio_access ADD COLUMN access_price VARCHAR(64)",
     ]
     # Commit per statement: on Postgres a later failure's rollback would other-
     # wise wipe earlier uncommitted successes in the same transaction (sqlite
@@ -294,12 +298,15 @@ class PortfolioAccess(db.Model):
     show_launch = db.Column(db.Boolean, default=True)
     show_boost = db.Column(db.Boolean, default=True)
     show_presence = db.Column(db.Boolean, default=True)
+    # Access is opt-in (default False): pre-2026-08 codes never see it.
+    show_access = db.Column(db.Boolean, default=False)
     # Whole pricing page on/off for this code (NULL/True → visible).
     show_pricing = db.Column(db.Boolean, default=True)
     launch_price = db.Column(db.String(64))
     launch_price_note = db.Column(db.String(256))
     boost_price = db.Column(db.String(64))
     presence_price = db.Column(db.String(64))
+    access_price = db.Column(db.String(64))
 
     def is_active(self):
         return bool(self.expires_at and self.expires_at > datetime.utcnow())

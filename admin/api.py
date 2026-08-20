@@ -992,13 +992,21 @@ def update_hitech_content():
         return jsonify({"error": str(e)}), 500
 
 
+def _portfolio_content_path():
+    """?lang=he edits the Hebrew overlay file; anything else the English source."""
+    name = 'portfolio_content_he.json' if request.args.get('lang') == 'he' else 'portfolio_content.json'
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app', 'data', name)
+
+
 @admin_bp.route('/api/portfolio/content', methods=['GET'])
 @login_required
 def get_portfolio_content():
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app', 'data', 'portfolio_content.json')
+    path = _portfolio_content_path()
     try:
         with open(path, encoding='utf-8') as f:
             return jsonify(json.load(f))
+    except FileNotFoundError:
+        return jsonify({"portfolio": {}})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -1006,7 +1014,7 @@ def get_portfolio_content():
 @admin_bp.route('/api/portfolio/content', methods=['PUT'])
 @login_required
 def update_portfolio_content():
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app', 'data', 'portfolio_content.json')
+    path = _portfolio_content_path()
     data = request.json
     if not data:
         return jsonify({"error": "No JSON payload provided"}), 400
@@ -1025,7 +1033,7 @@ def trigger_whatsapp_status_check():
     service (which has the Brevo env vars). Long timeout: the bot sends the
     emails sequentially inside this one request."""
     base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
-    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
+    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET")
     try:
         resp = requests.post(f"{base}/wa/status-check", params={"key": secret}, timeout=120)
         if resp.ok:
@@ -1044,7 +1052,7 @@ def _notify_via_bot(request_id):
     'unreachable'. The shared key (WA_CRON_SECRET / ADMIN_SECRET) must match on
     both services — a mismatch shows up as 'unreachable'."""
     base = os.environ.get("WA_BOT_BASE_URL", "https://ofoodiez-map-1.onrender.com").rstrip("/")
-    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET", "ofoodiez2025")
+    secret = os.environ.get("WA_CRON_SECRET") or os.environ.get("ADMIN_SECRET")
     try:
         resp = requests.post(f"{base}/wa/requests/{request_id}/notify",
                              params={"key": secret}, timeout=15)

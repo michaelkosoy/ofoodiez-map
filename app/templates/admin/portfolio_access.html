@@ -106,13 +106,16 @@
           <input type="checkbox" name="show_presence" checked> Show Presence
         </label>
         <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
+          <input type="checkbox" name="show_access" checked> Show Access
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:600;">
           <input type="checkbox" name="show_pricing" checked> Show Pricing page
         </label>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
         <div class="form-group">
           <label>Launch price</label>
-          <input type="text" name="launch_price" class="form-control" placeholder="default: ₪7,000 base">
+          <input type="text" name="launch_price" class="form-control" placeholder="default: {{ price_defaults.launch }}">
         </div>
         <div class="form-group">
           <label>Launch price note</label>
@@ -121,11 +124,15 @@
         </div>
         <div class="form-group">
           <label>Boost price (one-time)</label>
-          <input type="text" name="boost_price" class="form-control" placeholder="default: ₪11,900">
+          <input type="text" name="boost_price" class="form-control" placeholder="default: {{ price_defaults.boost }}">
         </div>
         <div class="form-group">
           <label>Presence price (per month)</label>
-          <input type="text" name="presence_price" class="form-control" placeholder="default: Starting from ₪9,900">
+          <input type="text" name="presence_price" class="form-control" placeholder="default: {{ price_defaults.presence }}">
+        </div>
+        <div class="form-group">
+          <label>Access price (per month)</label>
+          <input type="text" name="access_price" class="form-control" placeholder="default: {{ price_defaults.access or '₪5,000' }}">
         </div>
       </div>
     </details>
@@ -142,6 +149,8 @@
     {% set sl = row.show_launch is none or row.show_launch %}
     {% set sb = row.show_boost is none or row.show_boost %}
     {% set sp = row.show_presence is none or row.show_presence %}
+    {# Access is opt-in: NULL (pre-Access code) means hidden, not shown #}
+    {% set sa = row.show_access is sameas true %}
     <tr>
       <td><strong>{{ row.company }}</strong></td>
       <td><span class="code-chip">{{ row.code }}</span></td>
@@ -157,11 +166,12 @@
         {% elif row.show_pricing is sameas false %}
         <span class="badge" style="background:#f8d7da;color:#721c24;">NO PRICING PAGE</span>
         {% else %}
-        {{ ((['Launch'] if sl else []) + (['Boost'] if sb else []) + (['Presence'] if sp else [])) | join(' + ') }}
+        {{ ((['Launch'] if sl else []) + (['Boost'] if sb else []) + (['Presence'] if sp else []) + (['Access'] if sa else [])) | join(' + ') }}
         <div style="font-size:12px;color:#555;">
           {% if sl %}L: <strong>{{ row.launch_price or price_defaults.launch ~ '*' }}</strong>{% if row.launch_price_note %} ({{ row.launch_price_note }}){% endif %}{% endif %}
           {% if sb %} · B: <strong>{{ row.boost_price or price_defaults.boost ~ '*' }}</strong>/mo{% endif %}
           {% if sp %} · P: <strong>{{ row.presence_price or price_defaults.presence ~ '*' }}</strong>/mo{% endif %}
+          {% if sa %} · A: <strong>{{ row.access_price or price_defaults.access ~ '*' }}</strong>/mo{% endif %}
         </div>
         {% endif %}
       </td>

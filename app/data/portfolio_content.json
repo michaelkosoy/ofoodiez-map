@@ -630,7 +630,7 @@
             "**Active referrals of relevant candidates to your HR team**"
           ],
           "goal": "A one-time campaign to introduce your company to the right audience",
-          "price": "₪7,500",
+          "price": "₪8,500",
           "priceNote": "+ referral fee"
         },
         {
@@ -642,9 +642,8 @@
             "## Kickoff",
             "A practical content strategy and reorganization of your social profiles",
             "1 video published on my channels",
-            "2 reels created for your company's channels",
             "## Monthly Presence",
-            "Monthly filming session at a company event",
+            "At least 1 monthly filming session at a company event",
             "## Ongoing Support",
             "Ongoing content ideas and hands-on consulting",
             "## Community and Events",
@@ -653,33 +652,51 @@
             "**CV-bot candidate access and active referrals to your HR team**"
           ],
           "minimumCommitment": "3 months",
-          "price": "₪5,500",
-          "addons": [
-            "Additional filming days"
-          ]
+          "price": "₪7,500",
+          "priceNote": "+ referral fee"
         },
         {
           "name": "PRESENCE",
           "subtitle": "Full Employer Branding Content Engine",
           "description": "More consistent weekly content. Your team stays hands-off while I handle the entire content process.",
           "banner": "Everything from Boost, with:",
-          "goal": "More consistent weekly content. Your team stays hands-off while I handle the entire content process.",
+          "goal": "You forget social media exists. I handle everything, end to end.",
           "includes": [
             "## Additional Content and Support",
-            "Up to 2 filming days per month instead of 1",
-            "1 post published every week",
+            "More than 2 filming days per month",
+            "1 post published every week (reel/carousel)",
             "Maintaining your company's story",
             "## Talent",
             "**Access to candidates from my CV-bot talent pool**",
             "**Active referrals of relevant candidates to your HR team**"
           ],
           "minimumCommitment": "3 months",
-          "price": "Starting from ₪9,500",
+          "price": "Starting from ₪11,000",
+          "priceNote": "+ referral fee",
           "addons": [
             "Additional social media channel",
-            "Founder personal branding",
-            "Additional filming days"
+            "Founder personal branding"
           ]
+        },
+        {
+          "name": "ACCESS",
+          "subtitle": "Employer Branding Through the Ofoodiez Network",
+          "description": "A collaboration to get exposure to the right audience, using the Ofoodiez network only.",
+          "goal": "A collaboration to get exposure to the right audience, using the Ofoodiez network only.",
+          "includes": [
+            "## Kickoff",
+            "Discovery and creative session",
+            "Build a content strategy",
+            "## Monthly Presence",
+            "At least 1 filming session per month at a company event, published to my story",
+            "A clear call to action focused on hiring",
+            "1 reel published on my account every 3 months",
+            "## Talent",
+            "**Active referrals of relevant candidates to your HR team**"
+          ],
+          "minimumCommitment": "3 months",
+          "price": "₪5,000",
+          "priceNote": "+ referral fee"
         }
       ],
       "presencePanel": {

@@ -5,14 +5,18 @@
    portfolio_content.json; pre-revamp codes had their quoted prices frozen
    onto the access-code row itself, so old offers never change. #}
 {% set pricing = pricing | default({'show_launch': True, 'show_boost': True, 'show_presence': True,
+                                    'show_access': True,
                                     'launch_price': None, 'launch_note': None,
-                                    'boost_price': None, 'presence_price': None}) %}
+                                    'boost_price': None, 'presence_price': None,
+                                    'access_price': None}) %}
 {% set launch = c.packages['items'][0] %}
 {% set boost = c.packages['items'][1] %}
 {% set presence = c.packages['items'][2] %}
+{% set access = c.packages['items'][3] if c.packages['items'] | length > 3 else None %}
 {% set launch_msg = "Hi, I'm interested in the " ~ (launch.name | title) ~ " package" %}
 {% set boost_msg = "Hi, I'm interested in the " ~ (boost.name | title) ~ " package" %}
 {% set presence_msg = "Hi, I'm interested in the " ~ (presence.name | title) ~ " package" %}
+{% set access_msg = "Hi, I'm interested in the " ~ (access.name | title if access else 'Access') ~ " package" %}
 {% block content %}
 <!-- Main Content Canvas -->
 <main class="px-gutter md:px-margin-desktop py-20 max-w-7xl mx-auto space-y-32">
@@ -54,6 +58,37 @@
 {% if launch_note %}<p class="text-xs text-custom-brown mt-1">{{ launch_note }}</p>{% endif %}
 </div>
 <a href="https://wa.me/972542471816?text={{ launch_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
+</div>
+</div>
+{% endif %}
+{% if access and pricing.show_access %}
+<div class="package-card w-full md:flex-1 md:max-w-96 bg-white border border-custom-brown/10 p-3 flex flex-col text-custom-brown rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] relative">
+<div class="mb-3">
+<h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-4 font-black">{{ access.name | title }}</h3>
+<p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ access.subtitle }}</p>
+{% if access.goal %}<p class="text-xs text-custom-brown mt-1 leading-relaxed">{{ access.goal }}</p>{% endif %}
+</div>
+<div class="pt-3 flex-grow flex flex-col">
+<ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
+{# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
+{% for item in access.includes %}
+{% if item.startswith('## ') %}
+<li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
+{% elif item.startswith('**') %}
+<li class="flex items-start gap-2 font-black"><span class="material-symbols-outlined text-custom-brown text-lg">check</span> {{ item.strip('*') }}</li>
+{% else %}
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-custom-brown text-lg">check</span> {{ item }}</li>
+{% endif %}
+{% endfor %}
+</ul>
+</div>
+<div class="pt-3">
+<div class="text-center">
+<p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.access_price or access.price | default('₪5,000') }}<span class="font-medium text-sm">{{ ui.per_month | default('/month') }}</span></p>
+{% if access.priceNote %}<p class="text-xs text-custom-brown mt-1">{{ access.priceNote }}</p>{% endif %}
+{% if access.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">{{ ui.min_commitment | default('Minimum commitment:') }} {{ access.minimumCommitment }}</p>{% endif %}
+</div>
+<a href="https://wa.me/972542471816?text={{ access_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
 </div>
 </div>
 {% endif %}
@@ -102,6 +137,7 @@
 <div class="pt-3 mt-3">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.boost_price or boost.price | default('₪5,000') }}<span class="font-medium text-sm">{{ ui.per_month | default('/month') }}</span></p>
+{% if boost.priceNote %}<p class="text-xs text-custom-brown mt-1">{{ boost.priceNote }}</p>{% endif %}
 {% if boost.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">{{ ui.min_commitment | default('Minimum commitment:') }} {{ boost.minimumCommitment }}</p>{% endif %}
 </div>
 <a href="https://wa.me/972542471816?text={{ boost_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-burgundy text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
@@ -113,7 +149,7 @@
 <div class="mb-3 relative z-10">
 <h3 class="text-4xl md:text-5xl leading-none tracking-tight text-custom-brown mb-4 font-black">{{ presence.name | title }}</h3>
 <p class="font-label-mono text-xs uppercase tracking-wider text-custom-burgundy font-bold mb-1">{{ presence.subtitle }}</p>
-{% if presence.goal %}<p class="font-body-md text-custom-brown font-black text-sm leading-snug">{{ presence.goal }}</p>{% endif %}
+{% if presence.goal %}<p class="font-body-md text-custom-brown font-black text-lg md:text-xl leading-snug">{{ presence.goal }}</p>{% endif %}
 </div>
 <div class="pt-3 flex-grow flex flex-col relative z-10">
 {% if presence.inherits %}
@@ -150,6 +186,7 @@
 <div class="pt-3">
 <div class="text-center">
 <p class="font-body-md text-custom-brown font-bold text-lg">{{ pricing.presence_price or presence.price | default('Starting from ₪9,900') }}<span class="font-medium text-sm">{{ ui.per_month | default('/month') }}</span></p>
+{% if presence.priceNote %}<p class="text-xs text-custom-brown mt-1">{{ presence.priceNote }}</p>{% endif %}
 {% if presence.minimumCommitment %}<p class="font-label-mono text-xs text-custom-brown mt-1 uppercase tracking-wider">{{ ui.min_commitment | default('Minimum commitment:') }} {{ presence.minimumCommitment }}</p>{% endif %}
 </div>
 <a href="https://wa.me/972542471816?text={{ presence_msg | urlencode }}" target="_blank" rel="noopener" class="btn-soft mt-4 block text-center bg-custom-brown text-white px-6 py-3 font-label-bold text-label-bold uppercase tracking-widest border border-custom-brown shadow-[3px_3px_0px_0px_#2A2420] rounded-lg">{{ ui.get_started | default('Get Started') }}</a>
