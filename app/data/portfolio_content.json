@@ -46,13 +46,29 @@
             "views": "107K",
             "likes": "902",
             "sends": "910"
-          }
+          },
+          "section": "highlights"
         },
         {
-          "videoId": "Y-W7XyyYKlo",
+          "videoId": "FEFjKFDEnFE",
           "series": "Day in a Life",
           "title": "CEO & Entrepreneur",
-          "description": "A founder who's living the dream"
+          "description": "A founder who's living the dream",
+          "section": "dayinlife"
+        },
+        {
+          "videoId": "FuP8pkfHhEY",
+          "series": "Story",
+          "title": "Zafran",
+          "description": "Company story",
+          "section": "highlights"
+        },
+        {
+          "videoId": "rWoISBh77t0",
+          "series": "Startups Series",
+          "title": "ScaleOps",
+          "description": "Startup spotlight",
+          "section": "highlights"
         },
         {
           "videoId": "SfkXRtB5ZzY",
@@ -85,7 +101,8 @@
             "views": "204K",
             "likes": "2,508",
             "sends": "5,847"
-          }
+          },
+          "section": "highlights"
         },
         {
           "videoId": "bpAs1eVYM0M",
@@ -123,19 +140,36 @@
             "views": "103K",
             "likes": "662",
             "sends": "945"
-          }
-        },
-        {
-          "videoId": "y8JLP4kFndI",
-          "series": "Opinion",
-          "title": "Personal opinion",
-          "description": "Why hi-tech companies spend hundreds of thousands to take over cafés"
+          },
+          "section": "highlights"
         },
         {
           "videoId": "Zd_lIkYUtMU",
           "series": "Event Coverage",
           "title": "Cyera",
-          "description": "Art event coverage"
+          "description": "Art event coverage",
+          "section": "events"
+        },
+        {
+          "videoId": "J17IUqyrhms",
+          "series": "Event Coverage",
+          "title": "Appcharge",
+          "description": "Tech comedy night",
+          "section": "events"
+        },
+        {
+          "videoId": "vwLS9vYwG6Y",
+          "series": "Event Coverage",
+          "title": "Appcharge",
+          "description": "Movie night",
+          "section": "events"
+        },
+        {
+          "videoId": "y8JLP4kFndI",
+          "series": "Opinion",
+          "title": "Personal opinion",
+          "description": "Why hi-tech companies spend hundreds of thousands to take over cafés",
+          "section": "events"
         }
       ],
       "strip": {
@@ -154,7 +188,21 @@
           }
         ],
         "cta": "See all results and audience data"
-      }
+      },
+      "sections": [
+        {
+          "id": "highlights",
+          "title": "Company Highlights"
+        },
+        {
+          "id": "dayinlife",
+          "title": "Day in a Life"
+        },
+        {
+          "id": "events",
+          "title": "Events"
+        }
+      ]
     },
     "results": {
       "heroTitle": "The right audience. Measurable action.",

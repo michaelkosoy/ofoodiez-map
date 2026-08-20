@@ -231,8 +231,15 @@ function renderEditor() {
       <label>Results strip — link text (opens Results page)</label>
       <input type="text" id="series-strip-cta" value="${escapeHtml(c.series?.strip?.cta || '')}">
     </div>
+    ${(c.series?.sections || []).map((s, i) => `
+    <div class="editor-field">
+      <label>Work page row title — ${escapeHtml(s.id)}</label>
+      <input type="text" id="series-section-title-${i}" data-sid="${escapeHtml(s.id)}" value="${escapeHtml(s.title || '')}">
+    </div>`).join('')}
     <button class="btn btn-small" onclick="addSeriesItem()">+ Add Video</button>
   `;
+  const sectionIds = (c.series?.sections || []).map(s => s.id);
+  if (!sectionIds.length) sectionIds.push('highlights', 'dayinlife', 'events');
   (c.series?.items || []).forEach((item, i) => {
     html += `
       <div class="sub-card">
@@ -243,6 +250,12 @@ function renderEditor() {
         <div class="editor-field">
           <label>Series Name (badge — the content type)</label>
           <input type="text" id="series-series-${i}" value="${escapeHtml(item.series || '')}">
+        </div>
+        <div class="editor-field">
+          <label>Section (which work-page row it appears in)</label>
+          <select id="series-section-${i}">
+            ${sectionIds.map(s => `<option value="${s}" ${item.section === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
         </div>
         <div class="editor-field">
           <label>Title (company / subject)</label>
@@ -826,6 +839,9 @@ function collectData() {
 
   // Content Series (work page videos)
   const stripStats = parseValueLabel(document.getElementById('series-strip-stats').value);
+  // hover stats aren't editable here — capture BEFORE c.series is replaced,
+  // then carry them through so saving doesn't drop them
+  const oldSeriesItems = (portfolioContent.portfolio?.series?.items) || [];
   c.series = {
     title: document.getElementById('series-title').value,
     subtitle: document.getElementById('series-subtitle').value,
@@ -833,6 +849,12 @@ function collectData() {
       stats: stripStats,
       cta: document.getElementById('series-strip-cta').value,
     } : undefined,
+    sections: (() => {
+      const arr = [];
+      for (let si = 0, el; (el = document.getElementById(`series-section-title-${si}`)); si++)
+        arr.push({ id: el.dataset.sid, title: el.value });
+      return arr.length ? arr : undefined;
+    })(),
     items: [],
   };
   i = 0;
@@ -841,6 +863,8 @@ function collectData() {
     c.series.items.push({
       videoId: document.getElementById(`series-video-${i}`).value.trim(),
       series: document.getElementById(`series-series-${i}`).value,
+      section: (document.getElementById(`series-section-${i}`) || {}).value || undefined,
+      hover: (oldSeriesItems[i] || {}).hover,
       title: document.getElementById(`series-item-title-${i}`).value,
       description: document.getElementById(`series-desc-${i}`).value,
       goal: document.getElementById(`series-goal-${i}`).value || undefined,

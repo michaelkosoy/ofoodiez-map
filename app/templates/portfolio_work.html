@@ -26,16 +26,31 @@
 </div>
 </div>
 {% endif %}
-<div class="relative">
-<button id="series-prev" aria-label="Previous" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white rounded-full border border-custom-brown shadow-[2px_2px_0px_0px_#2A2420] hover:bg-custom-brown hover:text-white transition-colors">
-<span class="material-symbols-outlined">arrow_back</span>
+{# One row per section (Company Highlights / Day in a Life / Events): a
+   horizontal snap carousel each, so mobile scans three short shelves instead
+   of one endless strip. Items are tagged with section ids in the JSON. #}
+{% set sections = c.series.sections | default([{'id': 'highlights', 'title': 'Company Highlights'},
+                                               {'id': 'dayinlife', 'title': 'Day in a Life'},
+                                               {'id': 'events', 'title': 'Events'}]) %}
+<div class="space-y-14 md:space-y-20">
+{% for sec in sections %}
+{% set sec_items = c.series['items'] | default([]) | selectattr('section', 'equalto', sec.id) | list %}
+{% if sec_items %}
+<div>
+<div class="flex items-baseline gap-3 mb-4 md:mb-6">
+<span class="font-label-mono text-xs uppercase tracking-widest text-custom-burgundy font-bold">0{{ loop.index }}</span>
+<h3 class="font-headline-md text-2xl md:text-3xl text-custom-brown font-black">{{ sec.title }}</h3>
+</div>
+<div class="relative" data-row-carousel>
+<button data-prev aria-label="Previous" class="flex absolute left-0 top-1/2 -translate-y-1/2 md:-translate-x-1/2 z-20 w-9 h-9 md:w-12 md:h-12 items-center justify-center bg-white rounded-full border border-custom-brown shadow-[2px_2px_0px_0px_#2A2420] hover:bg-custom-brown hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg md:text-2xl">arrow_back</span>
 </button>
-<button id="series-next" aria-label="Next" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 w-12 h-12 items-center justify-center bg-white rounded-full border border-custom-brown shadow-[2px_2px_0px_0px_#2A2420] hover:bg-custom-brown hover:text-white transition-colors">
-<span class="material-symbols-outlined">arrow_forward</span>
+<button data-next aria-label="Next" class="flex absolute right-0 top-1/2 -translate-y-1/2 md:translate-x-1/2 z-20 w-9 h-9 md:w-12 md:h-12 items-center justify-center bg-white rounded-full border border-custom-brown shadow-[2px_2px_0px_0px_#2A2420] hover:bg-custom-brown hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg md:text-2xl">arrow_forward</span>
 </button>
-<div id="series-track" class="flex gap-bento-gap overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 -mx-gutter px-gutter md:mx-0 md:px-0">
-{% for item in c.series['items'] | default([]) %}
-<div class="series-card flex-shrink-0 w-[85%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-xl"
+<div class="row-track flex gap-bento-gap overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 -mx-gutter px-gutter md:mx-0 md:px-0">
+{% for item in sec_items %}
+<div class="series-card flex-shrink-0 w-[62%] sm:w-[46%] lg:w-[31%] snap-start aspect-[9/13] relative group neo-brutal-border overflow-hidden cursor-pointer neo-brutal-shadow-hover transition-all duration-300 bg-custom-brown rounded-xl"
      data-video-id="{{ item.videoId }}" data-video-title="{{ item.series }}: {{ item.title }}">
 <img src="https://i.ytimg.com/vi/{{ item.videoId }}/oar2.jpg"
      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/{{ item.videoId }}/hqdefault.jpg'"
@@ -68,6 +83,10 @@
 {% endfor %}
 </div>
 </div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
 </section>
 </main>
 <!-- Video Lightbox -->
@@ -85,16 +104,15 @@
 (function () {
   const box = document.getElementById('video-lightbox');
   const frame = document.getElementById('video-lightbox-frame');
-  const track = document.getElementById('series-track');
-  if (!box || !frame || !track) return;
+  if (!box || !frame) return;
   const close = () => {
     box.classList.add('hidden');
     box.classList.remove('flex');
     frame.src = '';
     document.body.style.overflow = '';
   };
-  // Delegated so it also works on the clones the carousel loop creates
-  track.addEventListener('click', (e) => {
+  // Delegated at the document so one lightbox serves every section row
+  document.addEventListener('click', (e) => {
     const card = e.target.closest('[data-video-id]');
     if (!card) return;
     frame.title = card.getAttribute('data-video-title') || 'Video';
@@ -106,6 +124,28 @@
   box.querySelectorAll('[data-lightbox-close]').forEach(el => el.addEventListener('click', close));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !box.classList.contains('hidden')) close();
+  });
+
+  // Per-row arrows: always visible on every row, mobile and desktop; plain
+  // scrollBy one card. Each arrow fades at its end of the row so people can
+  // tell when there's more to scroll.
+  document.querySelectorAll('[data-row-carousel]').forEach((row) => {
+    const track = row.querySelector('.row-track');
+    const prev = row.querySelector('[data-prev]');
+    const next = row.querySelector('[data-next]');
+    if (!track || !prev || !next) return;
+    const step = () => ((track.querySelector('.series-card') || {}).offsetWidth || 300) + 16;
+    const update = () => {
+      const atStart = track.scrollLeft < 8;
+      const atEnd = track.scrollLeft > track.scrollWidth - track.clientWidth - 8;
+      prev.style.opacity = atStart ? '0.25' : '1';
+      next.style.opacity = atEnd ? '0.25' : '1';
+    };
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+    update();
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
   });
 })();
 </script>
