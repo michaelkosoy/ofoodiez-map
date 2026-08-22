@@ -1,0 +1,464 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}{{ cand.name or 'Candidate' }} — Talent{% endblock %}
+
+{% block talent_actions %}
+{% if prev_id %}<a class="tbtn secondary" href="{{ url_for('admin.talent_candidate', cand_id=prev_id) }}"><i class="fas fa-chevron-left"></i> Prev</a>{% endif %}
+{% if next_id %}<a class="tbtn secondary" href="{{ url_for('admin.talent_candidate', cand_id=next_id) }}">Next <i class="fas fa-chevron-right"></i></a>{% endif %}
+{% endblock %}
+
+{% block talent_content %}
+{% set years = a.get('years_experience', cand.years_experience) %}
+{% set title = a.get('current_title') or cand.current_title or (a.get('roles') or [''])[0] %}
+
+<div class="tcard">
+    <div class="thead-line">
+        <h2>{{ cand.name or '(no name yet)' }}</h2>
+        <span class="tbadge {{ cand.status|lower }}">{{ cand.status.replace('_',' ') }}</span>
+        {% if active_cv and active_cv.analysis_status in ('pending','running') %}
+            <span class="tbadge pending" id="analyzingBadge">AI ANALYZING…</span>
+        {% elif active_cv and active_cv.analysis_status == 'failed' %}
+            <span class="tbadge failed" title="{{ active_cv.analysis_error }}">AI FAILED</span>
+        {% endif %}
+    </div>
+    <div class="tmeta">
+        {{ title or 'Unknown role' }}{% if years is not none %} · {{ '%g'|format(years) }} years{% endif %}{% if a.get('city') or cand.city %} · {{ a.get('city') or cand.city }}{% endif %}
+        {% if cand.source %} · via {{ cand.source }}{% endif %}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="tbtn success sm" onclick="setStatus('STRONG')"><u>S</u>trong</button>
+        <button class="tbtn warn sm" onclick="setStatus('MAYBE')"><u>M</u>aybe</button>
+        <button class="tbtn secondary sm" onclick="setStatus('SKIP')">Skip (<u>X</u>)</button>
+        <button class="tbtn secondary sm" onclick="setStatus('COMPLETED')">Completed</button>
+        <button class="tbtn secondary sm" onclick="setStatus('ARCHIVED')">Archive</button>
+        <span style="flex-grow:1"></span>
+        <button class="tbtn ghost sm" onclick="reanalyze()"><i class="fas fa-rotate"></i> Re-analyze</button>
+    </div>
+</div>
+
+<div class="tgrid">
+<div><!-- LEFT column -->
+
+    {% if a %}
+    <div class="tcard">
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;">
+            <div><h3 style="margin-bottom:4px">Overall</h3>
+                {% if a.get('rating') %}<span class="tbadge {{ a.rating|lower }}">{{ a.rating }}</span>{% else %}—{% endif %}
+            </div>
+            <div><h3 style="margin-bottom:4px">CV quality</h3>
+                {% if a.get('cv_quality') %}<span class="tbadge {{ a.cv_quality|lower }}">{{ a.cv_quality }}</span>{% else %}—{% endif %}
+            </div>
+        </div>
+        {% if a.get('rating_reasons') %}
+        <ul class="tlist" style="margin-bottom:14px;">
+            {% for r in a.rating_reasons %}<li class="dot">{{ r }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        <h3>Summary</h3>
+        <p style="margin-bottom:16px;">{{ a.get('summary') or '—' }}</p>
+
+        {% if a.get('positions') %}
+        <h3>Experience</h3>
+        <div style="margin-bottom:16px;">
+            {% for p in a.positions %}
+            <div class="trow"><span><b>{{ p.title }}</b>{% if p.company %} — {{ p.company }}{% endif %}</span>
+                <span class="tsub">{{ p.period or '' }}</span></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <h3>Skills</h3>
+        <div class="tskills" style="max-width:none; margin-bottom:16px;">
+            {% for s in a.get('skills') or [] %}<span class="tskill">{{ s }}</span>{% else %}<span class="tsub">—</span>{% endfor %}
+        </div>
+
+        <h3>Strengths</h3>
+        <ul class="tlist" style="margin-bottom:16px;">
+            {% for s in a.get('strengths') or [] %}<li class="pro">{{ s }}</li>{% else %}<li class="tsub">—</li>{% endfor %}
+        </ul>
+
+        <h3>Concerns</h3>
+        <ul class="tlist">
+            {% for s in a.get('concerns') or [] %}<li class="con">{{ s }}</li>
+            {% else %}<li class="tsub">No meaningful concerns.</li>{% endfor %}
+        </ul>
+
+        <p class="tsection-note" style="margin-top:14px;">
+            Analysis model: {{ active_cv.analysis_model }} · extraction v{{ active_cv.extraction_version }} ·
+            {{ active_cv.analyzed_at.strftime('%b %-d, %Y %H:%M') if active_cv.analyzed_at }}
+        </p>
+    </div>
+    {% elif active_cv and active_cv.analysis_status == 'failed' %}
+    <div class="tcard"><h3>AI analysis failed</h3>
+        <p style="color:#c62828;">{{ active_cv.analysis_error }}</p>
+        <button class="tbtn sm" onclick="reanalyze()">Try again</button>
+    </div>
+    {% elif active_cv %}
+    <div class="tcard"><h3>AI analysis</h3><p class="tsub">Running… this page refreshes automatically.</p></div>
+    {% else %}
+    <div class="tcard"><h3>No CV yet</h3><p class="tsub">Upload one on the right.</p></div>
+    {% endif %}
+
+    <div class="tcard">
+        <h3><i class="fas fa-building"></i> Recommended Companies</h3>
+        {% set shown = [] %}
+        {% for m in matches %}
+            {% set comp = companies.get(m.company_id) %}
+            {% set fit = m.admin_fit or m.ai_fit %}
+            {% if comp and fit and (fit != 'NO_MATCH' or m.overridden) %}
+            {% if shown.append(1) %}{% endif %}
+            <div class="tmatch" data-company="{{ comp.id }}">
+                <div class="mrow">
+                    <span class="mname">{{ comp.name }}</span>
+                    <span class="tbadge {{ fit|lower }}">{{ fit.replace('_',' ') }}{{ ' MATCH' if fit != 'NO_MATCH' else '' }}</span>
+                    {% if m.overridden %}<span class="tbadge manual" title="Manually set — AI re-runs will not change it">OVERRIDE</span>{% endif %}
+                    {% if m.source == 'MANUAL' %}<span class="tbadge manual">MANUAL ADD</span>{% endif %}
+                    {% if comp.id in referred_company_ids %}<span class="tbadge submitted">ALREADY REFERRED</span>{% endif %}
+                    <span style="flex-grow:1"></span>
+                    <span class="method">{{ comp.referral_method.replace('_',' ') }}</span>
+                </div>
+                {% if m.ai_pros or m.ai_cons %}
+                <ul class="tlist" style="margin-top:8px;">
+                    {% for p in m.ai_pros or [] %}<li class="pro">{{ p }}</li>{% endfor %}
+                    {% for c2 in m.ai_cons or [] %}<li class="con">{{ c2 }}</li>{% endfor %}
+                </ul>
+                {% endif %}
+                <div class="mactions">
+                    {% if comp.referral_method == 'MANUAL_UPLOAD' %}
+                        <button class="tbtn sm" onclick="quickRefer({{ comp.id }})"><i class="fas fa-rocket"></i> Refer — Portal Handoff</button>
+                        {% if comp.portal_url %}<a class="tbtn sm secondary" target="_blank" href="{{ comp.portal_url }}"><i class="fas fa-up-right-from-square"></i> Open Portal</a>{% endif %}
+                    {% elif comp.referral_method == 'REFERRAL_LINK' %}
+                        <button class="tbtn sm success" onclick="quickRefer({{ comp.id }})"><i class="fas fa-bolt"></i> Send Link Email Now</button>
+                        {% if comp.referral_url %}<button class="tbtn sm secondary" onclick="copyText('{{ comp.referral_url|e }}', 'Link copied')">Copy Link</button>{% endif %}
+                    {% else %}
+                        <button class="tbtn sm" onclick="quickRefer({{ comp.id }})"><i class="fas fa-envelope"></i> Email CV to {{ comp.name }}</button>
+                    {% endif %}
+                    <select class="tbtn sm secondary" style="padding:4px 8px;" onchange="overrideFit({{ m.id }}, this.value)">
+                        <option value="">Override fit…</option>
+                        <option value="STRONG">STRONG</option><option value="MAYBE">MAYBE</option>
+                        <option value="NO_MATCH">NO MATCH</option><option value="CLEAR">Clear override</option>
+                    </select>
+                </div>
+                {% if comp.referral_method == 'MANUAL_UPLOAD' and comp.portal_instructions %}
+                <p class="tsection-note" style="margin-top:8px; white-space:pre-wrap;">{{ comp.portal_instructions }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% if not shown %}
+        <p class="tsub">No recommended companies{% if active_cv and active_cv.analysis_status == 'complete' %} — the AI found no plausible match among active companies. You can still add one manually below.{% endif %}</p>
+        {% endif %}
+        {% set hidden_no_match = matches | selectattr('ai_fit', 'equalto', 'NO_MATCH') | rejectattr('overridden') | list %}
+        {% if hidden_no_match %}
+        <details><summary class="tsub" style="cursor:pointer;">{{ hidden_no_match|length }} company(ies) evaluated as NO MATCH — show</summary>
+            {% for m in hidden_no_match %}{% set comp = companies.get(m.company_id) %}
+            <div class="trow"><span><b>{{ comp.name if comp }}</b>
+                {% for c2 in m.ai_cons or [] %}<span class="tsub"> · {{ c2 }}</span>{% endfor %}</span>
+                <button class="tbtn sm ghost" onclick="overrideFit({{ m.id }}, 'MAYBE')">Add anyway</button></div>
+            {% endfor %}
+        </details>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center; border-top:1px solid #f0e7e1; padding-top:14px;">
+            <b style="font-size:13px; color:#6b5a52;">Add company:</b>
+            <select id="addCompanySelect" class="tbtn sm secondary" style="padding:6px 10px;">
+                <option value="">Pick a company…</option>
+                {% for comp in active_companies %}<option value="{{ comp.id }}">{{ comp.name }}</option>{% endfor %}
+            </select>
+            <select id="addCompanyFit" class="tbtn sm secondary" style="padding:6px 10px;">
+                <option value="MAYBE">MAYBE</option><option value="STRONG">STRONG</option>
+            </select>
+            <button class="tbtn sm" onclick="addCompany()">Add</button>
+        </div>
+    </div>
+
+    <div class="tcard">
+        <h3><i class="fas fa-clock-rotate-left"></i> Referral History</h3>
+        {% for r in referrals %}
+        {% set comp = companies.get(r.company_id) %}
+        <div class="trow" style="align-items:center;">
+            <span>
+                <b>{{ comp.name if comp else '?' }}</b>
+                <span class="tsub"> · {{ (r.method or '').replace('_',' ').title() }} · created {{ human_date(r.created_at) }}</span>
+                {% for ev in r.events or [] %}<br><span class="tsub">→ {{ ev.event.replace('_',' ') }} {{ ev.detail }} ({{ ev.at[:10] }})</span>{% endfor %}
+                {% if r.note %}<br><span class="tsub">note: {{ r.note }}</span>{% endif %}
+            </span>
+            <span style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <span class="tbadge {{ r.status|lower }}">{{ r.status.replace('_',' ') }}</span>
+                {% if r.status == 'NEEDS_ACTION' %}
+                    {% if r.method == 'MANUAL_UPLOAD' %}
+                        {% if comp and comp.portal_url %}<a class="tbtn sm secondary" target="_blank" href="{{ comp.portal_url }}">Portal</a>{% endif %}
+                        <button class="tbtn sm success" onclick="refStatus({{ r.id }}, 'SUBMITTED', 'marked uploaded')">Mark Uploaded</button>
+                    {% elif r.method == 'REFERRAL_LINK' %}
+                        <button class="tbtn sm" onclick="emailFlow({{ r.id }})">Prepare Link Email</button>
+                        <button class="tbtn sm secondary" onclick="refStatus({{ r.id }}, 'WAITING', 'link sent manually')">Mark Link Sent</button>
+                    {% else %}
+                        <button class="tbtn sm" onclick="emailFlow({{ r.id }})">Prepare Email</button>
+                    {% endif %}
+                {% elif r.status == 'WAITING' %}
+                    <button class="tbtn sm success" onclick="refStatus({{ r.id }}, 'SUBMITTED', 'candidate applied')">Mark Submitted</button>
+                {% elif r.status == 'SUBMITTED' %}
+                    <button class="tbtn sm success" onclick="refStatus({{ r.id }}, 'COMPLETED')">Mark Completed</button>
+                {% endif %}
+                {% if r.status in ('NEEDS_ACTION', 'WAITING') %}
+                    <button class="tbtn sm danger" onclick="refStatus({{ r.id }}, 'CANCELLED')">Cancel</button>
+                {% endif %}
+            </span>
+        </div>
+        {% else %}
+        <p class="tsub">No referrals yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+<div><!-- RIGHT column -->
+
+    <div class="tcard">
+        <h3><i class="fas fa-file-pdf"></i> CV</h3>
+        {% if active_cv %}
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+            <a class="tbtn sm" target="_blank" href="{{ url_for('admin.talent_cv_file', cv_id=active_cv.id) }}"><i class="fas fa-eye"></i> View CV</a>
+            <button class="tbtn sm secondary" onclick="copyText({{ (cand.name or '')|tojson }}, 'Name copied')">Copy Name</button>
+            <button class="tbtn sm secondary" onclick="copyText({{ (cand.email or '')|tojson }}, 'Email copied')">Copy Email</button>
+            <button class="tbtn sm secondary" onclick="copyText({{ (cand.phone or '')|tojson }}, 'Phone copied')">Copy Phone</button>
+            <button class="tbtn sm secondary" onclick="copyText({{ (a.get('summary') or '')|tojson }}, 'Summary copied')">Copy Summary</button>
+        </div>
+        {% if active_cv.ext == '.pdf' %}
+        <iframe class="tcv-frame" src="{{ url_for('admin.talent_cv_file', cv_id=active_cv.id) }}"></iframe>
+        {% else %}
+        <p class="tsub">DOCX — use View CV to download.</p>
+        {% endif %}
+        {% endif %}
+        <div style="margin-top:10px;">
+            {% for cv in cvs %}
+            <div class="trow"><span>v{{ cv.version }} · {{ cv.filename }} {% if cv.is_active %}<span class="tbadge new">ACTIVE</span>{% endif %}</span>
+                <a class="tsub" target="_blank" href="{{ url_for('admin.talent_cv_file', cv_id=cv.id) }}">open</a></div>
+            {% endfor %}
+        </div>
+        <form id="cvUploadForm" style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input type="file" id="newCvFile" accept=".pdf,.docx" style="font-size:12px;">
+            <button class="tbtn sm secondary" type="submit">Upload new version</button>
+        </form>
+    </div>
+
+    {% if email_row %}
+    <div class="tcard">
+        <h3><i class="fas fa-envelope"></i> Original Email</h3>
+        <p><b>{{ email_row.from_name or email_row.from_email }}</b> <span class="tsub">&lt;{{ email_row.from_email }}&gt;</span></p>
+        <p style="margin:6px 0;"><b>{{ email_row.subject or '(no subject)' }}</b></p>
+        <p class="tsub">{{ email_row.received_at.strftime('%b %-d, %Y %H:%M') if email_row.received_at }}</p>
+        {% if email_row.snippet %}<p class="tsub" style="white-space:pre-wrap; margin-top:8px; max-height:140px; overflow:auto;">{{ email_row.snippet }}</p>{% endif %}
+        {% if gmail_link %}<a class="tbtn sm secondary" style="margin-top:8px;" target="_blank" href="{{ gmail_link }}"><i class="fas fa-up-right-from-square"></i> Open in Gmail</a>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="tcard">
+        <h3><i class="fas fa-id-card"></i> Details</h3>
+        <div class="tform">
+            <div><label>Name</label><input type="text" id="f_name" value="{{ cand.name or '' }}"></div>
+            <div><label>Email</label><input type="email" id="f_email" value="{{ cand.email or '' }}"></div>
+            <div><label>Phone</label><input type="text" id="f_phone" value="{{ cand.phone or '' }}"></div>
+            <div><label>City</label><input type="text" id="f_city" value="{{ cand.city or '' }}"></div>
+            <div><label>Title</label><input type="text" id="f_title" value="{{ cand.current_title or '' }}"></div>
+            <div><label>Seniority</label><select id="f_seniority">
+                <option value="">—</option>
+                {% for s in ['JUNIOR','MID','SENIOR','STAFF'] %}
+                <option value="{{ s }}" {% if cand.seniority == s %}selected{% endif %}>{{ s.title() }}</option>
+                {% endfor %}</select></div>
+            <div><label>Years experience</label><input type="number" step="0.5" id="f_years" value="{{ cand.years_experience if cand.years_experience is not none else '' }}"></div>
+            <div><label>Source</label><input type="text" id="f_source" value="{{ cand.source or '' }}"></div>
+        </div>
+        <button class="tbtn sm" style="margin-top:10px;" onclick="saveDetails()">Save details</button>
+    </div>
+
+    <div class="tcard">
+        <h3><i class="fas fa-note-sticky"></i> Private Notes</h3>
+        <textarea id="f_notes" style="width:100%; min-height:90px; border:1px solid #ddd; border-radius:8px; padding:10px; font-family:inherit; box-sizing:border-box;"
+            placeholder="Internal only — never sent to companies or the AI.">{{ cand.notes or '' }}</textarea>
+        <button class="tbtn sm secondary" style="margin-top:8px;" onclick="saveNotes()">Save notes</button>
+    </div>
+
+    <div class="tkbd"><kbd>S</kbd> strong · <kbd>M</kbd> maybe · <kbd>X</kbd> skip · <kbd>K</kbd> prev · <kbd>J</kbd> next</div>
+</div>
+</div>
+{% endblock %}
+
+{% block talent_scripts %}
+<script>
+const CAND_ID = {{ cand.id|tojson }};
+
+async function setStatus(status) {
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID, { method: 'PUT', body: { status } });
+    if (data) location.reload();
+}
+async function reanalyze() {
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/analyze');
+    if (data) { toast('Re-analysis queued'); setTimeout(() => location.reload(), 1500); }
+}
+async function overrideFit(matchId, fit) {
+    if (!fit) return;
+    const data = await tapi('/admin/api/talent/match/' + matchId + '/override', { body: { fit } });
+    if (data) location.reload();
+}
+async function addCompany() {
+    const sel = document.getElementById('addCompanySelect');
+    if (!sel.value) return;
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/companies',
+        { body: { company_id: parseInt(sel.value), fit: document.getElementById('addCompanyFit').value } });
+    if (data) location.reload();
+}
+
+/* ONE pre-configured action per company (quick-refer):
+   link company -> the templated email is sent to the candidate immediately;
+   email company -> prefilled compose opens (recipient fixed), one click to send;
+   manual company -> handoff dialog: portal link, copyable details, Claude prompt. */
+async function quickRefer(companyId, force) {
+    let data = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/quick-refer',
+        { body: { company_id: companyId, force: !!force }, on409: true });
+    if (data && data.__conflict) {
+        const again = await Swal.fire({
+            title: 'Already referred', text: data.error,
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Do it again' });
+        if (again.isConfirmed) return quickRefer(companyId, true);
+        return;
+    }
+    if (!data) return;
+    if (data.action === 'link_sent') {
+        await Swal.fire('Link email sent ✅',
+            `The ${esc(data.company)} referral link email was sent to ${esc(data.to)}. ` +
+            'Status is now WAITING for the candidate.', 'success');
+        location.reload();
+    } else if (data.action === 'email_preview') {
+        emailFlow(data.ref_id);
+    } else if (data.action === 'manual') {
+        manualHandoff(data);
+    }
+}
+
+/* Manual-upload handoff: everything needed to finish in the portal fast. */
+async function manualHandoff(d) {
+    window.__handoff = d;  // referenced from the dialog's copy buttons
+    const res = await Swal.fire({
+        title: 'Referral created — portal handoff',
+        customClass: { popup: 'swal-wide-popup' },
+        html: `
+        <div style="text-align:left;">
+            ${d.portal_url ? `<p><a href="${esc(d.portal_url)}" target="_blank" class="tbtn" style="text-decoration:none;">🚀 Open ${esc(d.company)} portal</a></p>` : '<p style="color:#c62828;">⚠ No portal URL configured for this company.</p>'}
+            ${d.instructions ? `<p style="white-space:pre-wrap;background:#faf6f3;border-radius:8px;padding:10px;font-size:13px;">${esc(d.instructions)}</p>` : ''}
+            <p style="margin:8px 0 4px;"><b>Candidate details</b></p>
+            <pre style="background:#faf6f3;border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;">${esc(d.details)}</pre>
+            <p style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="tbtn sm secondary" onclick="copyText(window.__handoff.details, 'Details copied')">Copy Details</button>
+                <button class="tbtn sm secondary" onclick="copyText(window.__handoff.claude_prompt, 'Claude prompt copied — paste it into a Claude Code session with Chrome')">🤖 Copy Claude Prompt</button>
+            </p>
+            <p style="font-size:12px;color:#999;">The Claude prompt lets Claude-in-Chrome do the portal submission for you (e.g. Ashby: + Add → Referral).</p>
+        </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'Mark Uploaded ✓', cancelButtonText: 'Later',
+        confirmButtonColor: '#2e7d32',
+    });
+    if (res.isConfirmed) {
+        const ok = await tapi('/admin/api/talent/referral/' + d.ref_id + '/status',
+            { body: { status: 'SUBMITTED', detail: 'uploaded in portal' } });
+        if (ok) { toast('Marked uploaded'); }
+    }
+    location.reload();
+}
+
+/* Two-step outbound email (§8): preview with fixed recipient, editable
+   subject/body -> explicit Send. */
+async function emailFlow(refId) {
+    const p = await tapi('/admin/api/talent/referral/' + refId + '/email-preview', { method: 'GET' });
+    if (!p) return;
+    const warn = (p.warnings || []).map(w => `<p style="color:#c62828;margin:4px 0;">⚠ ${esc(w)}</p>`).join('');
+    const res = await Swal.fire({
+        title: p.method === 'REFERRAL_LINK' ? 'Referral link email (to candidate)' : 'Referral email (to company)',
+        customClass: { popup: 'swal-wide-popup' },
+        html: `
+            ${warn}
+            <div style="text-align:left;">
+            <p style="margin:4px 0;"><b>To:</b> ${esc(p.to) || '<i>missing</i>'} <span style="color:#999;font-size:12px;">(fixed — from stored config)</span></p>
+            ${p.cc ? `<p style="margin:4px 0;"><b>CC:</b> ${esc(p.cc)}</p>` : ''}
+            ${p.attach_cv ? '<p style="margin:4px 0;">📎 Active CV will be attached</p>' : ''}
+            <label style="font-size:13px;font-weight:700;">Subject</label>
+            <input id="em_subject" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;" value="${esc(p.subject)}">
+            <label style="font-size:13px;font-weight:700;margin-top:8px;display:block;">Body</label>
+            <textarea id="em_body" style="width:100%;min-height:220px;padding:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-family:inherit;">${esc(p.body)}</textarea>
+            </div>`,
+        showCancelButton: true, confirmButtonText: 'Send email', confirmButtonColor: '#2e7d32',
+        preConfirm: () => ({ subject: document.getElementById('em_subject').value,
+                             body: document.getElementById('em_body').value })
+    });
+    if (!res.isConfirmed) return;
+    const sent = await tapi('/admin/api/talent/referral/' + refId + '/send-email', { body: res.value });
+    if (sent) { toast('Email sent'); setTimeout(() => location.reload(), 900); }
+}
+
+async function refStatus(refId, status, detail) {
+    if (status === 'CANCELLED') {
+        const ok = await Swal.fire({ title: 'Cancel this referral?', icon: 'warning',
+            showCancelButton: true, confirmButtonText: 'Cancel referral' });
+        if (!ok.isConfirmed) return;
+    }
+    const data = await tapi('/admin/api/talent/referral/' + refId + '/status',
+        { body: { status, detail: detail || '' } });
+    if (data) location.reload();
+}
+
+async function saveDetails() {
+    const body = {
+        name: document.getElementById('f_name').value,
+        email: document.getElementById('f_email').value,
+        phone: document.getElementById('f_phone').value,
+        city: document.getElementById('f_city').value,
+        current_title: document.getElementById('f_title').value,
+        seniority: document.getElementById('f_seniority').value,
+        years_experience: document.getElementById('f_years').value,
+        source: document.getElementById('f_source').value,
+    };
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID, { method: 'PUT', body });
+    if (data) toast('Saved');
+}
+async function saveNotes() {
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID,
+        { method: 'PUT', body: { notes: document.getElementById('f_notes').value } });
+    if (data) toast('Notes saved');
+}
+
+function copyText(text, msg) {
+    if (!text) return toast('Nothing to copy');
+    navigator.clipboard.writeText(text).then(() => toast(msg));
+}
+
+document.getElementById('cvUploadForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = document.getElementById('newCvFile').files[0];
+    if (!f) return;
+    const form = new FormData();
+    form.append('file', f);
+    const data = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/cv', { form });
+    if (data) { toast('CV v' + data.version + ' uploaded — analyzing'); setTimeout(() => location.reload(), 1200); }
+});
+
+/* Poll while the analysis is running */
+{% if active_cv and active_cv.analysis_status in ('pending', 'running') %}
+(function poll() {
+    setTimeout(async () => {
+        const s = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/analysis-status', { method: 'GET' });
+        if (s && (s.status === 'complete' || s.status === 'failed')) location.reload();
+        else poll();
+    }, 3000);
+})();
+{% endif %}
+
+/* Keyboard: S/M/X verdicts, J next, K prev */
+document.addEventListener('keydown', e => {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+    if (e.key === 's') setStatus('STRONG');
+    else if (e.key === 'm') setStatus('MAYBE');
+    else if (e.key === 'x') setStatus('SKIP');
+    {% if next_id %}else if (e.key === 'j' || e.key === 'ArrowRight') location.href = '{{ url_for('admin.talent_candidate', cand_id=next_id) }}';{% endif %}
+    {% if prev_id %}else if (e.key === 'k' || e.key === 'ArrowLeft') location.href = '{{ url_for('admin.talent_candidate', cand_id=prev_id) }}';{% endif %}
+});
+</script>
+{% endblock %}

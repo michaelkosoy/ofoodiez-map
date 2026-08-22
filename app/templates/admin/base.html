@@ -355,6 +355,9 @@
             <a href="{{ url_for('admin.cv_reviews') }}" class="nav-link {% if request.endpoint == 'admin.cv_reviews' %}active{% endif %}">
                 <i class="fas fa-wand-magic-sparkles"></i> CV Reviews
             </a>
+            <a href="{{ url_for('admin.talent_dashboard') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('admin.talent') %}active{% endif %}">
+                <i class="fas fa-user-tie"></i> Talent Inbox
+            </a>
             <a href="{{ url_for('admin.blog') }}" class="nav-link {% if request.endpoint == 'admin.blog' %}active{% endif %}">
                 <i class="fas fa-book-open"></i> Blog Content
             </a>

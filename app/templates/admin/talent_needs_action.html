@@ -1,0 +1,67 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}Needs Action — Talent{% endblock %}
+
+{% block talent_content %}
+{% macro item(row) %}
+<div class="tna-item">
+    <span class="who"><a class="tname" style="display:inline;" href="{{ url_for('admin.talent_candidate', cand_id=row.cand.id) }}">{{ row.cand.name or row.cand.email or 'Unknown' }}</a></span>
+    <i class="fas fa-arrow-right" style="color:#c9b8ae;"></i>
+    <span><b>{{ row.comp.name if row.comp else '?' }}</b></span>
+    <span class="tbadge {{ row.r.status|lower }}">{{ row.r.status.replace('_',' ') }}</span>
+    <span style="flex-grow:1"></span>
+    <a class="tbtn sm" href="{{ url_for('admin.talent_candidate', cand_id=row.cand.id) }}">Handle</a>
+</div>
+{% endmacro %}
+
+{% set n_manual = groups['MANUAL_UPLOAD']|length %}
+{% set n_link = groups['REFERRAL_LINK']|length %}
+{% set n_email = groups['EMAIL']|length %}
+
+{% if not (n_manual or n_link or n_email or groups['WAITING'] or review_views) %}
+<div class="tcard tempty">Nothing needs your attention. 🎉</div>
+{% endif %}
+
+{% if n_manual %}
+<div class="tcard tna-group">
+    <h3><i class="fas fa-upload"></i> {{ n_manual }} Manual Upload{{ 's' if n_manual != 1 }}</h3>
+    {% for row in groups['MANUAL_UPLOAD'] %}{{ item(row) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if n_link %}
+<div class="tcard tna-group">
+    <h3><i class="fas fa-link"></i> {{ n_link }} Referral Link{{ 's' if n_link != 1 }} to send</h3>
+    {% for row in groups['REFERRAL_LINK'] %}{{ item(row) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if n_email %}
+<div class="tcard tna-group">
+    <h3><i class="fas fa-envelope"></i> {{ n_email }} Email Referral{{ 's' if n_email != 1 }} to send</h3>
+    {% for row in groups['EMAIL'] %}{{ item(row) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if groups['WAITING'] %}
+<div class="tcard tna-group">
+    <h3><i class="fas fa-hourglass-half"></i> {{ groups['WAITING']|length }} Waiting for candidate</h3>
+    {% for row in groups['WAITING'] %}{{ item(row) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if review_views %}
+<div class="tcard tna-group">
+    <h3><i class="fas fa-user-check"></i> {{ review_views|length }} Candidate{{ 's' if review_views|length != 1 }} need{{ '' if review_views|length != 1 else 's' }} review</h3>
+    {% for v in review_views %}
+    <div class="tna-item">
+        <span class="who"><a class="tname" style="display:inline;" href="{{ url_for('admin.talent_candidate', cand_id=v.c.id) }}">{{ v.c.name or v.c.email or 'Unknown' }}</a></span>
+        <span class="tsub">{{ v.role or '' }}</span>
+        {% if v.ai_rating %}<span class="tbadge {{ v.ai_rating|lower }}">{{ v.ai_rating }}</span>{% endif %}
+        {% if v.analysis_status == 'failed' %}<span class="tbadge failed">AI FAILED</span>{% endif %}
+        <span style="flex-grow:1"></span>
+        <a class="tbtn sm" href="{{ url_for('admin.talent_candidate', cand_id=v.c.id) }}">Review</a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

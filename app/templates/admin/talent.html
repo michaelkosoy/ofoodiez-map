@@ -1,0 +1,244 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}Talent Inbox{% endblock %}
+
+{% block talent_actions %}
+<button class="tbtn secondary" onclick="syncInbox(this)" title="{{ 'Pull new CVs from Gmail' if gmail_ready else 'Set TALENT_GMAIL_USER + TALENT_GMAIL_APP_PASSWORD to enable' }}">
+    <i class="fas fa-rotate"></i> Sync Inbox{% if not gmail_ready %} (not configured){% endif %}
+</button>
+<button class="tbtn" onclick="addCandidate()"><i class="fas fa-plus"></i> Add Candidate</button>
+{% endblock %}
+
+{% block talent_content %}
+{% set active_status = args.get('status', 'all') %}
+
+<div class="tcounters">
+    {% for key, label in [('new','New'), ('strong','Strong'), ('maybe','Maybe'),
+                          ('skip','Skip'), ('needs_review','Needs Review'),
+                          ('needs_action','Needs Action'), ('waiting','Waiting'),
+                          ('submitted','Submitted'), ('completed','Completed')] %}
+    <a class="tcounter {% if active_status == key %}active{% endif %}"
+       href="{{ url_for('admin.talent_dashboard', status=key) }}">
+        <span class="num">{{ counters[key] }}</span>
+        <span class="lbl">{{ label }}</span>
+    </a>
+    {% endfor %}
+    <a class="tcounter {% if active_status == 'all' %}active{% endif %}"
+       href="{{ url_for('admin.talent_dashboard') }}">
+        <span class="num">{{ total }}</span><span class="lbl">All</span>
+    </a>
+</div>
+
+<form class="tfilters" method="get">
+    <input type="hidden" name="status" value="{{ active_status }}">
+    <input type="text" name="q" placeholder="Search name, email, role, skills…" value="{{ args.get('q','') }}">
+    <input type="text" name="tech" placeholder="Technology (e.g. kubernetes)" value="{{ args.get('tech','') }}">
+    <input type="text" name="role" placeholder="Role (e.g. backend)" value="{{ args.get('role','') }}">
+    <select name="seniority">
+        <option value="">Seniority</option>
+        {% for s in ['JUNIOR','MID','SENIOR','STAFF'] %}
+        <option value="{{ s }}" {% if args.get('seniority','')|upper == s %}selected{% endif %}>{{ s.title() }}</option>
+        {% endfor %}
+    </select>
+    <select name="company">
+        <option value="">Company</option>
+        {% for comp in companies %}
+        <option value="{{ comp.id }}" {% if args.get('company','') == comp.id|string %}selected{% endif %}>{{ comp.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="source">
+        <option value="">Source</option>
+        {% for s in sources %}
+        <option value="{{ s }}" {% if args.get('source','') == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+    <select name="since">
+        <option value="">Received</option>
+        {% for days, label in [('1','Today'), ('7','Last 7 days'), ('30','Last 30 days'), ('90','Last 90 days')] %}
+        <option value="{{ days }}" {% if args.get('since','') == days %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button class="tbtn sm" type="submit"><i class="fas fa-filter"></i> Filter</button>
+    <a class="tbtn sm secondary" href="{{ url_for('admin.talent_dashboard') }}">Clear</a>
+</form>
+
+<div class="tbulk" id="bulkBar">
+    <span><b id="bulkCount">0</b> selected</span>
+    <button class="tbtn sm success" onclick="bulk('strong')">Strong</button>
+    <button class="tbtn sm warn" onclick="bulk('maybe')">Maybe</button>
+    <button class="tbtn sm secondary" onclick="bulk('skip')">Skip</button>
+    <button class="tbtn sm secondary" onclick="bulkAddCompany()">Add Company</button>
+    <button class="tbtn sm danger" onclick="bulk('archive')">Archive</button>
+</div>
+
+<div class="ttable-wrap">
+<table class="ttable" id="candTable">
+    <thead><tr>
+        <th><input type="checkbox" onclick="toggleAll(this)"></th>
+        <th>Candidate</th><th>Role</th><th>Exp</th><th>Skills</th>
+        <th>Rating</th><th>Matches</th><th>Received</th><th>Status</th><th></th>
+    </tr></thead>
+    <tbody>
+    {% for v in views %}
+    {% set c = v.c %}
+    <tr data-id="{{ c.id }}" data-url="{{ url_for('admin.talent_candidate', cand_id=c.id) }}">
+        <td><input type="checkbox" class="rowcheck" value="{{ c.id }}" onclick="updateBulk(event)"></td>
+        <td>
+            <a class="tname" href="{{ url_for('admin.talent_candidate', cand_id=c.id) }}">{{ c.name or '(no name yet)' }}</a>
+            <span class="tsub">{{ c.email or '' }}</span>
+        </td>
+        <td>{{ v.role or '—' }}</td>
+        <td>{{ '%g yrs'|format(v.a.get('years_experience', c.years_experience)) if v.a.get('years_experience', c.years_experience) is not none else '—' }}</td>
+        <td><div class="tskills">
+            {% for s in v.skills[:5] %}<span class="tskill">{{ s }}</span>{% endfor %}
+            {% if v.skills|length > 5 %}<span class="tsub">+{{ v.skills|length - 5 }}</span>{% endif %}
+        </div></td>
+        <td>
+            {% if v.analysis_status in ('pending','running') %}
+                <span class="tbadge pending">ANALYZING…</span>
+            {% elif v.analysis_status == 'failed' %}
+                <span class="tbadge failed">AI FAILED</span>
+            {% elif v.ai_rating %}
+                <span class="tbadge {{ v.ai_rating|lower }}">{{ v.ai_rating }}</span>
+            {% else %}<span class="tsub">—</span>{% endif %}
+        </td>
+        <td>{% if v.match_count %}{{ v.match_count }} match{{ 'es' if v.match_count != 1 }}{% else %}<span class="tsub">—</span>{% endif %}</td>
+        <td>{{ v.received }}</td>
+        <td>
+            <span class="tbadge {{ c.status|lower }}">{{ c.status.replace('_',' ') }}</span>
+            {% if v.needs_action %}<span class="tbadge needs_action">ACTION</span>{% endif %}
+            {% if v.waiting %}<span class="tbadge waiting">WAITING</span>{% endif %}
+            {% if v.submitted %}<span class="tbadge submitted">SUBMITTED</span>{% endif %}
+        </td>
+        <td><a class="tbtn sm secondary" href="{{ url_for('admin.talent_candidate', cand_id=c.id) }}">Review</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="10" class="tempty">
+        No candidates here yet. Use <b>Sync Inbox</b> to pull CVs from Gmail or <b>Add Candidate</b> to upload one manually.
+    </td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+<div class="tkbd"><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>Enter</kbd> open · <kbd>S</kbd> strong · <kbd>M</kbd> maybe · <kbd>X</kbd> skip</div>
+{% endblock %}
+
+{% block talent_scripts %}
+<script>
+const COMPANIES = [{% for comp in companies if comp.active %}{id:{{ comp.id }},name:"{{ comp.name|e }}"},{% endfor %}];
+
+async function syncInbox(btn) {
+    btn.disabled = true;
+    const data = await tapi('/admin/api/talent/sync');
+    btn.disabled = false;
+    if (!data) return;
+    await Swal.fire('Inbox synced',
+        `Scanned ${data.scanned} emails — ${data.new_cvs} new CV(s), ` +
+        `${data.new_candidates} new candidate(s). AI analysis runs in the background.`,
+        'success');
+    location.reload();
+}
+
+function addCandidate() {
+    Swal.fire({
+        title: 'Add Candidate',
+        customClass: { popup: 'swal-wide-popup' },
+        html: `
+        <div class="tform" style="text-align:left">
+            <div class="full"><label>CV file (PDF/DOCX) *</label><input type="file" id="ac_file" accept=".pdf,.docx"></div>
+            <div><label>Name</label><input type="text" id="ac_name" class="swal2-input" style="margin:0;width:100%"></div>
+            <div><label>Email</label><input type="email" id="ac_email" class="swal2-input" style="margin:0;width:100%"></div>
+            <div><label>Phone</label><input type="text" id="ac_phone" class="swal2-input" style="margin:0;width:100%"></div>
+            <div><label>Source</label><select id="ac_source" class="swal2-input" style="margin:0;width:100%">
+                <option>MANUAL</option><option>WHATSAPP</option><option>LINKEDIN</option><option>EMAIL</option><option>OTHER</option>
+            </select></div>
+            <div class="full"><label>Notes (private)</label><textarea id="ac_notes" class="swal2-textarea" style="margin:0;width:100%"></textarea></div>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'Add & Analyze',
+        preConfirm: () => {
+            const f = document.getElementById('ac_file').files[0];
+            if (!f) { Swal.showValidationMessage('Choose a CV file'); return false; }
+            const form = new FormData();
+            form.append('file', f);
+            form.append('name', document.getElementById('ac_name').value);
+            form.append('email', document.getElementById('ac_email').value);
+            form.append('phone', document.getElementById('ac_phone').value);
+            form.append('source', document.getElementById('ac_source').value);
+            form.append('notes', document.getElementById('ac_notes').value);
+            return form;
+        }
+    }).then(async r => {
+        if (!r.isConfirmed || !r.value) return;
+        const data = await tapi('/admin/api/talent/candidates', { form: r.value });
+        if (data) location.href = '/admin/talent/candidate/' + data.id;
+    });
+}
+
+/* ---- bulk selection ---- */
+function selected() { return [...document.querySelectorAll('.rowcheck:checked')].map(x => x.value); }
+function updateBulk(ev) {
+    if (ev) ev.stopPropagation();
+    const n = selected().length;
+    document.getElementById('bulkBar').classList.toggle('show', n > 0);
+    document.getElementById('bulkCount').textContent = n;
+}
+function toggleAll(box) {
+    document.querySelectorAll('.rowcheck').forEach(c => c.checked = box.checked);
+    updateBulk();
+}
+async function bulk(action, companyId) {
+    const body = { ids: selected(), action };
+    if (companyId) body.company_id = companyId;
+    const data = await tapi('/admin/api/talent/bulk', { body });
+    if (data) { toast(`Updated ${data.count} candidate(s)`); setTimeout(() => location.reload(), 600); }
+}
+function bulkAddCompany() {
+    if (!COMPANIES.length) return Swal.fire('No companies', 'Add a company first.', 'info');
+    Swal.fire({
+        title: 'Add company to selected',
+        input: 'select',
+        inputOptions: Object.fromEntries(COMPANIES.map(c => [c.id, c.name])),
+        showCancelButton: true, confirmButtonText: 'Add'
+    }).then(r => { if (r.isConfirmed) bulk('add_company', parseInt(r.value)); });
+}
+
+/* ---- keyboard: J/K move, Enter open, S/M/X status ---- */
+let krow = -1;
+const rows = [...document.querySelectorAll('#candTable tbody tr[data-id]')];
+function kselect(i) {
+    if (!rows.length) return;
+    krow = Math.max(0, Math.min(rows.length - 1, i));
+    rows.forEach(r => r.classList.remove('krow-active'));
+    rows[krow].classList.add('krow-active');
+    rows[krow].scrollIntoView({ block: 'nearest' });
+}
+async function ksetStatus(status) {
+    if (krow < 0) return;
+    const id = rows[krow].dataset.id;
+    const data = await tapi('/admin/api/talent/candidate/' + id, { method: 'PUT', body: { status } });
+    if (data) {
+        const cell = rows[krow].querySelector('td:nth-child(9) .tbadge');
+        cell.className = 'tbadge ' + status.toLowerCase();
+        cell.textContent = status;
+        toast(status);
+    }
+}
+document.addEventListener('keydown', e => {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+    if (e.key === 'j' || e.key === 'ArrowDown') { kselect(krow + 1); e.preventDefault(); }
+    else if (e.key === 'k' || e.key === 'ArrowUp') { kselect(krow - 1); e.preventDefault(); }
+    else if (e.key === 'Enter' && krow >= 0) location.href = rows[krow].dataset.url;
+    else if (e.key === 's') ksetStatus('STRONG');
+    else if (e.key === 'm') ksetStatus('MAYBE');
+    else if (e.key === 'x') ksetStatus('SKIP');
+});
+rows.forEach((r, i) => r.addEventListener('click', ev => {
+    if (ev.target.closest('a,button,input')) return;
+    kselect(i);
+}));
+
+/* Auto-refresh while any row is still analyzing (cheap: whole-page reload) */
+if (document.querySelector('.tbadge.pending') && !window.__talentRefresh) {
+    window.__talentRefresh = setTimeout(() => location.reload(), 6000);
+}
+</script>
+{% endblock %}

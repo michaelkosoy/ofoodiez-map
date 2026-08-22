@@ -1,0 +1,62 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}AI Usage — Talent{% endblock %}
+
+{% block talent_content %}
+<div class="tcard">
+    <div class="thead-line">
+        <h2>AI Usage — {{ month }}</h2>
+        <span style="flex-grow:1"></span>
+        <form method="get" style="display:flex; gap:8px;">
+            <input type="month" name="month" value="{{ month }}" class="tbtn sm secondary" style="padding:6px 10px;">
+            <button class="tbtn sm" type="submit">Go</button>
+        </form>
+    </div>
+    <div class="tstat-row">
+        <div class="tstat"><div class="num">{{ totals.cvs_analyzed }}</div><div class="lbl">CVs analyzed</div></div>
+        <div class="tstat"><div class="num">{{ totals.calls }}</div><div class="lbl">AI requests</div></div>
+        <div class="tstat"><div class="num">{{ '{:,}'.format(totals.input) }}</div><div class="lbl">Input tokens</div></div>
+        <div class="tstat"><div class="num">{{ '{:,}'.format(totals.output) }}</div><div class="lbl">Output tokens</div></div>
+        <div class="tstat"><div class="num">{{ '{:,}'.format(totals.cached) }}</div><div class="lbl">Cached tokens</div></div>
+        <div class="tstat"><div class="num">{{ totals.errors }}</div><div class="lbl">Errors</div></div>
+        {% if totals.cost is not none %}
+        <div class="tstat"><div class="num">${{ '%.4f'|format(totals.cost) }}</div><div class="lbl">Est. cost*</div></div>
+        {% endif %}
+    </div>
+    <p class="tsection-note">
+        Configured models — extraction: <b>{{ extraction_model }}</b> · matching: <b>{{ matching_model }}</b> ·
+        fallback: <b>{{ fallback_model or 'disabled' }}</b>
+        (env: GEMINI_CV_EXTRACTION_MODEL / GEMINI_CV_MATCHING_MODEL / GEMINI_CV_FALLBACK_MODEL).
+        {% if totals.cost is not none %}*From the price table in cv_review/gemini.py (PRICES_PER_1M) — token counts are the ground truth.{% endif %}
+    </p>
+</div>
+
+<div class="tcard">
+    <h3>By model</h3>
+    <table class="tmini">
+        <tr><th>Model</th><th>Calls</th><th>Input</th><th>Cached</th><th>Output</th><th>Errors</th></tr>
+        {% for model, m in by_model.items() %}
+        <tr><td>{{ model }}</td><td>{{ m.calls }}</td><td>{{ '{:,}'.format(m.input) }}</td>
+            <td>{{ '{:,}'.format(m.cached) }}</td><td>{{ '{:,}'.format(m.output) }}</td><td>{{ m.errors }}</td></tr>
+        {% else %}
+        <tr><td colspan="6" class="tempty">No AI calls this month.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="tcard">
+    <h3>Recent calls (last 50)</h3>
+    <table class="tmini">
+        <tr><th>When</th><th>Kind</th><th>Model</th><th>In</th><th>Out</th><th>Secs</th><th>Status</th></tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.created_at.strftime('%b %-d %H:%M') }}</td>
+            <td>{{ log.kind }}</td><td>{{ log.model }}</td>
+            <td>{{ '{:,}'.format(log.input_tokens or 0) }}</td>
+            <td>{{ '{:,}'.format(log.output_tokens or 0) }}</td>
+            <td>{{ '%.1f'|format(log.seconds or 0) }}</td>
+            <td>{% if log.ok %}<span class="tbadge strong">OK</span>{% else %}<span class="tbadge failed" title="{{ log.error }}">FAILED</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

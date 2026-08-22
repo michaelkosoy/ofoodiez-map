@@ -48,6 +48,9 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 
 
+# Talent Inbox tables must be registered on `db` before init_db's create_all
+import talent.models  # noqa: F401
+
 # Register Instagram Automation blueprint
 from instagram_automation import init_app as init_ig_automation
 init_ig_automation(app)

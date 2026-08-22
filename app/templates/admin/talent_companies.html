@@ -1,0 +1,94 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}Companies — Talent{% endblock %}
+
+{% block talent_actions %}
+<button class="tbtn" onclick="addCompany()"><i class="fas fa-plus"></i> Add Company</button>
+{% endblock %}
+
+{% block talent_content %}
+<div class="tcomp-grid">
+    {% for comp in companies %}
+    {% set refs = ref_stats.get(comp.id, {}) %}
+    <a class="tcomp-card {% if not comp.active %}inactive{% endif %}" href="{{ url_for('admin.talent_company', company_id=comp.id) }}">
+        <h4>{{ comp.name }}</h4>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="tbadge manual">{{ comp.referral_method.replace('_',' ') }}</span>
+            {% if comp.active %}<span class="tbadge strong">ACTIVE</span>
+            {% else %}<span class="tbadge archived">INACTIVE</span>{% endif %}
+        </div>
+        <div class="stats">
+            {{ match_counts.get(comp.id, 0) }} matched ·
+            {{ refs.values()|sum }} referral{{ 's' if refs.values()|sum != 1 }}
+            {% if refs.get('NEEDS_ACTION') %} · <b style="color:#c62828;">{{ refs['NEEDS_ACTION'] }} need action</b>{% endif %}
+            {% if refs.get('WAITING') %} · {{ refs['WAITING'] }} waiting{% endif %}
+        </div>
+        {% if comp.target_roles %}<div class="stats">Targets: {{ comp.target_roles|join(' · ') }}</div>{% endif %}
+    </a>
+    {% else %}
+    <div class="tempty" style="grid-column:1/-1;">No companies yet — add the first one to start matching candidates.</div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block talent_scripts %}
+<script>
+function addCompany() {
+    Swal.fire({
+        title: 'Add Company',
+        customClass: { popup: 'swal-wide-popup' },
+        html: `
+        <div class="tform" style="text-align:left;">
+            <div class="full"><label>Company name *</label><input type="text" id="c_name"></div>
+            <div class="full"><label>How do I refer candidates? *</label>
+                <label style="font-weight:400; display:block; margin:6px 0;"><input type="radio" name="c_method" value="REFERRAL_LINK" onchange="methodFields()">
+                    <b>Candidate uses a referral link</b> — I email the candidate my personal referral URL and they apply themselves.</label>
+                <label style="font-weight:400; display:block; margin:6px 0;"><input type="radio" name="c_method" value="MANUAL_UPLOAD" onchange="methodFields()">
+                    <b>I manually upload the CV</b> — I submit the candidate in the company's referral portal myself.</label>
+                <label style="font-weight:400; display:block; margin:6px 0;"><input type="radio" name="c_method" value="EMAIL" onchange="methodFields()">
+                    <b>I send the CV by email</b> — I email the CV to a stored contact at the company.</label>
+            </div>
+            <div class="full" id="mf_link" style="display:none;"><label>Referral URL *</label><input type="url" id="c_referral_url" placeholder="https://…"></div>
+            <div class="full" id="mf_portal" style="display:none;">
+                <label>Application portal URL</label><input type="url" id="c_portal_url" placeholder="https://…">
+                <label style="margin-top:8px;">Upload instructions</label><textarea id="c_portal_instructions" placeholder="Upload CV under referral section…"></textarea>
+            </div>
+            <div class="full" id="mf_email" style="display:none;">
+                <label>Referral recipient email *</label><input type="email" id="c_email_to" placeholder="talent@example.com">
+                <label style="margin-top:8px;">CC (optional, comma-separated)</label><input type="text" id="c_email_cc">
+            </div>
+            <div class="full hint">Target roles, skills and templates can be added later on the company page.</div>
+        </div>`,
+        showCancelButton: true, confirmButtonText: 'Create',
+        preConfirm: () => {
+            const name = document.getElementById('c_name').value.trim();
+            const method = (document.querySelector('input[name=c_method]:checked') || {}).value;
+            if (!name) { Swal.showValidationMessage('Company name is required'); return false; }
+            if (!method) { Swal.showValidationMessage('Pick how you refer candidates'); return false; }
+            const body = { name, referral_method: method, active: true };
+            if (method === 'REFERRAL_LINK') {
+                body.referral_url = document.getElementById('c_referral_url').value.trim();
+                if (!body.referral_url) { Swal.showValidationMessage('Referral URL is required for this method'); return false; }
+            } else if (method === 'MANUAL_UPLOAD') {
+                body.portal_url = document.getElementById('c_portal_url').value.trim();
+                body.portal_instructions = document.getElementById('c_portal_instructions').value;
+            } else {
+                body.email_to = document.getElementById('c_email_to').value.trim();
+                if (!body.email_to) { Swal.showValidationMessage('Recipient email is required for this method'); return false; }
+                body.email_cc = document.getElementById('c_email_cc').value.trim();
+            }
+            return body;
+        }
+    }).then(async r => {
+        if (!r.isConfirmed || !r.value) return;
+        const data = await tapi('/admin/api/talent/companies', { body: r.value });
+        if (data) location.href = '/admin/talent/company/' + data.id;
+    });
+}
+function methodFields() {
+    const m = (document.querySelector('input[name=c_method]:checked') || {}).value;
+    document.getElementById('mf_link').style.display = m === 'REFERRAL_LINK' ? '' : 'none';
+    document.getElementById('mf_portal').style.display = m === 'MANUAL_UPLOAD' ? '' : 'none';
+    document.getElementById('mf_email').style.display = m === 'EMAIL' ? '' : 'none';
+}
+</script>
+{% endblock %}
