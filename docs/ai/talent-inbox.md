@@ -39,8 +39,12 @@ company's method, reusing an existing NEEDS_ACTION referral or creating one
   the admin CV URL first and stopping before final submit.
 
 ## Scheduled ingestion (two paths, both keyed)
-Keyed auth = admin session OR `?key=ADMIN_SECRET` / `X-Admin-Key` header,
-fail-closed — same pattern as /wa/backfill-cron.
+Keyed auth (`_cron_authorized`) = admin session OR a key matching **either**
+`ADMIN_SECRET` or `TALENT_INGEST_TOKEN`, sent as `?key=`, `X-Admin-Key` or
+`X-Ingest-Token`; `hmac.compare_digest`, fails closed when both env vars are
+unset. `TALENT_INGEST_TOKEN` is the narrow one: it unlocks ONLY these two
+ingestion endpoints (admin pages still redirect to login), so it's what belongs
+in an EXTERNAL scheduler's config — never put ADMIN_SECRET there.
 1. `POST /admin/api/talent/sync` — server-side IMAP pull (needs
    TALENT_GMAIL_* env). One call ingests everything new.
 2. `POST /admin/api/talent/ingest` — push path for external routines: Ofir's

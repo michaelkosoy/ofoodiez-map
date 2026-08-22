@@ -10,6 +10,7 @@ Python — 3-4 batched queries total, no N+1 (searching inside the JSON analysis
 cross-dialect is what pushes filtering into Python). Add SQL-side filtering +
 pagination if the pool outgrows that.
 """
+import hmac
 import os
 import re
 from datetime import datetime, timedelta
@@ -524,11 +525,25 @@ def talent_cv_file(cv_id):
 # ---------------------------------------------------------------------------
 
 def _cron_authorized():
-    """Same keyed-endpoint pattern as /wa/backfill-cron: ?key= or X-Admin-Key
-    matching ADMIN_SECRET, fail-closed when the secret is unset."""
-    secret = os.environ.get('ADMIN_SECRET')
-    supplied = request.headers.get('X-Admin-Key') or request.args.get('key')
-    return bool(secret) and supplied == secret
+    """Keyed access for scheduled callers (same pattern as /wa/backfill-cron).
+
+    Accepts EITHER the full ADMIN_SECRET, or TALENT_INGEST_TOKEN — a narrow
+    credential that only unlocks CV ingestion, never the admin panel. Use the
+    narrow one for anything that must store the value in an external
+    scheduler's config: if that leaks, the blast radius is "someone can add
+    CVs", not "someone owns the admin". Fails closed when neither is set.
+    """
+    supplied = (request.headers.get('X-Ingest-Token')
+                or request.headers.get('X-Admin-Key')
+                or request.args.get('key') or '')
+    if not supplied:
+        return False
+    for name in ('ADMIN_SECRET', 'TALENT_INGEST_TOKEN'):
+        secret = os.environ.get(name) or ''
+        # compare_digest: don't leak the secret's length/prefix via timing.
+        if secret and hmac.compare_digest(supplied, secret):
+            return True
+    return False
 
 
 @admin_bp.route('/api/talent/sync', methods=['POST'])
