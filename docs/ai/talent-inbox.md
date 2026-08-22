@@ -53,12 +53,40 @@ fail-closed — same pattern as /wa/backfill-cron.
    Ofir's schedule, keep the endpoint contract stable.
 Both paths return fast; AI analysis continues in a background thread.
 
+## CV Library (`/admin/talent/cvs`)
+Drive-like list of every CV version: candidate, file, version (active flagged),
+size, whether local text extraction worked, received date, search, Open. Sizes
+come from `length()` in SQL — the page never loads blobs.
+`/admin/talent/cvs.zip` streams the whole library as
+`<Candidate>/v<n>_<file>`, read in chunks of 25 to bound memory. That ZIP is
+the no-credentials way to keep a personal copy (see below).
+
+## Performance notes (measured 2026-08-22, prod)
+Network is negligible (~32ms TLS); the cost is DB round trips from Render to
+Supabase: static file TTFB 0.30s, +1 query 0.77s, 5 queries 1.27s — so roughly
+**100ms per query and ~470ms for the first DB touch** (pool checkout +
+`pool_pre_ping`'s SELECT 1). Consequences:
+- Query COUNT is the thing to optimize, not local wall time (SQLite hides it).
+  Pages are 2-7 queries with no N+1; keep it that way.
+- The UI must not reload the page for an action — a reload costs a full ~1.2s.
+  Status/fit changes patch the DOM; next/prev + hovered rows are prefetched.
+- Dashboard renders max PAGE_ROWS (100) rows; counters/filters still run over
+  the whole set. `?limit=all` for everything. 300 candidates = 144KB, not 384KB.
+- Remaining ~0.75s floor is infrastructure (Render↔Supabase distance +
+  pre_ping). Dropping `pool_pre_ping` would save ~100ms/request everywhere but
+  reintroduces stale-pooler-connection errors — don't without discussing.
+
 ## Personal CV copies
-Every incoming CV (sync + manual upload) is best-effort mirrored to Google
-Drive: `<TALENT_DRIVE_FOLDER_ID or GOOGLE_DRIVE_CV_FOLDER_ID>/Talent CVs/
-<Candidate>/v<n>_<file>` via the CV reviewer's service account
-(`pipeline.mirror_cv_to_drive`). Unconfigured Drive = silently skipped;
-Postgres remains the durable store either way.
+Postgres `talent_cvs.file` is the durable store — every version, never
+overwritten, never purged, served only through the admin-authed route.
+
+`pipeline.mirror_cv_to_drive` additionally mirrors each new CV to
+`<TALENT_DRIVE_FOLDER_ID or GOOGLE_DRIVE_CV_FOLDER_ID>/Talent CVs/
+<Candidate>/v<n>_<file>` via the CV reviewer's service account — but
+**verified 2026-08-22: Drive is NOT configured on prod** (all 29 `cv_reviews`
+rows have empty `drive`, so `GOOGLE_DRIVE_CREDENTIALS_JSON` is unset on the
+main service). The mirror is therefore a silent no-op today; the CV Library
+ZIP covers the "my own copy" need without any credentials.
 
 ## Hard rules
 - **AI never submits anything.** All outbound actions are two-step admin
