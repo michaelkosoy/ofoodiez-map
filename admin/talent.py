@@ -456,6 +456,57 @@ def talent_sync():
     return jsonify(summary), (200 if summary.get('ok') else 400)
 
 
+@admin_bp.route('/api/talent/ingest', methods=['POST'])
+def talent_ingest():
+    """Keyed ingestion for external routines — e.g. a scheduled Claude routine
+    that reads Gmail through a connector and pushes each CV email here.
+    Multipart: file (PDF/DOCX) + from_email/from_name/subject/snippet/
+    received_at/message_id. Idempotent: a message_id that was already ingested
+    is a no-op, so the routine can safely re-scan overlapping windows."""
+    if not (session.get('admin_logged_in') or _cron_authorized()):
+        return _err('forbidden', 403)
+    file = request.files.get('file')
+    if file is None:
+        return _err('A CV file (PDF/DOCX) is required.')
+    message_id = (request.form.get('message_id') or '').strip()[:512]
+    if message_id:
+        existing = TalentEmail.query.filter_by(message_id=message_id).first()
+        if existing:
+            return jsonify({'ok': True, 'ingested': False,
+                            'reason': 'already ingested',
+                            'candidate_id': existing.candidate_id})
+    from_email = (request.form.get('from_email') or '').strip().lower()[:256]
+    from_name = (request.form.get('from_name') or '').strip()[:256]
+    received_at = None
+    try:
+        raw = (request.form.get('received_at') or '').strip()
+        if raw:
+            received_at = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+            if received_at.tzinfo:
+                received_at = received_at.astimezone(tz=None).replace(tzinfo=None)
+    except ValueError:
+        pass
+    row = TalentEmail(message_id=message_id or None, from_name=from_name,
+                      from_email=from_email,
+                      subject=(request.form.get('subject') or '').strip()[:1000],
+                      snippet=(request.form.get('snippet') or '').strip()[:800],
+                      received_at=received_at or datetime.utcnow())
+    db.session.add(row)
+    db.session.flush()
+    cand, created = ensure_candidate(email=from_email, name=from_name,
+                                     source='EMAIL')
+    try:
+        add_cv(cand, file.read(), file.filename, email_id=row.id)
+    except UploadError as exc:
+        db.session.rollback()
+        return _err(str(exc))
+    row.candidate_id = cand.id
+    db.session.commit()
+    analyze_pending_async(current_app._get_current_object())
+    return jsonify({'ok': True, 'ingested': True, 'new_candidate': created,
+                    'candidate_id': cand.id})
+
+
 @admin_bp.route('/api/talent/candidates', methods=['POST'])
 @login_required
 def talent_create_candidate():

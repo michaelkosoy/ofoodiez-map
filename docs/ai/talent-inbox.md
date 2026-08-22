@@ -38,11 +38,20 @@ company's method, reusing an existing NEEDS_ACTION referral or creating one
   submission (e.g. Zafran's Ashby: + Add → Referral), downloading the CV via
   the admin CV URL first and stopping before final submit.
 
-## Scheduled ingestion
-`POST /admin/api/talent/sync` accepts the admin session OR the keyed-endpoint
-pattern (`?key=ADMIN_SECRET` / `X-Admin-Key` header, fail-closed) so a cron /
-scheduled routine can ingest daily or twice daily. Ingest is fast; analysis
-continues in a background thread after the response.
+## Scheduled ingestion (two paths, both keyed)
+Keyed auth = admin session OR `?key=ADMIN_SECRET` / `X-Admin-Key` header,
+fail-closed — same pattern as /wa/backfill-cron.
+1. `POST /admin/api/talent/sync` — server-side IMAP pull (needs
+   TALENT_GMAIL_* env). One call ingests everything new.
+2. `POST /admin/api/talent/ingest` — push path for external routines: Ofir's
+   scheduled Claude routine reads Gmail through a CONNECTOR (no app password,
+   no server Gmail config) and POSTs each CV email here as multipart
+   (file + from_email/from_name/subject/snippet/received_at/message_id).
+   Idempotent on message_id (`ingested: false` = already known, not an
+   error), so overlapping scan windows are safe; a repeat sender becomes a
+   new CV version. This is the ACTIVE path — the routine prompt lives with
+   Ofir's schedule, keep the endpoint contract stable.
+Both paths return fast; AI analysis continues in a background thread.
 
 ## Personal CV copies
 Every incoming CV (sync + manual upload) is best-effort mirrored to Google
