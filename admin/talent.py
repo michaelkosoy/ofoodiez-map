@@ -193,9 +193,20 @@ def _apply_filters(views, args):
     return views
 
 
-def _all_candidates():
-    return TalentCandidate.query.order_by(
-        TalentCandidate.created_at.desc()).limit(1000).all()
+def _all_candidates(statuses=None):
+    q = TalentCandidate.query
+    if statuses:
+        q = q.filter(TalentCandidate.status.in_(statuses))
+    return q.order_by(TalentCandidate.created_at.desc()).limit(1000).all()
+
+
+# Rows rendered per dashboard load. Counters and filters still run over the
+# whole set — this only caps the HTML, which is what actually costs time on the
+# wire (~1.3KB/row). ?limit=all renders everything.
+# ponytail: display slice, not SQL pagination — assembly is ~40ms at 300 rows
+# and _all_candidates() is capped at 1000. Move filtering into SQL if the pool
+# ever outgrows that.
+PAGE_ROWS = 100
 
 
 def _parse_list(value):
@@ -217,13 +228,18 @@ def talent_dashboard():
     views = _candidate_views(_all_candidates())
     counters = _counters(views)
     filtered = _apply_filters(views, request.args)
+    shown = filtered
+    if request.args.get('limit') != 'all':
+        shown = filtered[:PAGE_ROWS]
     companies = TalentCompany.query.order_by(TalentCompany.name).all()
     sources = sorted({v['c'].source for v in views if v['c'].source})
     gmail_ready = bool(tcfg.gmail_config()['user'] and tcfg.gmail_config()['password'])
-    return render_template('admin/talent.html', views=filtered, counters=counters,
+    return render_template('admin/talent.html', views=shown, counters=counters,
                            companies=companies, sources=sources,
                            args=request.args, gmail_ready=gmail_ready,
-                           total=len(views))
+                           total=len(views), matched=len(filtered),
+                           pending=sum(1 for v in views
+                                       if v['analysis_status'] in ('pending', 'running')))
 
 
 @admin_bp.route('/talent/needs-action')
@@ -244,7 +260,9 @@ def talent_needs_action():
             groups['WAITING'].append(item)
         else:
             groups.setdefault(r.method or 'MANUAL_UPLOAD', []).append(item)
-    review_views = [v for v in _candidate_views(_all_candidates())
+    # Only NEW candidates can be "needs review" — assembling just those keeps
+    # this page cheap instead of pulling every analysis in the pool.
+    review_views = [v for v in _candidate_views(_all_candidates(statuses=('NEW',)))
                     if _bucket(v, 'needs_review')]
     return render_template('admin/talent_needs_action.html', groups=groups,
                            review_views=review_views)
@@ -597,6 +615,17 @@ def talent_reanalyze(cand_id):
     db.session.commit()
     analyze_pending_async(current_app._get_current_object())
     return jsonify({'ok': True})
+
+
+@admin_bp.route('/api/talent/pending-count')
+@login_required
+def talent_pending_count():
+    """How many active CVs are still being analyzed. One tiny query — the
+    dashboard polls this instead of blind-reloading the whole page."""
+    n = db.session.query(db.func.count(TalentCv.id)).filter(
+        TalentCv.is_active.is_(True),
+        TalentCv.analysis_status.in_(('pending', 'running'))).scalar()
+    return jsonify({'pending': n or 0})
 
 
 @admin_bp.route('/api/talent/candidate/<cand_id>/analysis-status')

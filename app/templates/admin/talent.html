@@ -119,6 +119,12 @@
     </tbody>
 </table>
 </div>
+{% if matched > views|length %}
+<p class="tsection-note" style="margin-top:10px;">
+    Showing the {{ views|length }} most recent of {{ matched }} matching candidates.
+    <a href="{{ url_for('admin.talent_dashboard', **dict(args, limit='all')) }}">Show all {{ matched }}</a>
+</p>
+{% endif %}
 <div class="tkbd"><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>Enter</kbd> open · <kbd>S</kbd> strong · <kbd>M</kbd> maybe · <kbd>X</kbd> skip</div>
 {% endblock %}
 
@@ -236,9 +242,30 @@ rows.forEach((r, i) => r.addEventListener('click', ev => {
     kselect(i);
 }));
 
-/* Auto-refresh while any row is still analyzing (cheap: whole-page reload) */
-if (document.querySelector('.tbadge.pending') && !window.__talentRefresh) {
-    window.__talentRefresh = setTimeout(() => location.reload(), 6000);
-}
+/* Prefetch a candidate page on row hover — by the time the click lands the
+   HTML is usually already cached. */
+const prefetched = new Set();
+rows.forEach(r => r.addEventListener('mouseenter', () => {
+    const url = r.dataset.url;
+    if (prefetched.has(url)) return;
+    prefetched.add(url);
+    const l = document.createElement('link');
+    l.rel = 'prefetch'; l.href = url;
+    document.head.appendChild(l);
+}, { passive: true }));
+
+/* While CVs are analyzing, poll a 1-query counter and reload ONLY when it
+   actually drops — instead of blind full-page reloads every 6s. */
+{% if pending %}
+(function watchPending(last) {
+    setTimeout(async () => {
+        const r = await fetch('/admin/api/talent/pending-count');
+        if (!r.ok) return;
+        const { pending } = await r.json();
+        if (pending < last) location.reload();
+        else watchPending(last);
+    }, 5000);
+})({{ pending }});
+{% endif %}
 </script>
 {% endblock %}

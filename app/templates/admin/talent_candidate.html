@@ -13,7 +13,7 @@
 <div class="tcard">
     <div class="thead-line">
         <h2>{{ cand.name or '(no name yet)' }}</h2>
-        <span class="tbadge {{ cand.status|lower }}">{{ cand.status.replace('_',' ') }}</span>
+        <span class="tbadge {{ cand.status|lower }}" id="statusBadge">{{ cand.status.replace('_',' ') }}</span>
         {% if active_cv and active_cv.analysis_status in ('pending','running') %}
             <span class="tbadge pending" id="analyzingBadge">AI ANALYZING…</span>
         {% elif active_cv and active_cv.analysis_status == 'failed' %}
@@ -133,7 +133,7 @@
                     {% else %}
                         <button class="tbtn sm" onclick="quickRefer({{ comp.id }})"><i class="fas fa-envelope"></i> Email CV to {{ comp.name }}</button>
                     {% endif %}
-                    <select class="tbtn sm secondary" style="padding:4px 8px;" onchange="overrideFit({{ m.id }}, this.value)">
+                    <select class="tbtn sm secondary" style="padding:4px 8px;" onchange="overrideFit({{ m.id }}, this.value, this)">
                         <option value="">Override fit…</option>
                         <option value="STRONG">STRONG</option><option value="MAYBE">MAYBE</option>
                         <option value="NO_MATCH">NO MATCH</option><option value="CLEAR">Clear override</option>
@@ -278,27 +278,56 @@
         <button class="tbtn sm secondary" style="margin-top:8px;" onclick="saveNotes()">Save notes</button>
     </div>
 
-    <div class="tkbd"><kbd>S</kbd> strong · <kbd>M</kbd> maybe · <kbd>X</kbd> skip · <kbd>K</kbd> prev · <kbd>J</kbd> next</div>
+    <div class="tkbd"><kbd>S</kbd> strong · <kbd>M</kbd> maybe · <kbd>X</kbd> skip ·
+        <kbd>⇧</kbd>+key = set &amp; jump to next · <kbd>K</kbd> prev · <kbd>J</kbd> next</div>
 </div>
 </div>
 {% endblock %}
 
 {% block talent_scripts %}
+{# Warm the browser cache for the next/prev candidate so J/K navigation is
+   instant instead of a cold ~1s request. #}
+{% if next_id %}<link rel="prefetch" href="{{ url_for('admin.talent_candidate', cand_id=next_id) }}">{% endif %}
+{% if prev_id %}<link rel="prefetch" href="{{ url_for('admin.talent_candidate', cand_id=prev_id) }}">{% endif %}
 <script>
 const CAND_ID = {{ cand.id|tojson }};
+const NEXT_URL = {{ (url_for('admin.talent_candidate', cand_id=next_id) if next_id else None)|tojson }};
 
-async function setStatus(status) {
+/* In-place badge swap — no page reload, so S/M/X during a review loop is
+   instant instead of costing a full round trip. */
+async function setStatus(status, thenNext) {
+    const badge = document.getElementById('statusBadge');
+    const prev = badge ? { cls: badge.className, txt: badge.textContent } : null;
+    if (badge) { badge.className = 'tbadge ' + status.toLowerCase(); badge.textContent = status; }
     const data = await tapi('/admin/api/talent/candidate/' + CAND_ID, { method: 'PUT', body: { status } });
-    if (data) location.reload();
+    if (!data) {
+        if (badge && prev) { badge.className = prev.cls; badge.textContent = prev.txt; }
+        return;
+    }
+    toast(status);
+    if (thenNext && NEXT_URL) location.href = NEXT_URL;
 }
 async function reanalyze() {
     const data = await tapi('/admin/api/talent/candidate/' + CAND_ID + '/analyze');
     if (data) { toast('Re-analysis queued'); setTimeout(() => location.reload(), 1500); }
 }
-async function overrideFit(matchId, fit) {
+async function overrideFit(matchId, fit, sel) {
     if (!fit) return;
     const data = await tapi('/admin/api/talent/match/' + matchId + '/override', { body: { fit } });
-    if (data) location.reload();
+    if (!data) return;
+    // Update this card's badges in place; no reload (ordering refreshes next visit).
+    const card = sel && sel.closest('.tmatch');
+    if (card && fit !== 'CLEAR') {
+        const b = card.querySelector('.tbadge');
+        b.className = 'tbadge ' + fit.toLowerCase();
+        b.textContent = fit.replace('_', ' ') + (fit !== 'NO_MATCH' ? ' MATCH' : '');
+        if (!card.querySelector('.tbadge.manual')) {
+            b.insertAdjacentHTML('afterend',
+                '<span class="tbadge manual" title="Manually set — AI re-runs will not change it">OVERRIDE</span>');
+        }
+    }
+    if (sel) sel.value = '';
+    toast(fit === 'CLEAR' ? 'Override cleared' : 'Set to ' + fit.replace('_', ' '));
 }
 async function addCompany() {
     const sel = document.getElementById('addCompanySelect');
@@ -451,12 +480,13 @@ document.getElementById('cvUploadForm').addEventListener('submit', async e => {
 })();
 {% endif %}
 
-/* Keyboard: S/M/X verdicts, J next, K prev */
+/* Keyboard: S/M/X verdicts (shift+key = verdict AND jump to next), J next, K prev */
 document.addEventListener('keydown', e => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-    if (e.key === 's') setStatus('STRONG');
-    else if (e.key === 'm') setStatus('MAYBE');
-    else if (e.key === 'x') setStatus('SKIP');
+    const chain = e.shiftKey;
+    if (e.key.toLowerCase() === 's') setStatus('STRONG', chain);
+    else if (e.key.toLowerCase() === 'm') setStatus('MAYBE', chain);
+    else if (e.key.toLowerCase() === 'x') setStatus('SKIP', chain);
     {% if next_id %}else if (e.key === 'j' || e.key === 'ArrowRight') location.href = '{{ url_for('admin.talent_candidate', cand_id=next_id) }}';{% endif %}
     {% if prev_id %}else if (e.key === 'k' || e.key === 'ArrowLeft') location.href = '{{ url_for('admin.talent_candidate', cand_id=prev_id) }}';{% endif %}
 });
