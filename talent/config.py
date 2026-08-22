@@ -64,5 +64,5 @@ DEFAULT_REFERRAL_BODY = (
     '{years_experience} years of experience.\n\n'
     'Highlights:\n{candidate_highlights}\n\n'
     'CV attached.\n\n'
-    'Michael'
+    'Thanks,\nOfir'
 )

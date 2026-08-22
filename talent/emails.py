@@ -103,7 +103,7 @@ def send_email(to, subject, text_body, cc=None, attachment=None):
     if not to:
         return False, 'No recipient address.'
     body = {
-        'sender': {'email': from_email, 'name': 'Michael — Ofoodiez'},
+        'sender': {'email': from_email, 'name': 'Ofir — Ofoodiez'},
         'to': [{'email': to}],
         'subject': subject or '(no subject)',
         'textContent': text_body or '',
