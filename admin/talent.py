@@ -429,6 +429,76 @@ def talent_ai():
                            fallback_model=tcfg.fallback_model())
 
 
+@admin_bp.route('/talent/cvs')
+@login_required
+def talent_cv_library():
+    """Drive-like view of every CV file on record, newest first. Never loads
+    the blobs — sizes come from length() in SQL."""
+    q = (db.session.query(
+            TalentCv.id, TalentCv.candidate_id, TalentCv.version,
+            TalentCv.is_active, TalentCv.filename, TalentCv.ext,
+            TalentCv.text_source, TalentCv.created_at, TalentCv.analysis_status,
+            db.func.length(TalentCv.file).label('size'),
+            db.func.length(TalentCv.text).label('text_len'))
+         .order_by(TalentCv.created_at.desc()))
+    rows = q.limit(2000).all()
+    cands = {c.id: c for c in TalentCandidate.query.all()} if rows else {}
+
+    search = (request.args.get('q') or '').lower().strip()
+    items = []
+    for r in rows:
+        cand = cands.get(r.candidate_id)
+        blob = ' '.join([(cand.name or '') if cand else '',
+                         (cand.email or '') if cand else '',
+                         r.filename or '']).lower()
+        if search and search not in blob:
+            continue
+        items.append({'r': r, 'cand': cand,
+                      'received': _human_date(r.created_at)})
+    total_bytes = sum((r.size or 0) for r in rows)
+    return render_template('admin/talent_cvs.html', items=items, rows_total=len(rows),
+                           total_bytes=total_bytes, search=request.args.get('q', ''),
+                           shown_bytes=sum((i['r'].size or 0) for i in items))
+
+
+@admin_bp.route('/talent/cvs.zip')
+@login_required
+def talent_cvs_zip():
+    """Every CV as one ZIP: <Candidate_Name>/v<n>_<file>. Blobs are read in
+    chunks so a big library doesn't sit in memory all at once."""
+    import io
+    import zipfile
+    from cv_review.storage import sanitize_name
+
+    ids = [r[0] for r in db.session.query(TalentCv.id)
+           .order_by(TalentCv.created_at.desc()).limit(2000).all()]
+    cands = {c.id: c for c in TalentCandidate.query.all()}
+    buf = io.BytesIO()
+    used = set()
+    with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for i in range(0, len(ids), 25):     # chunked: bounded memory, few round trips
+            for cv in TalentCv.query.filter(TalentCv.id.in_(ids[i:i + 25])).all():
+                if not cv.file:
+                    continue
+                cand = cands.get(cv.candidate_id)
+                folder = sanitize_name((cand.name or cand.email or 'Unknown')
+                                       if cand else 'Unknown')
+                stem = sanitize_name(os.path.splitext(cv.filename or 'cv')[0])
+                name = f'{folder}/v{cv.version}_{stem}{cv.ext or ""}'
+                n = 2
+                while name in used:
+                    name = f'{folder}/v{cv.version}_{stem}_{n}{cv.ext or ""}'
+                    n += 1
+                used.add(name)
+                zf.writestr(name, cv.file)
+    buf.seek(0)
+    stamp = datetime.utcnow().strftime('%Y-%m-%d')
+    return Response(buf.getvalue(), mimetype='application/zip', headers={
+        'Content-Disposition': f'attachment; filename="ofoodiez-cvs-{stamp}.zip"',
+        'Cache-Control': 'private, no-store',
+    })
+
+
 @admin_bp.route('/talent/cv/<cv_id>/file')
 @login_required
 def talent_cv_file(cv_id):

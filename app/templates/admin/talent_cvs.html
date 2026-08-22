@@ -1,0 +1,72 @@
+{% extends "admin/talent_layout.html" %}
+{% block title %}CV Library — Talent{% endblock %}
+
+{% macro size(b) %}{% if b is none %}—{% elif b >= 1048576 %}{{ '%.1f MB'|format(b / 1048576) }}{% else %}{{ (b // 1024) or 1 }} KB{% endif %}{% endmacro %}
+
+{% block talent_actions %}
+{% if rows_total %}
+<a class="tbtn" href="{{ url_for('admin.talent_cvs_zip') }}"><i class="fas fa-file-zipper"></i> Download all ({{ size(total_bytes) }})</a>
+{% endif %}
+{% endblock %}
+
+{% block talent_content %}
+<div class="tcard" style="padding:14px 20px;">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <b style="color:#5A3A31;">{{ rows_total }} CV{{ 's' if rows_total != 1 }} on file · {{ size(total_bytes) }}</b>
+        <span style="flex-grow:1"></span>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search candidate or filename…"
+               style="padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-family:inherit; min-width:240px;">
+        <button class="tbtn sm" type="submit"><i class="fas fa-magnifying-glass"></i> Search</button>
+        {% if search %}<a class="tbtn sm secondary" href="{{ url_for('admin.talent_cv_library') }}">Clear</a>{% endif %}
+    </form>
+    {% if search %}<p class="tsection-note" style="margin-top:8px;">{{ items|length }} match{{ 'es' if items|length != 1 }} · {{ size(shown_bytes) }}</p>{% endif %}
+</div>
+
+<div class="ttable-wrap">
+<table class="ttable">
+    <thead><tr>
+        <th>Candidate</th><th>File</th><th>Version</th><th>Size</th>
+        <th>Text</th><th>Received</th><th></th>
+    </tr></thead>
+    <tbody>
+    {% for i in items %}
+    {% set r = i.r %}
+    <tr>
+        <td>
+            {% if i.cand %}
+            <a class="tname" href="{{ url_for('admin.talent_candidate', cand_id=i.cand.id) }}">{{ i.cand.name or '(no name)' }}</a>
+            <span class="tsub">{{ i.cand.email or '' }}</span>
+            {% else %}<span class="tsub">(candidate removed)</span>{% endif %}
+        </td>
+        <td>
+            <i class="fas {{ 'fa-file-pdf' if r.ext == '.pdf' else 'fa-file-word' }}" style="color:#b08968;"></i>
+            {{ r.filename or 'cv' ~ (r.ext or '') }}
+        </td>
+        <td>v{{ r.version }} {% if r.is_active %}<span class="tbadge new">ACTIVE</span>{% endif %}</td>
+        <td>{{ size(r.size) }}</td>
+        <td>
+            {% if r.text_len %}<span class="tbadge good" title="{{ r.text_len }} characters extracted locally via {{ r.text_source }}">{{ r.text_source|upper }}</span>
+            {% else %}<span class="tbadge skip" title="No local text — the PDF itself was sent for analysis">NONE</span>{% endif %}
+        </td>
+        <td>{{ i.received }}</td>
+        <td style="white-space:nowrap;">
+            <a class="tbtn sm secondary" target="_blank" href="{{ url_for('admin.talent_cv_file', cv_id=r.id) }}">
+                <i class="fas fa-eye"></i> Open</a>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="tempty">
+        {% if search %}No CVs match “{{ search }}”.
+        {% else %}No CVs yet — they appear here automatically as they arrive.{% endif %}
+    </td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<p class="tsection-note" style="margin-top:12px;">
+    Every version is kept — uploading a newer CV never replaces an older one. Files are stored in the
+    database (Render's disk is wiped on each deploy) and are only reachable through this admin panel;
+    they have no public URLs.
+</p>
+{% endblock %}
