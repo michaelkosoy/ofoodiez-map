@@ -344,8 +344,8 @@ CAND_SUBMITTED = (
 )
 CAND_EXPLORE_MORE = (
     "Done! ✅ Your CV is on its way — fingers crossed! 🤞🎉\n\n"
-    "Want to apply to another role? Reply *yes* to search another company, "
-    "or *no* if you're all set. 🙂"
+    "Want to apply somewhere else? Just send the *next company name* — "
+    "or reply *no* if you're all set. 🙂"
 )
 CAND_FINISHED = "Thanks for using Ofoodiez Referrals — we're rooting for you! 🤞🧡"
 ADVOCATE_PING = (

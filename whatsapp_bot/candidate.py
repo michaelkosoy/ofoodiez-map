@@ -499,14 +499,41 @@ def _handle_resume(user, conv, data, inbound):
 
 _EXPLORE_YES_WORDS = {"yes", "y", "yep", "yeah", "yup", "sure", "ok", "okay",
                       "another", "more", "again", "👍", "✅"}
+# Typed ways of saying "I'm done". Needed now that unrecognised text means "this
+# is my next company" — without it, "no thanks" would be logged as a company.
+_EXPLORE_NO_WORDS = {
+    "no", "n", "nope", "nah", "no thanks", "no thank you", "nope thanks",
+    "not now", "later", "done", "im done", "i'm done", "finished", "that's all",
+    "thats all", "all set", "im good", "i'm good", "im ok", "i'm ok", "ok thanks",
+    "thanks", "thank you", "stop", "bye", "🙏", "👌",
+}
 
 
 def _handle_explore(user, conv, payload, text=""):
-    if payload == "EXPLORE_YES" or (text or "").strip().lower() in _EXPLORE_YES_WORDS:
+    """After a submission: another company, or done.
+
+    A button tap is unambiguous — EXPLORE_YES is yes, any other payload is no.
+    Typed text is where this used to break: a candidate who already knows their
+    next target just types the company name instead of "yes", and treating that
+    as "no" ended the conversation — then silently ate the role, the job link and
+    the CV that followed, so they could never apply to a second company. So
+    unrecognised text is taken as the next company name.
+    """
+    t = (text or "").strip()
+    low = t.lower()
+    if payload == "EXPLORE_YES" or low in _EXPLORE_YES_WORDS:
         return start(user, conv)
-    conversation.reset_state(conv)
-    messaging.send_prompt(user.phone, copy.CAND_FINISHED)
-    return "cand_finished"
+    if payload or low in _EXPLORE_NO_WORDS:
+        conversation.reset_state(conv)
+        messaging.send_prompt(user.phone, copy.CAND_FINISHED)
+        return "cand_finished"
+    if not t:
+        # Media-only — e.g. re-sending the CV "just in case". Never hang up on
+        # someone who is actively trying to send us a file.
+        messaging.send_prompt(user.phone, copy.CAND_EXPLORE_MORE)
+        return "cand_explore_more"
+    conversation.set_state(conv, "candidate", "cand_company", {})
+    return _handle_company(user, conv, {}, t)
 
 
 def _recent_duplicate_application(candidate_user_id, company_id, days=30):
