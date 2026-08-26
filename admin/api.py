@@ -1371,7 +1371,10 @@ def send_hitech_bulk_email():
             consecutive_failures = 0
             for row_id, email in pending:
                 try:
-                    unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={email}"
+                    # quote(): '+' etc. in an address must be %-encoded or the
+                    # query decode turns it into a space and the link no-ops.
+                    from urllib.parse import quote
+                    unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={quote(email)}"
                     personal_html = None if plain else html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
                     personal_text = f"{text_content}\n\nלהסרה מהרשימה: {unsub_link}"
                     success = send_custom_community_email(
