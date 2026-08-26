@@ -1256,6 +1256,9 @@ def send_hitech_bulk_email():
     target = data.get('target', 'all')
     list_name = (data.get('list_name') or '').strip()
     specific_email = (data.get('specific_email') or '').strip()
+    # Plain mode: text-only, NO html part — Gmail files styled multipart under
+    # Promotions; a bare text email with a personal subject reaches Primary.
+    plain = bool(data.get('plain'))
 
     if not subject or not body_text:
         return jsonify({'success': False, 'message': 'Subject and Body are required.'}), 400
@@ -1369,7 +1372,7 @@ def send_hitech_bulk_email():
             for row_id, email in pending:
                 try:
                     unsub_link = f"https://ofoodiez.com/hitech/unsubscribe?email={email}"
-                    personal_html = html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
+                    personal_html = None if plain else html_template.replace("UNSUBSCRIBE_LINK", unsub_link)
                     personal_text = f"{text_content}\n\nלהסרה מהרשימה: {unsub_link}"
                     success = send_custom_community_email(
                         to_email=email,

@@ -367,7 +367,11 @@ def send_hitech_rejection_email(to_email):
 
 
 def send_custom_community_email(to_email, subject, body_html, body_text):
-    """Send a custom community email to a tech member via Brevo."""
+    """Send a custom community email to a tech member via Brevo.
+
+    body_html=None sends PLAIN TEXT ONLY — no HTML part at all. That's the
+    Gmail-Primary trick (see send_referral_confirmed_email): styled multipart
+    mail gets filed under Promotions."""
     api_key = WaConfig.BREVO_API_KEY
     from_email = WaConfig.WA_FROM_EMAIL
     if not to_email:
@@ -381,14 +385,15 @@ def send_custom_community_email(to_email, subject, body_html, body_text):
         print("="*60 + "\n")
         return True
 
+    content = [{"type": "text/plain", "value": body_text}]
+    if body_html:
+        content.append({"type": "text/html",
+                        "value": html.escape(body_html) if "<" not in body_html else body_html})
     payload = {
         "personalizations": [{"to": [{"email": to_email}]}],
         "from": {"email": from_email, "name": "Ofoodiez"},
         "subject": subject,
-        "content": [
-            {"type": "text/plain", "value": body_text},
-            {"type": "text/html", "value": html.escape(body_html) if "<" not in body_html else body_html},
-        ],
+        "content": content,
     }
     return _post(payload)
 

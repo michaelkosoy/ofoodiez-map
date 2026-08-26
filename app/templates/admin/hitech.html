@@ -84,6 +84,12 @@
                 <input id="email-image-url" type="url" placeholder="https://..." style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
             </div>
 
+            <!-- Plain-text / Gmail Primary mode -->
+            <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:0.9rem;color:#333;">
+                <input type="checkbox" id="email-plain" style="margin-top:3px;">
+                <span>מצב Primary — טקסט נקי בלבד: בלי עיצוב, תמונה וכפתור (הקישור יופיע כטקסט). מגדיל משמעותית את הסיכוי להגיע לתיבה הראשית בג׳ימייל ולא ל״קידומי מכירות״.</span>
+            </label>
+
             <!-- Recipient Criteria -->
             <div style="display:flex;flex-direction:column;gap:6px;">
                 <label style="font-size:0.85rem;font-weight:600;color:#555;">קהל יעד למשלוח *</label>
@@ -448,6 +454,7 @@
         document.getElementById('email-image-select').value = '';
         document.getElementById('email-image-url').value = '';
         document.getElementById('email-image-url-group').style.display = 'none';
+        document.getElementById('email-plain').checked = false;
         document.getElementById('email-target-list').value = '';
         document.getElementById('email-target-specific').value = '';
         
@@ -505,6 +512,7 @@
                 button_url: buttonUrl,
                 button_text: buttonText,
                 image_url: imageUrl,
+                plain: document.getElementById('email-plain').checked,
                 target: target,
                 list_name: listName,
                 specific_email: specificEmail
