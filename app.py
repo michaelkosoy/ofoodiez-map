@@ -771,12 +771,21 @@ def hitech_suppliers():
                            c=content.get('suppliers', {}))
 
 
-@app.route('/hitech/unsubscribe')
+@app.route('/hitech/unsubscribe', methods=['GET', 'POST'])
 def hitech_unsubscribe():
-    """Unsubscribe a user from the HiTech community waitlist."""
-    email = request.args.get('email', '').strip().lower()
+    """Unsubscribe a user from the HiTech community waitlist.
+
+    Two-step on purpose: GET only shows a confirmation button, POST deletes.
+    Corporate mail-security scanners prefetch every GET link in delivered
+    email — a scanner auto-"clicked" an unsubscribe link and deleted a real
+    member (2026-08-26). Bots don't submit forms; humans do.
+    """
+    email = (request.values.get('email') or '').strip().lower()
     if not email:
         return render_template('hitech_unsubscribed.html', email='Unknown')
+
+    if request.method == 'GET':
+        return render_template('hitech_unsubscribe_confirm.html', email=email)
 
     try:
         from database.models import db
@@ -785,19 +794,20 @@ def hitech_unsubscribe():
             db.session.delete(entry)
             db.session.commit()
 
-        # Notify ops/admin
-        from whatsapp_bot.emailer import send_custom_community_email
-        ops_email = os.environ.get("WA_OPS_EMAIL") or "info@ofoodiez.com"
-        send_custom_community_email(
-            to_email=ops_email,
-            subject=f"HiTech Unsubscribe: {email}",
-            body_html=f"<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: rtl; text-align: right;'>"
-                      f"<p>התקבל ביקוש להסרה מרשימת התפוצה של קהילת ההייטק:</p>"
-                      f"<p>כתובת המייל: <b>{email}</b></p>"
-                      f"<p>המשתמש הוסר אוטומטית מבסיס הנתונים.</p>"
-                      f"</div>",
-            body_text=f"Request to unsubscribe received from: {email}\nThe email was automatically removed from the database."
-        )
+            # Notify ops/admin — only on a real removal, so scanner/repeat
+            # hits don't flood the inbox or burn the Brevo daily quota.
+            from whatsapp_bot.emailer import send_custom_community_email
+            ops_email = os.environ.get("WA_OPS_EMAIL") or "info@ofoodiez.com"
+            send_custom_community_email(
+                to_email=ops_email,
+                subject=f"HiTech Unsubscribe: {email}",
+                body_html=f"<div style='font-family: sans-serif; font-size: 15px; color: #222; direction: rtl; text-align: right;'>"
+                          f"<p>התקבל ביקוש להסרה מרשימת התפוצה של קהילת ההייטק:</p>"
+                          f"<p>כתובת המייל: <b>{email}</b></p>"
+                          f"<p>המשתמש הוסר אוטומטית מבסיס הנתונים.</p>"
+                          f"</div>",
+                body_text=f"Request to unsubscribe received from: {email}\nThe email was automatically removed from the database."
+            )
     except Exception as e:
         print(f"⚠️ Error during HiTech unsubscribe for {email}: {e}")
 
