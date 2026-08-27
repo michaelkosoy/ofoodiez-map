@@ -1274,14 +1274,23 @@ def send_hitech_bulk_email():
         if not list_name:
             return jsonify({'success': False, 'message': 'List tag is required.'}), 400
         recipients = HitechEmail.query.filter_by(list_name=list_name).all()
+        # Default ON: campaigns go to verified members only (2026-08-27: a list
+        # send caught rows tagged mid-edit and emailed unverified signups).
+        # Untick the checkbox to deliberately include unverified rows.
+        if data.get('verified_only', True):
+            recipients = [r for r in recipients if r.verified]
     elif target == 'specific':
         if not specific_email or '@' not in specific_email:
             return jsonify({'success': False, 'message': 'Valid test email address is required.'}), 400
-        # Create a dummy container for the loop
+        # If the address belongs to a member, use the real row so the send is
+        # MARKED — a one-off send must not create a future duplicate when the
+        # same campaign is later resumed to a wider target. Non-members
+        # (e.g. test addresses) still go through a dummy container.
         class DummyRecipient:
             def __init__(self, email):
                 self.email = email
-        recipients = [DummyRecipient(specific_email)]
+        member = HitechEmail.query.filter_by(email=specific_email.lower()).first()
+        recipients = [member or DummyRecipient(specific_email)]
     else:
         return jsonify({'success': False, 'message': 'Invalid target audience.'}), 400
 

@@ -116,6 +116,9 @@
               <div id="target-list-group" style="display:none;flex-direction:column;gap:4px;">
                   <label style="font-size:0.85rem;font-weight:600;color:#555;">שם תגית הרשימה *</label>
                   <input id="email-target-list" type="text" placeholder="למשל: founders" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;font-family:inherit;">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;color:#333;margin-top:4px;">
+                      <input type="checkbox" id="email-list-verified-only" checked> שליחה למאומתים (Verified) בלבד מתוך הרשימה
+                  </label>
               </div>
   
               <!-- Specific Email Input (Conditional) -->
@@ -455,6 +458,7 @@
         document.getElementById('email-image-url').value = '';
         document.getElementById('email-image-url-group').style.display = 'none';
         document.getElementById('email-plain').checked = false;
+        document.getElementById('email-list-verified-only').checked = true;
         document.getElementById('email-target-list').value = '';
         document.getElementById('email-target-specific').value = '';
         
@@ -515,6 +519,7 @@
                 plain: document.getElementById('email-plain').checked,
                 target: target,
                 list_name: listName,
+                verified_only: document.getElementById('email-list-verified-only').checked,
                 specific_email: specificEmail
             })
         })
