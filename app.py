@@ -446,7 +446,10 @@ def portfolio_pricing():
                                c=content.get('portfolio', {}), pricing=pricing)
     pricing = {
         'show_launch': row.show_launch is not False if row else True,
-        'show_boost': row.show_boost is not False if row else True,
+        # ponytail: Boost pulled from the lineup 2026-08-31 (data kept in
+        # portfolio_content.json + the boost_* columns). Restore with
+        # row.show_boost is not False if row else True.
+        'show_boost': False,
         'show_presence': row.show_presence is not False if row else True,
         # Access joined 2026-08: opt-IN per code (NULL/False → hidden), so
         # codes sent before it existed never gain a package they weren't offered.

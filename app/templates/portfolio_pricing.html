@@ -50,6 +50,17 @@
 {% endif %}
 {% endfor %}
 </ul>
+{% if launch.addons %}
+<div class="mt-3 pt-3 space-y-2">
+{% for addon in launch.addons %}
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-custom-brown text-lg flex-shrink-0">add_circle</span>
+<span class="font-body-md text-custom-brown text-sm font-bold">{{ addon }}</span>
+<span class="ml-auto border border-custom-brown/30 text-custom-brown font-label-mono text-[10px] uppercase font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ ui.addon | default('add-on') }}</span>
+</div>
+{% endfor %}
+</div>
+{% endif %}
 </div>
 <div class="pt-3">
 <div class="text-center">

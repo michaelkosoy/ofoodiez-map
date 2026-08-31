@@ -687,8 +687,11 @@
             "**Active referrals of relevant candidates to your HR team**"
           ],
           "goal": "A one-time campaign to introduce your company to the right audience",
-          "price": "₪8,500",
-          "priceNote": "+ referral fee"
+          "price": "$3,000",
+          "priceNote": "+ referral fee",
+          "addons": [
+            "Additional company events / trips for full-event coverage"
+          ]
         },
         {
           "name": "BOOST",
@@ -716,7 +719,7 @@
           "name": "PRESENCE",
           "subtitle": "Full Employer Branding Content Engine",
           "description": "More consistent weekly content. Your team stays hands-off while I handle the entire content process.",
-          "banner": "Everything from Boost, with:",
+          "banner": "Everything from Launch, with:",
           "goal": "You forget social media exists. I handle everything, end to end.",
           "includes": [
             "## Additional Content and Support",
@@ -728,7 +731,7 @@
             "**Active referrals of relevant candidates to your HR team**"
           ],
           "minimumCommitment": "3 months",
-          "price": "Starting from ₪11,000",
+          "price": "Starting from $4,000",
           "priceNote": "+ referral fee",
           "addons": [
             "Additional social media channel",
@@ -752,7 +755,7 @@
             "**Active referrals of relevant candidates to your HR team**"
           ],
           "minimumCommitment": "3 months",
-          "price": "₪5,000",
+          "price": "$2,000",
           "priceNote": "+ referral fee"
         }
       ],
