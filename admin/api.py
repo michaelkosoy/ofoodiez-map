@@ -1273,7 +1273,10 @@ def send_hitech_bulk_email():
     elif target == 'list':
         if not list_name:
             return jsonify({'success': False, 'message': 'List tag is required.'}), 400
-        recipients = HitechEmail.query.filter_by(list_name=list_name).all()
+        # Case-insensitive: tags are hand-typed in the grid; 'a' vs 'A' split
+        # one audience mid-tagging (2026-09-09).
+        recipients = HitechEmail.query.filter(
+            db.func.lower(HitechEmail.list_name) == list_name.lower()).all()
         # Default ON: campaigns go to verified members only (2026-08-27: a list
         # send caught rows tagged mid-edit and emailed unverified signups).
         # Untick the checkbox to deliberately include unverified rows.
