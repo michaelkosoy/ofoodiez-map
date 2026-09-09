@@ -460,6 +460,10 @@ def portfolio_pricing():
         'boost_price': (row.boost_price or None) if row else None,
         'presence_price': (row.presence_price or None) if row else None,
         'access_price': (row.access_price or None) if row else None,
+        # Resolves the "{company}" / "{life_at}" placeholders in package
+        # includes (Presence's "Monthly Presence ({life_at})"). None for the
+        # admin grant → the generic ui fallbacks.
+        'company': (row.company or None) if row else None,
     }
     return render_template('portfolio_pricing.html', c=content.get('portfolio', {}),
                            pricing=pricing, **_portfolio_i18n(content))
@@ -516,6 +520,10 @@ PORTFOLIO_UI = {
         'availability': 'Limited monthly availability',
         'recommended': 'Recommended', 'get_started': 'Get Started', 'per_month': '/month',
         'min_commitment': 'Minimum commitment:', 'addon': 'add-on',
+        'your_company': 'Your Company',
+        # "{life_at}" in package includes → "Life at <Company>" for a client
+        # code, or the generic page name when there's no company behind the grant.
+        'life_at': 'Life at', 'life_at_page': '"Life at" page',
     },
     'he': {
         'toggle': 'English', 'toggle_code': 'en',
@@ -529,6 +537,8 @@ PORTFOLIO_UI = {
         'availability': 'זמינות חודשית מוגבלת',
         'recommended': 'מומלץ', 'get_started': 'בואו נתחיל', 'per_month': '/לחודש',
         'min_commitment': 'התחייבות מינימלית:', 'addon': 'תוספת',
+        'your_company': 'החברה שלכם',
+        'life_at': 'Life at', 'life_at_page': 'עמוד "Life at"',
     },
 }
 

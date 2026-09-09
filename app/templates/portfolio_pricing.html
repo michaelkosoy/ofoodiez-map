@@ -40,7 +40,8 @@
 <div class="pt-3 flex-grow flex flex-col">
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
 {# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
-{% for item in launch.includes %}
+{% for raw in launch.includes %}
+{% set item = raw.replace('{company}', pricing.company or ui.your_company).replace('{life_at}', (ui.life_at ~ ' ' ~ pricing.company) if pricing.company else ui.life_at_page) %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
 {% elif item.startswith('**') %}
@@ -82,7 +83,8 @@
 <div class="pt-3 flex-grow flex flex-col">
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
 {# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
-{% for item in access.includes %}
+{% for raw in access.includes %}
+{% set item = raw.replace('{company}', pricing.company or ui.your_company).replace('{life_at}', (ui.life_at ~ ' ' ~ pricing.company) if pricing.company else ui.life_at_page) %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
 {% elif item.startswith('**') %}
@@ -123,7 +125,8 @@
 {% if boost.banner %}<p class="font-body-md text-custom-brown/60 text-sm mb-2">{{ boost.banner }}</p>{% endif %}
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
 {# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
-{% for item in boost.includes %}
+{% for raw in boost.includes %}
+{% set item = raw.replace('{company}', pricing.company or ui.your_company).replace('{life_at}', (ui.life_at ~ ' ' ~ pricing.company) if pricing.company else ui.life_at_page) %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
 {% elif item.startswith('**') %}
@@ -172,7 +175,8 @@
 {% if presence.banner %}<p class="font-body-md text-custom-brown/60 text-sm mb-2">{{ presence.banner }}</p>{% endif %}
 <ul class="space-y-1.5 font-body-md text-custom-brown text-sm flex-grow">
 {# Includes lines starting with "## " render as group headers; "**text**" renders bold #}
-{% for item in presence.includes %}
+{% for raw in presence.includes %}
+{% set item = raw.replace('{company}', pricing.company or ui.your_company).replace('{life_at}', (ui.life_at ~ ' ' ~ pricing.company) if pricing.company else ui.life_at_page) %}
 {% if item.startswith('## ') %}
 <li class="font-label-mono uppercase text-custom-burgundy text-xs font-bold tracking-wider {{ 'pt-2' if not loop.first }}">{{ item[3:] }}</li>
 {% elif item.startswith('**') %}
