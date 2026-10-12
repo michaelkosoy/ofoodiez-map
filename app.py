@@ -307,6 +307,11 @@ def blog_japan():
     return render_template('blog_japan.html', api_key=GOOGLE_MAPS_API_KEY,
                            c=_load_blog('japan'))
 
+@app.route('/blog/spain')
+def blog_spain():
+    """Spain travel & food guide — Madrid, Haro/Rioja, San Sebastián."""
+    return render_template('blog_spain.html', c=_load_blog('spain'))
+
 @app.route('/blog/instagram')
 def blog_instagram():
     return render_template('blog_instagram.html')
@@ -1018,7 +1023,7 @@ def health_check():
 
 # ============ SEO ============
 SITE_URL = 'https://ofoodiez.com'
-SITEMAP_PAGES = ['/', '/blog', '/map', '/about', '/blog/japan', '/blog/bachelorette',
+SITEMAP_PAGES = ['/', '/blog', '/map', '/about', '/blog/japan', '/blog/spain', '/blog/bachelorette',
                  '/blog/instagram', '/hitech', '/hitech/community',
                  '/hitech/referrals-bot', '/hitech/cv-guide']
 
@@ -1504,4 +1509,4 @@ def submit_happy_hour():
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))

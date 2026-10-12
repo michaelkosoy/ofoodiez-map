@@ -7,6 +7,7 @@ All blog pages live under `/blog/<slug>`. Never create a blog page at a top-leve
 | URL | Template | Route function |
 |-----|----------|----------------|
 | `/blog/japan` | `app/templates/blog_japan.html` | `blog_japan()` |
+| `/blog/spain` | `app/templates/blog_spain.html` | `blog_spain()` |
 | `/blog/instagram` | `app/templates/blog_instagram.html` | `blog_instagram()` |
 | `/blog/bachelorette` | `app/templates/bachelorette.html` | `bachelorette_page()` |
 

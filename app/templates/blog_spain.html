@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  {% include 'components/analytics.html' %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מדריך ספרד · Ofoodiez</title>
+  <meta name="description"
+    content="המדריך המלא לספרד — מדריד, ריוחה והארו, סן סבסטיאן. מסעדות, יקבים, פינצ'וס ומסלול יומי מפורט.">
+  <meta name="keywords" content="מדריך ספרד, טיול לספרד, מדריד, ריוחה, הארו, סן סבסטיאן, פינצ'וס, יין ריוחה, spain guide, spain food, ofoodiez">
+  <link rel="canonical" href="https://ofoodiez.com/blog/spain">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ofoodiez">
+  <meta property="og:url" content="https://ofoodiez.com/blog/spain">
+  <meta property="og:title" content="מדריך ספרד · Ofoodiez">
+  <meta property="og:description" content="המדריך המלא לספרד — מדריד, ריוחה והארו, סן סבסטיאן. מסעדות, יקבים, פינצ'וס ומסלול יומי מפורט.">
+  <meta property="og:image" content="https://ofoodiez.com/static/img/logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="מדריך ספרד · Ofoodiez">
+  <meta property="twitter:description" content="המדריך המלא לספרד — מדריד, ריוחה והארו, סן סבסטיאן. מסעדות, יקבים, פינצ'וס ומסלול יומי מפורט.">
+  <meta property="twitter:image" content="https://ofoodiez.com/static/img/logo.png">
+  <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=5">
+  <style>
+    html,
+    body {
+      margin: 0;
+      background: var(--bg-color);
+    }
+
+    /* Section anchor links row */
+    .ofz-subnav {
+      background: #faf5e6;
+      border-bottom: 1px solid #ece1cb;
+      padding: 0 16px 10px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .ofz-subnav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ofz-subnav a {
+      font-family: 'Outfit', 'Assistant', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #603e35;
+      text-decoration: none;
+      padding: 5px 13px;
+      border-radius: 999px;
+      white-space: nowrap;
+      background: #fff;
+      border: 1px solid #ece1cb;
+      transition: background .15s;
+    }
+
+    .ofz-subnav a:hover {
+      background: rgba(96, 62, 53, .1);
+    }
+  </style>
+</head>
+
+<body>
+  {% set active_page = 'spain' %}
+  {% include 'components/blog_menu.html' %}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;800&family=Heebo:wght@300;400;500;700;800&display=swap"
+    rel="stylesheet">
+
+  <div id="ofz-guide" dir="rtl" lang="he">
+
+    <!-- INTRO -->
+    <header class="ofz-hero" id="intro">
+      <h1 class="ofz-title">{{ c.page_title }}</h1>
+      <p class="ofz-intro">{{ c.intro_body | replace('\n', '<br>') | safe }}</p>
+      <div class="ofz-route">{{ c.intro_route | replace('\n', '<br>') | safe }}</div>
+    </header>
+
+    <!-- MAP -->
+    <section class="ofz-section" id="map">
+      <h2 class="ofz-h2"><span>01</span> מפה</h2>
+      <div class="ofz-mapcard">
+        <iframe id="ofz-map" title="מפת ספרד" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps?q=Spain&z=6&output=embed"></iframe>
+      </div>
+    </section>
+
+    <!-- CITIES / DAY PLANS -->
+    <section class="ofz-section" id="cities">
+      <h2 class="ofz-h2"><span>02</span> ערים · מסלולים יומיים</h2>
+      <p class="ofz-lead">{{ c.cities_lead }}</p>
+      <nav class="ofz-subnav" aria-label="קפיצה לעיר">
+        <a href="#city-0">מדריד</a>
+        <a href="#city-1">הארו · ריוחה</a>
+        <a href="#city-2">סן סבסטיאן</a>
+      </nav>
+
+      <!-- MADRID -->
+      <details class="ofz-city" id="city-0">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Madrid</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
+          <p class="ofz-cintro">{{ c.cities.madrid.intro | replace('\n', '<br>') | safe }}</p>
+          {% if c.cities.madrid.accom %}<div class="ofz-accom"><span class="ofz-accom-label">🏨 Where to stay</span>{{ c.cities.madrid.accom }}</div>{% endif %}
+        </summary>
+        <div class="ofz-days">
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
+              <h4 class="ofz-darea">הגעה · Zara &amp; Calle de Jesús</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Zara%20Serrano%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">קניות</span><span class="ofz-sname">Zara Serrano<span class="arr">↗</span></span></a><span class="ofz-snote">הדבר הראשון בעיר — איסוף חבילות שהוזמנו מראש. סניף הגברים הכי שווה.</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=ZaCaffe%20Zara%20Serrano%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">קפה</span><span class="ofz-sname">ZaCaffe<span class="arr">↗</span></span></a><span class="ofz-snote">בתוך Zara Serrano, בסניף הגברים</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Cerveceria%20El%20Diario%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בר טאפאס</span><span class="ofz-sname">Cervecería El Diario<span class="arr">↗</span></span></a><span class="ofz-snote">ב-Calle de Jesús, רחוב שכולו ברים</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Castizo%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בר טאפאס</span><span class="ofz-sname">Castizo<span class="arr">↗</span></span></a><span class="ofz-snote">ורמוט וגילדה נגד ג'טלאג; פלפלי פדרון</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 2</span>
+              <h4 class="ofz-darea">סיור אוכל עם בתאל</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Pilpelet%20Food%20Tour%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">סיור</span><span class="ofz-sname">סיור אוכל עם בתאל<span class="arr">↗</span></span></a><span class="ofz-snote">ישראלית שמדריכה במדריד 9 שנים. 4 עצירות: שוק, ברים מקומיים; ארטישוק עם חמון, גמבעס בשום, טינטו דה וראנו</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Watts%20Cantina%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בראנץ'</span><span class="ofz-sname">Watts Cantina<span class="arr">↗</span></span></a><span class="ofz-snote">פנקייק עם בייקון</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
+              <h4 class="ofz-darea">תרבות · פראדו ופלמנקו</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Museo%20del%20Prado%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">מוזיאון</span><span class="ofz-sname">מוזיאון הפראדו<span class="arr">↗</span></span></a></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Essential%20Flamenco%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">הופעה</span><span class="ofz-sname">Essential Flamenco (טוררו)<span class="arr">↗</span></span></a><span class="ofz-snote">מופע מדהים ולא תיירותי; עדיף על מופע במסעדה</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 4</span>
+              <h4 class="ofz-darea">שוק אל ראסטרו</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=El%20Rastro%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">שוק</span><span class="ofz-sname">El Rastro<span class="arr">↗</span></span></a><span class="ofz-snote">שוק הפשפשים הגדול, רק בימי ראשון, עמוס מאוד</span></li>
+            </ul>
+          </article>
+        </div>
+        <div class="ofz-extras">
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">＋</span>
+              <h4 class="ofz-darea">עוד לאכול ולשתות</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=El%20Puertito%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בר צדפות</span><span class="ofz-sname">El Puertito<span class="arr">↗</span></span></a><span class="ofz-snote">מגש צדפות ושמפניה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=61%20Sixtyone%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">מסעדת ערב</span><span class="ofz-sname">61<span class="arr">↗</span></span></a><span class="ofz-snote">Wagyu smash burger; אווירת נרות</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Casa%20Canito%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">Casa Canito<span class="arr">↗</span></span></a><span class="ofz-snote">ורמוט, טינטו דה וראנו ושיפודי גילדה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sala%20de%20Despiece%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">מסעדת שף</span><span class="ofz-sname">Sala de Despiece<span class="arr">↗</span></span></a><span class="ofz-snote">מעוצבת כמפעל פירוק בשר; כבד אווז עם חלמון. קצת אטרקציה אבל טעים</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Joselitos%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">טעימות חמון</span><span class="ofz-sname">Joselito's<span class="arr">↗</span></span></a><span class="ofz-snote">טעימת חמון איבריקו מ-2018, 2019 ו-2020 זה לצד זה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=GOTA%20wine%20bar%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">בר יין</span><span class="ofz-sname">GOTA<span class="arr">↗</span></span></a><span class="ofz-snote">צדפות, פסטה ירוקה. אוכל 7/10, אווירה 10/10, יין 10/10</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=MYKA%20frozen%20yogurt%20Madrid" target="_blank" rel="noopener"><span class="ofz-dtag">קינוח</span><span class="ofz-sname">MYKA<span class="arr">↗</span></span></a><span class="ofz-snote">פרוזן יוגורט יווני; טעים, חוץ מרוטב הפיסטוק</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">💡</span>
+              <h4 class="ofz-darea">טיפים ודברים שווה לדעת</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop">נגד ג'טלאג: ורמוט וגילדה.</li>
+              <li class="ofz-stop">בכל עיר חדשה שווה סיור אוכל — אין דרך טובה יותר להכיר את תרבות האוכל.</li>
+              <li class="ofz-stop">טינטו דה וראנו: יין אדום, ורמוט אדום, סודה ממותקת, תפוז ולימון.</li>
+              <li class="ofz-stop">הידעתם? כמו שאצלנו מקבלים שי לחג, בספרד מביאים לעובדים ירך חזיר שלמה.</li>
+              <li class="ofz-stop">חמון ספרדי עובר המלחה ויישון מחודשים ועד שנים; הסוגים נקבעים לפי סוג החזיר, מה אכל ואיך גדל — כמו יין.</li>
+            </ul>
+          </article>
+        </div>
+      </details>
+
+      <!-- HARO / RIOJA -->
+      <details class="ofz-city" id="city-1">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">Haro · La Rioja</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
+          <p class="ofz-cintro">{{ c.cities.rioja.intro | replace('\n', '<br>') | safe }}</p>
+          {% if c.cities.rioja.accom %}<div class="ofz-accom"><span class="ofz-accom-label">🏨 Where to stay</span>{{ c.cities.rioja.accom }}</div>{% endif %}
+        </summary>
+        <div class="ofz-days">
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
+              <h4 class="ofz-darea">יקבים בתוך העיר</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=La%20Rioja%20Alta%20Haro" target="_blank" rel="noopener"><span class="ofz-dtag">יקב</span><span class="ofz-sname">La Rioja Alta<span class="arr">↗</span></span></a><span class="ofz-snote">סיור + טעימות, כ-2 שעות, 45€ לאדם. חמוד אבל קצת חופר; אין אוכל בסיור, השלמנו בבר שלהם</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Bodegas%20CVNE%20Haro" target="_blank" rel="noopener"><span class="ofz-dtag">יקב</span><span class="ofz-sname">Bodegas CVNE<span class="arr">↗</span></span></a><span class="ofz-snote">סיור בעונת הבציר, ראינו את התהליך בלייב — 10 דקות הליכה מהמלון</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Roots%20wine%20bar%20Haro" target="_blank" rel="noopener"><span class="ofz-dtag">בר יין</span><span class="ofz-sname">Roots<span class="arr">↗</span></span></a><span class="ofz-snote">היין חלום; התפריט קצר והאוכל סביר (סטייק)</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 2</span>
+              <h4 class="ofz-darea">ארוחת מישלן</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Nublo%20restaurant%20Haro" target="_blank" rel="noopener"><span class="ofz-dtag">מישלן</span><span class="ofz-sname">Nublo<span class="arr">↗</span></span></a><span class="ofz-snote">סינטה מפרה בוגרת מושרית בגבינה כחולה עם פלפל (המנה הכי מטורפת), סטייק טונה על עלה גפן. הקינוחים פחות. יין מקומי ב-10€ לכוס. הזמנו יומיים מראש; 250€ לזוג (~860 ₪)</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Los%20Canos%20Haro" target="_blank" rel="noopener"><span class="ofz-dtag">בר משפחתי</span><span class="ofz-sname">Los Caños<span class="arr">↗</span></span></a><span class="ofz-snote">הבר-מסעדה של משפחת השף מיגל קניו (הבעלים של נובלו) — נפתח ב-1930 על ידי משפחתו, צמוד דלת-ליד-דלת לנובלו</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
+              <h4 class="ofz-darea">יום בלגוארדיה</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Ysios%20Bodegas%20Laguardia" target="_blank" rel="noopener"><span class="ofz-dtag">יקב</span><span class="ofz-sname">Ysios<span class="arr">↗</span></span></a><span class="ofz-snote">היקב הכי יפה שראינו, כחצי שעה מהארו. בר יין בלי הזמנה, כוס מ-7€, גבינות וזיתים</span></li>
+            </ul>
+          </article>
+        </div>
+        <div class="ofz-extras">
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">💡</span>
+              <h4 class="ofz-darea">טיפים ודברים שווה לדעת</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop">לכל היקבים יש בר יין שאפשר להגיע אליו בלי הזמנה; סיור מזמינים מראש.</li>
+              <li class="ofz-stop">ענבי יין קטנים ומתוקים מענבי מאכל, עם קליפה עבה שנותנת הרבה טעם.</li>
+              <li class="ofz-stop">יין שהתיישן 20 שנה מאבד צבע ומזכיר יותר ליקר.</li>
+              <li class="ofz-stop">היסטוריה: במאה ה-19 מגפה השמידה את הכרמים בצרפת. הצרפתים חיפשו ענבים, והארו נמצאת על תחנת רכבת — כך הפכה לבירת היין.</li>
+              <li class="ofz-stop">סוף ספטמבר הוא עונת הבציר – רואים את הייצור בזמן אמת.</li>
+            </ul>
+          </article>
+        </div>
+      </details>
+
+      <!-- SAN SEBASTIAN -->
+      <details class="ofz-city" id="city-2">
+        <summary class="ofz-city-head">
+          <div class="ofz-city-head-row">
+            <h3 class="ofz-cname">San Sebastián</h3>
+            <i class="fas fa-chevron-down ofz-city-chevron"></i>
+          </div>
+          <p class="ofz-cintro">{{ c.cities.sansebastian.intro | replace('\n', '<br>') | safe }}</p>
+          {% if c.cities.sansebastian.accom %}<div class="ofz-accom"><span class="ofz-accom-label">🏨 Where to stay</span>{{ c.cities.sansebastian.accom }}</div>{% endif %}
+        </summary>
+        <div class="ofz-days">
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 1</span>
+              <h4 class="ofz-darea">סיבוב פינצ'וס קלאסי</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=La%20Vina%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">קינוח</span><span class="ofz-sname">La Viña<span class="arr">↗</span></span></a><span class="ofz-snote">עוגת הגבינה הבסקית המקורית — הדבר הכי קרמי שאכלתי בחיים. חזרנו פעמיים</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Borda%20Berri%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Borda Berri<span class="arr">↗</span></span></a><span class="ofz-snote">ריזוטו גבינת כבשים בסקית (מדהים), לחי בקר, צלעות חזיר. עמוס, שווה את ההמתנה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Bar%20Desy%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Bar Desy<span class="arr">↗</span></span></a><span class="ofz-snote">המבורגר txuleta עם רוטב גבינה סודי; סלט טונה עם אנשובי, בגט סלמון ואבוקדו</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Gandarias%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Gandarias<span class="arr">↗</span></span></a><span class="ofz-snote">שיפוד אנטריקוט, כבד אווז ברוטב פירות יער</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 2</span>
+              <h4 class="ofz-darea">עוד סיבוב ברים</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Bar%20La%20Cerveceria%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Bar La Cervecería<span class="arr">↗</span></span></a><span class="ofz-snote">הבר עם הפרסים; כבד אווז עם ריבת בצל ופיסטוק</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=La%20Cerveceria%20del%20Antiguo%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">La Cervecería del Antiguo<span class="arr">↗</span></span></a><span class="ofz-snote">פטריות עם חלמון. מלא מקומיים, כמה דקות מהתצפית</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Bar%20Valles%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Bar Vallés<span class="arr">↗</span></span></a><span class="ofz-snote">ממציאי הגילדה, אבל שלהם הייתה הכי פחות טעימה</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Manojo%20wine%20bar%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">בר יין</span><span class="ofz-sname">Manojo<span class="arr">↗</span></span></a><span class="ofz-snote">בר סופר קול עם הרבה יינות טבעיים</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Arenales%20Bar%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">בר</span><span class="ofz-sname">Arenales Bar<span class="arr">↗</span></span></a><span class="ofz-snote">עוד עצירה בסיבוב הברים</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 3</span>
+              <h4 class="ofz-darea">שקיעה וים</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Monte%20Igueldo%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">תצפית</span><span class="ofz-sname">Monte Igueldo<span class="arr">↗</span></span></a><span class="ofz-snote">שקיעה על המפרץ כל ערב</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Sua.Muka%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">מסעדה (מישלן)</span><span class="ofz-sname">Sua.Muka<span class="arr">↗</span></span></a><span class="ofz-snote">סטייק מלוח עם פלפל קלוי מתוק. קצת יקר, על הים עם שקיעה</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day">
+            <div class="ofz-dhead"><span class="ofz-dnum">Day 4</span>
+              <h4 class="ofz-darea">בראנץ' ועוד פינצ'וס</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Rompehuevos%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">בראנץ'</span><span class="ofz-sname">Rompehuevos<span class="arr">↗</span></span></a><span class="ofz-snote">שקשוקה ספרדית ואסאי</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Bar%20El%20Kbzon%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">Bar El Kbzon<span class="arr">↗</span></span></a><span class="ofz-snote">סרדינים, נתחי בשר</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=La%20Cuchara%20de%20San%20Telmo%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">פינצ'וס</span><span class="ofz-sname">La Cuchara de San Telmo<span class="arr">↗</span></span></a><span class="ofz-snote">מפורסם; ויתרנו בגלל התור</span></li>
+            </ul>
+          </article>
+        </div>
+        <div class="ofz-extras">
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">＋</span>
+              <h4 class="ofz-darea">עוד לראות ולעשות (לא הגענו)</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=Aquarium%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">אטרקציה</span><span class="ofz-sname">האקווריום<span class="arr">↗</span></span></a><span class="ofz-snote">יכול למלא יום נפרד</span></li>
+              <li class="ofz-stop"><a href="https://www.google.com/maps/search/?api=1&query=La%20Perla%20Spa%20San%20Sebastian" target="_blank" rel="noopener"><span class="ofz-dtag">ספא</span><span class="ofz-sname">La Perla<span class="arr">↗</span></span></a><span class="ofz-snote">יכול למלא יום נפרד</span></li>
+            </ul>
+          </article>
+          <article class="ofz-day ofz-day-extra">
+            <div class="ofz-dhead"><span class="ofz-dnum">💡</span>
+              <h4 class="ofz-darea">טיפים ודברים שווה לדעת</h4>
+            </div>
+            <ul class="ofz-dlist">
+              <li class="ofz-stop">גילדה = זית, אנשובי ופלפל כבוש על קיסם. פינצ'ו = מנה קטנה בסגנון בסקי (מ-pinchar, לנעוץ). טאפאס = השם הספרדי הכללי למנות קטנות.</li>
+              <li class="ofz-stop">הגילדה נקראת על שם הסרט Gilda (1946): ירוקה, מלוחה וחריפה כמו הדמות.</li>
+              <li class="ofz-stop">צ'קולי (יין מקומי) מומזג מגובה כדי לאוורר אותו ולתת לו קצת תוסס.</li>
+              <li class="ofz-stop">ברים מפורסמים עם תורים ארוכים — אפשר לוותר ולעבור לבר הבא.</li>
+              <li class="ofz-stop">יש הרבה דגלי פלסטין ברחובות, אבל המארח שלנו אוהב ישראלים — שווה לדעת באזור.</li>
+            </ul>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <footer class="ofz-foot">{{ c.footer }}</footer>
+  </div>
+
+  <style>
+    #ofz-guide {
+      --paper: #faf5e6;
+      --card: #ffffff;
+      --ink: #362118;
+      --muted: #603e35;
+      --indigo: #720815;
+      --indigo-soft: #f4ecda;
+      --verm: #720815;
+      --gold: #720815;
+      --line: #ece1cb;
+      --line2: #f4ecda;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Outfit', 'Heebo', sans-serif;
+      padding: 0 clamp(16px, 4vw, 40px) 40px;
+      border-radius: 18px;
+      max-width: 1180px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #ofz-guide * {
+      box-sizing: border-box;
+    }
+
+    #ofz-guide a {
+      color: inherit;
+    }
+
+    #ofz-guide :focus-visible {
+      outline: 2px solid var(--indigo);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    /* HERO */
+    .ofz-hero {
+      padding: 26px 0 30px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 30px;
+    }
+
+    .ofz-title {
+      font-family: "Frank Ruhl Libre", serif;
+      font-weight: 800;
+      font-size: clamp(36px, 8vw, 76px);
+      line-height: 1.05;
+      margin: 10px 0 16px;
+      letter-spacing: normal;
+    }
+
+    .ofz-intro {
+      max-width: 62ch;
+      font-size: 17px;
+      line-height: 1.6;
+      color: #3C3F47;
+      margin: 0 0 16px;
+    }
+
+    .ofz-route {
+      max-width: 62ch;
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    /* SECTIONS */
+    .ofz-section {
+      padding: 18px 0 6px;
+      scroll-margin-top: 64px;
+    }
+
+    .ofz-h2 {
+      font-family: "Frank Ruhl Libre", serif;
+      font-weight: 700;
+      font-size: clamp(26px, 5vw, 38px);
+      margin: 24px 0 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .ofz-h2 span {
+      font-family: "Space Mono", monospace;
+      font-size: 15px;
+      color: var(--verm);
+      font-weight: 700;
+    }
+
+    .ofz-lead {
+      color: var(--muted);
+      font-size: 15.5px;
+      line-height: 1.55;
+      max-width: 64ch;
+      margin: 0 0 20px;
+    }
+
+    /* MAP */
+    .ofz-mapcard {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card);
+      box-shadow: 0 6px 20px rgba(28, 61, 99, .07);
+      display: flex;
+      align-items: stretch;
+    }
+
+    #ofz-map {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: clamp(280px, 46vw, 440px);
+      border: 0;
+      display: block;
+    }
+
+    .arr {
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      color: var(--gold);
+      margin-inline-start: 5px;
+    }
+
+    /* ACCOMMODATION ROW */
+    .ofz-accom {
+      margin: 10px 0 0;
+      padding: 10px 14px;
+      background: #F0EBE1;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #3C3F47;
+    }
+
+    .ofz-accom-label {
+      font-family: "Space Mono", monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--indigo);
+      display: block;
+      margin-bottom: 4px;
+      letter-spacing: .05em;
+    }
+
+    /* BONUS PICKS ROW */
+    .ofz-extras {
+      margin-top: 14px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      align-items: start;
+    }
+
+    .ofz-extras .ofz-day-extra {
+      background: #FBF6EC;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 16px 16px 8px;
+    }
+
+    /* DAY PLANS */
+    .ofz-city {
+      margin: 30px 0 6px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+    }
+
+    .ofz-city-head {
+      display: block;
+      cursor: pointer;
+      border-inline-start: 4px solid var(--verm);
+      padding-inline-start: 14px;
+      margin-bottom: 18px;
+    }
+
+    .ofz-city-head::-webkit-details-marker {
+      display: none;
+    }
+
+    .ofz-city-head::marker {
+      content: "";
+    }
+
+    .ofz-city-head-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .ofz-city-chevron {
+      font-size: 14px;
+      color: var(--verm);
+      margin-inline-start: auto;
+      transition: transform .2s;
+      flex: 0 0 auto;
+    }
+
+    .ofz-city[open] .ofz-city-chevron {
+      transform: rotate(180deg);
+    }
+
+    .ofz-cname {
+      font-family: "Frank Ruhl Libre", serif;
+      font-weight: 700;
+      font-size: 30px;
+      margin: 0 0 6px;
+    }
+
+    .ofz-cintro {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.55;
+      max-width: 66ch;
+    }
+
+    .ofz-days {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      align-items: start;
+    }
+
+    .ofz-day {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 16px 8px;
+    }
+
+    .ofz-day-extra {
+      background: #FBF6EC;
+      border-style: dashed;
+    }
+
+    .ofz-dhead {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line2);
+    }
+
+    .ofz-dnum {
+      font-family: "Space Mono", monospace;
+      font-weight: 700;
+      font-size: 12px;
+      color: #fff;
+      background: var(--indigo);
+      border-radius: 8px;
+      padding: 4px 9px;
+      white-space: nowrap;
+    }
+
+    .ofz-darea {
+      font-family: "Frank Ruhl Libre", serif;
+      font-weight: 700;
+      font-size: 19px;
+      margin: 0;
+    }
+
+    .ofz-dlist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ofz-stop {
+      padding: 8px 0;
+      border-bottom: 1px dotted var(--line2);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .ofz-stop:last-child {
+      border-bottom: 0;
+    }
+
+    .ofz-stop a {
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ofz-dtag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--indigo);
+      background: var(--indigo-soft);
+      border-radius: 5px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+
+    .ofz-sname {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--ink);
+    }
+
+    .ofz-stop a:hover .ofz-sname {
+      color: var(--indigo);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .ofz-snote {
+      display: block;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      #ofz-guide * {
+        transition: none !important;
+        scroll-behavior: auto;
+      }
+    }
+
+    /* DESKTOP — wider text */
+    @media (min-width:720px) {
+      .ofz-intro {
+        max-width: none;
+      }
+
+      .ofz-route {
+        max-width: none;
+      }
+
+      .ofz-cintro {
+        max-width: none;
+      }
+
+      .ofz-lead {
+        max-width: none;
+      }
+    }
+
+    /* PRINT → PDF */
+    @media print {
+
+      .ofz-nav,
+      .ofz-mapcard {
+        display: none !important;
+      }
+
+      #ofz-guide {
+        max-width: none;
+        padding: 0;
+        background: #fff;
+      }
+
+      .ofz-section,
+      .ofz-day {
+        break-inside: avoid;
+      }
+
+      a[href]:after {
+        content: "";
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      var mapEl = document.getElementById('ofz-map');
+
+      function openInMap(searchUrl) {
+        try {
+          var u = new URL(searchUrl), q = u.searchParams.get('query');
+          if (!q) return;
+          mapEl.src = 'https://www.google.com/maps?q=' + encodeURIComponent(q) + '&z=15&output=embed';
+          document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) { }
+      }
+
+      document.querySelectorAll('.ofz-stop a').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          openInMap(a.href);
+        });
+      });
+
+      // ---- OPEN CITY FROM SUBNAV / HASH LINK ----
+      function openCityFromHash() {
+        var id = location.hash.slice(1);
+        if (!id) return;
+        var el = document.getElementById(id);
+        if (el && el.tagName === 'DETAILS') el.open = true;
+      }
+      window.addEventListener('hashchange', openCityFromHash);
+      openCityFromHash();
+    })();
+  </script>
+
+  {% include 'components/bottom_nav.html' %}
+</body>
+</html>
