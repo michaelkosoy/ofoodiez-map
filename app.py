@@ -351,10 +351,12 @@ def about_page():
 def portfolio_page():
     """Employer Branding & Founder-Led Content Studio portfolio.
 
-    Private: unlocked by a per-company access code (created in admin →
-    Portfolio Access, valid 7 days), by the admin password (ADMIN_SECRET),
-    or by an active admin session. Gate copy lives in portfolio_content.json
-    under portfolio.gate (editable at /admin/portfolio/content)."""
+    The gate is a single "click to unlock" button: a POST without a code
+    grants 'public' (default packages/prices). A posted per-company access
+    code (admin → Portfolio Access) or ADMIN_SECRET is still honoured, so
+    per-code pricing keeps working for direct POSTs. Gate copy lives in
+    portfolio_content.json under portfolio.gate (editable at
+    /admin/portfolio/content)."""
     content = _load_portfolio_content(_portfolio_lang())
     i18n = _portfolio_i18n(content)
     c = content.get('portfolio', {})
@@ -365,7 +367,9 @@ def portfolio_page():
         code = request.form.get('code', '').strip()
         row = None
         _admin_secret = os.environ.get('ADMIN_SECRET')  # no default: unset locks out
-        if code and _admin_secret and code == _admin_secret:
+        if not code:
+            grant = 'public'
+        elif _admin_secret and code == _admin_secret:
             grant = 'admin'
         else:
             if code:
@@ -476,17 +480,20 @@ def portfolio_pricing():
 
 def _portfolio_grant():
     """The PortfolioAccess row behind this session's unlock, or None for the
-    admin grant (or no grant) — callers treat None as 'use the defaults'."""
+    admin/public grant (or no grant) — callers treat None as 'use the defaults'."""
     grant = session.get('portfolio_access')
-    if grant in (None, 'admin'):
+    if grant in (None, 'admin', 'public'):
         return None
     from database.models import db, PortfolioAccess
     return db.session.get(PortfolioAccess, grant)
 
 
 def _portfolio_pricing_hidden():
-    """True when this session's access code has the pricing page switched off
+    """True when pricing is off for this session: always for the public
+    click-to-unlock grant, or when the access code has it switched off
     (admin grant and untouched codes → visible)."""
+    if session.get('portfolio_access') == 'public':
+        return True
     row = _portfolio_grant()
     return bool(row and row.show_pricing is False)
 
@@ -498,7 +505,7 @@ def _portfolio_unlocked():
     a code in the admin panel (or its 7-day expiry) locks the client out
     on their next page load."""
     grant = session.get('portfolio_access')
-    if grant == 'admin':
+    if grant in ('admin', 'public'):
         return True
     if grant is not None:
         from database.models import db, PortfolioAccess
@@ -517,8 +524,8 @@ PORTFOLIO_UI = {
         'toggle': 'עברית', 'toggle_code': 'he',
         'nav_about': 'About', 'nav_work': 'Work', 'nav_results': 'Results', 'nav_pricing': 'Pricing',
         'contact': 'Contact', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'Email',
-        'metric_community': 'Tech community', 'metric_cv': 'Increase in CV submissions',
-        'metric_views': 'Views last month', 'see_more_metrics': 'See more metrics',
+        'metric_community': 'Followers across all socials', 'metric_cv': 'Increase in CV submissions',
+        'metric_views': 'Monthly views on my profile', 'see_more_metrics': 'See more metrics',
         'edge_p1': 'I worked as a software engineer at cybersecurity companies and built a content career alongside my full-time job.',
         'edge_p2_pre': "I don't just make videos,", 'edge_p2_mark': 'I understand your product.',
         'see_full_results': 'See full results',
@@ -534,8 +541,8 @@ PORTFOLIO_UI = {
         'toggle': 'English', 'toggle_code': 'en',
         'nav_about': 'אודות', 'nav_work': 'עבודות', 'nav_results': 'תוצאות', 'nav_pricing': 'תמחור',
         'contact': 'צרו קשר', 'contact_whatsapp': 'WhatsApp', 'contact_email': 'אימייל',
-        'metric_community': 'קהילת הייטק', 'metric_cv': 'עלייה בהגשות קורות חיים',
-        'metric_views': 'צפיות בחודש האחרון', 'see_more_metrics': 'לכל המדדים',
+        'metric_community': 'עוקבים בכל הרשתות החברתיות', 'metric_cv': 'עלייה בהגשות קורות חיים',
+        'metric_views': 'צפיות בחודש בפרופיל שלי', 'see_more_metrics': 'לכל המדדים',
         'edge_p1': 'עבדתי כמהנדס תוכנה בחברות סייבר ובניתי קריירת תוכן לצד משרה מלאה.',
         'edge_p2_pre': 'אני לא רק מצלם סרטונים,', 'edge_p2_mark': 'אני מבין את המוצר שלכם.',
         'see_full_results': 'לכל התוצאות',

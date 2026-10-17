@@ -5,14 +5,14 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>{{ c.meta_title | default('Private Portfolio — Ofoodiez Content Studio') }}</title>
-    <meta name="description" content="{{ c.meta_description | default('By invitation only. Enter your access code.') }}">
+    <meta name="description" content="{{ c.meta_description | default('By invitation only.') }}">
     <meta name="robots" content="noindex">
 
     <!-- Open Graph (the link clients receive should preview nicely) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ofoodiez.com/portfolio">
     <meta property="og:title" content="{{ c.meta_title | default('Private Portfolio — Ofoodiez Content Studio') }}">
-    <meta property="og:description" content="{{ c.meta_description | default('By invitation only. Enter your access code.') }}">
+    <meta property="og:description" content="{{ c.meta_description | default('By invitation only.') }}">
 
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <meta name="theme-color" content="#0a0a0a">
@@ -159,25 +159,6 @@
         .js .booting #gate-form { opacity: 0; transition: opacity 0.35s; }
         .js .booting #gate-form.revealed { opacity: 1; }
 
-        .prompt-label { display: block; margin-bottom: 10px; }
-        .input-row { display: flex; align-items: center; gap: 10px; }
-        .input-row .pfx { color: var(--butter-dim); font-size: 15px; }
-        input[type="password"] {
-            flex: 1;
-            min-width: 0;
-            background: transparent;
-            border: none;
-            border-bottom: 2px dashed var(--butter-dim);
-            color: var(--fg);
-            font-family: inherit;
-            font-size: 17px;
-            letter-spacing: 0.25em;
-            padding: 6px 2px 8px;
-            caret-color: var(--butter);
-        }
-        input[type="password"]::placeholder { color: rgba(255, 255, 255, 0.25); letter-spacing: 0.08em; }
-        input[type="password"]:focus { outline: none; border-bottom-color: var(--butter); }
-
         .auth-btn {
             margin-top: 22px;
             width: 100%;
@@ -242,50 +223,6 @@
             .js .booting .line .txt { visibility: visible; }
             .js .booting #gate-form { opacity: 1; }
         }
-
-        /* Tooltip */
-        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; margin-left: 6px; }
-        .tooltip-icon { 
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--butter-dim);
-            color: var(--butter-dim); font-size: 10px; font-weight: bold; font-family: sans-serif;
-        }
-        .tooltip-wrapper:hover .tooltip-icon { color: var(--butter); border-color: var(--butter); }
-        .tooltip-text {
-            visibility: hidden;
-            width: max-content;
-            max-width: 220px;
-            background-color: var(--ink);
-            color: var(--fg);
-            text-align: center;
-            border: 1px solid var(--butter-dim);
-            padding: 8px 10px;
-            position: absolute;
-            z-index: 10;
-            bottom: 150%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.2s;
-            font-size: 11px;
-            line-height: 1.4;
-            box-shadow: 2px 2px 0 0 var(--butter-dim);
-            pointer-events: none;
-        }
-        .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--butter-dim) transparent transparent transparent;
-        }
-        .tooltip-wrapper:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
     </style>
 </head>
 <body>
@@ -330,19 +267,8 @@
 
             {% if state != 'granted' %}
             <form id="gate-form" method="post" action="{{ url_for('portfolio_page') }}" autocomplete="off">
-                <label class="prompt-label" for="code"><span class="pfx">&gt; </span>{{ c.prompt | default('ENTER ACCESS CODE:') }}
-                    <div class="tooltip-wrapper" tabindex="0">
-                        <span class="tooltip-icon">?</span>
-                        <span class="tooltip-text">{{ c.tooltip_hint | default("Hint: it's your company name in small letters.") }}</span>
-                    </div>
-                </label>
-                <div class="input-row">
-                    <span class="pfx" aria-hidden="true">&gt;</span>
-                    <input type="password" id="code" name="code" placeholder="{{ c.placeholder | default('access code') }}"
-                           autocapitalize="none" spellcheck="false" required {% if state %}autofocus{% endif %}>
-                </div>
-                <button class="auth-btn" type="submit">[ {{ c.button | default('UNLOCK') }} ]</button>
-                <div class="hint">{{ c.hint | default('Your access code was sent to you with the proposal — codes are valid for 1 week.') }}</div>
+                <button class="auth-btn" type="submit" {% if state %}autofocus{% endif %}>[ {{ c.button | default('CLICK TO UNLOCK') }} ]</button>
+                {% if c.hint %}<div class="hint">{{ c.hint }}</div>{% endif %}
             </form>
             {% endif %}
         </div>
@@ -361,7 +287,7 @@
         if (state === 'denied') {
             var term = document.getElementById('term');
             if (!reduced) { term.classList.add('shake'); }
-            return; // lines pre-printed; input autofocuses via attribute
+            return; // lines pre-printed; button autofocuses via attribute
         }
         if (state === 'expired' || reduced) { return; }
 
@@ -372,7 +298,7 @@
         function typeLine(i) {
             if (i >= txts.length) {
                 form.classList.add('revealed');
-                document.getElementById('code').focus({ preventScroll: true });
+                form.querySelector('.auth-btn').focus({ preventScroll: true });
                 return;
             }
             var el = txts[i];

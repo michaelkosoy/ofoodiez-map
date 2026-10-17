@@ -152,6 +152,20 @@
           "section": "highlights"
         },
         {
+          "videoId": "TzcrDJOVRI0",
+          "series": "Company Trip",
+          "title": "ScaleOps",
+          "description": "Company trip to Greece",
+          "section": "events"
+        },
+        {
+          "videoId": "y8JLP4kFndI",
+          "series": "Opinion",
+          "title": "Personal opinion",
+          "description": "Why hi-tech companies spend hundreds of thousands to take over cafés",
+          "section": "events"
+        },
+        {
           "videoId": "Zd_lIkYUtMU",
           "series": "Event Coverage",
           "title": "Cyera",
@@ -173,11 +187,18 @@
           "section": "events"
         },
         {
-          "videoId": "y8JLP4kFndI",
-          "series": "Opinion",
-          "title": "Personal opinion",
-          "description": "Why hi-tech companies spend hundreds of thousands to take over cafés",
-          "section": "events"
+          "videoId": "gR5WqeoN37I",
+          "series": "Day in a Life",
+          "title": "Naftali Bennett",
+          "description": "The entrepreneur who runs for politics",
+          "section": "dayinlife"
+        },
+        {
+          "videoId": "Itm4xLBUPz4",
+          "series": "Day in a Life",
+          "title": "Noa Zilberman",
+          "description": "A day in her life",
+          "section": "dayinlife"
         }
       ],
       "strip": {
@@ -866,17 +887,13 @@
     },
     "gate": {
       "meta_title": "Private Portfolio — Ofoodiez Content Studio",
-      "meta_description": "By invitation only. Enter your access code.",
+      "meta_description": "By invitation only.",
       "boot_lines": [
         "OFOODIEZ CONTENT STUDIO",
         "PRIVATE PORTFOLIO / 2026",
         "EMPLOYER BRANDING · FOUNDER-LED CONTENT"
       ],
-      "prompt": "ENTER ACCESS CODE:",
-      "placeholder": "access code",
-      "button": "UNLOCK",
-      "hint": "Your access code was sent to you with the proposal — codes are valid for 1 week.",
-      "tooltip_hint": "Hint: it's your company name in small letters.",
+      "button": "CLICK TO UNLOCK",
       "denied_title": "ACCESS DENIED",
       "denied_hint": "Wrong code. Check your proposal and try again.",
       "expired_title": "ACCESS EXPIRED",
