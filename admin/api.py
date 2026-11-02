@@ -1153,6 +1153,7 @@ def create_hitech_email():
         return jsonify({'success': False, 'message': 'Email already exists.'}), 409
     entry = HitechEmail(
         email=email,
+        name=(data.get('name') or '').strip() or None,
         linkedin_url=(data.get('linkedin_url') or '').strip() or None,
         job_title=(data.get('job_title') or '').strip() or None,
         company=(data.get('company') or '').strip() or None,
@@ -1163,7 +1164,7 @@ def create_hitech_email():
     db.session.add(entry)
     db.session.commit()
     return jsonify({
-        'id': entry.id, 'email': entry.email,
+        'id': entry.id, 'email': entry.email, 'name': entry.name or '',
         'linkedin_url': entry.linkedin_url or '', 'job_title': entry.job_title or '',
         'company': entry.company or '', 'gender': entry.gender or '',
         'verified': bool(entry.verified), 'list_name': entry.list_name or '',
@@ -1177,6 +1178,7 @@ def get_hitech_emails():
     return jsonify([{
         'id': e.id,
         'email': e.email,
+        'name': e.name or '',
         'linkedin_url': e.linkedin_url or '',
         'job_title': e.job_title or '',
         'company': e.company or '',
@@ -1189,9 +1191,11 @@ def get_hitech_emails():
 @admin_bp.route('/api/hitech-emails/<int:id>', methods=['PATCH'])
 @login_required
 def update_hitech_email(id):
-    """Update editable fields (currently: list_name, job_title) on a tech community member."""
+    """Update editable fields on a tech community member."""
     entry = HitechEmail.query.get_or_404(id)
     data = request.json or {}
+    if 'name' in data:
+        entry.name = (data['name'] or '').strip() or None
     if 'list_name' in data:
         entry.list_name = (data['list_name'] or '').strip() or None
     if 'job_title' in data:
@@ -1205,7 +1209,7 @@ def update_hitech_email(id):
     if 'gender' in data:
         entry.gender = (data['gender'] or '').strip() or None
     db.session.commit()
-    return jsonify({'id': entry.id, 'list_name': entry.list_name or '', 'job_title': entry.job_title or '', 'company': entry.company or '', 'linkedin_url': entry.linkedin_url or ''})
+    return jsonify({'id': entry.id, 'name': entry.name or '', 'list_name': entry.list_name or '', 'job_title': entry.job_title or '', 'company': entry.company or '', 'linkedin_url': entry.linkedin_url or ''})
 
 @admin_bp.route('/api/hitech-emails/<int:id>/reject', methods=['POST'])
 @login_required
