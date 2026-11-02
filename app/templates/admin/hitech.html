@@ -18,6 +18,7 @@
         <h3 style="margin:0 0 20px;">Add Member</h3>
         <div style="display:flex;flex-direction:column;gap:12px;">
             <input id="add-email" type="email" placeholder="Email *" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
+            <input id="add-name" type="text" placeholder="Full Name" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
             <input id="add-linkedin" type="url" placeholder="LinkedIn URL" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
             <input id="add-job-title" type="text" placeholder="Job Title" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
             <input id="add-company" type="text" placeholder="Company" style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:0.95rem;">
@@ -141,6 +142,13 @@
 
 {% block scripts %}
 <script>
+    // Member fields come from the public signup form: escape before rendering as HTML.
+    function escapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value;
+        return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     var table = new Tabulator("#hitech-table", {
         layout: "fitColumns",
         ajaxURL: "{{ url_for('admin.get_hitech_emails') }}",
@@ -149,6 +157,21 @@
         initialSort: [{ column: "joined", dir: "desc" }],
         columns: [
             { title: "#", field: "id", width: 60, headerSort: false },
+            {
+                title: "Full Name",
+                field: "name",
+                minWidth: 170,
+                headerFilter: "input",
+                editor: "input",
+                cellEdited: function(cell) {
+                    const id = cell.getRow().getData().id;
+                    fetch("{{ url_for('admin.get_hitech_emails') }}/" + id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: cell.getValue() })
+                    });
+                }
+            },
             { title: "Email", field: "email", headerFilter: "input", minWidth: 220 },
             {
                 title: "Verified",
@@ -187,7 +210,9 @@
                 formatter: function(cell) {
                     const url = cell.getValue();
                     if (!url) return '<span style="color:#aaa;">—</span>';
-                    return `<a href="${url}" target="_blank" style="color:#5A3A31; text-decoration:underline;">${url}</a>`;
+                    const safe = escapeHtml(url);
+                    if (!/^https?:\/\//i.test(url.trim())) return safe;
+                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer" style="color:#5A3A31; text-decoration:underline;">${safe}</a>`;
                 }
             },
             {
@@ -206,7 +231,7 @@
                 },
                 formatter: function(cell) {
                     const v = cell.getValue();
-                    return v ? v : '<span style="color:#aaa;">—</span>';
+                    return v ? escapeHtml(v) : '<span style="color:#aaa;">—</span>';
                 }
             },
             {
@@ -225,7 +250,7 @@
                 },
                 formatter: function(cell) {
                     const v = cell.getValue();
-                    return v ? v : '<span style="color:#aaa;">—</span>';
+                    return v ? escapeHtml(v) : '<span style="color:#aaa;">—</span>';
                 }
             },
             {
@@ -269,7 +294,7 @@
                 formatter: function(cell) {
                     const v = cell.getValue();
                     if (!v) return '<span style="color:#bbb; font-style:italic;">—</span>';
-                    return `<span style="background:#f0ece4; color:#603e35; border-radius:4px; padding:2px 8px; font-size:0.82rem; font-weight:600;">${v}</span>`;
+                    return `<span style="background:#f0ece4; color:#603e35; border-radius:4px; padding:2px 8px; font-size:0.82rem; font-weight:600;">${escapeHtml(v)}</span>`;
                 }
             },
             { title: "Joined", field: "joined", width: 150 },
@@ -298,7 +323,7 @@
                                 .then(res => res.json())
                                 .then(data => {
                                     if (data.success) {
-                                        Swal.fire('Sent!', `Rejection email sent to ${email}.`, 'success');
+                                        Swal.fire('Sent!', `Rejection email sent to ${escapeHtml(email)}.`, 'success');
                                     } else {
                                         Swal.fire('Error', data.message || 'Failed to send email.', 'error');
                                     }
@@ -361,7 +386,7 @@
 
     function closeAddModal() {
         document.getElementById('add-member-modal').style.display = 'none';
-        ['add-email','add-linkedin','add-job-title','add-company','add-list'].forEach(id => document.getElementById(id).value = '');
+        ['add-email','add-name','add-linkedin','add-job-title','add-company','add-list'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('add-gender').value = '';
         document.getElementById('add-verified').checked = false;
     }
@@ -374,6 +399,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: email,
+                name: document.getElementById('add-name').value.trim(),
                 linkedin_url: document.getElementById('add-linkedin').value.trim(),
                 job_title: document.getElementById('add-job-title').value.trim(),
                 company: document.getElementById('add-company').value.trim(),
@@ -396,7 +422,7 @@
 
     function exportCSV() {
         const verifiedRows = table.getData().filter(r => r.verified);
-        const fields = ['id', 'email', 'linkedin_url', 'job_title', 'company', 'gender', 'list_name', 'joined'];
+        const fields = ['id', 'name', 'email', 'linkedin_url', 'job_title', 'company', 'gender', 'list_name', 'joined'];
         const header = fields.join(',');
         const rows = verifiedRows.map(r =>
             fields.map(f => {
