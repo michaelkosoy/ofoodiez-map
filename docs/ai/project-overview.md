@@ -54,6 +54,12 @@ re-checked in the DB per visit, so deleting a code revokes access. The locked sc
 `app/templates/portfolio_gate.html` (terminal-boot design); its copy lives in
 `portfolio_content.json` under `portfolio.gate` (editable at /admin/portfolio/content).
 
+## Admin panel on phones
+All phone layout lives in `app/static/css/admin_mobile.css` + `app/static/js/admin_mobile.js`,
+behind one 768px breakpoint, and is loaded from `admin/base.html`. Tables become cards: every
+Tabulator table automatically, plain HTML tables by adding their selector to both files. New
+pages need no per-page work unless they add a plain table or a fixed-width element.
+
 ## Content conventions — text must be editable, not hardcoded
 Any user-facing copy added to the site (headlines, button labels, descriptions, FAQ
 entries, etc.) must live in an editable JSON content file under `app/data/`, not
