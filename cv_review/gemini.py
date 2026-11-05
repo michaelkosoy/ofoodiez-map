@@ -181,6 +181,12 @@ def generate_json(parts, schema, *, purpose, usage, key,
         },
         # No 'tools' key — grounding/URL-context/code-execution stay OFF.
     }
+    if 'flash-lite' not in model:
+        # gemini-3.7-flash is deprecated and silently routed to 3.8 Flash, whose
+        # default thinking level (medium) pushed the 16k-token rewrite/repair
+        # past the 90s client timeout (2026-11-05). Low is Google's latency
+        # lever; Flash-Lite already defaults to minimal.
+        payload['generationConfig']['thinkingConfig'] = {'thinkingLevel': 'low'}
 
     last_err = None
     for attempt in (1, 2):
@@ -205,6 +211,11 @@ def generate_json(parts, schema, *, purpose, usage, key,
                     continue
                 raise GeminiError('gemini 429', 'The AI reviewer is at capacity right now. '
                                                 'Please try again in a few minutes.')
+            if resp.status_code == 402:
+                # Prepaid AI Studio credits ran out (outage 2026-10-31→11-05): not
+                # transient, so don't tell users to retry in a minute.
+                raise GeminiError('gemini 402: prepaid credits depleted',
+                                  'The AI reviewer is paused right now. Please check back later.')
             if resp.status_code in (400, 403, 404):
                 fallback = os.environ.get('GEMINI_CV_MODEL', DEFAULT_MODEL)
                 if model != fallback:

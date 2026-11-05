@@ -534,11 +534,17 @@ def _continue_review(review, name, *, generate, key, usage):
         violations = _collect_violations(opt, corpus, profile, name, canonical)
         while violations and repairs < MAX_REPAIRS and remaining() > 60:
             repairs += 1
-            repaired = _call(generate,
-                             parts=[{'text': prompts.repair_prompt(
-                                 violations, json.dumps(opt, ensure_ascii=False))}],
-                             schema=schemas.OPTIMIZER_SCHEMA, purpose=f'repair_{repairs}',
-                             usage=usage, key=key, temperature=0.1)
+            try:
+                repaired = _call(generate,
+                                 parts=[{'text': prompts.repair_prompt(
+                                     violations, json.dumps(opt, ensure_ascii=False))}],
+                                 schema=schemas.OPTIMIZER_SCHEMA, purpose=f'repair_{repairs}',
+                                 usage=usage, key=key, temperature=0.1)
+            except PipelineError as exc:
+                # Repair is best-effort: a slow or failed model round must not sink
+                # a review the deterministic hard fixes below can still finish.
+                print(f'⚠️ CV review: repair_{repairs} failed ({exc}) — hard fixes only')
+                break
             try:
                 candidate_opt = schemas.ensure_optimizer(repaired)
             except schemas.SchemaError:

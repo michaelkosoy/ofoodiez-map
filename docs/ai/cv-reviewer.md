@@ -103,7 +103,11 @@ after any model change rather than trusting these projections.
 - **Hybrid, per step** (`gemini.STEP_MODELS`): extraction and both critics run
   on `gemini-3.5-flash-lite`; the REWRITE and its repairs run on
   `gemini-3.7-flash`, because that is the only step whose prose the candidate
-  reads. Override any step with `GEMINI_CV_MODEL_<STEP>` (OPTIMIZE, REPAIR,
+  reads. NOTE (2026-11-05): Google deprecated `gemini-3.7-flash` and routes it
+  to `gemini-3.8-flash`, whose default *medium* thinking blew the 90s call
+  timeout; non-Flash-Lite calls therefore send `thinkingLevel: low`, and a
+  failed repair round falls through to the hard fixes instead of failing
+  the review. Prepaid credits running out surface as HTTP 402 (own message). Override any step with `GEMINI_CV_MODEL_<STEP>` (OPTIMIZE, REPAIR,
   EXTRACT, CRITIC, TRANSLATE), change the base with `GEMINI_CV_MODEL`, or set
   `GEMINI_CV_HYBRID=off` to put everything back on one model. A per-step model
   that the API key can't use falls back to the base model for the rest of the
