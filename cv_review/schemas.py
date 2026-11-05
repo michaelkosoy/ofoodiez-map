@@ -103,7 +103,16 @@ _OPTIMIZED_CV = _obj({
     'projects': _arr(_obj({'name': _STR, 'tech': _NSTR, 'description': _STR, 'link': _NSTR}, ['name'])),
     'education': _arr(_obj({'institution': _STR, 'degree': _STR, 'dates': _STR})),
     'extras': _arr(_obj({'heading': _STR, 'lines': _STR_ARR})),
-}, ['name', 'title', 'summary'])
+}, ['name', 'title', 'summary', 'experience', 'education'])
+# Without an explicit order the API makes the model emit properties
+# alphabetically — education and experience BEFORE it has written the name,
+# title or summary. Seen 2026-11-05: the rewrite came back with both sections
+# empty on every current Flash model. Natural CV order: framing first, then the
+# heavy sections; experience/education are also required (an empty list is
+# still allowed for a CV that truly has none).
+_OPTIMIZED_CV['propertyOrdering'] = ['name', 'title', 'location', 'email', 'phone', 'links',
+                                     'summary', 'experience', 'projects', 'education',
+                                     'extras', 'skills_groups']
 
 OPTIMIZER_SCHEMA = _obj({
     'optimized_cv': _OPTIMIZED_CV,
@@ -134,6 +143,8 @@ OPTIMIZER_SCHEMA = _obj({
         'cv_instruction': _STR,
     }, ['skill', 'priority', 'reason_type', 'reason', 'cv_evidence', 'recommendation'])),
 }, ['optimized_cv', 'changes', 'career_recommendations'])
+OPTIMIZER_SCHEMA['propertyOrdering'] = ['optimized_cv', 'changes', 'jd_analysis',
+                                        'career_recommendations']
 
 
 TRANSLATION_SCHEMA = _obj({'lines': _STR_ARR}, ['lines'])

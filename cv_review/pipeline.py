@@ -528,6 +528,13 @@ def _continue_review(review, name, *, generate, key, usage):
             opt = schemas.ensure_optimizer(opt)
         except schemas.SchemaError as exc:
             raise PipelineError('The AI reviewer returned an unexpected answer. Please try again.') from exc
+        # Shape of the rewrite, counters only (never content): the one line that
+        # tells a gutted rewrite from a truncated one in the Render log.
+        _c = usage.calls[-1] if usage.calls else {}
+        print(f"ℹ️ CV review: optimizer[{_c.get('model')}] experience={len(opt['optimized_cv'].get('experience') or [])} "
+              f"bullets={validators.total_bullets(opt['optimized_cv'])} "
+              f"education={len(opt['optimized_cv'].get('education') or [])} changes={len(opt['changes'])} "
+              f"out_tokens={_c.get('output_tokens')} thoughts={_c.get('thoughts_tokens')} seconds={_c.get('seconds')}")
 
         # Validate → model repair (bounded) → deterministic hard fixes.
         repairs = 0
@@ -537,7 +544,7 @@ def _continue_review(review, name, *, generate, key, usage):
             try:
                 repaired = _call(generate,
                                  parts=[{'text': prompts.repair_prompt(
-                                     violations, json.dumps(opt, ensure_ascii=False))}],
+                                     violations, json.dumps(opt, ensure_ascii=False), claims)}],
                                  schema=schemas.OPTIMIZER_SCHEMA, purpose=f'repair_{repairs}',
                                  usage=usage, key=key, temperature=0.1)
             except PipelineError as exc:

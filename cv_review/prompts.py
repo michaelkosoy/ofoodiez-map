@@ -199,12 +199,21 @@ RULES:
 - Return EXACTLY {count} lines, in the same order, in the "lines" array. Nothing else."""
 
 
-def repair_prompt(violations, previous_json):
+def repair_prompt(violations, previous_json, claims=None):
+    # The ledger travels with every repair: without it a "content_loss" violation
+    # has no source to rebuild from, and the model invents one (seen 2026-11-05:
+    # a fabricated employer and degree for an emptied experience section).
+    ledger = ''
+    if claims:
+        ledger = f"""
+EVIDENCE LEDGER (the ONLY source for any content you restore or reword — rebuild a lost section by rewriting these claims in professional CV English; never an employer, school, date, number or technology that is not here):
+{json.dumps(claims, ensure_ascii=False, indent=1)}
+"""
     return f"""Your previous CV-optimization JSON failed automated validation. Fix ONLY the violations listed below and return the FULL corrected JSON in the exact same schema. Change nothing else. Do not add new content, skills or numbers; removals and rewording using existing evidence only (translating non-English evidence into English is required and does NOT count as new content). The candidate name and every evidence rule still apply. Reflect any fix that changes CV content in the "changes" ledger truthfully.
 
 VIOLATIONS:
 {json.dumps(violations, ensure_ascii=False, indent=1)}
-
+{ledger}
 YOUR PREVIOUS JSON:
 {previous_json}
 
