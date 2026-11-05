@@ -107,7 +107,18 @@ after any model change rather than trusting these projections.
   to `gemini-3.8-flash`, whose default *medium* thinking blew the 90s call
   timeout; non-Flash-Lite calls therefore send `thinkingLevel: low`, and a
   failed repair round falls through to the hard fixes instead of failing
-  the review. Prepaid credits running out surface as HTTP 402 (own message). Override any step with `GEMINI_CV_MODEL_<STEP>` (OPTIMIZE, REPAIR,
+  the review. Prepaid credits running out surface as HTTP 402 (own message).
+- **Optimizer schema shape matters more than the model** (2026-11-05): with no
+  `propertyOrdering` the API makes the model emit `optimized_cv` properties
+  alphabetically — education and experience BEFORE name/title/summary — and
+  every current Flash model (3.6, 3.7→3.8, low or medium thinking) returned
+  those two sections EMPTY; the content floor then restored them verbatim, so
+  users got an unoptimized CV. `schemas._OPTIMIZED_CV` now orders framing
+  first and requires experience/education, and the repair prompt carries the
+  evidence ledger (without it a content-loss repair INVENTED an employer and
+  a degree). One counters-only log line per review (`ℹ️ CV review:
+  optimizer[...] experience= bullets= ... out_tokens=`) shows the rewrite's
+  shape in Render. Override any step with `GEMINI_CV_MODEL_<STEP>` (OPTIMIZE, REPAIR,
   EXTRACT, CRITIC, TRANSLATE), change the base with `GEMINI_CV_MODEL`, or set
   `GEMINI_CV_HYBRID=off` to put everything back on one model. A per-step model
   that the API key can't use falls back to the base model for the rest of the
@@ -147,6 +158,12 @@ after any model change rather than trusting these projections.
 - `./venv/bin/python scripts/cv_eval.py` — live eval of the synthetic CVs in
   `tests/fixtures/eval/` through the real pipeline; artifacts land in
   `artifacts/cv_eval/` (read the generated CVs, not just the scores).
+- **Test with UNPUBLISHED CVs.** This repo is public, so the fixtures are on
+  the web; `eks_devops.txt` has bullets that are already optimal, the ideal
+  rewrite is a near-verbatim copy, and Gemini's RECITATION filter blocks it
+  (attempt 1 hit MAX_TOKENS, attempt 2 `finishReason=RECITATION`, 2026-11-05).
+  A renamed copy of the same CV and a fresh one both pass. Real CVs aren't on
+  the web, so this is a test artifact, not a user-facing failure.
 
 ## Env vars (see .env.example)
 `GEMINI_API_KEY` (paid project), `GEMINI_CV_MODEL`, `CV_REVIEW_PASSWORD`,
